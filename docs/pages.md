@@ -36,10 +36,27 @@
 
 ## /quran-hadith
 - Daily ayah/hadith (same as Dashboard)
-- Favorite and view saved items (Supabase)
+- Expanded view with translation selector
+- Favorite button (auth-protected)
+- Share functionality
 
-**V1:** Basic display and favorites  
-**Later:** Search, filtering, topic tagging
+**V1:** ✅ Complete - Daily ayah, translation options, favorites  
+**Later:** Hadith implementation, search, filtering, topic tagging
+
+---
+
+## /favorites
+- Auth-protected page (requires sign-in)
+- Tabbed interface: Quran / Hadith
+- List of all favorited items
+- Full ayah display with Arabic + translation
+- Remove from favorites button
+- Share button per item
+- Empty states with CTAs
+- Count badges showing number of items
+
+**V1:** ✅ Complete - Quran favorites list  
+**Later:** Hadith favorites, category filters, notes, export
 
 ---
 

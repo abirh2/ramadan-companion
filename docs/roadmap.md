@@ -8,9 +8,9 @@ This document outlines planned milestones and dependencies for the Ramadan Compa
 
 | Version | Target | Focus |
 |----------|---------|-------|
-| **V1.0** | Core release (Ramadan-ready) | Foundational features, stable backend |
+| **V1.0** | Core release (Ramadan-ready) | Foundational features, stable backend, Auth |
 | **V1.1** | Post-launch enhancements | Zikr tracker, small UX improvements |
-| **V2.0** | Full suite | Community features, Places, Auth |
+| **V2.0** | Full suite | Community features, Places, Advanced features |
 
 ---
 
@@ -21,24 +21,32 @@ This document outlines planned milestones and dependencies for the Ramadan Compa
 ### Features
 | Feature | Description | Dependencies |
 |----------|-------------|---------------|
+| Authentication | Email/password + OAuth (Google) | Supabase Auth |
+| User Profile | Profile settings, preferences management | Supabase, Auth |
 | Dashboard | Aggregated summary cards | Components, Prayer API, Supabase |
 | Prayer Times & Qibla | Full daily schedule, countdown, static Qibla arrow | AlAdhan API |
 | Ramadan Countdown | Pre-Ramadan and during-Ramadan timers | Hijri API, Prayer API |
 | Quran & Hadith | Daily content + favorites | AlQuran Cloud, Sunnah.com, Supabase |
-| Charity Tracker | Donation CRUD + Zakat calculator | Supabase |
+| Charity Tracker | Donation CRUD + Zakat calculator (protected) | Supabase, Auth |
 | Settings | Location/method/theme management | Supabase |
 
 ### Technical
-- Next.js app with Tailwind + shadcn/ui  
-- Supabase database: `profiles`, `donations`, `favorites`  
-- LocalStorage persistence for preferences  
+- Next.js 15 app with Tailwind + shadcn/ui  
+- Supabase Auth: email/password + OAuth (Google) with brand logo
+- Supabase database: `profiles`, `donations`, `favorites` with RLS
+- Client/server Supabase client split (@supabase/ssr)
+- AuthProvider React Context for auth state
+- Middleware for protected routes
+- LocalStorage persistence for public preferences  
 - Deployment on Vercel (frontend) + Supabase (backend)  
 - API proxy routes for AlAdhan/Quran/Hadith (to hide keys)
 
 ### Deliverables
 - Responsive UI verified on mobile and desktop  
-- Anonymous user flow  
-- Light/dark theme toggle  
+- Full authentication flow (email/password + OAuth)
+- Protected features (charity, favorites require auth)
+- Public dashboard (prayer times, Quran/Hadith viewable without auth)
+- Light/dark theme toggle (in user menu)
 - Minimal Islamic visual identity
 
 ---
@@ -67,17 +75,17 @@ This document outlines planned milestones and dependencies for the Ramadan Compa
 | Feature | Description |
 |----------|-------------|
 | Full Mosque & Halal Finder | Map + filters + directions |
-| User Authentication | Supabase Auth (email/social) |
-| Cloud Sync for Zikr/Favorites | Persist across devices |
+| Cloud Sync for Zikr | Persist zikr progress across devices |
 | Notifications | Iftar reminders, prayer alerts |
 | Language Support | Arabic, Urdu, Bengali, Malay |
 | Visual Themes | Ramadan night, neutral, modern |
+| Social Features | Share achievements, community feed |
 
 ### Technical
 - Add push notifications (Web APIs)  
-- Add user profiles with Supabase Auth  
 - Create `daily_content` table with server cron job for global ayah/hadith  
-- Expand `/api` routes for caching, auth checks
+- Expand `/api` routes for caching
+- Multi-language support with i18n
 
 ---
 

@@ -1,24 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ramadan Companion
+
+A modern, minimal web app built for Muslims to assist with daily worship and reflection—especially during Ramadan.
+
+Built with Next.js 15, TypeScript, TailwindCSS, shadcn/ui, and Supabase.
+
+## Features (V1)
+
+- **Prayer Times** - Accurate daily prayer times with Qibla direction
+- **Ramadan Countdown** - Track days until Ramadan
+- **Daily Quran** - Inspirational verses with multiple translations and favorites
+- **Charity Tracker** - Log and track sadaqah and zakat donations (auth required)
+- **Authentication** - Secure sign-in with email/password and OAuth (Google)
+- **Favorites** - Save and manage your favorite Quran verses
+- **Dark Mode** - Beautiful theme switching for day and night
+- **Mobile-First** - Responsive design optimized for all devices
+- **Privacy-First** - Your data stays secure with Supabase
+
+### Coming Soon
+- Hadith of the Day
+- Mosque & Halal Food Finder
+- Zikr Counter
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 20.9.0 or higher
+- npm, yarn, pnpm, or bun
+
+### Installation
 
 ```bash
+# Install dependencies
+npm install
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Testing
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# Run tests in watch mode
+npm test
+
+# Run tests once (CI/CD)
+npm run test:ci
+
+# Run tests with coverage report
+npm run test:coverage
+```
+
+See [docs/testing.md](docs/testing.md) for detailed testing guide.
+
+## Documentation
+
+Comprehensive documentation is available in the `/docs` directory:
+
+- **[Documentation Index](docs/README.md)** - Overview and complete documentation links
+- **[Features Guide](docs/features.md)** - Detailed feature specifications
+- **[API Structure](docs/api-structure.md)** - API endpoints and external integrations
+- **[Authentication Setup](docs/auth-setup.md)** - Supabase auth configuration guide
+- **[Quran Implementation](docs/quran-implementation.md)** - Quran feature implementation details
+
+See [docs/README.md](docs/README.md) for the complete documentation index.
 
 ## Learn More
 
