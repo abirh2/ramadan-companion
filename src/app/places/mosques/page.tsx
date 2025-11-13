@@ -18,6 +18,7 @@ import { useMosques } from '@/hooks/useMosques'
 import { MosqueList } from '@/components/places/MosqueList'
 import { LocationSearch } from '@/components/places/LocationSearch'
 import { MosqueDetailDialog } from '@/components/places/MosqueDetailDialog'
+import { FeedbackButton } from '@/components/FeedbackButton'
 import { saveDistanceUnit } from '@/lib/places'
 import type { MosqueData, DistanceUnit } from '@/types/places.types'
 import type { LocationData } from '@/types/ramadan.types'
@@ -232,6 +233,9 @@ export default function MosquesPage() {
           open={dialogOpen}
           onOpenChange={setDialogOpen}
         />
+
+        {/* Feedback Button */}
+        <FeedbackButton pagePath="/places/mosques" />
       </main>
     </div>
   )

@@ -9,6 +9,7 @@ import { ZikrCounter } from '@/components/zikr/ZikrCounter'
 import { ZikrPhraseSelector } from '@/components/zikr/ZikrPhraseSelector'
 import { DuaList } from '@/components/zikr/DuaList'
 import { useZikr } from '@/hooks/useZikr'
+import { FeedbackButton } from '@/components/FeedbackButton'
 
 export default function ZikrPage() {
   const {
@@ -179,6 +180,9 @@ export default function ZikrPage() {
 
           <DuaList />
         </section>
+
+        {/* Feedback Button */}
+        <FeedbackButton pagePath="/zikr" />
       </main>
     </div>
   )

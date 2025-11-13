@@ -6,6 +6,7 @@ import { HadithCard } from '@/components/dashboard/HadithCard'
 import { CharityCard } from '@/components/dashboard/CharityCard'
 import { ZikrCard } from '@/components/dashboard/ZikrCard'
 import { PlacesCard } from '@/components/dashboard/PlacesCard'
+import { FeedbackButton } from '@/components/FeedbackButton'
 
 export default function Home() {
   return (
@@ -36,6 +37,9 @@ export default function Home() {
           <ZikrCard />
           <PlacesCard />
         </div>
+
+        {/* Feedback Button */}
+        <FeedbackButton pagePath="/" />
       </main>
     </div>
   )

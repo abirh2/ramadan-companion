@@ -7,6 +7,7 @@ import { ArrowLeft, Clock, Sunrise, Loader2 } from 'lucide-react'
 import { usePrayerTimes } from '@/hooks/usePrayerTimes'
 import { QiblaCompass } from '@/components/prayer-times/QiblaCompass'
 import { PrayerTimesSettings } from '@/components/prayer-times/PrayerTimesSettings'
+import { FeedbackButton } from '@/components/FeedbackButton'
 
 export default function TimesPage() {
   const {
@@ -207,6 +208,9 @@ export default function TimesPage() {
             </div>
           </div>
         )}
+
+        {/* Feedback Button */}
+        <FeedbackButton pagePath="/times" />
       </main>
     </div>
   )

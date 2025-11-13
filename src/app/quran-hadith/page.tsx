@@ -13,6 +13,7 @@ import { useHadithFavorites } from '@/hooks/useHadithFavorites'
 import { LoginModal } from '@/components/auth/LoginModal'
 import { TranslationSelector } from '@/components/quran/TranslationSelector'
 import { LanguageSelector } from '@/components/hadith/LanguageSelector'
+import { FeedbackButton } from '@/components/FeedbackButton'
 import type { QuranFavoriteData } from '@/types/quran.types'
 import type { HadithFavoriteData } from '@/types/hadith.types'
 
@@ -593,6 +594,9 @@ export default function QuranHadithPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Feedback Button */}
+        <FeedbackButton pagePath="/quran-hadith" />
       </main>
 
       {/* Login Modal */}

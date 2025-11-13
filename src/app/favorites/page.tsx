@@ -10,6 +10,7 @@ import { ProtectedFeature } from '@/components/auth/ProtectedFeature'
 import { useFavoritesList } from '@/hooks/useFavoritesList'
 import { FavoriteQuranItem } from '@/components/favorites/FavoriteQuranItem'
 import { FavoriteHadithItem } from '@/components/favorites/FavoriteHadithItem'
+import { FeedbackButton } from '@/components/FeedbackButton'
 
 export default function FavoritesPage() {
   const {
@@ -187,6 +188,9 @@ export default function FavoritesPage() {
             </TabsContent>
           </Tabs>
         </ProtectedFeature>
+
+        {/* Feedback Button */}
+        <FeedbackButton pagePath="/favorites" />
       </main>
     </div>
   )

@@ -17,7 +17,9 @@ It provides enough detail for any developer or AI agent to implement the app end
 9. Halal Food Finder
 10. Settings
 11. Common Design & Interaction Standards
-12. API Reference Links
+12. About & Acknowledgements
+13. User Feedback System
+14. API Reference Links
 
 ---
 
@@ -1227,7 +1229,146 @@ Single page with three tabs using shadcn/ui Tabs component:
 
 ---
 
-## 13. API Reference Links
+## 13. User Feedback System
+
+### Purpose
+Allow users to report problems and suggest improvements directly from any page in the app. Supports anonymous feedback to reduce friction while optionally attaching user ID for authenticated users.
+
+### Functionality
+- **Universal availability:** Feedback button appears at bottom of every page
+- **Two feedback types:** 
+  - Report a Problem (bug reports, issues, errors)
+  - Suggest an Improvement (feature requests, enhancements)
+- **Anonymous by default:** No authentication required to submit feedback
+- **Optional user ID:** If authenticated, automatically attaches user ID for follow-up
+- **Simple validation:** Minimum 10 characters, maximum 5000 characters
+- **Success confirmation:** Visual feedback on successful submission
+
+### User Flow
+1. User scrolls to bottom of any page and clicks "Feedback" button
+2. Dialog opens with radio selection (Problem / Suggestion)
+3. User selects feedback type (defaults to "Report a Problem")
+4. User enters feedback text in textarea (validated for 10+ characters)
+5. User clicks "Submit Feedback" button
+6. System saves to Supabase `feedback` table with page path, type, content
+7. Success message displays with checkmark icon
+8. Dialog auto-closes after 2 seconds
+9. Form resets for next use
+
+### Data Model
+
+**Table: `feedback`**
+```sql
+CREATE TABLE feedback (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  page_path TEXT NOT NULL,
+  feedback_type TEXT NOT NULL CHECK (feedback_type IN ('problem', 'suggestion')),
+  content TEXT NOT NULL,
+  user_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  user_agent TEXT,
+  metadata JSONB
+);
+```
+
+**Indexes:**
+- `idx_feedback_created_at` - Query by submission date
+- `idx_feedback_type` - Filter by problem vs suggestion
+- `idx_feedback_page_path` - Group by page
+
+**RLS Policies:**
+- `INSERT`: Anyone (anonymous or authenticated) can submit feedback
+- `SELECT`: Only admins via service role (users cannot view feedback)
+
+### UI Components
+
+**`FeedbackButton` component** (`src/components/FeedbackButton.tsx`)
+- Props: `pagePath` (string) - current page route
+- Renders centered button at bottom of page with border-top separator
+- Opens dialog on click with feedback form
+- Handles form state, validation, submission, success/error states
+- Resets form on close
+
+**UI Elements:**
+- Button: "Feedback" with MessageSquare icon
+- Dialog with radio group for feedback type selection
+- Textarea for feedback content (120px min-height, resize disabled)
+- Character count reminder ("Minimum 10 characters")
+- Privacy notice: "Your feedback is anonymous..."
+- Submit button with loading state (Loader2 spinner)
+- Success screen with CheckCircle icon
+
+### Integration Pattern
+
+**Each page includes:**
+```tsx
+import { FeedbackButton } from '@/components/FeedbackButton'
+
+// At end of <main> section, before closing tag
+<FeedbackButton pagePath="/current-page-path" />
+```
+
+**Integrated pages (10 total):**
+1. Home (`/`)
+2. About (`/about`)
+3. Prayer Times (`/times`)
+4. Quran & Hadith (`/quran-hadith`)
+5. Charity Tracker (`/charity`)
+6. Favorites (`/favorites`)
+7. Zikr & Duas (`/zikr`)
+8. Mosque Finder (`/places/mosques`)
+9. Halal Food (`/places/food`)
+10. Profile (`/profile`)
+
+### Validation Rules
+- **Content length:** 10-5000 characters
+- **Type selection:** Required (defaults to 'problem')
+- **Submission throttling:** None (allow multiple submissions)
+- **No spam protection:** V1 relies on Supabase rate limiting
+
+### Privacy & Security
+- **Anonymous submissions allowed:** Reduces friction for feedback
+- **No PII collected:** Only optional user_id if authenticated
+- **User-agent stored:** For troubleshooting (browser/device context)
+- **Admin-only access:** Users cannot view other feedback
+- **No email notifications:** V1 - admins check dashboard manually
+
+### Error Handling
+- **Validation errors:** Display below textarea in red
+- **Submission errors:** Display in error card with retry option
+- **Network errors:** Generic error message ("Please try again")
+- **Success timeout:** Auto-close after 2 seconds
+- **Form persistence:** Errors keep form content for retry
+
+### Technical Implementation
+
+**Files created:**
+- `src/types/feedback.types.ts` - TypeScript interfaces
+- `src/lib/feedback.ts` - Submission utility functions
+- `src/components/ui/radio-group.tsx` - Radio UI component (shadcn/ui)
+- `src/components/FeedbackButton.tsx` - Main feedback component
+
+**Files modified:**
+- `supabase-migrations.sql` - Added feedback table and RLS policies
+- All 10 page components - Added FeedbackButton integration
+
+**Dependencies:**
+- `@radix-ui/react-radio-group` - Radio button primitive
+- Existing: Dialog, Button, Lucide icons
+
+### Admin Access Pattern
+Admins access feedback via Supabase dashboard:
+1. Log into Supabase project dashboard
+2. Navigate to Table Editor → `feedback` table
+3. Query/filter by `page_path`, `feedback_type`, `created_at`
+4. Export as CSV for analysis if needed
+
+**V1:** Complete anonymous feedback system on all pages  
+**Later:** Admin dashboard, feedback categories, sentiment analysis, email notifications, spam protection, feedback status tracking (open/resolved)
+
+---
+
+## 14. API Reference Links
 
 | Category | API | Documentation |
 |-----------|-----|---------------|

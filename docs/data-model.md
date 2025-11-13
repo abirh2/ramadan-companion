@@ -104,6 +104,46 @@ Store saved Quran ayahs and hadiths.
 
 ---
 
+## Table: feedback
+Store user feedback and suggestions for app improvements.
+
+| Field | Type | Description | Status |
+|--------|------|-------------|--------|
+| id | uuid (PK) | unique record ID, auto-generated | **Active (V1)** |
+| created_at | timestamptz | auto timestamp | **Active (V1)** |
+| page_path | text | page where feedback was submitted (e.g., '/', '/times') | **Active (V1)** |
+| feedback_type | text | 'problem' or 'suggestion' | **Active (V1)** |
+| content | text | user's feedback message | **Active (V1)** |
+| user_id | uuid (FK) | references profiles.id, nullable, SET NULL on delete | **Active (V1)** |
+| user_agent | text | browser/device info for troubleshooting | **Active (V1)** |
+| metadata | jsonb | optional additional data | **Active (V1)** |
+
+**Purpose:** Allow users to report problems and suggest improvements directly from any page. Supports anonymous submissions (user_id nullable) while optionally attaching user ID for authenticated users.
+
+**V1:** Anonymous feedback collection with admin-only access  
+**Later:** Admin dashboard, feedback status tracking (open/resolved), email notifications, categories, sentiment analysis
+
+**Indexes:**
+- `idx_feedback_created_at` (created_at DESC) - Query by submission date
+- `idx_feedback_type` (feedback_type) - Filter by problem vs suggestion  
+- `idx_feedback_page_path` (page_path) - Group feedback by page
+
+**RLS Policies:**
+- **INSERT:** Anyone (anonymous or authenticated) can submit feedback (`WITH CHECK (true)`)
+- **SELECT:** Only admins via service role (`USING (false)` - users cannot query feedback)
+- **UPDATE/DELETE:** Not allowed for users (admin-only via dashboard)
+
+**Privacy & Security:**
+- Anonymous submissions allowed to reduce friction
+- No PII collected beyond optional user_id
+- User-agent stored for troubleshooting context only
+- Admin-only access ensures users cannot view other feedback
+
+**Admin Access:**
+Admins access feedback via Supabase Dashboard → Table Editor → `feedback` table
+
+---
+
 ## Table: zikr_logs (Future)
 Track daily zikr counts across devices.
 

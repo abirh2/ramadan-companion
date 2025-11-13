@@ -18,6 +18,7 @@ import { useHalalFood } from '@/hooks/useHalalFood'
 import { FoodList } from '@/components/places/FoodList'
 import { LocationSearch } from '@/components/places/LocationSearch'
 import { FoodDetailDialog } from '@/components/places/FoodDetailDialog'
+import { FeedbackButton } from '@/components/FeedbackButton'
 import { saveDistanceUnit } from '@/lib/places'
 import type { HalalFoodData, DistanceUnit } from '@/types/places.types'
 import type { LocationData } from '@/types/ramadan.types'
@@ -233,6 +234,9 @@ export default function HalalFoodPage() {
           open={dialogOpen}
           onOpenChange={setDialogOpen}
         />
+
+        {/* Feedback Button */}
+        <FeedbackButton pagePath="/places/food" />
       </main>
     </div>
   )

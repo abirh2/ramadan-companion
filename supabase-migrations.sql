@@ -244,3 +244,46 @@ BEGIN
   END IF;
 END $$;
 
+-- ============================================
+-- 12. CREATE FEEDBACK TABLE
+-- ============================================
+
+-- Feedback table for user reports and suggestions
+CREATE TABLE IF NOT EXISTS feedback (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  page_path TEXT NOT NULL,
+  feedback_type TEXT NOT NULL CHECK (feedback_type IN ('problem', 'suggestion')),
+  content TEXT NOT NULL,
+  user_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  user_agent TEXT,
+  metadata JSONB
+);
+
+-- Create index for feedback queries
+CREATE INDEX IF NOT EXISTS idx_feedback_created_at ON feedback(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_feedback_type ON feedback(feedback_type);
+CREATE INDEX IF NOT EXISTS idx_feedback_page_path ON feedback(page_path);
+
+-- Enable RLS for feedback table
+ALTER TABLE feedback ENABLE ROW LEVEL SECURITY;
+
+-- ============================================
+-- 13. CREATE RLS POLICIES - FEEDBACK
+-- ============================================
+
+-- Drop existing policies if any
+DROP POLICY IF EXISTS "allow_all_insert" ON feedback;
+DROP POLICY IF EXISTS "Anyone can submit feedback" ON feedback;
+DROP POLICY IF EXISTS "Only admins can view feedback" ON feedback;
+
+-- Allow anonymous and authenticated users to insert feedback
+CREATE POLICY "allow_all_insert"
+ON feedback
+FOR INSERT
+TO anon, authenticated
+WITH CHECK (true);
+
+-- No SELECT policy - admin-only access via service role
+-- Users cannot read feedback (prevents spam/abuse)
+

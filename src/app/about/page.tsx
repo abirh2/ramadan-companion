@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowLeft, Linkedin, Mail, ExternalLink, Copy, Check } from 'lucide-react'
+import { FeedbackButton } from '@/components/FeedbackButton'
 
 function AboutContent() {
   const router = useRouter()
@@ -426,6 +427,9 @@ function AboutContent() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Feedback Button */}
+        <FeedbackButton pagePath="/about" />
       </main>
     </div>
   )

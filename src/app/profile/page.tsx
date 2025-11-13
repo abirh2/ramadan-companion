@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { createClient } from '@/lib/supabase/client';
 import { ArrowLeft } from 'lucide-react';
+import { FeedbackButton } from '@/components/FeedbackButton';
 
 export default function ProfilePage() {
   const { user, profile, loading, refreshProfile } = useAuth();
@@ -138,6 +139,9 @@ export default function ProfilePage() {
             </form>
           </CardContent>
         </Card>
+
+        {/* Feedback Button */}
+        <FeedbackButton pagePath="/profile" />
       </main>
     </div>
   );

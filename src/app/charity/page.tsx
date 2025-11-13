@@ -16,6 +16,7 @@ import { ZakatCalculator } from '@/components/charity/ZakatCalculator'
 import { RecommendedCharities } from '@/components/charity/RecommendedCharities'
 import { deleteDonation } from '@/lib/donations'
 import { useAuth } from '@/hooks/useAuth'
+import { FeedbackButton } from '@/components/FeedbackButton'
 import type { Donation } from '@/types/donation.types'
 import {
   Dialog,
@@ -263,6 +264,9 @@ export default function CharityPage() {
             </div>
           )}
         </ProtectedFeature>
+
+        {/* Feedback Button */}
+        <FeedbackButton pagePath="/charity" />
       </main>
 
       {/* Donation Form Dialog */}
