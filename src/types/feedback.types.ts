@@ -28,6 +28,5 @@ export interface FeedbackSubmission {
 export interface FeedbackSubmissionResult {
   success: boolean
   error?: string
-  data?: Feedback
 }
 

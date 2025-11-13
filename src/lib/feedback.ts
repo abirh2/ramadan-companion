@@ -29,7 +29,7 @@ export async function submitFeedback(
     }
 
     // Insert feedback into Supabase
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('feedback')
       .insert(feedbackData)
 
@@ -43,7 +43,6 @@ export async function submitFeedback(
 
     return {
       success: true,
-      data,
     }
   } catch (err) {
     console.error('Unexpected error submitting feedback:', err)
