@@ -287,3 +287,126 @@ WITH CHECK (true);
 -- No SELECT policy - admin-only access via service role
 -- Users cannot read feedback (prevents spam/abuse)
 
+-- ============================================
+-- 14. ADD ADMIN SYSTEM TO PROFILES TABLE
+-- ============================================
+
+-- Add is_admin column to profiles table
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'profiles' 
+    AND column_name = 'is_admin'
+  ) THEN
+    ALTER TABLE profiles ADD COLUMN is_admin BOOLEAN DEFAULT FALSE;
+  END IF;
+END $$;
+
+-- Create index for admin queries
+CREATE INDEX IF NOT EXISTS idx_profiles_is_admin ON profiles(is_admin);
+
+-- Set initial admin user (abir5611@gmail.com)
+-- This will only work after the user has signed up and created a profile
+UPDATE profiles 
+SET is_admin = TRUE 
+WHERE id = (SELECT id FROM auth.users WHERE email = 'abir5611@gmail.com');
+
+-- ============================================
+-- 15. EXTEND FEEDBACK TABLE FOR ADMIN WORKFLOW
+-- ============================================
+
+-- Add workflow fields to feedback table
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'feedback' 
+    AND column_name = 'status'
+  ) THEN
+    ALTER TABLE feedback ADD COLUMN status TEXT DEFAULT 'new' CHECK (status IN ('new', 'reviewed', 'resolved'));
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'feedback' 
+    AND column_name = 'priority'
+  ) THEN
+    ALTER TABLE feedback ADD COLUMN priority TEXT DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high'));
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'feedback' 
+    AND column_name = 'category'
+  ) THEN
+    ALTER TABLE feedback ADD COLUMN category TEXT;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'feedback' 
+    AND column_name = 'admin_notes'
+  ) THEN
+    ALTER TABLE feedback ADD COLUMN admin_notes TEXT;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'feedback' 
+    AND column_name = 'reviewed_at'
+  ) THEN
+    ALTER TABLE feedback ADD COLUMN reviewed_at TIMESTAMPTZ;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'feedback' 
+    AND column_name = 'reviewed_by'
+  ) THEN
+    ALTER TABLE feedback ADD COLUMN reviewed_by UUID REFERENCES profiles(id);
+  END IF;
+END $$;
+
+-- Create indexes for feedback filtering
+CREATE INDEX IF NOT EXISTS idx_feedback_status ON feedback(status);
+CREATE INDEX IF NOT EXISTS idx_feedback_priority ON feedback(priority);
+CREATE INDEX IF NOT EXISTS idx_feedback_category ON feedback(category);
+
+-- ============================================
+-- 16. CREATE ADMIN RLS POLICIES FOR FEEDBACK
+-- ============================================
+
+-- Drop existing admin policies if any
+DROP POLICY IF EXISTS "Admins can view all feedback" ON feedback;
+DROP POLICY IF EXISTS "Admins can update feedback" ON feedback;
+
+-- Admins can view all feedback
+CREATE POLICY "Admins can view all feedback"
+ON feedback FOR SELECT
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles 
+    WHERE profiles.id = auth.uid() 
+    AND profiles.is_admin = TRUE
+  )
+);
+
+-- Admins can update feedback (status, priority, category, notes)
+CREATE POLICY "Admins can update feedback"
+ON feedback FOR UPDATE
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles 
+    WHERE profiles.id = auth.uid() 
+    AND profiles.is_admin = TRUE
+  )
+);
+

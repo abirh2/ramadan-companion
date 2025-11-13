@@ -19,7 +19,8 @@ It provides enough detail for any developer or AI agent to implement the app end
 11. Common Design & Interaction Standards
 12. About & Acknowledgements
 13. User Feedback System
-14. API Reference Links
+14. Admin Dashboard
+15. API Reference Links
 
 ---
 
@@ -1364,11 +1365,220 @@ Admins access feedback via Supabase dashboard:
 4. Export as CSV for analysis if needed
 
 **V1:** Complete anonymous feedback system on all pages  
-**Later:** Admin dashboard, feedback categories, sentiment analysis, email notifications, spam protection, feedback status tracking (open/resolved)
+**Later:** Email notifications, sentiment analysis, spam protection, feedback trends
 
 ---
 
-## 14. API Reference Links
+## 14. Admin Dashboard
+
+### Purpose
+Admin-only dashboard for managing user feedback, monitoring system health, and viewing analytics.
+
+### Access Control
+- **Admin detection:** `is_admin` boolean field in `profiles` table
+- **Initial admin:** Set via SQL: `UPDATE profiles SET is_admin = TRUE WHERE id = (SELECT id FROM auth.users WHERE email = 'admin@example.com')`
+- **Route protection:** `/admin` page wrapped in `ProtectedAdmin` component
+- **RLS enforcement:** Admin-only RLS policies on feedback table
+
+### Dashboard Integration
+
+**AdminCard Component** (`/src/components/dashboard/AdminCard.tsx`)
+- **Visibility:** Only appears for admin users (`is_admin = true`)
+- **Location:** Main dashboard grid, below existing feature cards
+- **Displays:**
+  - Issues need review count (status = 'new')
+  - Total users count
+  - Feedback health percentage (% reviewed)
+- **Action:** Clickable card navigates to `/admin`
+
+### Admin Dashboard Page (`/admin`)
+
+**Layout:**
+- Protected route requiring admin access
+- Header with Shield icon and description
+- Tabs: "Feedback Management" | "Analytics"
+
+**Tab 1: Feedback Management**
+
+**Components:**
+- `FeedbackFilters` - Filter controls with active filter count
+- `FeedbackTable` - Feedback items with inline editing
+
+**Filters:**
+- Status: All, New, Reviewed, Resolved
+- Priority: All, Low, Medium, High
+- Category: All, Bug, Feature Request, UI/UX, Performance, Other
+- Page: All pages + list of actual page paths
+- Search: Content text search (client-side)
+
+**Feedback Table:**
+- **Compact row view:**
+  - Expand/collapse toggle
+  - Date/time submitted
+  - Type badge (Problem/Suggestion with color coding)
+  - Page path (code badge)
+  - Content preview (truncated)
+  - Status dropdown (inline edit)
+  - Priority dropdown (inline edit)
+  - Category dropdown (inline edit)
+  
+- **Expanded row details:**
+  - Full content text
+  - Metadata: User ID (truncated), User agent (truncated)
+  - Admin notes textarea with Save/Cancel buttons
+  - Review tracking: "Reviewed on [date] by [admin_id]"
+
+**Inline Editing:**
+- Status change auto-sets `reviewed_at` and `reviewed_by`
+- Priority and category update immediately
+- Admin notes require explicit Save button
+- All updates show loading state
+- Errors display as alert dialogs
+
+**Tab 2: Analytics**
+
+**Metric Cards:**
+1. **Total Users:** Count from profiles table
+2. **Total Feedback:** All submissions count
+3. **Unresolved Issues:** Count where status = 'new'
+4. **Reviewed Percentage:** (reviewed + resolved) / total * 100
+
+**Future Expansion Note:**
+Card displaying planned analytics features:
+- Feature usage stats (prayer times, donations, favorites)
+- User engagement metrics (DAU, WAU, retention)
+- Geographic distribution
+- API performance monitoring
+- Feedback trends and sentiment analysis
+
+### Feedback Workflow
+
+**User submission → Admin review → Resolution:**
+
+1. **New feedback arrives:**
+   - status = 'new'
+   - priority = 'medium'
+   - category = null
+   - admin_notes = null
+
+2. **Admin reviews:**
+   - Views in Feedback Management tab
+   - Filters by status = 'new' to see unreviewed items
+   - Reads content and decides action
+
+3. **Admin workflow actions:**
+   - **Set priority:** High (urgent bugs), Medium (normal), Low (nice-to-have)
+   - **Assign category:** Bug, Feature Request, UI/UX, Performance, Other
+   - **Update status:** 
+     - 'reviewed' = acknowledged, will address
+     - 'resolved' = completed/fixed/implemented
+   - **Add admin notes:** Internal tracking, related issues, implementation notes
+
+4. **Tracking metadata:**
+   - `reviewed_at`: Timestamp when status changed from 'new'
+   - `reviewed_by`: Admin user ID who made the change
+
+### Data Model Extensions
+
+**profiles table:**
+```sql
+ALTER TABLE profiles ADD COLUMN is_admin BOOLEAN DEFAULT FALSE;
+CREATE INDEX idx_profiles_is_admin ON profiles(is_admin);
+```
+
+**feedback table:**
+```sql
+ALTER TABLE feedback ADD COLUMN status TEXT DEFAULT 'new' CHECK (status IN ('new', 'reviewed', 'resolved'));
+ALTER TABLE feedback ADD COLUMN priority TEXT DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high'));
+ALTER TABLE feedback ADD COLUMN category TEXT;
+ALTER TABLE feedback ADD COLUMN admin_notes TEXT;
+ALTER TABLE feedback ADD COLUMN reviewed_at TIMESTAMPTZ;
+ALTER TABLE feedback ADD COLUMN reviewed_by UUID REFERENCES profiles(id);
+
+CREATE INDEX idx_feedback_status ON feedback(status);
+CREATE INDEX idx_feedback_priority ON feedback(priority);
+CREATE INDEX idx_feedback_category ON feedback(category);
+```
+
+**RLS Policies:**
+```sql
+-- Admins can view all feedback
+CREATE POLICY "Admins can view all feedback"
+ON feedback FOR SELECT
+USING (EXISTS (SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.is_admin = TRUE));
+
+-- Admins can update feedback
+CREATE POLICY "Admins can update feedback"
+ON feedback FOR UPDATE
+USING (EXISTS (SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.is_admin = TRUE));
+```
+
+### Technical Implementation
+
+**New files:**
+- `src/hooks/useAdmin.ts` - Admin detection hook
+- `src/hooks/useFeedback.ts` - Feedback CRUD operations
+- `src/hooks/useAnalytics.ts` - Analytics data fetching
+- `src/components/admin/ProtectedAdmin.tsx` - Route protection wrapper
+- `src/components/admin/FeedbackTable.tsx` - Feedback display and editing
+- `src/components/admin/FeedbackFilters.tsx` - Filter controls
+- `src/components/admin/AnalyticsPanel.tsx` - Analytics metrics display
+- `src/components/dashboard/AdminCard.tsx` - Dashboard quick access card
+- `src/app/admin/page.tsx` - Admin dashboard page
+
+**Modified files:**
+- `src/types/auth.types.ts` - Added is_admin to Profile interface
+- `src/types/feedback.types.ts` - Extended with workflow fields, filters, stats
+- `src/app/page.tsx` - Added AdminCard to dashboard
+- `supabase-migrations.sql` - Added admin system migrations
+- `docs/data-model.md` - Updated profiles and feedback table documentation
+
+**Dependencies:**
+- All existing shadcn/ui components (Card, Button, Select, Input, Tabs, Dialog)
+- Existing hooks (useAuth, Supabase client)
+- Lucide icons (Shield, Filter, ChevronDown/Up, Save, AlertCircle, MessageSquare, etc.)
+
+### User Experience
+
+**For Admin Users:**
+1. See AdminCard on main dashboard with key metrics
+2. Click AdminCard → Navigate to `/admin`
+3. View Feedback Management tab by default
+4. Filter feedback to find relevant items
+5. Expand rows to read full content
+6. Update status, priority, category inline
+7. Add internal notes for tracking
+8. Switch to Analytics tab to view system health
+9. Monitor unresolved issues count daily
+
+**For Non-Admin Users:**
+- AdminCard never appears (returns null)
+- `/admin` route shows 403 Access Denied page
+- No feedback SELECT permission (RLS blocks all queries)
+- Cannot see admin-only UI elements
+
+### Error Handling
+
+- **403 Access Denied:** Non-admin users redirected with clear message
+- **RLS policy blocks:** Queries fail silently with no data returned
+- **Update failures:** Alert dialog shows error message
+- **Network errors:** Generic error handling with retry option
+- **Loading states:** Spinners during async operations
+
+### Security Considerations
+
+- **RLS enforcement:** Database-level security, client cannot bypass
+- **Admin flag in profiles:** Single source of truth for admin status
+- **No client-side admin checks for security:** Only for UX (hiding UI)
+- **Server-side validation:** All updates validated by RLS policies
+- **Audit trail:** reviewed_by field tracks admin actions
+
+**V1:** Full admin dashboard with feedback workflow management and basic analytics  
+**Later:** Email notifications on new feedback, bulk operations, feedback export to CSV, multiple admin roles (super-admin/moderator/viewer), audit log for admin actions, dashboard customization
+
+---
+
+## 15. API Reference Links
 
 | Category | API | Documentation |
 |-----------|-----|---------------|

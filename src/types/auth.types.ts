@@ -21,6 +21,7 @@ export interface Profile {
   quran_translation?: string;
   hadith_language?: string;
   distance_unit?: string;
+  is_admin?: boolean;
 }
 
 export interface AuthContextType {

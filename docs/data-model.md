@@ -21,15 +21,19 @@ Store per-user preferences and settings.
 | theme | text | 'light', 'dark', or 'system' | Planned |
 | quran_translation | text | e.g. 'en.asad' | **Active (V1)** - Stores user's preferred Quran translation |
 | hadith_language | text | 'english', 'urdu', or 'arabic' (default: 'english') | **Active (V1)** - Stores user's preferred Hadith language |
-|| distance_unit | text | 'mi' or 'km' (default: 'mi') | Planned - Stores user's preferred distance unit for mosque finder |
+| distance_unit | text | 'mi' or 'km' (default: 'mi') | Planned - Stores user's preferred distance unit for mosque finder |
+| is_admin | boolean | default false | **Active (V1)** - Admin flag for accessing admin dashboard and managing feedback |
 
-**V1:** Auth integrated, display_name, location (lat/lng/city), calculation_method, madhab, quran_translation, hadith_language all active  
+**V1:** Auth integrated, display_name, location (lat/lng/city), calculation_method, madhab, quran_translation, hadith_language, is_admin all active  
 **Later:** Profile picture, notifications, hijri_offset integration, language, theme, distance_unit integration
 
 **SQL Migration Required:**
 ```sql
 -- Add hadith_language column to profiles table
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS hadith_language text DEFAULT 'english';
+
+-- Add is_admin column to profiles table
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_admin boolean DEFAULT FALSE;
 ```
 
 **Note on timezone:** The `timezone` field exists in the schema but is not used by the application. The app automatically uses the browser's detected timezone (`Intl.DateTimeFormat().resolvedOptions().timeZone`) for all time-based calculations. This provides accurate times for the user's current location without requiring manual configuration.
@@ -117,30 +121,53 @@ Store user feedback and suggestions for app improvements.
 | user_id | uuid (FK) | references profiles.id, nullable, SET NULL on delete | **Active (V1)** |
 | user_agent | text | browser/device info for troubleshooting | **Active (V1)** |
 | metadata | jsonb | optional additional data | **Active (V1)** |
+| status | text | 'new', 'reviewed', or 'resolved' (default: 'new') | **Active (V1)** - Workflow state tracking |
+| priority | text | 'low', 'medium', or 'high' (default: 'medium') | **Active (V1)** - Issue prioritization |
+| category | text | 'bug', 'feature-request', 'ui-ux', 'performance', 'other' (nullable) | **Active (V1)** - Admin categorization |
+| admin_notes | text | internal notes for admin use (nullable) | **Active (V1)** - Admin workflow notes |
+| reviewed_at | timestamptz | timestamp when status changed from 'new' (nullable) | **Active (V1)** - Review tracking |
+| reviewed_by | uuid (FK) | references profiles.id, admin who reviewed (nullable) | **Active (V1)** - Admin accountability |
 
 **Purpose:** Allow users to report problems and suggest improvements directly from any page. Supports anonymous submissions (user_id nullable) while optionally attaching user ID for authenticated users.
 
-**V1:** Anonymous feedback collection with admin-only access  
-**Later:** Admin dashboard, feedback status tracking (open/resolved), email notifications, categories, sentiment analysis
+**V1:** Anonymous feedback collection with admin dashboard for workflow management  
+**Later:** Email notifications, feedback trends and sentiment analysis, attachments/screenshots for bug reports
+
+**Workflow:**
+- Users submit feedback (status = 'new', priority = 'medium')
+- Admins view all feedback in admin dashboard (`/admin`)
+- Admins can:
+  - Update status (new → reviewed → resolved)
+  - Set priority (low/medium/high)
+  - Assign category for organization
+  - Add internal notes
+  - Track review metadata (who reviewed, when)
 
 **Indexes:**
 - `idx_feedback_created_at` (created_at DESC) - Query by submission date
 - `idx_feedback_type` (feedback_type) - Filter by problem vs suggestion  
 - `idx_feedback_page_path` (page_path) - Group feedback by page
+- `idx_feedback_status` (status) - Filter by workflow status
+- `idx_feedback_priority` (priority) - Filter by priority level
+- `idx_feedback_category` (category) - Filter by category
 
 **RLS Policies:**
-- **INSERT:** Anyone (anonymous or authenticated) can submit feedback (`WITH CHECK (true)`)
-- **SELECT:** Only admins via service role (`USING (false)` - users cannot query feedback)
-- **UPDATE/DELETE:** Not allowed for users (admin-only via dashboard)
+- **INSERT:** Anyone (anonymous or authenticated) can submit feedback (`TO anon, authenticated WITH CHECK (true)`)
+- **SELECT:** Only admins can view all feedback (`EXISTS (SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.is_admin = TRUE)`)
+- **UPDATE:** Only admins can update feedback (same admin check)
+- **DELETE:** Not allowed (preserve feedback history)
 
 **Privacy & Security:**
 - Anonymous submissions allowed to reduce friction
 - No PII collected beyond optional user_id
 - User-agent stored for troubleshooting context only
 - Admin-only access ensures users cannot view other feedback
+- Regular users cannot query or view feedback table
 
 **Admin Access:**
-Admins access feedback via Supabase Dashboard → Table Editor → `feedback` table
+Admins access feedback via:
+- Admin dashboard at `/admin` with full workflow management UI
+- Alternatively: Supabase Dashboard → Table Editor → `feedback` table (direct database access)
 
 ---
 
