@@ -1,5 +1,9 @@
 # Page & Data Requirements
 
+**Note:** All pages include a Feedback button at the bottom for users to report problems or suggest improvements. Feedback is submitted anonymously to Supabase and optionally linked to user profile if authenticated.
+
+---
+
 ## / (Dashboard)
 **Cards and Data Sources**
 - Next Prayer: prayer API + user prefs  
