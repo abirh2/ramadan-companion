@@ -4,6 +4,7 @@ import { RamadanCard } from '@/components/dashboard/RamadanCard'
 import { QuranCard } from '@/components/dashboard/QuranCard'
 import { HadithCard } from '@/components/dashboard/HadithCard'
 import { CharityCard } from '@/components/dashboard/CharityCard'
+import { ZikrCard } from '@/components/dashboard/ZikrCard'
 import { PlacesCard } from '@/components/dashboard/PlacesCard'
 
 export default function Home() {
@@ -32,6 +33,7 @@ export default function Home() {
           <QuranCard />
           <HadithCard />
           <CharityCard />
+          <ZikrCard />
           <PlacesCard />
         </div>
       </main>

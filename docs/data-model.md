@@ -21,9 +21,10 @@ Store per-user preferences and settings.
 | theme | text | 'light', 'dark', or 'system' | Planned |
 | quran_translation | text | e.g. 'en.asad' | **Active (V1)** - Stores user's preferred Quran translation |
 | hadith_language | text | 'english', 'urdu', or 'arabic' (default: 'english') | **Active (V1)** - Stores user's preferred Hadith language |
+|| distance_unit | text | 'mi' or 'km' (default: 'mi') | Planned - Stores user's preferred distance unit for mosque finder |
 
 **V1:** Auth integrated, display_name, location (lat/lng/city), calculation_method, madhab, quran_translation, hadith_language all active  
-**Later:** Profile picture, notifications, hijri_offset integration, language, theme
+**Later:** Profile picture, notifications, hijri_offset integration, language, theme, distance_unit integration
 
 **SQL Migration Required:**
 ```sql

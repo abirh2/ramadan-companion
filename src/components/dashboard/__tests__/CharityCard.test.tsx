@@ -4,6 +4,23 @@ import { CharityCard } from '../CharityCard'
 import { AuthContext } from '@/components/auth/AuthProvider'
 import { AuthContextType } from '@/types/auth.types'
 
+// Mock useDonations hook
+jest.mock('@/hooks/useDonations', () => ({
+  useDonations: () => ({
+    donations: [],
+    loading: false,
+    error: null,
+    refetch: jest.fn(),
+    isEmpty: true,
+    summary: {
+      ramadanTotal: 0,
+      yearlyTotal: 0,
+      allTimeTotal: 0,
+      totalCount: 0,
+    },
+  }),
+}))
+
 const mockAuthContext: AuthContextType = {
   user: { id: '123', email: 'test@example.com' } as any,
   session: {} as any,
@@ -58,22 +75,12 @@ describe('CharityCard', () => {
     expect(screen.getByText(/Track your sadaqah and zakat donations/i)).toBeInTheDocument()
   })
 
-  it('renders add button', () => {
+  it('renders as a clickable link to charity page', () => {
     renderWithAuth(<CharityCard />)
     
-    const buttons = screen.getAllByRole('button')
-    expect(buttons.length).toBeGreaterThan(0)
-  })
-
-  it('add button is clickable', async () => {
-    const user = userEvent.setup()
-    renderWithAuth(<CharityCard />)
-    
-    const buttons = screen.getAllByRole('button')
-    const addButton = buttons[0]
-    
-    await user.click(addButton)
-    expect(addButton).toBeInTheDocument()
+    const link = screen.getByRole('link', { name: /Charity Tracker/i })
+    expect(link).toBeInTheDocument()
+    expect(link).toHaveAttribute('href', '/charity')
   })
 
   it('uses grid layout for totals', () => {

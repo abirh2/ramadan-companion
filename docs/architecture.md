@@ -56,15 +56,15 @@ middleware.ts
 | Ramadan Countdown | Hijri API | Local | No | V1 |
 | Quran & Hadith | External APIs | Supabase (favorites) | No (favorites require auth) | V1 |
 | Charity Tracker | Supabase | Cloud (RLS) | Yes | V1 |
-| Zikr Tracker | Local / Supabase | Local | No | Later |
-| Mosque Finder | Google Places | None | No | Later |
+| Zikr Tracker | Local / Supabase | Local | No | V1 |
+| Mosque Finder | OpenStreetMap Overpass API | localStorage (distance_unit) | No | V1 |
 | Halal Food Finder | Google Places | None | No | Later |
 
 ## Data Separation
 
 | Storage | Used For | Auth Required | Examples |
 |----------|-----------|---------------|-----------|
-| LocalStorage | Preferences & offline data | No | theme, method, location |
+| LocalStorage | Preferences & offline data | No | theme, method, location, distance_unit |
 | Supabase Auth | Authentication state | Yes | user session, JWT tokens |
 | Supabase Database | Persistent user data | Yes | donations, favorites, profiles |
 | APIs | Dynamic content | No | prayer times, Quran, hadith |

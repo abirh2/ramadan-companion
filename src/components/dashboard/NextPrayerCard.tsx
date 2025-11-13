@@ -85,7 +85,7 @@ export function NextPrayerCard() {
         </CardHeader>
         <CardContent className="space-y-2">
           <p className="text-2xl font-semibold">
-            {nextPrayer?.name} in {nextPrayer?.countdown}
+            {nextPrayer?.name}{nextPrayer?.isTomorrow ? ' (tomorrow)' : ''} in {nextPrayer?.countdown}
           </p>
           <div className="space-y-0.5">
             <p className="text-xs text-muted-foreground">

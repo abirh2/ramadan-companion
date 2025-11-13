@@ -9,6 +9,7 @@ import { ArrowLeft, Heart, BookOpen, Loader2 } from 'lucide-react'
 import { ProtectedFeature } from '@/components/auth/ProtectedFeature'
 import { useFavoritesList } from '@/hooks/useFavoritesList'
 import { FavoriteQuranItem } from '@/components/favorites/FavoriteQuranItem'
+import { FavoriteHadithItem } from '@/components/favorites/FavoriteHadithItem'
 
 export default function FavoritesPage() {
   const {
@@ -22,6 +23,8 @@ export default function FavoritesPage() {
   const {
     favorites: hadithFavorites,
     loading: hadithLoading,
+    error: hadithError,
+    refetch: refetchHadith,
     isEmpty: hadithEmpty,
   } = useFavoritesList('hadith')
 
@@ -48,8 +51,8 @@ export default function FavoritesPage() {
       {/* Main Content */}
       <main className="mx-auto max-w-4xl px-4 py-6">
         <ProtectedFeature
-          featureName="Favorites"
-          message="Sign in to save and view your favorite Quran verses and hadiths."
+          title="Favorites"
+          description="Sign in to save and view your favorite Quran verses and hadiths."
         >
           <Tabs defaultValue="quran" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
@@ -136,26 +139,49 @@ export default function FavoritesPage() {
                 </div>
               )}
 
-              {!hadithLoading && hadithEmpty && (
+              {hadithError && (
+                <Card className="rounded-xl">
+                  <CardContent className="p-6 text-center">
+                    <p className="text-destructive mb-2">Failed to load favorites</p>
+                    <p className="text-sm text-muted-foreground mb-4">{hadithError}</p>
+                    <Button onClick={refetchHadith} variant="outline" size="sm">
+                      Try Again
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+
+              {!hadithLoading && !hadithError && hadithEmpty && (
                 <Card className="rounded-xl">
                   <CardContent className="p-12 text-center space-y-4">
                     <Heart className="h-12 w-12 mx-auto text-muted-foreground/50" />
                     <div>
                       <h3 className="text-lg font-semibold mb-2">No Hadith Favorites Yet</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Hadith favorites will be available once the Hadith feature is implemented.
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Start building your collection by clicking the heart icon on any hadith.
                       </p>
+                      <Link href="/quran-hadith">
+                        <Button>
+                          View Daily Hadith
+                        </Button>
+                      </Link>
                     </div>
                   </CardContent>
                 </Card>
               )}
 
-              {!hadithLoading && !hadithEmpty && (
+              {!hadithLoading && !hadithError && !hadithEmpty && (
                 <div className="space-y-4">
                   <p className="text-sm text-muted-foreground">
                     {hadithFavorites.length} {hadithFavorites.length === 1 ? 'hadith' : 'hadiths'} saved
                   </p>
-                  {/* Hadith items will be rendered here when hadith feature is implemented */}
+                  {hadithFavorites.map((favorite) => (
+                    <FavoriteHadithItem
+                      key={favorite.id}
+                      favorite={favorite}
+                      onRemove={refetchHadith}
+                    />
+                  ))}
                 </div>
               )}
             </TabsContent>

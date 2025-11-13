@@ -49,8 +49,10 @@ export default function QuranHadithPage() {
 
   const [shareSuccess, setShareSuccess] = useState(false)
   const [hadithShareSuccess, setHadithShareSuccess] = useState(false)
-  const [copiedEnglish, setCopiedEnglish] = useState(false)
-  const [copiedArabic, setCopiedArabic] = useState(false)
+  const [copiedQuranArabic, setCopiedQuranArabic] = useState(false)
+  const [copiedQuranTranslation, setCopiedQuranTranslation] = useState(false)
+  const [copiedHadithEnglish, setCopiedHadithEnglish] = useState(false)
+  const [copiedHadithArabic, setCopiedHadithArabic] = useState(false)
   const [showLoginModal, setShowLoginModal] = useState(false)
 
   // Prepare Quran favorite data
@@ -127,6 +129,34 @@ export default function QuranHadithPage() {
     }
   }
 
+  // Handle copy Quran Arabic
+  const handleCopyQuranArabic = async () => {
+    if (!arabic) return
+
+    try {
+      await navigator.clipboard.writeText(arabic.text)
+      setCopiedQuranArabic(true)
+      setTimeout(() => setCopiedQuranArabic(false), 2000)
+    } catch (err) {
+      console.error('Error copying Quran Arabic:', err)
+    }
+  }
+
+  // Handle copy Quran translation
+  const handleCopyQuranTranslation = async () => {
+    if (!translation || !surah) return
+
+    const copyText = `${translation.text}\n\n— Quran ${surah.englishName} (${surah.number}:${numberInSurah})`
+
+    try {
+      await navigator.clipboard.writeText(copyText)
+      setCopiedQuranTranslation(true)
+      setTimeout(() => setCopiedQuranTranslation(false), 2000)
+    } catch (err) {
+      console.error('Error copying Quran translation:', err)
+    }
+  }
+
   // Handle Hadith share/copy to clipboard
   const handleHadithShare = async () => {
     if (!hadithEnglish || !narrator || !book || !hadithNumber) return
@@ -150,30 +180,30 @@ export default function QuranHadithPage() {
   }
 
   // Handle copy English hadith
-  const handleCopyEnglish = async () => {
+  const handleCopyHadithEnglish = async () => {
     if (!hadithEnglish || !narrator || !book || !hadithNumber) return
 
     const copyText = `${hadithEnglish}\n\n${narrator}\n— ${book} ${hadithNumber}`
 
     try {
       await navigator.clipboard.writeText(copyText)
-      setCopiedEnglish(true)
-      setTimeout(() => setCopiedEnglish(false), 2000)
+      setCopiedHadithEnglish(true)
+      setTimeout(() => setCopiedHadithEnglish(false), 2000)
     } catch (err) {
       console.error('Error copying English hadith:', err)
     }
   }
 
   // Handle copy Arabic hadith
-  const handleCopyArabic = async () => {
+  const handleCopyHadithArabic = async () => {
     if (!hadithArabic || !book || !hadithNumber) return
 
     const copyText = `${hadithArabic}\n\n— ${book} ${hadithNumber}`
 
     try {
       await navigator.clipboard.writeText(copyText)
-      setCopiedArabic(true)
-      setTimeout(() => setCopiedArabic(false), 2000)
+      setCopiedHadithArabic(true)
+      setTimeout(() => setCopiedHadithArabic(false), 2000)
     } catch (err) {
       console.error('Error copying Arabic hadith:', err)
     }
@@ -288,25 +318,59 @@ export default function QuranHadithPage() {
 
             {!loading && !error && arabic && translation && surah && (
               <>
-                {/* Arabic Text */}
-                <div className="space-y-4">
-                  <p
-                    className="text-2xl md:text-3xl leading-relaxed text-right font-serif"
-                    dir="rtl"
-                    lang="ar"
-                  >
-                    {arabic.text}
-                  </p>
+                {/* Arabic Text with Copy Button */}
+                <div className="space-y-2">
+                  <div className="flex items-start justify-between gap-4">
+                    <p
+                      className="text-2xl md:text-3xl leading-relaxed text-right font-serif flex-1"
+                      dir="rtl"
+                      lang="ar"
+                    >
+                      {arabic.text}
+                    </p>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={handleCopyQuranArabic}
+                      disabled={loading}
+                      title="Copy Arabic text"
+                      className="mt-1 flex-shrink-0"
+                    >
+                      {copiedQuranArabic ? (
+                        <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
 
-                {/* Translation */}
+                {/* Translation with Copy Button */}
                 <div className="space-y-2 border-t pt-4">
-                  <p className="text-base md:text-lg leading-relaxed text-muted-foreground">
-                    {translation.text}
-                  </p>
-                  <p className="text-sm text-muted-foreground italic">
-                    — {translation.edition.englishName}
-                  </p>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <p className="text-base md:text-lg leading-relaxed text-muted-foreground">
+                        {translation.text}
+                      </p>
+                      <p className="text-sm text-muted-foreground italic mt-2">
+                        — {translation.edition.englishName}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={handleCopyQuranTranslation}
+                      disabled={loading}
+                      title="Copy translation"
+                      className="flex-shrink-0"
+                    >
+                      {copiedQuranTranslation ? (
+                        <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Surah Info Card */}
@@ -428,12 +492,12 @@ export default function QuranHadithPage() {
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      onClick={handleCopyArabic}
+                      onClick={handleCopyHadithArabic}
                       disabled={hadithLoading}
                       title="Copy Arabic text"
                       className="mt-1 flex-shrink-0"
                     >
-                      {copiedArabic ? (
+                      {copiedHadithArabic ? (
                         <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
                       ) : (
                         <Copy className="h-4 w-4" />
@@ -456,12 +520,12 @@ export default function QuranHadithPage() {
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      onClick={handleCopyEnglish}
+                      onClick={handleCopyHadithEnglish}
                       disabled={hadithLoading || selectedLanguage !== 'english'}
                       title="Copy English translation"
                       className="flex-shrink-0"
                     >
-                      {copiedEnglish ? (
+                      {copiedHadithEnglish ? (
                         <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
                       ) : (
                         <Copy className="h-4 w-4" />

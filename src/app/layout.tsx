@@ -3,6 +3,7 @@ import { Manrope } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import { Footer } from "@/components/Footer";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -28,6 +29,7 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             {children}
+            <Footer />
           </AuthProvider>
         </ThemeProvider>
       </body>

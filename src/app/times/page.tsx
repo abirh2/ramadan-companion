@@ -127,7 +127,7 @@ export default function TimesPage() {
                       {nextPrayer?.countdown}
                     </p>
                     <p className="text-lg text-muted-foreground mt-2">
-                      until {nextPrayer?.name} at {nextPrayer?.time ? formatTime(nextPrayer.time) : ''}
+                      until {nextPrayer?.name}{nextPrayer?.isTomorrow ? ' (tomorrow)' : ''} at {nextPrayer?.time ? formatTime(nextPrayer.time) : ''}
                     </p>
                   </div>
                   {location && (

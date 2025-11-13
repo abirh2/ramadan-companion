@@ -9,6 +9,7 @@ import type {
   LocationData,
   CalculationMethodId,
   MadhabId,
+  PrayerTimesSource,
   UsePrayerTimesResult,
   PrayerTimesApiResponse,
   QiblaApiResponse,
@@ -19,6 +20,7 @@ import {
   saveLocationToStorage,
   MECCA_COORDS,
 } from '@/lib/location'
+import { calculatePrayerTimesLocal, validatePrayerTimes } from '@/lib/prayerTimes'
 
 // Prayer names in order (excluding Sunrise for next prayer calculation)
 const PRAYER_NAMES = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const
@@ -27,20 +29,24 @@ export function usePrayerTimes(): UsePrayerTimesResult {
   const { profile } = useAuth()
   const [state, setState] = useState<{
     prayerTimes: PrayerTime | null
+    tomorrowPrayerTimes: PrayerTime | null
     nextPrayer: NextPrayerInfo | null
     qiblaDirection: QiblaData | null
     location: LocationData | null
     calculationMethod: CalculationMethodId
     madhab: MadhabId
+    calculationSource: PrayerTimesSource
     loading: boolean
     error: string | null
   }>({
     prayerTimes: null,
+    tomorrowPrayerTimes: null,
     nextPrayer: null,
     qiblaDirection: null,
     location: null,
     calculationMethod: '4', // Default: Umm al-Qura
     madhab: '0', // Default: Standard (Shafi/Maliki/Hanbali)
+    calculationSource: null,
     loading: true,
     error: null,
   })
@@ -48,9 +54,13 @@ export function usePrayerTimes(): UsePrayerTimesResult {
   const isFetchingRef = useRef(false)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const mountedRef = useRef(true)
+  const lastDateRef = useRef<string>(new Date().toDateString())
 
   // Calculate next prayer and countdown
-  const calculateNextPrayer = useCallback((prayerTimes: PrayerTime): NextPrayerInfo | null => {
+  const calculateNextPrayer = useCallback((
+    prayerTimes: PrayerTime, 
+    tomorrowPrayerTimes: PrayerTime | null = null
+  ): NextPrayerInfo | null => {
     const now = new Date()
     const currentTime = now.getTime()
 
@@ -85,11 +95,34 @@ export function usePrayerTimes(): UsePrayerTimesResult {
           time: prayer.timeString,
           countdown,
           timeUntil,
+          isTomorrow: false,
         }
       }
     }
 
     // If no prayer found today, next prayer is tomorrow's Fajr
+    // Use tomorrow's actual times if available
+    if (tomorrowPrayerTimes) {
+      const [hours, minutes] = tomorrowPrayerTimes.Fajr.split(':').map(Number)
+      const tomorrowFajr = new Date(now)
+      tomorrowFajr.setDate(tomorrowFajr.getDate() + 1)
+      tomorrowFajr.setHours(hours, minutes, 0, 0)
+      
+      const timeUntil = tomorrowFajr.getTime() - currentTime
+      const hoursUntil = Math.floor(timeUntil / (1000 * 60 * 60))
+      const minutesUntil = Math.floor((timeUntil % (1000 * 60 * 60)) / (1000 * 60))
+      const secondsUntil = Math.floor((timeUntil % (1000 * 60)) / 1000)
+
+      return {
+        name: 'Fajr',
+        time: tomorrowPrayerTimes.Fajr,
+        countdown: `${hoursUntil}h ${minutesUntil}m ${secondsUntil}s`,
+        timeUntil,
+        isTomorrow: true,
+      }
+    }
+
+    // Fallback: use today's Fajr + 24 hours if tomorrow's times not available
     const fajr = prayerSchedule[0]
     const tomorrowFajr = new Date(fajr.time)
     tomorrowFajr.setDate(tomorrowFajr.getDate() + 1)
@@ -103,6 +136,62 @@ export function usePrayerTimes(): UsePrayerTimesResult {
       time: fajr.timeString,
       countdown: `${hours}h ${minutes}m ${seconds}s`,
       timeUntil,
+      isTomorrow: true,
+    }
+  }, [])
+
+  // Fetch tomorrow's prayer times
+  const fetchTomorrowPrayerTimes = useCallback(async (
+    location: LocationData,
+    method: CalculationMethodId,
+    madhab: MadhabId,
+    timezone: string
+  ): Promise<PrayerTime | null> => {
+    try {
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      
+      // Format date as DD-MM-YYYY for AlAdhan API
+      const day = String(tomorrow.getDate()).padStart(2, '0')
+      const month = String(tomorrow.getMonth() + 1).padStart(2, '0')
+      const year = tomorrow.getFullYear()
+      const dateString = `${day}-${month}-${year}`
+
+      // Try API first
+      try {
+        const response = await fetch(
+          `/api/prayertimes?latitude=${location.lat}&longitude=${location.lng}&method=${method}&school=${madhab}&timezone=${encodeURIComponent(timezone)}&date=${dateString}`,
+          { signal: AbortSignal.timeout(10000) }
+        )
+
+        if (response.ok) {
+          const data: PrayerTimesApiResponse = await response.json()
+          return data.data.timings
+        } else {
+          throw new Error(`API returned ${response.status}`)
+        }
+      } catch (apiError) {
+        // API failed - fall back to local calculation
+        console.warn('AlAdhan API unavailable for tomorrow, using local calculation:', apiError)
+        
+        const localTimes = calculatePrayerTimesLocal(
+          location.lat,
+          location.lng,
+          method,
+          madhab,
+          timezone,
+          tomorrow
+        )
+
+        if (validatePrayerTimes(localTimes)) {
+          return localTimes
+        } else {
+          throw new Error('Local calculation produced invalid times')
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch tomorrow\'s prayer times:', error)
+      return null
     }
   }, [])
 
@@ -160,40 +249,97 @@ export function usePrayerTimes(): UsePrayerTimesResult {
       // Get browser timezone
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
-      // Fetch prayer times
-      const prayerTimesResponse = await fetch(
-        `/api/prayertimes?latitude=${location.lat}&longitude=${location.lng}&method=${method}&school=${madhab}&timezone=${encodeURIComponent(timezone)}`
-      )
+      // Try to fetch prayer times from API first
+      let prayerTimes: PrayerTime | null = null
+      let calculationSource: PrayerTimesSource = null
 
-      if (!prayerTimesResponse.ok) {
-        throw new Error('Failed to fetch prayer times')
+      try {
+        const prayerTimesResponse = await fetch(
+          `/api/prayertimes?latitude=${location.lat}&longitude=${location.lng}&method=${method}&school=${madhab}&timezone=${encodeURIComponent(timezone)}`,
+          { signal: AbortSignal.timeout(10000) } // 10 second timeout
+        )
+
+        if (prayerTimesResponse.ok) {
+          const prayerTimesData: PrayerTimesApiResponse = await prayerTimesResponse.json()
+          prayerTimes = prayerTimesData.data.timings
+          calculationSource = 'api'
+        } else {
+          throw new Error(`API returned ${prayerTimesResponse.status}`)
+        }
+      } catch (apiError) {
+        // API failed - fall back to local calculation
+        console.warn('AlAdhan API unavailable, falling back to local calculation:', apiError)
+        
+        try {
+          prayerTimes = calculatePrayerTimesLocal(
+            location.lat,
+            location.lng,
+            method,
+            madhab,
+            timezone
+          )
+
+          // Validate calculated times
+          if (validatePrayerTimes(prayerTimes)) {
+            calculationSource = 'local'
+            console.info('Prayer times calculated locally using PrayTime library')
+          } else {
+            throw new Error('Local calculation produced invalid prayer times')
+          }
+        } catch (localError) {
+          console.error('Local calculation also failed:', localError)
+          throw new Error('Unable to calculate prayer times. Please check your connection.')
+        }
       }
 
-      const prayerTimesData: PrayerTimesApiResponse = await prayerTimesResponse.json()
-
-      // Fetch Qibla direction
-      const qiblaResponse = await fetch(
-        `/api/qibla?latitude=${location.lat}&longitude=${location.lng}`
-      )
-
-      if (!qiblaResponse.ok) {
-        throw new Error('Failed to fetch Qibla direction')
+      // If we still don't have prayer times, bail out
+      if (!prayerTimes || !calculationSource) {
+        throw new Error('Failed to obtain prayer times from any source')
       }
 
-      const qiblaData: QiblaApiResponse = await qiblaResponse.json()
+      // Fetch Qibla direction (optional, can fail independently)
+      let qiblaData: QiblaData | null = null
+      try {
+        const qiblaResponse = await fetch(
+          `/api/qibla?latitude=${location.lat}&longitude=${location.lng}`,
+          { signal: AbortSignal.timeout(10000) }
+        )
+
+        if (qiblaResponse.ok) {
+          const qibla: QiblaApiResponse = await qiblaResponse.json()
+          qiblaData = qibla.data
+        }
+      } catch (qiblaError) {
+        console.warn('Failed to fetch Qibla direction:', qiblaError)
+        // Continue without Qibla data
+      }
 
       if (!mountedRef.current) return
 
-      // Calculate next prayer
-      const nextPrayer = calculateNextPrayer(prayerTimesData.data.timings)
+      // Check if Isha has passed - if so, proactively fetch tomorrow's times
+      const [ishaHours, ishaMinutes] = prayerTimes.Isha.split(':').map(Number)
+      const ishaTime = new Date()
+      ishaTime.setHours(ishaHours, ishaMinutes, 0, 0)
+      const now = new Date()
+      const ishaHasPassed = now.getTime() > ishaTime.getTime()
+
+      let tomorrowTimes: PrayerTime | null = null
+      if (ishaHasPassed) {
+        tomorrowTimes = await fetchTomorrowPrayerTimes(location, method, madhab, timezone)
+      }
+
+      // Calculate next prayer with tomorrow's times if available
+      const nextPrayer = calculateNextPrayer(prayerTimes, tomorrowTimes)
 
       setState({
-        prayerTimes: prayerTimesData.data.timings,
+        prayerTimes,
+        tomorrowPrayerTimes: tomorrowTimes,
         nextPrayer,
-        qiblaDirection: qiblaData.data,
+        qiblaDirection: qiblaData,
         location,
         calculationMethod: method,
         madhab,
+        calculationSource,
         loading: false,
         error: null,
       })
@@ -205,7 +351,16 @@ export function usePrayerTimes(): UsePrayerTimesResult {
 
       intervalRef.current = setInterval(() => {
         if (!mountedRef.current) return
-        const updatedNextPrayer = calculateNextPrayer(prayerTimesData.data.timings)
+        
+        // Check if day changed (crossed midnight) - refetch everything
+        const currentDate = new Date().toDateString()
+        if (lastDateRef.current !== currentDate) {
+          lastDateRef.current = currentDate
+          fetchData()
+          return
+        }
+        
+        const updatedNextPrayer = calculateNextPrayer(prayerTimes!, tomorrowTimes)
         setState((prev) => ({ ...prev, nextPrayer: updatedNextPrayer }))
       }, 1000)
     } catch (error) {
@@ -220,7 +375,7 @@ export function usePrayerTimes(): UsePrayerTimesResult {
     } finally {
       isFetchingRef.current = false
     }
-  }, [profile, calculateNextPrayer])
+  }, [profile, calculateNextPrayer, fetchTomorrowPrayerTimes])
 
   // Initial fetch
   useEffect(() => {

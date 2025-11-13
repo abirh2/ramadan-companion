@@ -1,46 +1,78 @@
-'use client';
+'use client'
 
+import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Heart, Plus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Heart, Loader2 } from 'lucide-react'
 import { ProtectedFeature } from '@/components/auth/ProtectedFeature'
+import { useDonations } from '@/hooks/useDonations'
 
 export function CharityCard() {
+  const { loading, error, summary } = useDonations()
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount)
+  }
+
   return (
     <ProtectedFeature
       title="Charity Tracker"
       description="Sign in to track your sadaqah and zakat donations"
     >
-      <Card className="rounded-2xl shadow-sm">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
+      <Link href="/charity" className="block">
+        <Card className="rounded-2xl shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+          <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <Heart className="h-4 w-4 text-muted-foreground" />
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Charity Tracker
               </CardTitle>
             </div>
-            <Button variant="ghost" size="icon-sm" className="h-7 w-7">
-              <Plus className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <p className="text-xs text-muted-foreground">This Ramadan</p>
-              <p className="text-xl font-semibold">$0.00</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">All Time</p>
-              <p className="text-xl font-semibold">$0.00</p>
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Track your sadaqah and zakat donations
-          </p>
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {loading && (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            )}
+
+            {error && !loading && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs text-muted-foreground">This Ramadan</p>
+                  <p className="text-xl font-semibold">$0.00</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">All Time</p>
+                  <p className="text-xl font-semibold">$0.00</p>
+                </div>
+              </div>
+            )}
+
+            {!loading && !error && (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground">This Ramadan</p>
+                    <p className="text-xl font-semibold">{formatCurrency(summary.ramadanTotal)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">All Time</p>
+                    <p className="text-xl font-semibold">{formatCurrency(summary.allTimeTotal)}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {summary.totalCount === 0
+                    ? 'Track your sadaqah and zakat donations'
+                    : `${summary.totalCount} ${summary.totalCount === 1 ? 'donation' : 'donations'} recorded`}
+                </p>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </Link>
     </ProtectedFeature>
   )
 }

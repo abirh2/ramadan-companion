@@ -18,6 +18,9 @@ export interface Profile {
   hijri_offset_days?: number;
   language?: string;
   theme?: 'light' | 'dark' | 'system';
+  quran_translation?: string;
+  hadith_language?: string;
+  distance_unit?: string;
 }
 
 export interface AuthContextType {

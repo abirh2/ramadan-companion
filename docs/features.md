@@ -76,11 +76,11 @@ Centralized view of daily information and quick access to all modules.
 | Quran of the Day | short Arabic + translation | opens `/quran-hadith` |
 | Hadith of the Day | English text + source | opens `/quran-hadith` |
 | Charity Summary | totals (Ramadan & all-time) | opens `/charity` |
-| Places (Placeholder) | mosques/halal food tabs | Coming Soon message |
+| Places | mosques/halal food tabs with live data | opens `/places/mosques` or `/places/food` |
 | Zikr Summary | current zikr and progress | opens `/zikr` |
 
-**Included in V1:** Ramadan (hero), Next Prayer, Quran, Hadith, Charity, Places (placeholder)  
-**Later:** Zikr (full implementation), Places (full implementation)
+**Included in V1:** Ramadan (hero), Next Prayer, Quran, Hadith, Charity, Places (mosques + halal food), Zikr  
+**Later:** Prayer time integration with Places, saved favorites for places, user reviews
 
 ### Visual Design
 - Soft neutral background (`#f5f3f0`), deep-green accents (`#0f3d3e`).  
@@ -101,10 +101,18 @@ Display accurate prayer times and Qibla direction based on user location with ci
   3. Browser Geolocation API (with user permission)
   4. Mecca default fallback (21.4225, 39.8262)
 - **Calculation method:** Supabase `profiles.calculation_method` → localStorage → default **Umm al-Qura (Method 4)**
-- **Prayer Times API:** Next.js proxy `/api/prayertimes` → AlAdhan API  
+- **Prayer Times Calculation (with automatic fallback):**
+  - **Primary:** Next.js proxy `/api/prayertimes` → AlAdhan API  
     `GET https://api.aladhan.com/v1/timings/{DD-MM-YYYY}?latitude={lat}&longitude={lng}&method={method}&timezonestring={timezone}`
+  - **Fallback:** PrayTime library (local calculation) when API unavailable
+    - Uses `praytime` npm package (v3.2.0)
+    - Supports all 7 calculation methods (same as AlAdhan)
+    - Enables offline usage and network resilience
+    - Transparent to users (automatic detection and fallback)
+    - Calculation source tracked: `'api'` | `'local'` | `null`
 - **Qibla API:** Next.js proxy `/api/qibla` → AlAdhan API  
     `GET https://api.aladhan.com/v1/qibla/{lat}/{lng}`
+  - Qibla failures are independent and don't affect prayer times
 - **City Geocoding:** OpenStreetMap Nominatim API (free, no API key)
   - Search: `GET https://nominatim.openstreetmap.org/search?q={city}&format=json&limit=5`
   - Reverse: `GET https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lng}&format=json`
@@ -126,7 +134,8 @@ Display accurate prayer times and Qibla direction based on user location with ci
 - Responsive layout (mobile single-column, desktop 2-column)
 
 **Key Components:**
-- `usePrayerTimes()` hook - Core logic for fetching and calculating prayer times
+- `usePrayerTimes()` hook - Core logic for fetching and calculating prayer times with automatic fallback
+- `/src/lib/prayerTimes.ts` - Local prayer times calculation utility using PrayTime library
 - `QiblaCompass` - SVG-based circular compass with rotated arrow
 - `PrayerTimesSettings` - Calculation method selector + location management
 
@@ -137,6 +146,7 @@ Display accurate prayer times and Qibla direction based on user location with ci
 4. **Calculation method:** 7 options (Umm al-Qura, ISNA, MWL, Egyptian, Karachi, Tehran, Jafari)
 5. **Data persistence:** Location and method saved to Supabase profile (if authenticated) + localStorage
 6. **Browser timezone:** Automatically uses `Intl.DateTimeFormat().resolvedOptions().timeZone`
+7. **Automatic fallback:** If AlAdhan API unavailable (network error, timeout, API error), automatically calculates prayer times locally using PrayTime library. Fallback is transparent - users see accurate prayer times regardless of connectivity.
 
 ### UI
 - **Dashboard Card:**
@@ -158,12 +168,39 @@ Display accurate prayer times and Qibla direction based on user location with ci
 
 ### Error Handling
 - Geolocation denied: Falls back to Mecca, shows message
-- API failures: User-friendly error messages with retry suggestion
+- AlAdhan API failures: Automatically falls back to local calculation (transparent to user)
+- Local calculation failure: Shows error message only if both API and local calculation fail
 - City search no results: Clear error message with suggestion
 - Invalid coordinates: Validated before API calls
+- Qibla API failures: Independent of prayer times, continues without Qibla direction
 
-**V1 Status:** ✅ Complete - daily times + countdown + static Qibla arrow + city selection + location display  
-**Later:** Compass orientation using DeviceOrientationEvent (phone compass integration)
+### Fallback Mechanism Details
+**Implementation:** `/src/lib/prayerTimes.ts` + `/src/hooks/usePrayerTimes.ts`
+
+**Calculation Method Mapping:**
+- AlAdhan ID → PrayTime method: '0'→Jafari, '1'→Karachi, '2'→ISNA, '3'→Egypt, '4'→Makkah, '5'→MWL, '7'→Tehran
+- Madhab: '0'→Standard (Shafi/Maliki/Hanbali), '1'→Hanafi
+
+**Fallback Trigger:**
+- Network errors (fetch failure)
+- API errors (4xx/5xx responses)
+- Timeout (>10 seconds)
+- Malformed responses
+
+**Validation:**
+- All calculated prayer times validated for format (HH:MM)
+- Chronological order verified (Fajr < Sunrise < Dhuhr < Asr < Maghrib < Isha)
+- Invalid calculations rejected with error
+
+**Benefits:**
+- ✅ Offline support - prayer times work without internet
+- ✅ Network resilience - survives API outages
+- ✅ Same accuracy - identical calculation methods
+- ✅ Transparent UX - users unaware of source
+- ✅ Future-ready - foundation for advanced options (higher latitude adjustments, custom tuning)
+
+**V1 Status:** ✅ Complete - daily times + countdown + static Qibla arrow + city selection + location display + automatic fallback  
+**Later:** Compass orientation using DeviceOrientationEvent (phone compass integration), advanced calculation options (higher latitude methods, time tuning)
 
 ---
 
@@ -232,14 +269,24 @@ Show one ayah and one hadith per day (same for all users) and allow favorites. *
   - Proxied through `/api/hadith?language={id}`
 
 ### Logic
-- **Deterministic daily selection:**
-  - **Quran:** `ayahNumber = ((year * 10000 + month * 100 + day) % 6236) + 1`
-    - Cycles through all 6236 ayahs of the Quran
-  - **Hadith:** `globalIndex = (dateNumber % TOTAL_HADITHS)`
-    - Pool: ~15,000 hadiths (Sahih Bukhari ~7563 + Sahih Muslim ~7563)
-    - Distributes selection across both collections
-  - Ensures same content globally for all users each day
-  - No randomness - predictable and consistent
+- **Weighted random daily selection:**
+  - Uses date as deterministic seed - **same content globally for all users each day**
+  - **Quran:** Weighted probability favoring:
+    - Last Juz (30th) - Most memorized surahs (weight: 20)
+    - Short impactful surahs (Al-Ikhlas, Al-Falaq, An-Nas) (weight: 18)
+    - Surah Yaseen - "Heart of Quran" (weight: 16)
+    - Surah Al-Kahf - Friday recitation (weight: 14)
+    - Surah Ar-Rahman - Beautiful recitation (weight: 12)
+    - Other sections balanced for full Quran coverage (weight: 8-15)
+    - Cycles through all 6,236 ayahs with weighted probability
+  - **Hadith:** Weighted probability by topic and authenticity:
+    - Sahih Bukhari prioritized (slightly higher weight overall)
+    - Books of Faith, Prayer, Fasting (weight: 18-22)
+    - Books of Zakat, Good Manners, Tawheed (weight: 16-20)
+    - Other practical topics (weight: 8-15)
+    - Pool: ~15,000 hadiths across both Sahih collections
+  - **Seeded randomness** ensures predictability (same seed = same ayah/hadith)
+  - Balances impactful content with full collection coverage
 - **Daily content viewable without auth**
 - **Favorites stored in Supabase `favorites` table with RLS**
 - **Favorite button shows login prompt if not authenticated**
@@ -265,6 +312,7 @@ Show one ayah and one hadith per day (same for all users) and allow favorites. *
 - `/hooks/useHadithOfTheDay.ts` - Fetch daily hadith with language preference
 - `/hooks/useHadithFavorites.ts` - Manage favorite state with auth protection
 - `/components/dashboard/HadithCard.tsx` - Dashboard card with live data
+- `/components/favorites/FavoriteHadithItem.tsx` - Favorites list item with copy buttons
 - `/components/hadith/LanguageSelector.tsx` - Language preference selector
 - `/types/hadith.types.ts` - TypeScript types for all Hadith data
 
@@ -298,12 +346,13 @@ Show one ayah and one hadith per day (same for all users) and allow favorites. *
 
 **Dedicated Page (`/quran-hadith`):**
 - **Quran Section:**
-  - Large Arabic text (text-2xl/3xl, RTL, right-aligned)
-  - English translation with translator attribution
+  - Large Arabic text (text-2xl/3xl, RTL, right-aligned) with copy button
+  - English translation with translator attribution and copy button
   - Surah info card: Name, meaning, revelation type, number of ayahs
   - Translation selector dropdown (saves to profile/localStorage)
   - Favorite button (auth-protected, shows login modal if needed)
   - Share button (copy ayah + reference to clipboard)
+  - Copy buttons provide instant feedback with checkmark icon
 - **Hadith Section:**
   - Large Arabic text (text-2xl/3xl, RTL, right-aligned) with copy button
   - Selected language translation (English/Urdu/Arabic) with copy button for English
@@ -323,24 +372,37 @@ Show one ayah and one hadith per day (same for all users) and allow favorites. *
 - **Tabbed interface:** Separate tabs for Quran and Hadith favorites
 - **Quran Favorites:**
   - List of all favorited ayahs with full text (Arabic + translation)
+  - Copy buttons for Arabic and translation text separately
   - Surah reference and save date displayed
-  - Remove from favorites button (filled heart icon)
-  - Share button per item
+  - Share button per item (text label with icon)
+  - Remove from favorites button (text label "Remove" with filled heart icon)
   - Empty state with call-to-action to view daily ayah
   - Count badge showing number of saved verses
+  - Consistent button styling matching Hadith favorites
 - **Hadith Favorites:**
-  - List of all favorited hadiths with full text (Arabic + English/Urdu)
-  - Book, hadith number, status badge, and save date displayed
+  - List of all favorited hadiths with full text (Arabic + English)
+  - Book, hadith number, chapter, status badge, and save date displayed
+  - Copy buttons for Arabic and English text separately
+  - Share button per item (copies formatted text to clipboard)
   - Remove from favorites button (filled heart icon)
-  - Share button per item
   - Empty state with call-to-action to view daily hadith
   - Count badge showing number of saved hadiths
+  - Error handling with retry button
 - **Access:** Via UserMenu → Favorites menu item
 
 **Buttons:**
 - Favorite: Heart icon (outline when not favorited, filled red when favorited)
-- Share: Copy icon, copies formatted text to clipboard
+- Share: Text label "Share" with Share2 icon, copies formatted text to clipboard
+- Remove: Text label "Remove" with filled heart icon (on favorites page)
+- Copy: Copy icon that changes to green checkmark on success
 - Translation selector: Dropdown with 4 translation options
+- Language selector: Dropdown with 3 language options (Hadith)
+
+**UI Consistency:**
+- Both Quran and Hadith cards use identical button layouts and styling
+- Copy buttons positioned next to Arabic text and translation/English text
+- Action buttons (Share, Remove) at bottom with text labels
+- Green checkmark feedback (2 seconds) on successful copy
 
 **Typography:**
 - Arabic: `text-lg`/`text-xl`/`text-2xl`, `dir="rtl"`, `lang="ar"`, serif font
@@ -355,97 +417,659 @@ Show one ayah and one hadith per day (same for all users) and allow favorites. *
 ## 6. Charity & Zakat Tracker (`/charity`)
 
 ### Functionality
-Track donations and calculate zakat locally. **Requires authentication.**
+Comprehensive donation tracking with monthly insights, visualizations, and zakat calculator. **Requires authentication.**
+
+### Implementation Status
+✅ **Fully Implemented (V1)**
+- Full CRUD operations for donations
+- Monthly tracking with calendar and list views
+- Interactive charts (line, bar, pie)
+- Zakat calculator with auto-populate
+- Dashboard integration with live totals
+- View toggle with localStorage persistence
 
 ### Data
 Supabase `donations` table with RLS policies.
 
+**Database Fields:**
+- `id` (uuid) - Primary key
+- `user_id` (uuid) - Foreign key to profiles table
+- `amount` (numeric) - Donation amount in USD
+- `currency` (text) - Default 'USD'
+- `type` (text) - 'zakat', 'sadaqah', or 'other'
+- `category` (text) - Optional category (e.g., Education, Medical)
+- `charity_name` (text) - Name of charity/organization
+- `charity_url` (text) - Optional URL
+- `date` (date) - Donation date
+- `notes` (text) - Optional notes
+- `is_recurring` (boolean) - Future use
+- `created_at`, `updated_at` - Auto timestamps
+
+**RLS Policies:**
+- Users can only view, create, update, and delete their own donations
+- Enforced at database level via `user_id` matching
+
 ### Behavior
-- **Protected feature:** Must be signed in to access
-- Add/Edit/Delete donations (user_id matches authenticated user)
-- Summaries: Ramadan total, yearly total, all-time total  
-- Local zakat calculator (2.5% on net assets)  
-- Option to log zakat as a donation record
+
+**Protected Access:**
+- Page wrapped with `ProtectedFeature` component
+- Unauthenticated users see login prompt
+- All operations require valid user session
+
+**Donation Management:**
+- **Add:** Click "Add Donation" → modal form → save to Supabase
+- **Edit:** Click edit icon on any donation → pre-filled modal → update
+- **Delete:** Click delete icon → confirmation dialog → permanent removal
+- Form fields: amount (required), type (required), date (required), charity name, category, notes
+- Real-time validation: amount > 0, required fields checked
+- Success/error feedback with toast-style messages
+
+**Monthly Tracking:**
+- **Two view modes:** Calendar grid and List accordion
+- **Toggle buttons:** Switch between views (preference saved to localStorage)
+- **Calendar View:**
+  - 12-month grid for selected year
+  - Each month card shows: total, count, visual indicator
+  - Click month to expand and see all donations
+  - Year selector with prev/next buttons
+  - Inline edit/delete actions per donation
+- **List View:**
+  - Accordion grouped by month (most recent first)
+  - Month header shows total and count
+  - Expanded: full table with columns (date, amount, type, charity, actions)
+  - Better for detailed review and quick editing
+
+**Summary Totals:**
+- **This Ramadan:** Sum of donations during current Ramadan period
+- **This Year:** Sum of donations in current calendar year
+- **All Time:** Lifetime total of all donations
+- Displayed in 3 prominent cards at top of page
+- Real-time updates after add/edit/delete
+
+**Charts & Visualizations:**
+- **Line Chart:** Monthly donation trends over time (X: months, Y: USD amount)
+- **Bar Chart:** Last 12 months comparison with visual bars
+- **Pie Chart:** Breakdown by type (zakat vs sadaqah vs other) with percentages
+- Built with recharts library (responsive, mobile-friendly)
+- Empty state: "Add donations to see charts"
+- Color-coded type badges: Green (zakat), Blue (sadaqah), Gray (other)
+
+**Zakat Calculator:**
+- Expandable/collapsible section
+- Input fields: Cash, Savings, Gold, Silver, Business Assets, Debts
+- Live calculation: (Total Assets - Debts) × 2.5%
+- Display breakdown: Total Assets, Debts, Net Zakatable Wealth, Zakat Due
+- "Log as Donation" button pre-fills form with calculated amount and type=zakat
+- Educational note about consulting scholars
+
+**Recommended Charities Placeholder:**
+- Descriptive card with icon (HeartHandshake, Sparkles)
+- Title: "Recommended Charities & Causes"
+- Description: Coming soon message explaining future feature
+- Dashed border styling to indicate placeholder status
 
 ### APIs
-None (Supabase only).
+None (Supabase only). All operations through Supabase client.
 
-### UI
-Sections:
-1. ProtectedFeature wrapper (shows login prompt if not authenticated)
-2. Totals (cards)
-3. Donation table/list
-4. "Add Donation" dialog (Form → Supabase insert with user_id)
-5. Local Zakat calculator with "Log as donation" option
+### Key Components
 
-**V1:** donations + calculator with auth protection + RLS  
-**Later:** charts, recurring, CSV export
+**Pages:**
+- `/app/charity/page.tsx` - Main charity tracker page
+
+**Hooks:**
+- `/hooks/useDonations.ts` - Fetch donations, calculate summaries, loading/error states
+
+**Utilities:**
+- `/lib/donations.ts` - CRUD operations (getDonations, addDonation, updateDonation, deleteDonation, getMonthlyTotals, getRamadanTotal)
+
+**Types:**
+- `/types/donation.types.ts` - TypeScript interfaces (Donation, DonationFormData, MonthlyTotal, ZakatCalculation, DonationSummary, DonationFilters)
+
+**Components:**
+- `/components/charity/DonationForm.tsx` - Add/Edit modal dialog
+- `/components/charity/MonthlyView.tsx` - Calendar-style monthly grid
+- `/components/charity/ListViewAccordion.tsx` - Accordion list grouped by month
+- `/components/charity/ChartsSection.tsx` - Line, bar, and pie charts
+- `/components/charity/ZakatCalculator.tsx` - Collapsible zakat calculator
+- `/components/charity/RecommendedCharities.tsx` - Placeholder component
+- `/components/dashboard/CharityCard.tsx` - Dashboard card with live data and link
+
+### UI Details
+
+**Dashboard Card:**
+- Shows "This Ramadan" and "All Time" totals
+- Loading state with spinner
+- Error state shows $0.00
+- Click card to navigate to `/charity` page
+- Hover effect for interactivity feedback
+- Count badge: "X donations recorded"
+
+**Main Page Layout:**
+- Header: Back button, page title, AuthButton
+- Summary cards row (3 columns on desktop, stacked on mobile)
+- Action bar: View toggle buttons + Add Donation button
+- Empty state: Icon, message, CTA button
+- Monthly view section (conditional based on toggle)
+- Charts section (hidden if no donations)
+- Zakat calculator (collapsible)
+- Recommended charities placeholder
+- All sections responsive and mobile-optimized
+
+**Form Dialog:**
+- Modal overlay with backdrop
+- Title changes: "Add Donation" vs "Edit Donation"
+- Inline validation feedback
+- Required field indicators (*)
+- Date picker defaults to today
+- Cancel and submit buttons
+- Loading state during save
+
+**Delete Confirmation:**
+- Separate dialog for deletion
+- Shows donation details (amount, type, charity, date)
+- Destructive action styling (red button)
+- Loading state during deletion
+- Cannot undo warning
+
+**Color Scheme:**
+- Primary: HSL primary color from theme
+- Success/Zakat: Green (#10b981)
+- Info/Sadaqah: Blue (#3b82f6)
+- Neutral/Other: Gray (#6b7280)
+- Destructive: Red from theme
+- Muted backgrounds for secondary info
+
+### Currency & Localization
+- **V1:** USD only (hardcoded)
+- Format: `Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })`
+- Display: $0.00 format with 2 decimal places
+- Input: Number input with step="0.01"
+
+### State Management
+- React hooks + local component state (no global store)
+- `useDonations` hook fetches data per page/component
+- Refetch pattern after mutations (add/edit/delete)
+- View preference persisted to localStorage (key: `charity_view_mode`)
+- Default view: 'calendar'
+
+### Error Handling
+- Network errors: Display error message with retry button
+- Validation errors: Inline field errors
+- RLS violations: Caught at Supabase level (shouldn't happen with proper auth)
+- Empty states: Friendly messages with CTAs
+- Loading states: Spinners and skeleton placeholders
+
+### Performance Considerations
+- Single query fetches all user donations (indexed by user_id)
+- Monthly grouping done client-side (JavaScript map/reduce)
+- Charts only render when donations exist
+- Lazy calculation of summaries (computed in useDonations hook)
+- View toggle doesn't refetch data (just changes display)
+- LocalStorage write on view change (minimal overhead)
+
+**V1 Status:** ✅ **Complete** - Full CRUD, monthly tracking with calendar/list views, charts (line/bar/pie), zakat calculator, dashboard integration, auth protection, RLS enforcement  
+**Later:** Recurring donations, multi-currency support with conversion, CSV export, email receipts, tax year summaries, charity recommendations database, donation analytics insights
 
 ---
 
-## 6. Zikr & Dua Tracker (`/zikr`)
+## 7. Zikr & Dua Tracker (`/zikr`)
 
 ### Functionality
-Simple tasbeeh counter and dua list.
+Interactive tasbeeh counter with goal tracking and comprehensive dua library for daily worship.
+
+### Implementation Status
+✅ **Fully Implemented (V1)**
+- Tasbeeh counter with 5 standard phrases
+- Goal tracking with visual progress indicators
+- Daily auto-reset at Fajr (Islamic day boundary)
+- Audio and haptic feedback on increment
+- Free count mode (no target) and custom targets
+- Comprehensive dua library (20 duas across 8 categories)
+- Dashboard integration with live counter state
 
 ### Data
-- LocalStorage for current zikr progress.  
-- Optional static JSON for duas.
+**LocalStorage:**
+- `zikr_state`: Counter state (phraseId, count, target, lastResetDate)
+- `zikr_feedback_enabled`: Audio/haptic preferences
+
+**No Supabase in V1** - fully local, works offline
+
+### Standard Phrases
+| Phrase | Arabic | Default Target |
+|--------|--------|----------------|
+| SubhanAllah | سُبْحَانَ ٱللَّٰهِ | 33 |
+| Alhamdulillah | ٱلْحَمْدُ لِلَّٰهِ | 33 |
+| Allahu Akbar | ٱللَّٰهُ أَكْبَرُ | 34 |
+| Astaghfirullah | أَسْتَغْفِرُ ٱللَّٰهَ | 100 |
+| La ilaha illallah | لَا إِلَٰهَ إِلَّا ٱللَّٰهُ | 100 |
 
 ### Behavior
-- Select phrase → tap to increment count.  
-- Save progress locally.  
-- Reset daily.
+
+**Counter Mechanics:**
+- Tap/click anywhere on circular counter to increment
+- Visual scale animation on tap for feedback
+- Circular progress ring shows completion percentage (when target set)
+- Count persists to localStorage automatically
+- Goal reached message when target achieved
+
+**Daily Reset at Fajr:**
+- Automatically resets counter at Fajr prayer time
+- Fajr time fetched from `usePrayerTimes` hook
+- Follows Islamic day boundary (new day begins at Fajr)
+- Fallback to midnight if Fajr time unavailable
+- User-facing explanation displayed on page
+- Reset logic: `if current time > today's Fajr AND lastResetDate < today`
+
+**Target Modes:**
+1. **Default Target Mode**: Uses phrase-specific recommended count (e.g., 33x for SubhanAllah)
+2. **Custom Target Mode**: User sets any count goal (e.g., 50, 200, etc.)
+3. **Free Count Mode**: No target, unlimited counting with ∞ symbol
+
+**Feedback System:**
+- **Audio**: 50ms sine wave beep (800Hz) using Web Audio API
+- **Haptic**: 10ms vibration pulse using Vibration API
+- **Visual**: Scale animation on button press
+- **Toggleable**: User can enable/disable audio and haptic independently
+- **Graceful degradation**: Features fail silently if APIs unavailable
+
+**Phrase Switching:**
+- Select any of 5 standard phrases from dropdown
+- Counter resets to 0 when switching phrases
+- Target resets to phrase's default (or stays in free count mode)
+- Arabic, transliteration, and meaning displayed
+
+### Dua Library
+
+**20 Essential Duas Across 8 Categories:**
+
+| Category | Count | Examples |
+|----------|-------|----------|
+| Morning | 3 | Morning protection, Ayatul Kursi, Seeking forgiveness |
+| Evening | 3 | Evening protection, Seeking refuge, Bismillah protection |
+| Meals | 2 | Before eating, After eating |
+| Travel | 2 | Departure, Protection during travel |
+| Sleep | 1 | Before sleep |
+| Home | 2 | Entering home, Leaving home |
+| Worship | 3 | Entering mosque, Leaving mosque, After wudu |
+| General | 4 | Forgiveness, Difficulty, Gratitude, Protection |
+
+**Dua Card Format:**
+- Arabic text (large, RTL, serif font)
+- Transliteration (italicized)
+- English translation
+- Authentic reference (Quran/Hadith source)
+- Copy button (copies full formatted text to clipboard)
+- Responsive grid layout (1 column mobile, 2 columns desktop)
+
+### Key Components
+
+**Pages:**
+- `/app/zikr/page.tsx` - Main zikr page with counter and dua library
+
+**Hooks:**
+- `/hooks/useZikr.ts` - State management, Fajr reset logic, feedback integration
+
+**Utilities:**
+- `/lib/zikr.ts` - LocalStorage operations, audio/haptic functions, reset logic
+- `/lib/duas.ts` - Static dua data array with helper functions
+
+**Types:**
+- `/types/zikr.types.ts` - TypeScript interfaces (ZikrPhrase, ZikrState, Dua, ZikrFeedbackPreferences)
+
+**Components:**
+- `/components/zikr/ZikrCounter.tsx` - Circular counter with tap area, progress ring
+- `/components/zikr/ZikrPhraseSelector.tsx` - Phrase dropdown, target settings panel
+- `/components/zikr/DuaCard.tsx` - Single dua display with copy functionality
+- `/components/zikr/DuaList.tsx` - Categorized grid of all duas
+- `/components/dashboard/ZikrCard.tsx` - Dashboard summary card
 
 ### UI
-- Zikr selector dropdown.  
-- Central circular count display.  
-- Dua cards underneath.
 
-**V1:** local only.  
-**Later:** Supabase logs, streak tracking.
+**Dashboard Card:**
+- Current phrase name (transliteration)
+- Count display with target (e.g., "23 / 33" or "15 ∞")
+- Progress bar (if target set)
+- Arabic text of current phrase
+- English meaning
+- Color-coded: green when goal reached, primary otherwise
+- Click navigates to `/zikr` page
+
+**Full Page (`/zikr`):**
+- **Header**: Back button, page title, AuthButton
+- **Counter Section** (hero):
+  - Arabic phrase with transliteration and meaning
+  - Large circular counter (280x280px SVG)
+  - Progress ring (only visible if target set)
+  - Count display (center of circle)
+  - Target display below count
+  - Goal reached message (green, animated)
+  - Tap prompt on hover
+- **Phrase Selector**:
+  - Dropdown with all 5 phrases
+  - Target settings toggle button
+  - Expandable panel: Default target, Free count, Custom target input
+- **Controls Card**:
+  - Reset counter button (disabled when count = 0)
+  - Audio feedback toggle (with Volume icon)
+  - Haptic feedback toggle (with Smartphone icon)
+- **Fajr Reset Info Card**:
+  - Moon emoji
+  - "Daily Reset at Fajr" heading
+  - Explanation of Islamic day boundary
+  - Muted background color
+- **Duas Section**:
+  - Section header with count
+  - Categorized display (8 categories)
+  - Responsive grid layout
+
+### Progress Display Logic
+```typescript
+if (hasTarget) {
+  // Show "23/33" and circular progress ring
+  progress = (count / target) * 100
+  color = isGoalReached ? 'green' : 'primary'
+} else {
+  // Show "23 ∞" with infinity symbol
+  // No progress ring
+}
+```
+
+### Fajr Reset Logic
+```typescript
+shouldReset = (currentTime > todaysFajr) && (lastResetDate < today)
+
+// Edge cases handled:
+// - User opens app before Fajr: counter persists
+// - User opens app after Fajr: counter resets
+// - Fajr time unavailable: fallback to midnight reset
+// - Timezone changes: uses browser timezone
+```
+
+### Performance & Accessibility
+- **Offline-first**: Fully functional without network
+- **Instant feedback**: Audio/haptic within 10ms
+- **Persistent state**: Auto-saves on every increment
+- **Accessibility**:
+  - ARIA labels on counter button
+  - Keyboard navigation support
+  - Screen reader friendly
+  - High contrast progress indicators
+- **Mobile optimized**:
+  - Large tap target (280x280px)
+  - Touch-friendly controls
+  - Active state animations
+
+### Error Handling
+- LocalStorage write failures: Silent fail, continue operation
+- Audio API unavailable: Skip audio feedback
+- Vibration API unavailable: Skip haptic feedback
+- Fajr time fetch failure: Fall back to midnight reset
+- Invalid stored state: Reset to default
+
+**V1 Status:** ✅ **Complete** - Tasbeeh counter with 5 phrases, goal tracking, Fajr auto-reset, audio/haptic feedback, 20 duas across 8 categories, dashboard integration  
+**Later:** Supabase sync for cross-device persistence, streak tracking, custom phrase creation, dua search/filtering, notification reminders
 
 ---
 
-## 7. Mosque Finder (`/places/mosques`)
+## 8. Mosque Finder (`/places/mosques`)
 
 ### Functionality
-List nearby mosques.
+Find and display nearby mosques with interactive map and list views.
 
 ### API
-- **[Google Places API – Nearby Search](https://developers.google.com/maps/documentation/places/web-service/search-nearby)**  
-    GET https://maps.googleapis.com/maps/api/place/nearbysearch/json
-    ?location={lat},{lng}
-    &radius=5000
-    &type=mosque
-    &key={API_KEY}
+- **OpenStreetMap Overpass API** (free, no API key required)
+  ```
+  POST https://overpass-api.de/api/interpreter
+  data=[out:json];node["amenity"="place_of_worship"]["religion"="muslim"](around:{radius},{lat},{lng});out;
+  ```
+  
+- **Response Structure:**
+  ```json
+  {
+    "elements": [
+      {
+        "type": "node",
+        "id": 2809904792,
+        "lat": 40.8750571,
+        "lon": -73.8801588,
+        "tags": {
+          "name": "North Bronx Islamic Center",
+          "addr:street": "East 206th Street",
+          "addr:housenumber": "216",
+          "addr:city": "Bronx",
+          "addr:state": "NY",
+          "addr:postcode": "10467",
+          "phone": "+1-xxx-xxx-xxxx",
+          "website": "https://example.com",
+          "opening_hours": "Mo-Su 05:00-22:00"
+        }
+      }
+    ]
+  }
+  ```
 
-### Behavior
-- Use stored or current location.  
-- Show list (name, address, distance, rating).  
-- Open in Google Maps link.
+### Features (V1 - Implemented)
+**Dashboard Card:**
+- Displays nearest mosque with name, distance, and address snippet
+- Quick "Get Directions" button opens native maps app
+- "View All" button navigates to full mosque finder page
 
-**Later:** full map + filters.
+**Dedicated Page (`/places/mosques`):**
+- **Location Search:** Nominatim autocomplete search with 5 suggestions as user types
+- **Current Location:** Button to use browser geolocation
+- **Search Radius:** Adjustable selector (1, 2, 3, 5, 10 miles) - default 3 miles
+- **Distance Units:** Toggle between miles (default) and kilometers - persists to localStorage + profile
+- **List View:** Scrollable cards showing:
+  - Mosque name (with fallback for unnamed mosques: "Mosque near [street]")
+  - Distance (in user's preferred unit)
+  - Full address (if available)
+  - Phone number (if available)
+  - Website link (if available)
+  - "Get Directions" button
+- **Map View:** Interactive MapLibre map with:
+  - OpenStreetMap tiles (free)
+  - Mosque markers (green pins with hover tooltips)
+  - User location marker (blue)
+  - Auto-zoom to fit all results
+  - Click marker or list item to open detail dialog
+- **Detail Dialog:** Full mosque information with:
+  - Name and distance
+  - Complete address with copy button
+  - Coordinates
+  - Additional info: phone, website, hours, wheelchair access, denomination
+  - "Get Directions" button (platform-aware: Apple Maps for iOS, Google Maps for others)
+
+### Data Flow
+1. User's location retrieved from profile → localStorage → browser geolocation
+2. Search parameters (lat, lng, radius in meters) sent to `/api/mosques`
+3. API route queries Overpass API for mosques within radius
+4. Results parsed, distances calculated using Haversine formula (in km)
+5. Mosques sorted by distance (nearest first)
+6. Client displays distances in user's preferred unit (mi/km)
+
+### Distance Calculation
+- **Haversine formula** for accurate Earth-surface distances
+- Internal storage: kilometers (matches API standard)
+- Display: user's preference (miles default, kilometers optional)
+- Conversion: 1 mile = 1.60934 km
+
+### Geocoding
+- **Nominatim API** for location search (free OpenStreetMap service)
+- Autocomplete with 500ms debounce
+- Returns up to 5 suggestions with display names
+- Fallback: Simple search using first result
+
+### Navigation Integration
+- Platform detection via user agent
+- iOS Safari: `maps://?daddr={lat},{lng}&q={name}` (opens Apple Maps)
+- Android/Desktop: `https://www.google.com/maps/dir/?api=1&destination={lat},{lng}` (opens Google Maps)
+- Opens in new tab or triggers native app
+
+### Fallback Handling
+- Missing mosque names: Generated from address ("Mosque near East 189th Street")
+- Incomplete addresses: Display available components only
+- No location permission: Prompt user to search manually
+- No results: Suggest increasing radius or changing location
+
+**V1:** Full implementation - list view, map view, location search, distance units, directions
+**Later:** Favorites/saved mosques, prayer time integration, user reviews, facility filters
 
 ---
 
-## 8. Halal Food Finder (`/places/halal-food`)
+## 9. Halal Food Finder (`/places/food`)
 
 ### Functionality
-Find halal restaurants near user.
+Find and display halal restaurants and food places with interactive map and list views using comprehensive search strategies.
 
 ### API
-- **Google Places API (same as above)**  
-    type=restaurant&keyword=halal
+- **Geoapify Places API** with THREE parallel search strategies for maximum coverage:
+  1. **Strict Name Search:** `name=halal` + `categories=catering.restaurant,catering.fast_food`
+  2. **Halal Category:** `categories=halal` (explicit halal categorization)
+  3. **Cuisine-Based:** Traditional halal cuisines (Pakistani, Turkish, Lebanese, Syrian, Arab, Kebab)
+  
+  ```
+  GET https://api.geoapify.com/v2/places?
+    categories={categories}&
+    filter=circle:{lng},{lat},{radiusMeters}&
+    bias=proximity:{lng},{lat}&
+    limit=100&
+    apiKey={GEOAPIFY_API_KEY}
+  ```
+  
+- **Response Structure:**
+  ```json
+  {
+    "type": "FeatureCollection",
+    "features": [{
+      "properties": {
+        "name": "Azal Restaurant & Halal",
+        "lat": 40.8454573,
+        "lon": -73.8658065,
+        "formatted": "...",
+        "categories": ["catering", "catering.restaurant", "halal"],
+        "catering": {
+          "cuisine": "middle_eastern",
+          "diet": { "halal": true }
+        },
+        "contact": { "phone": "+1-xxx-xxx-xxxx" },
+        "opening_hours": "Mo-Su 12:00-23:00",
+        "facilities": { "takeaway": true, "delivery": true },
+        "distance": 3413,
+        "place_id": "..."
+      }
+    }]
+  }
+  ```
 
-### Behavior
-List view identical to mosque finder.
+### Features (V1 - Implemented)
 
-**Later only.**
+**Dashboard Card:**
+- Displays nearest halal food place with name, distance, and cuisine
+- Quick "Get Directions" button opens native maps app
+- "View All" button navigates to full food finder page
+- Loading and error states handled gracefully
+
+**Dedicated Page (`/places/food`):**
+- **Location Search:** Nominatim autocomplete search with 5 suggestions
+- **Current Location:** Button to use browser geolocation
+- **Search Radius:** Adjustable selector (1, 2, 3, 5, 10 miles) - default 3 miles
+- **Distance Units:** Toggle between miles and kilometers - persists to localStorage + profile
+- **List View:** Scrollable cards showing:
+  - Restaurant name (with cuisine-based fallback for unnamed places)
+  - Distance (in user's preferred unit)
+  - Cuisine type (e.g., Pakistani, Turkish, Middle Eastern)
+  - Full address (if available)
+  - Phone number (if available)
+  - Website link (if available)
+  - Facility badges (Takeaway, Delivery, Wheelchair Accessible)
+  - "Get Directions" button
+- **Map View:** Interactive MapLibre map with:
+  - OpenStreetMap tiles (free)
+  - Food place markers (orange pins with hover tooltips)
+  - User location marker (blue)
+  - Auto-zoom to fit all results
+  - Click marker or list item to open detail dialog
+- **Detail Dialog:** Full restaurant information with:
+  - Name and distance
+  - Cuisine type
+  - Halal certification indicator (if explicitly marked)
+  - Categories (displayed as badges)
+  - Complete address
+  - Opening hours (if available)
+  - Contact information (phone, website)
+  - Facility information (takeaway, delivery, wheelchair access)
+  - "Get Directions" and "Call" buttons
+
+### Data Flow
+1. User's location retrieved from profile → localStorage → browser geolocation
+2. Search parameters (lat, lng, radius in meters) sent to `/api/food`
+3. API route makes sequential Geoapify API calls (conserves quota):
+   - First: Strict name search
+   - Second (if needed): Category search
+   - Third (if needed): Cuisine search
+4. Results merged and deduplicated by `place_id`
+5. Distances calculated using Haversine formula (in km)
+6. Food places sorted by distance (nearest first)
+7. Client displays distances in user's preferred unit (mi/km)
+
+### Sequential Search Strategy
+**Smart API quota management:**
+- **Primary:** Strict name search (`name=halal`) - most specific results
+- **Fallback 1:** Category search (`categories=halal`) - only if < 5 results
+- **Fallback 2:** Cuisine search (Pakistani, Turkish, Lebanese, etc.) - only if still < 5 results
+- Sequential approach conserves API quota by avoiding unnecessary calls
+- Results are deduplicated when multiple strategies are used
+
+### Retry Logic & Timeout Management
+- Each API call retries 2-3 times with exponential backoff (1s, 2s delays)
+- Dynamic timeout based on search radius:
+  - Small radius (< 3 mi): 15-20 seconds
+  - Medium radius (3-6 mi): 20-30 seconds
+  - Large radius (> 6 mi): 30-45 seconds (capped)
+- Result limits scaled by radius to prevent timeouts:
+  - Small radius: 50 results per strategy
+  - Medium radius: 30 results per strategy
+  - Large radius: 20 results per strategy
+- Continues with partial results if some strategies fail
+- User-friendly error messages for rate limits/overload
+
+### Data Parsing
+- Extracts cuisine from `catering.cuisine` or `datasource.raw.cuisine`
+- Diet information from `catering.diet.halal` or `datasource.raw['diet:halal']`
+- Contact info from `contact` or `datasource.raw` (phone, website)
+- Facilities from `facilities` or `datasource.raw` (wheelchair, takeaway, delivery)
+- Opening hours from `opening_hours` or `datasource.raw.opening_hours`
+
+### Distance Calculation
+- Haversine formula for accurate Earth-surface distances
+- Internal storage: kilometers (from Geoapify `distance` field or calculated)
+- Display: user's preference (miles default, kilometers optional)
+- Conversion: 1 mile = 1.60934 km
+
+### Navigation Integration
+- Platform detection via user agent
+- iOS Safari: Opens Apple Maps with destination
+- Android/Desktop: Opens Google Maps with directions
+- Direct phone call links for contact numbers
+
+### Fallback Handling
+- Missing names: Generated from cuisine or location ("Turkish Restaurant", "Restaurant on Main St")
+- Incomplete data: Display only available fields
+- No location permission: Prompt user to search manually
+- No results: Suggest increasing radius or changing location
+- API failures: Continue with results from successful strategies
+
+### Data Source Attribution
+- Powered by Geoapify and OpenStreetMap
+- Disclaimer about verifying halal certification with establishment
+- Transparent about search methodology (name + category + cuisine based)
+
+**V1:** ✅ **Complete** - Triple search strategy, list view, map view, location search, distance units, directions, comprehensive food data display  
+**Later:** Favorites/saved places, user reviews, dietary filters (vegan, gluten-free), price range, cuisine filters, operating hours filter
 
 ---
 
-## 9. Settings (Profile Page `/profile`)
+## 10. Settings (Profile Page `/profile`)
 
 ### Functionality
 Edit user profile and preferences.
@@ -478,7 +1102,7 @@ Supabase `profiles` table with authenticated user data.
 
 ---
 
-## 10. Common Design & Interaction Standards
+## 11. Common Design & Interaction Standards
 
 ### Layout
 - Mobile-first, responsive grid.  
@@ -509,7 +1133,101 @@ All using `shadcn/ui`:
 
 ---
 
-## 11. API Reference Links
+## 12. About & Acknowledgements (`/about`)
+
+### Functionality
+Information about the app creator, app mission, and acknowledgements for open-source libraries and APIs used.
+
+### Access
+- **Footer links:** Available on all pages via footer navigation
+- **Direct URL:** `/about` with tab parameter support (`/about?tab=acknowledgements`)
+
+### Page Structure
+Single page with three tabs using shadcn/ui Tabs component:
+1. **Creator Tab** - Information about Abir Hossain
+2. **About App Tab** - App mission, features, technology stack, privacy principles
+3. **Acknowledgements Tab** - APIs, open-source libraries, disclaimers
+
+### Creator Tab
+- **Profile image:** Circular 120px image from `/public/creator-profile.jpg`
+- **Contact info:** 
+  - LinkedIn: https://www.linkedin.com/in/abir-hossain-0b6a4ab3/
+  - Email: abirh@alumni.upenn.edu (with copy-to-clipboard)
+- **Education:** UPenn MSE in Computer Science, BSE in Computer Engineering (2025)
+- **Professional:** Developer I at FTI Consulting - Data & Analytics Software Solutions
+- **Bio:** Highlights passion for Islam and software development
+- **Notable Projects:**
+  - Langmates: AI-powered K-12 language learning platform (Norman Gross Award winner)
+  - BlissAlarm: IoT device for Islamic prayer time notifications
+
+### About App Tab
+- **Mission statement:** Help Muslims maintain daily worship routines
+- **Key features overview:** Prayer times, Ramadan countdown, Quran/Hadith, charity tracker, zikr counter, places finder
+- **Technology stack:** Next.js 16, React 19, TypeScript, TailwindCSS, Supabase, MapLibre GL
+- **Privacy principles:** 
+  - Secure storage with Supabase RLS
+  - Most features work without auth
+  - Local storage for location data
+  - No tracking, ads, or third-party analytics
+- **Future roadmap:** Prayer notifications, Quran audio, advanced zikr tracking, community features
+
+### Acknowledgements Tab
+
+**APIs & Data Sources:**
+- **AlAdhan API** - Prayer times, Hijri calendar, Qibla
+  - Warning: Community-driven, accuracy varies by region
+- **AlQuran Cloud API** - Quran content and translations
+  - Warning: Translations are interpretations, consult scholars
+- **HadithAPI.com** - Hadith collections (Sahih Bukhari & Sahih Muslim)
+  - Warning: Check authentication grades and chains
+- **OpenStreetMap Overpass API** - Mosque locations
+  - Warning: Community-contributed, may be incomplete/outdated
+- **Nominatim** - Geocoding services
+  - Warning: Volunteer-run with rate limits
+
+**Open Source Libraries:**
+- Next.js (Vercel) - MIT License
+- React (Meta) - MIT License
+- Supabase - Apache 2.0 License
+- TailwindCSS - MIT License
+- shadcn/ui (Radix UI) - MIT License
+- MapLibre GL - BSD 3-Clause License
+- Recharts - MIT License
+- Lucide Icons - ISC License
+
+**Disclaimers:**
+- Prayer times are calculated mathematically—verify with local mosque
+- Religious content translations require scholarly consultation for detailed understanding
+- Location data is community-contributed—verify before visiting
+- App provided as-is for informational purposes
+
+### UI Components
+- **Footer component:** `src/components/Footer.tsx`
+  - Links to "About" and "Acknowledgements" (tab navigation)
+  - Copyright notice with current year
+  - Positioned after page content in root layout
+  - Minimal styling with border-top and muted text
+- **About page:** `src/app/about/page.tsx`
+  - Tabs for navigation between sections
+  - URL search param handling for direct tab navigation
+  - Consistent header with back button
+  - Card-based layout for content sections
+  - Copy-to-clipboard for contact info
+  - Responsive design for mobile/desktop
+
+### Design Pattern
+- **Tab navigation:** URL-synced with search params (`?tab=creator`, `?tab=app`, `?tab=acknowledgements`)
+- **Default tab:** Creator tab when no param specified
+- **Footer placement:** Global in root layout, appears on all pages
+- **Accessibility:** Semantic HTML, ARIA labels, keyboard navigation
+- **Mobile-responsive:** Tabs stack vertically on small screens
+
+**V1:** Complete with creator info, app details, and full acknowledgements  
+**Later:** Possibly add changelog, contribution guide, support/feedback section
+
+---
+
+## 13. API Reference Links
 
 | Category | API | Documentation |
 |-----------|-----|---------------|
@@ -517,8 +1235,10 @@ All using `shadcn/ui`:
 | Qibla | AlAdhan Qibla API | https://aladhan.com/qibla-api#overview |
 | Hijri Calendar | AlAdhan Islamic Calendar API | https://aladhan.com/islamic-calendar-api |
 | Quran | AlQuran Cloud API | https://alquran.cloud/api |
-| Hadith | Sunnah.com API | https://hadithapi.com/|
-| Places (Mosque & Halal Food) | Google Places API | https://developers.google.com/maps/documentation/places/web-service/search-nearby |
+| Hadith | HadithAPI.com | https://hadithapi.com/|
+| Mosques | OpenStreetMap Overpass API | https://wiki.openstreetmap.org/wiki/Overpass_API |
+| Halal Food | Geoapify Places API | https://www.geoapify.com/places-api |
+| Geocoding | Nominatim API | https://nominatim.org/release-docs/latest/api/Overview/ |
 | Supabase | Database & Auth | https://supabase.com/docs |
 
 

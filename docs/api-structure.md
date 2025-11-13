@@ -268,7 +268,178 @@
 **Environment Variable:**
 - `HADITH_API_KEY`: Required API key for HadithAPI (stored in .env.local, server-side only)
 
-## /api/places
-- Proxy: Google Places API  
-- For halal/mosques queries  
-**Later**
+---
+
+## /api/mosques
+**Status:** ✅ Implemented (V1)
+
+**Purpose:** Proxy to OpenStreetMap Overpass API for finding nearby mosques with retry logic and distance calculation
+
+**Method:** GET
+
+**Parameters:**
+- `latitude` (required): Latitude coordinate (-90 to 90)
+- `longitude` (required): Longitude coordinate (-180 to 180)
+- `radius` (optional): Search radius in meters (default: 4828 = 3 miles, max: 50000)
+
+**Search Query:**
+```
+[out:json];
+node["amenity"="place_of_worship"]["religion"="muslim"](around:{radius},{lat},{lng});
+out;
+```
+
+**Response Format:**
+```json
+{
+  "mosques": [
+    {
+      "id": 2809904792,
+      "name": "North Bronx Islamic Center",
+      "lat": 40.8750571,
+      "lng": -73.8801588,
+      "distanceKm": 1.234,
+      "address": {
+        "street": "216 East 206th Street",
+        "city": "Bronx",
+        "state": "NY",
+        "postcode": "10467",
+        "country": "United States"
+      },
+      "tags": {
+        "phone": "+1-xxx-xxx-xxxx",
+        "website": "https://example.com",
+        "opening_hours": "Mo-Su 05:00-22:00",
+        "wheelchair": "yes",
+        "denomination": "sunni"
+      }
+    }
+  ],
+  "count": 15,
+  "searchLocation": { "lat": 40.8730, "lng": -73.8837 },
+  "radiusMeters": 4828
+}
+```
+
+**Features:**
+- Fallback mosque names: Generated from address if name missing ("Mosque near East 189th Street")
+- Distance calculation: Haversine formula for accurate Earth-surface distances
+- Sorted by distance: Nearest mosques first
+- Retry logic: 2-3 attempts with exponential backoff (1s, 2s delays)
+- Timeout protection: 15-second timeout per request
+
+**Caching:** 1 hour (revalidate: 3600)
+
+**Error Handling:**
+- 400: Missing or invalid parameters (lat/lng/radius)
+- 500: Overpass API error or network failure
+- 504/503: API overloaded message with suggestion to reduce radius
+
+**External API:**
+- URL: `https://overpass-api.de/api/interpreter`
+- Method: POST with URL-encoded Overpass QL query
+- Rate limiting: Subject to Overpass API fair use policy
+
+---
+
+## /api/food
+**Status:** ✅ Implemented (V1)
+
+**Purpose:** Proxy to Geoapify Places API with triple search strategy for comprehensive halal food coverage
+
+**Method:** GET
+
+**Parameters:**
+- `latitude` (required): Latitude coordinate (-90 to 90)
+- `longitude` (required): Longitude coordinate (-180 to 180)
+- `radius` (optional): Search radius in meters (default: 4828 = 3 miles, max: 50000)
+
+**Sequential Search Strategy:**
+Makes API calls sequentially to conserve quota - only continues if insufficient results:
+1. **Strict Name Search (primary):** `name=halal` + `categories=catering.restaurant,catering.fast_food`
+2. **Halal Category (fallback):** `categories=halal` - only if < 5 results from strict
+3. **Cuisine-Based (fallback):** Traditional halal cuisines - only if < 5 results total
+
+This approach minimizes API calls while ensuring good coverage.
+
+**Response Format:**
+```json
+{
+  "foods": [
+    {
+      "id": "51828aaa5f697752c059f0a2dff1376c4440f00103f901b413348a02000000",
+      "name": "Azal Restaurant & Halal",
+      "lat": 40.8454573,
+      "lng": -73.8658065,
+      "distanceKm": 3.413,
+      "address": {
+        "street": "Morris Park Avenue",
+        "city": "New York",
+        "state": "NY",
+        "postcode": "10461",
+        "country": "United States",
+        "formatted": "Azal Restaurant & Halal, Morris Park Avenue, New York, NY 10461, United States"
+      },
+      "categories": ["catering", "catering.restaurant", "halal"],
+      "cuisine": "middle_eastern",
+      "diet": {
+        "halal": true
+      },
+      "contact": {
+        "phone": "+1-347-621-2884",
+        "website": "https://khalilsfood.com"
+      },
+      "openingHours": "Mo-Su 12:00-23:00",
+      "facilities": {
+        "takeaway": true,
+        "delivery": true,
+        "wheelchair": false
+      }
+    }
+  ],
+  "count": 42,
+  "searchLocation": { "lat": 40.8730, "lng": -73.8837 },
+  "radiusMeters": 4828,
+  "searchStrategies": {
+    "strict": 15,
+    "category": 8,
+    "cuisine": 25,
+    "merged": 42
+  }
+}
+```
+
+**Data Parsing:**
+- Cuisine: Extracted from `catering.cuisine` or `datasource.raw.cuisine`
+- Diet info: From `catering.diet.halal` or `datasource.raw['diet:halal']`
+- Contact: From `contact` object or `datasource.raw` (phone, website)
+- Facilities: From `facilities` or `datasource.raw` (wheelchair, takeaway, delivery)
+- Opening hours: From `opening_hours` or `datasource.raw.opening_hours`
+
+**Features:**
+- Sequential search: Only makes additional API calls if needed (< 5 results)
+- Results deduplication: Merged by `place_id` when multiple strategies used
+- Fallback names: Generated from cuisine or location if name missing
+- Distance calculation: From Geoapify `distance` field (meters) or Haversine formula
+- Sorted by distance: Nearest food places first
+- Retry logic: 2-3 attempts per strategy with exponential backoff (1s, 2s delays)
+- Dynamic timeout: 15-45 seconds based on search radius
+- Dynamic limits: 20-50 results based on radius to prevent timeouts and conserve quota
+- Partial results: Continues with successful strategies if some fail
+- Quota conservation: Minimizes API calls through sequential strategy
+
+**Caching:** 1 hour (revalidate: 3600)
+
+**Error Handling:**
+- 400: Missing or invalid parameters (lat/lng/radius)
+- 500: Geoapify API key missing or all strategies failed
+- 429: Rate limit exceeded message with suggestion to try again
+- Graceful degradation: Returns results from successful strategies even if some fail
+
+**External API:**
+- URL: `https://api.geoapify.com/v2/places`
+- Method: GET with query parameters
+- Rate limiting: Subject to Geoapify API plan limits
+
+**Environment Variable:**
+- `GEOAPIFY_API_KEY`: Required API key for Geoapify (stored in .env.local, server-side only)

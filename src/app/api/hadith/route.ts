@@ -8,11 +8,90 @@ const HADITH_API_KEY = process.env.HADITH_API_KEY || '$2y$10$5v38H9m4hOEA84i8Zy1
 // Approximate hadith counts for the two sahih collections
 const SAHIH_BUKHARI_COUNT = 7563
 const SAHIH_MUSLIM_COUNT = 7563
-const TOTAL_HADITHS = SAHIH_BUKHARI_COUNT + SAHIH_MUSLIM_COUNT
 
 /**
- * Calculate the daily hadith selection using deterministic date-based algorithm
- * Same hadith globally for all users on the same day
+ * Weighted Hadith Ranges
+ * Higher weight = higher probability of selection
+ * Prioritizes most authentic and impactful hadiths
+ */
+const WEIGHTED_COLLECTIONS = [
+  // Sahih Bukhari - Most authentic collection (higher weight)
+  {
+    book: 'sahih-bukhari' as const,
+    ranges: [
+      // Book of Faith - Fundamental beliefs (very high weight)
+      { start: 1, end: 100, weight: 20 },
+      
+      // Book of Knowledge - Seeking knowledge (high weight)  
+      { start: 101, end: 200, weight: 18 },
+      
+      // Book of Prayer - Daily worship (very high weight)
+      { start: 350, end: 800, weight: 20 },
+      
+      // Book of Zakat - Charity (high weight)
+      { start: 1400, end: 1550, weight: 16 },
+      
+      // Book of Fasting - Ramadan relevance (very high weight)
+      { start: 1891, end: 2080, weight: 22 },
+      
+      // Book of Hajj - Pilgrimage (medium-high weight)
+      { start: 1555, end: 1890, weight: 14 },
+      
+      // Book of Good Manners (Adab) - Character (high weight)
+      { start: 5800, end: 6200, weight: 18 },
+      
+      // Book of Tawheed - Monotheism (very high weight)
+      { start: 7300, end: 7563, weight: 20 },
+      
+      // Other sections (medium weight)
+      { start: 201, end: 349, weight: 10 },
+      { start: 801, end: 1399, weight: 10 },
+      { start: 2081, end: 5799, weight: 8 },
+      { start: 6201, end: 7299, weight: 10 },
+    ],
+  },
+  
+  // Sahih Muslim - Also highly authentic (slightly lower weight)
+  {
+    book: 'sahih-muslim' as const,
+    ranges: [
+      // Book of Faith (high weight)
+      { start: 1, end: 400, weight: 18 },
+      
+      // Book of Prayer (very high weight)
+      { start: 1000, end: 1500, weight: 19 },
+      
+      // Book of Fasting (very high weight)
+      { start: 2500, end: 2800, weight: 21 },
+      
+      // Book of Zakat (high weight)
+      { start: 2200, end: 2400, weight: 15 },
+      
+      // Book of Piety and Good Character (high weight)
+      { start: 6500, end: 7000, weight: 17 },
+      
+      // Other sections (medium weight)
+      { start: 401, end: 999, weight: 10 },
+      { start: 1501, end: 2199, weight: 9 },
+      { start: 2401, end: 2499, weight: 9 },
+      { start: 2801, end: 6499, weight: 8 },
+      { start: 7001, end: 7563, weight: 10 },
+    ],
+  },
+]
+
+/**
+ * Seeded random number generator for deterministic randomness
+ * Same seed (date) produces same random sequence globally
+ */
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed) * 10000
+  return x - Math.floor(x)
+}
+
+/**
+ * Calculate the daily hadith selection using weighted random
+ * Same hadith globally for all users on the same day (deterministic seed)
  */
 function getDailyHadithSelection(): { book: 'sahih-bukhari' | 'sahih-muslim'; hadithNumber: number } {
   const today = new Date()
@@ -20,23 +99,60 @@ function getDailyHadithSelection(): { book: 'sahih-bukhari' | 'sahih-muslim'; ha
   const month = today.getMonth() + 1
   const day = today.getDate()
 
-  // Create a numeric representation of the date
-  const dateNumber = year * 10000 + month * 100 + day
+  // Create a numeric seed from the date
+  const seed = year * 10000 + month * 100 + day
 
-  // Deterministic selection within total pool
-  const globalIndex = dateNumber % TOTAL_HADITHS
+  // Flatten all ranges with their weights
+  const allRanges: Array<{
+    book: 'sahih-bukhari' | 'sahih-muslim'
+    start: number
+    end: number
+    weight: number
+    rangeWeight: number
+  }> = []
 
-  // Distribute between two collections
-  if (globalIndex < SAHIH_BUKHARI_COUNT) {
-    return {
-      book: 'sahih-bukhari',
-      hadithNumber: globalIndex + 1,
+  let totalWeight = 0
+
+  for (const collection of WEIGHTED_COLLECTIONS) {
+    for (const range of collection.ranges) {
+      const rangeSize = range.end - range.start + 1
+      const rangeWeight = rangeSize * range.weight
+      totalWeight += rangeWeight
+      
+      allRanges.push({
+        book: collection.book,
+        start: range.start,
+        end: range.end,
+        weight: range.weight,
+        rangeWeight,
+      })
     }
-  } else {
-    return {
-      book: 'sahih-muslim',
-      hadithNumber: globalIndex - SAHIH_BUKHARI_COUNT + 1,
+  }
+
+  // Generate seeded random value
+  const randomValue = seededRandom(seed) * totalWeight
+
+  // Select range based on weighted probability
+  let cumulativeWeight = 0
+  let selectedRange = allRanges[0]
+
+  for (const range of allRanges) {
+    cumulativeWeight += range.rangeWeight
+    if (randomValue <= cumulativeWeight) {
+      selectedRange = range
+      break
     }
+  }
+
+  // Select random hadith within chosen range (using secondary seed)
+  const rangeSize = selectedRange.end - selectedRange.start + 1
+  const secondarySeed = seed * 7919 // Prime multiplier for variation
+  const hadithIndex = Math.floor(seededRandom(secondarySeed) * rangeSize)
+  const hadithNumber = selectedRange.start + hadithIndex
+
+  return {
+    book: selectedRange.book,
+    hadithNumber,
   }
 }
 

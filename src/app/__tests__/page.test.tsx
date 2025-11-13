@@ -41,7 +41,9 @@ describe('Dashboard Page', () => {
   it('renders cards in a grid layout', () => {
     const { container } = renderWithAuth(<Home />)
     
-    const grid = container.querySelector('.grid')
+    // Select the main grid container (not card internal grids)
+    const main = screen.getByRole('main')
+    const grid = main.querySelector('.grid.grid-cols-1')
     expect(grid).toBeInTheDocument()
     expect(grid).toHaveClass('grid-cols-1')
     expect(grid).toHaveClass('md:grid-cols-2')

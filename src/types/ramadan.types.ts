@@ -88,6 +88,7 @@ export interface NextPrayerInfo {
   time: string
   countdown: string
   timeUntil: number // milliseconds
+  isTomorrow?: boolean // indicates if prayer is tomorrow (post-Isha)
 }
 
 export interface PrayerTimesApiResponse {
@@ -142,6 +143,9 @@ export const CALCULATION_METHODS: CalculationMethod[] = [
   { id: '0', name: 'Jafari', description: 'Shia Ithna-Ashari' },
 ]
 
+// Prayer Times Calculation Source
+export type PrayerTimesSource = 'api' | 'local' | null
+
 // Prayer Times Hook State
 export interface UsePrayerTimesResult {
   prayerTimes: PrayerTime | null
@@ -150,6 +154,7 @@ export interface UsePrayerTimesResult {
   location: LocationData | null
   calculationMethod: CalculationMethodId
   madhab: MadhabId
+  calculationSource: PrayerTimesSource // Indicates if times are from API or local calculation
   loading: boolean
   error: string | null
   refetch: () => Promise<void>
