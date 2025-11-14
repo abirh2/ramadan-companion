@@ -1,14 +1,15 @@
 # Ramadan Companion
 
-> **Version 1.0** ✅ Live and deployed | Built with Next.js 16, React 19, TypeScript, and Supabase
+> **Version 1.1** 🚧 In Progress | Built with Next.js 16, React 19, TypeScript, and Supabase
 
 A modern, minimal web app built for Muslims to assist with daily worship and reflection—especially during Ramadan. Comprehensive features for prayer times, Quran study, hadith reading, charity tracking, zikr counter, and finding nearby mosques and halal food.
 
-## Features (V1.0 Complete)
+## Features (V1.0 Complete + V1.1 In Progress)
 
 ### Core Features
 - ✅ **Prayer Times & Qibla** - Accurate daily prayer times with 7 calculation methods, live countdown, Qibla compass, and offline fallback
 - ✅ **Ramadan Countdown** - Track days until Ramadan with Hijri calendar integration and iftar/suhoor timers
+- ✅ **Quran Browser** 🆕 - Browse all 114 surahs with translations, Juz navigation, bookmarks, search, and auto-resume reading position
 - ✅ **Daily Quran** - Weighted random ayah selection with 4 translations (Asad, Sahih International, Pickthall, Yusuf Ali)
 - ✅ **Daily Hadith** - Authentic hadith from Sahih Bukhari and Muslim with English/Urdu/Arabic text and grading
 - ✅ **Charity Tracker** - Full donation CRUD with monthly calendar/list views, line/bar/pie charts, and zakat calculator
@@ -95,13 +96,15 @@ See [docs/README.md](docs/README.md) for the complete documentation index.
 - **APIs**: AlAdhan, AlQuran Cloud, HadithAPI, OpenStreetMap Overpass, Nominatim, Geoapify Places
 - **Hosting**: Vercel (frontend) + Supabase (backend)
 
-## What's Next (V1.1 Preview)
+## What's Next (V1.1 In Progress)
 
 We're actively working on the next version with exciting enhancements:
 
-### Coming Soon (2-3 weeks)
+### Recently Completed (V1.1)
+- ✅ **Full Quran Browser** - Complete browsing experience with 114 surahs, Juz navigation, bookmarks (dual-storage), favorites integration, translation switching, auto-resume, ayah sharing, search, list/grid views
+
+### Coming Soon (V1.1)
 - 🔔 **Prayer Time Notifications** - Push notifications for prayer reminders
-- 📖 **Full Quran Browser** - Browse all 114 surahs with search by surah/ayah and juz navigation
 - 🤲 **Expanded Dua Library** - 100+ duas with new categories (illness, travel, marriage, children)
 - ✅ **Prayer Tracking** - Mark prayers as completed and track daily progress
 - 💰 **Recurring Donations** - Track monthly/yearly recurring charity commitments

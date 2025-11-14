@@ -30,30 +30,54 @@ It is meant to be concrete enough that any developer or designer can implement c
 ### 2.1 Layout
 
 - Base layout:
-  - `max-width: 800px` container centered on desktop.
+  - `max-width: 800px` (4xl) or `1280px` (6xl) container centered on desktop.
   - Full-width (with paddings) on mobile.
 - Grid:
   - Mobile: single-column layout for cards.
   - Desktop: 2-column grid for dashboard cards.
 - Page structure:
-  - App shell: header (title + theme toggle) + main content.
+  - **Global header** (sticky): "Ramadan Companion" title + NavMenu + AuthButton
+  - **Page content area**: Back button + page title + content
   - Footer is optional and minimal (version, small credits).
 
-Example container (Tailwind):
+### 2.1.1 Navigation Pattern (Standardized - November 2024)
+
+**Global Header** (in `src/app/layout.tsx`):
+- Present on ALL pages
+- Sticky at top: `sticky top-0 z-50`
+- Contains: App title (clickable link to home) + Navigation menu + Auth button
+- Never duplicated per-page
+
+**Page-Level Navigation** (in page content):
+- Back button + page title positioned at top of content area
+- Consistent pattern across all pages except homepage
+
+Example page structure:
 
 ```tsx
-<div className="min-h-screen bg-background text-foreground">
-  <header className="border-b">
-    <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-      {/* Logo/title + actions */}
-    </div>
-  </header>
-
-  <main className="mx-auto max-w-4xl px-4 py-6">
-    {/* Page content */}
-  </main>
+// Global header is automatic via layout.tsx
+// Page content only:
+<div className="container mx-auto px-4 py-6 max-w-4xl">
+  <div className="mb-6">
+    <Link 
+      href="/" 
+      className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-3"
+    >
+      <ArrowLeft className="h-4 w-4" />
+      <span className="text-sm">Back to Home</span>
+    </Link>
+    <h1 className="text-3xl font-bold">Page Title</h1>
+    <p className="text-muted-foreground mt-2">Optional description</p>
+  </div>
+  
+  {/* Page content */}
 </div>
-````
+```
+
+**Max-width conventions:**
+- Standard content pages: `max-w-4xl` (1024px)
+- Wide layouts (maps, charts, tables): `max-w-6xl` (1280px)
+- Admin dashboard: `max-w-7xl` (1536px)
 
 ### 2.2 Spacing Scale
 

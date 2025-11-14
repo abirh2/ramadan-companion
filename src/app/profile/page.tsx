@@ -70,21 +70,22 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b">
-        <div className="mx-auto flex max-w-4xl items-center gap-4 px-4 py-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push('/')}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <h1 className="text-xl font-semibold">Profile Settings</h1>
-        </div>
-      </header>
+    <div className="container mx-auto px-4 py-6 max-w-4xl">
+      <div className="mb-6">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push('/')}
+          className="mb-3 -ml-2"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Home
+        </Button>
+        <h1 className="text-3xl font-bold">Profile Settings</h1>
+        <p className="text-muted-foreground mt-2">Update your profile settings and preferences</p>
+      </div>
 
-      <main className="mx-auto max-w-4xl px-4 py-6">
+      {/* Content */}
         <Card>
           <CardHeader>
             <CardTitle>Account Information</CardTitle>
@@ -140,9 +141,8 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
 
-        {/* Feedback Button */}
-        <FeedbackButton pagePath="/profile" />
-      </main>
+      {/* Feedback Button */}
+      <FeedbackButton pagePath="/profile" />
     </div>
   );
 }

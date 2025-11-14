@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { AuthButton } from '@/components/auth/AuthButton'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ProtectedFeature } from '@/components/auth/ProtectedFeature'
@@ -119,28 +118,22 @@ export default function CharityPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <header className="border-b">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <Link href="/">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <div className="flex items-center gap-2">
-              <Heart className="h-5 w-5 text-primary" />
-              <h1 className="text-xl font-semibold">Charity Tracker</h1>
-            </div>
-          </div>
-          <AuthButton />
+    <div className="container mx-auto px-4 py-6 max-w-6xl">
+      <div className="mb-6">
+        <Link 
+          href="/" 
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-3"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span className="text-sm">Back to Home</span>
+        </Link>
+        <div className="flex items-center gap-2">
+          <Heart className="h-8 w-8 text-primary" />
+          <h1 className="text-3xl font-bold">Charity Tracker</h1>
         </div>
-      </header>
+      </div>
 
-      {/* Main Content */}
-      <main className="mx-auto max-w-6xl px-4 py-6">
-        <ProtectedFeature
+      <ProtectedFeature
           title="Charity Tracker"
           description="Sign in to track your sadaqah, zakat, and other charitable contributions."
         >
@@ -265,9 +258,8 @@ export default function CharityPage() {
           )}
         </ProtectedFeature>
 
-        {/* Feedback Button */}
-        <FeedbackButton pagePath="/charity" />
-      </main>
+      {/* Feedback Button */}
+      <FeedbackButton pagePath="/charity" />
 
       {/* Donation Form Dialog */}
       <DonationForm

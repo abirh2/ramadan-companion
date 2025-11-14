@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { AuthButton } from '@/components/auth/AuthButton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Clock, Sunrise, Loader2 } from 'lucide-react'
 import { usePrayerTimes } from '@/hooks/usePrayerTimes'
@@ -69,26 +68,19 @@ export default function TimesPage() {
     : []
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <header className="border-b">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-            <h1 className="text-xl font-semibold">Prayer Times</h1>
-          </div>
-          <AuthButton />
-        </div>
-      </header>
+    <div className="container mx-auto px-4 py-6 max-w-6xl">
+      <div className="mb-6">
+        <Link 
+          href="/" 
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-3"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span className="text-sm">Back to Home</span>
+        </Link>
+        <h1 className="text-3xl font-bold">Prayer Times</h1>
+      </div>
 
-      {/* Main Content */}
-      <main className="mx-auto max-w-6xl px-4 py-6">
-        {loading ? (
+      {loading ? (
           // Loading State
           <div className="flex items-center justify-center py-20">
             <div className="text-center space-y-3">
@@ -209,9 +201,8 @@ export default function TimesPage() {
           </div>
         )}
 
-        {/* Feedback Button */}
-        <FeedbackButton pagePath="/times" />
-      </main>
+      {/* Feedback Button */}
+      <FeedbackButton pagePath="/times" />
     </div>
   )
 }

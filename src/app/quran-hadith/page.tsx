@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { useState, useMemo } from 'react'
-import { AuthButton } from '@/components/auth/AuthButton'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { ArrowLeft, BookOpen, Heart, Share2, Loader2, ScrollText, Copy, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -238,24 +237,20 @@ export default function QuranHadithPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <header className="border-b">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <Link href="/">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <h1 className="text-xl font-semibold">Daily Reminders</h1>
-          </div>
-          <AuthButton />
-        </div>
-      </header>
+    <div className="container mx-auto px-4 py-6 max-w-4xl space-y-6">
+      <div className="mb-6">
+        <Link 
+          href="/" 
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-3"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span className="text-sm">Back to Home</span>
+        </Link>
+        <h1 className="text-3xl font-bold">Daily Reminders</h1>
+        <p className="text-muted-foreground mt-2">Quran and Hadith of the Day</p>
+      </div>
 
-      {/* Main Content */}
-      <main className="mx-auto max-w-4xl px-4 py-6 space-y-6">
+      {/* Content */}
         {/* Quran of the Day Section */}
         <Card className="rounded-2xl shadow-sm">
           <CardHeader>
@@ -595,9 +590,8 @@ export default function QuranHadithPage() {
           </CardContent>
         </Card>
 
-        {/* Feedback Button */}
-        <FeedbackButton pagePath="/quran-hadith" />
-      </main>
+      {/* Feedback Button */}
+      <FeedbackButton pagePath="/quran-hadith" />
 
       {/* Login Modal */}
       <LoginModal open={showLoginModal} onOpenChange={setShowLoginModal} />

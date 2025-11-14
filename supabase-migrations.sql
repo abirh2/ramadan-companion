@@ -53,6 +53,17 @@ CREATE TABLE IF NOT EXISTS favorites (
   metadata JSONB
 );
 
+-- Quran Bookmarks table (for reading position tracking)
+CREATE TABLE IF NOT EXISTS quran_bookmarks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  surah_number INTEGER NOT NULL CHECK (surah_number >= 1 AND surah_number <= 114),
+  ayah_number INTEGER NOT NULL CHECK (ayah_number >= 1),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, surah_number)
+);
+
 -- ============================================
 -- 2. CREATE INDEXES
 -- ============================================
@@ -61,6 +72,8 @@ CREATE INDEX IF NOT EXISTS idx_donations_user_id ON donations(user_id);
 CREATE INDEX IF NOT EXISTS idx_donations_date ON donations(date);
 CREATE INDEX IF NOT EXISTS idx_favorites_user_id ON favorites(user_id);
 CREATE INDEX IF NOT EXISTS idx_favorites_item_type ON favorites(item_type);
+CREATE INDEX IF NOT EXISTS idx_quran_bookmarks_user_id ON quran_bookmarks(user_id);
+CREATE INDEX IF NOT EXISTS idx_quran_bookmarks_user_surah ON quran_bookmarks(user_id, surah_number);
 
 -- ============================================
 -- 3. ENABLE ROW LEVEL SECURITY
@@ -69,6 +82,7 @@ CREATE INDEX IF NOT EXISTS idx_favorites_item_type ON favorites(item_type);
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE donations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;
+ALTER TABLE quran_bookmarks ENABLE ROW LEVEL SECURITY;
 
 -- ============================================
 -- 4. DROP EXISTING POLICIES (if any)
@@ -86,6 +100,11 @@ DROP POLICY IF EXISTS "Users can delete own donations" ON donations;
 DROP POLICY IF EXISTS "Users can view own favorites" ON favorites;
 DROP POLICY IF EXISTS "Users can create own favorites" ON favorites;
 DROP POLICY IF EXISTS "Users can delete own favorites" ON favorites;
+
+DROP POLICY IF EXISTS "Users can view own bookmarks" ON quran_bookmarks;
+DROP POLICY IF EXISTS "Users can create own bookmarks" ON quran_bookmarks;
+DROP POLICY IF EXISTS "Users can update own bookmarks" ON quran_bookmarks;
+DROP POLICY IF EXISTS "Users can delete own bookmarks" ON quran_bookmarks;
 
 -- ============================================
 -- 5. CREATE RLS POLICIES - PROFILES
@@ -152,7 +171,32 @@ ON favorites FOR DELETE
 USING (auth.uid() = user_id);
 
 -- ============================================
--- 8. CREATE TRIGGER FOR AUTO-CREATING PROFILES
+-- 8. CREATE RLS POLICIES - QURAN BOOKMARKS
+-- ============================================
+
+-- Users can view their own bookmarks
+CREATE POLICY "Users can view own bookmarks"
+ON quran_bookmarks FOR SELECT
+USING (auth.uid() = user_id);
+
+-- Users can create their own bookmarks
+CREATE POLICY "Users can create own bookmarks"
+ON quran_bookmarks FOR INSERT
+WITH CHECK (auth.uid() = user_id);
+
+-- Users can update their own bookmarks
+CREATE POLICY "Users can update own bookmarks"
+ON quran_bookmarks FOR UPDATE
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+-- Users can delete their own bookmarks
+CREATE POLICY "Users can delete own bookmarks"
+ON quran_bookmarks FOR DELETE
+USING (auth.uid() = user_id);
+
+-- ============================================
+-- 9. CREATE TRIGGER FOR AUTO-CREATING PROFILES
 -- ============================================
 
 -- Function to create profile on user signup

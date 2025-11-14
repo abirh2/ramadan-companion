@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { ArrowLeft, Loader2 } from 'lucide-react'
-import { AuthButton } from '@/components/auth/AuthButton'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import {
@@ -81,24 +80,20 @@ export default function MosquesPage() {
       ]
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <header className="border-b">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <Link href="/">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            </Link>
-            <h1 className="text-xl font-semibold">Nearby Mosques</h1>
-          </div>
-          <AuthButton />
-        </div>
-      </header>
+    <div className="container mx-auto px-4 py-6 max-w-4xl space-y-6">
+      <div className="mb-6">
+        <Link 
+          href="/" 
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-3"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span className="text-sm">Back to Home</span>
+        </Link>
+        <h1 className="text-3xl font-bold">Nearby Mosques</h1>
+        <p className="text-muted-foreground mt-2">Find mosques near you</p>
+      </div>
 
-      {/* Main Content */}
-      <main className="mx-auto max-w-4xl px-4 py-6 space-y-6">
+      {/* Content */}
         {/* Location Search */}
         <div>
           <LocationSearch onLocationSelect={handleLocationSelect} currentLocation={location} />
@@ -226,17 +221,16 @@ export default function MosquesPage() {
           </div>
         )}
 
-        {/* Mosque Detail Dialog */}
-        <MosqueDetailDialog
-          mosque={selectedMosque}
-          distanceUnit={distanceUnit}
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
-        />
+      {/* Mosque Detail Dialog */}
+      <MosqueDetailDialog
+        mosque={selectedMosque}
+        distanceUnit={distanceUnit}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      />
 
-        {/* Feedback Button */}
-        <FeedbackButton pagePath="/places/mosques" />
-      </main>
+      {/* Feedback Button */}
+      <FeedbackButton pagePath="/places/mosques" />
     </div>
   )
 }

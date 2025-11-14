@@ -108,3 +108,38 @@ export interface QuranFavoriteData {
   translationId: QuranTranslationId
 }
 
+// Full Surah Response (for Quran Browser)
+export interface FullSurahResponse {
+  surah: QuranSurah
+  ayahs: AyahPair[]
+  translation: QuranTranslationId
+}
+
+// Ayah pair (Arabic + Transliteration + Translation)
+export interface AyahPair {
+  numberInSurah: number
+  globalNumber: number
+  arabic: QuranAyah
+  transliteration: QuranAyah
+  translation: QuranAyah
+}
+
+// Bookmark data structure
+export interface BookmarkData {
+  id?: string
+  user_id: string
+  surah_number: number
+  ayah_number: number
+  created_at?: string
+  updated_at?: string
+}
+
+// Juz data (from quranData.ts)
+export interface JuzData {
+  number: number
+  startSurah: number
+  startAyah: number
+  endSurah: number
+  endAyah: number
+}
+

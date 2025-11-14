@@ -439,16 +439,160 @@ Show one ayah and one hadith per day (same for all users) and allow favorites. *
 
 **V1 Status:** ✅ **Complete** (November 2024) - Daily ayah (4 translations) + daily hadith (3 languages) + favorites system + translation/language preferences + dual-storage pattern + favorites list page + share functionality + weighted random selection
 
-**Future Enhancements (V1.1+):**
-- **V1.1:** Full Quran browser (search by surah/ayah, browse all 114 surahs, juz navigation)
+**Future Enhancements (V1.2+):**
 - **V1.2:** Quran audio recitation (multiple reciters: Mishary, Abdul Basit, Sudais)
 - **V1.2:** Hadith browser (6 major collections, search by topic/narrator)
 - **V1.2:** Tafsir integration (Ibn Kathir commentary)
 - **V1.2:** Notes on favorites (personal reflections)
-- **V1.2:** Quran reading progress tracking
 - **V1.2:** Share to social media (WhatsApp, Twitter direct integration)
 - **V2.0:** Word-by-word Quran translation display
 - **V2.0:** Hadith narrator chains (isnad) visualization
+
+---
+
+## 5B. Quran Browser (`/quran`)
+
+### Functionality
+Full Quran browsing experience allowing users to select and read all 114 surahs with translations, bookmark reading positions, and navigate by Surah or Juz.
+
+### Implementation Status
+✅ **Fully Implemented (V1.1)** - November 2024
+
+### API & Data
+
+**AlQuran Cloud API:**
+- **Surah List:** `GET /v1/surah` - Fetches metadata for all 114 surahs
+- **Full Surah:** `GET /v1/surah/{number}/editions/{edition1},{edition2}` - Fetches complete surah with Arabic + translation
+- **Editions Used:** `quran-uthmani` (Arabic), user-selected translation (default: `en.asad`)
+- **Caching:** 7-day server-side cache for full surahs
+
+**Local Data:**
+- `quranData.ts` - Static metadata for all 114 surahs (names, ayah counts, revelation type)
+- 30 Juz mappings with start/end surah and ayah positions
+
+**Database:**
+- `profiles.quran_translation` - Stores user's translation preference
+- `quran_bookmarks` table - Stores reading positions (surah number + ayah number)
+  - `user_id` (uuid) - Foreign key to profiles
+  - `surah_number` (integer) - Surah being read (1-114)
+  - `ayah_number` (integer) - Last ayah position
+  - `updated_at` (timestamp) - Auto-updated on scroll
+  - **Unique constraint:** (user_id, surah_number) - One bookmark per surah per user
+  - **RLS Policies:** Users can only access their own bookmarks
+  - **Dual-storage:** Bookmarks saved to both Supabase (authenticated users) and localStorage (guest users)
+
+### UI & Navigation
+
+**Landing Page (`/quran`):**
+- **Tabbed Navigation:** Toggle between "By Surah" and "By Juz"
+- **Surah Tab:**
+  - **View Toggle:** Switch between List view and Grid view
+  - **Search:** Filter surahs by name, translation, or number
+  - **List View:** All 114 surahs with number badge, English/Arabic names, metadata (Meccan/Medinan, ayah count)
+  - **Grid View:** Card-based layout with centered Arabic names and metadata
+- **Juz Tab:**
+  - 30 Juz cards showing start/end positions (surah:ayah format)
+  - Click to navigate to starting surah at specific ayah
+
+**Surah Reading Page (`/quran/[surahNumber]`):**
+- **Header:**
+  - Back button to return to browser
+  - Surah info banner: Arabic name, English name, translation, revelation type, ayah count
+- **Controls:**
+  - Translation selector dropdown (saves to profile/localStorage)
+  - Ayah range lookup: Jump to specific ayah number with "Go" button
+- **Ayah Display:**
+  - Vertical scrollable list of all ayahs in surah
+  - Each ayah card contains:
+    - **Ayah number badge:** "Surah:Ayah" format
+    - **Arabic text:** Large (text-3xl), RTL, serif font, with proper line spacing
+    - **Translation text:** Below Arabic, separated by border, in muted color
+    - **Action buttons:**
+      - **Copy:** Copies Arabic + translation + reference
+      - **Favorite:** Adds to favorites (heart icon, shows login modal if unauthenticated)
+      - **Bookmark:** Saves reading position
+      - **Share:** Native share API or copy link to specific ayah
+- **Auto-scroll:** Resumes to last bookmarked ayah or jumps to URL-specified ayah
+- **Auto-bookmark:** Saves reading position on scroll (debounced, updates every 1 second)
+
+**Navigation Menu:**
+- Dropdown menu in header next to AuthButton
+- Links to: Quran Browser, Prayer Times, Daily Quran & Hadith, Charity Tracker, Favorites, Zikr & Duas
+
+### Hooks & State Management
+
+**Custom Hooks:**
+- `useFullSurah(surahNumber)` - Fetches complete surah with translation, handles loading/error states
+- `useQuranBookmarks()` - Manages CRUD operations for bookmarks, dual-storage pattern
+- `useQuranFavorites()` - Integrates with existing favorites system for individual ayahs
+
+**State Persistence:**
+- **Bookmarks:** Saved to Supabase (authenticated) + localStorage (guest)
+- **Translation preference:** Saved to profile (authenticated) + localStorage (fallback)
+- **View mode (List/Grid):** Saved to localStorage only
+
+### Components
+
+**Pages:**
+- `/quran/page.tsx` - Landing page with tabs
+- `/quran/[surahNumber]/page.tsx` - Dynamic surah reading page
+
+**Components:**
+- `SurahSelector` - Search and view toggle controls
+- `SurahList` - List view of all surahs
+- `SurahGrid` - Grid view of all surahs
+- `JuzList` - 30 Juz cards with navigation
+- `SurahReader` - Main reading interface with scroll tracking
+- `SurahHeader` - Surah info banner
+- `AyahCard` - Individual ayah display (Arabic + translation)
+- `AyahActions` - Copy/favorite/bookmark/share buttons
+- `AyahRangeLookup` - Jump to specific ayah
+- `TranslationSelector` - Dropdown for translation selection
+
+### Technical Details
+
+**API Route:** `/api/quran/surah/[number]/route.ts`
+- Validates surah number (1-114)
+- Fetches from AlQuran Cloud API with specified translation
+- Returns paired data: Arabic + translation for each ayah
+- Implements 7-day caching via Next.js `revalidate`
+
+**Type Definitions:**
+```typescript
+interface FullSurahResponse {
+  surah: QuranSurah
+  ayahs: AyahPair[]
+  translation: QuranTranslationId
+}
+
+interface AyahPair {
+  numberInSurah: number
+  globalNumber: number
+  arabic: QuranAyah
+  translation: QuranAyah
+}
+
+interface BookmarkData {
+  id?: string
+  user_id: string
+  surah_number: number
+  ayah_number: number
+  created_at?: string
+  updated_at?: string
+}
+```
+
+**V1.1 Status:** ✅ **Complete** (November 2024) - Full surah browser with 114 surahs, Juz navigation, bookmarks, favorites integration, search, multiple views, translation switching, auto-scroll resume, ayah sharing
+
+**Future Enhancements (V1.2+):**
+- **V1.2:** Reading progress statistics (total ayahs read, completion percentage)
+- **V1.2:** Quran audio recitation per ayah (play/pause controls)
+- **V1.2:** Tafsir (commentary) integration for each ayah
+- **V1.2:** Word-by-word translation view
+- **V1.2:** Night reading mode with adjusted colors
+- **V1.2:** Ayah-level notes and reflections
+- **V2.0:** Offline mode with downloaded surahs
+- **V2.0:** Reading streaks and achievements
 
 ---
 

@@ -13,14 +13,14 @@ import {
 import { QURAN_TRANSLATIONS, QuranTranslationId } from '@/types/quran.types'
 
 interface TranslationSelectorProps {
-  value: QuranTranslationId
-  onValueChange: (translation: QuranTranslationId) => void
+  currentTranslation: QuranTranslationId
+  onTranslationChange: (translation: QuranTranslationId) => void
   disabled?: boolean
 }
 
 export function TranslationSelector({
-  value,
-  onValueChange,
+  currentTranslation,
+  onTranslationChange,
   disabled = false,
 }: TranslationSelectorProps) {
   const { user } = useAuth()
@@ -55,7 +55,7 @@ export function TranslationSelector({
     }
 
     // Trigger refetch with new translation
-    onValueChange(translationId)
+    onTranslationChange(translationId)
   }
 
   return (
@@ -64,7 +64,7 @@ export function TranslationSelector({
         Translation
       </label>
       <Select
-        value={value}
+        value={currentTranslation}
         onValueChange={handleChange}
         disabled={disabled || isSaving}
       >
