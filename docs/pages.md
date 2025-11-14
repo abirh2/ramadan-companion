@@ -1,95 +1,356 @@
-# Page & Data Requirements
+# Page & Data Requirements (V1.0 Complete)
+
+**Last Updated:** November 2024  
+**Status:** All 10 pages fully implemented and deployed
 
 **Note:** All pages include a Feedback button at the bottom for users to report problems or suggest improvements. Feedback is submitted anonymously to Supabase and optionally linked to user profile if authenticated.
 
 ---
 
 ## / (Dashboard)
-**Cards and Data Sources**
-- Next Prayer: prayer API + user prefs  
-- Ramadan Countdown: Hijri API + prayer times  
-- Quran of the Day: AlQuran API  
-- Hadith of the Day: Sunnah API  
-- Charity Summary: Supabase (donations)
-- Zikr Summary: localStorage (later)
 
-**V1:** Prayer, Ramadan, Quran, Hadith, Charity  
-**Later:** Zikr stats, Places summary
+**V1.0 Status:** ✅ **Complete**
 
----
+**Cards and Data Sources:**
+- **Ramadan Countdown** (Hero card): Hijri API + prayer times for iftar/suhoor
+- **Next Prayer:** AlAdhan API + user preferences (calculation method, madhab, location)
+- **Quran of the Day:** AlQuran Cloud API with weighted random selection
+- **Hadith of the Day:** HadithAPI with weighted random selection
+- **Charity Summary:** Supabase (This Ramadan + All Time totals)
+- **Zikr Summary:** localStorage (current phrase, count, progress)
+- **Places:** Mosque + Halal Food tabs with live data from APIs
+- **Admin Card:** Only visible to admin users (feedback metrics, user count)
 
-## /times
-- Daily prayer times (API)
-- Qibla bearing (API or local calculation)
-- Change method/madhab (update Supabase)
-
-**V1:** Full feature  
-**Later:** Weekly/monthly view
+**Future Enhancements (V1.1+):**
+- **V1.1:** Interactive widgets (drag to reorder)
+- **V1.1:** Customizable card visibility (hide/show cards)
+- **V2.0:** Widget system (choose which cards to display)
+- **V2.0:** Community feed widget
 
 ---
 
-## /charity
-- CRUD for donations (Supabase)
-- Zakat calculator (local only)
-- Charity list (static JSON)
+## /times (Prayer Times & Qibla)
 
-**V1:** Donations + calculator  
-**Later:** Charts, recurring, public charity database
+**V1.0 Status:** ✅ **Complete**
+
+**Features:**
+- Daily prayer times (Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha)
+- Live next prayer countdown (updates every second)
+- Qibla compass with bearing and compass direction
+- 7 calculation methods (Umm al-Qura, ISNA, MWL, Egyptian, Karachi, Tehran, Jafari)
+- Madhab support (Shafi/Maliki/Hanbali, Hanafi)
+- Location management (search cities, use current location, manual coordinates)
+- Automatic fallback to local calculation (PrayTime library)
+- Browser timezone auto-detection
+
+**Data Sources:**
+- AlAdhan API (primary) + PrayTime library (fallback)
+- Nominatim API for city search
+- Supabase profile for preferences storage
+- localStorage for guest user preferences
+
+**Future Enhancements (V1.1+):**
+- **V1.1:** Prayer time notifications (Web Push API)
+- **V1.1:** Prayer tracking (mark completed, daily progress)
+- **V1.2:** Monthly/weekly calendar view
+- **V1.3:** Phone compass (DeviceOrientationEvent)
+- **V1.3:** Advanced settings (high latitude methods, manual time tuning)
 
 ---
 
-## /quran-hadith
-- Daily ayah/hadith (same as Dashboard)
-- Expanded view with translation selector
-- Favorite button (auth-protected)
-- Share functionality
+## /charity (Charity & Zakat Tracker)
 
-**V1:** ✅ Complete - Daily ayah, translation options, favorites  
-**Later:** Hadith implementation, search, filtering, topic tagging
+**V1.0 Status:** ✅ **Complete**
+
+**Features:**
+- Full CRUD for donations (create, read, update, delete)
+- Monthly tracking with two view modes (calendar grid, list accordion)
+- View toggle with localStorage persistence
+- Summary totals (This Ramadan, This Year, All Time)
+- Interactive charts (line, bar, pie)
+- Zakat calculator with auto-populate
+- Type categorization (zakat, sadaqah, other)
+- Optional metadata (charity name, URL, category, notes)
+- Auth-protected (ProtectedFeature wrapper)
+- RLS enforcement (users see only their own data)
+
+**Data Sources:**
+- Supabase (donations table)
+- Recharts for visualizations
+- LocalStorage for view preference
+
+**Future Enhancements (V1.1+):**
+- **V1.1:** Recurring donation tracking
+- **V1.1:** Multi-currency support with conversion
+- **V1.1:** CSV export for taxes
+- **V1.1:** Enhanced insights (trends, patterns)
+- **V1.3:** Email receipts
+- **V1.3:** Tax year summaries
+- **V2.0:** Charity recommendations database
+- **V2.0:** Fundraising campaigns
 
 ---
 
-## /favorites
+## /quran-hadith (Daily Quran & Hadith)
+
+**V1.0 Status:** ✅ **Complete**
+
+**Features:**
+- Daily Quran ayah (weighted random selection, same globally)
+- 4 translation options (Asad, Sahih International, Pickthall, Yusuf Ali)
+- Daily hadith (Sahih Bukhari + Muslim, weighted selection)
+- 3 language options for hadith (English, Urdu, Arabic)
+- Favorites system (auth-protected)
+- Translation/language preference storage (dual-storage pattern)
+- Share functionality (copy formatted text to clipboard)
+- Surah metadata display
+- Hadith grading with color-coded badges
+- Copy buttons for Arabic and translation text separately
+
+**Data Sources:**
+- AlQuran Cloud API (Quran)
+- HadithAPI (Hadith)
+- Supabase (favorites table, profile preferences)
+- localStorage (guest preferences)
+
+**Future Enhancements (V1.1+):**
+- **V1.1:** Full Quran browser (114 surahs, juz navigation, search)
+- **V1.2:** Audio recitation (Mishary, Abdul Basit, Sudais)
+- **V1.2:** Hadith browser (6 collections, search)
+- **V1.2:** Tafsir integration (Ibn Kathir)
+- **V1.2:** Notes on favorites
+- **V1.2:** Reading progress tracking
+- **V2.0:** Word-by-word translation
+
+---
+
+## /favorites (Saved Content)
+
+**V1.0 Status:** ✅ **Complete**
+
+**Features:**
 - Auth-protected page (requires sign-in)
-- Tabbed interface: Quran / Hadith
-- List of all favorited items
-- Full ayah display with Arabic + translation
-- Remove from favorites button
-- Share button per item
+- Tabbed interface (Quran / Hadith tabs)
+- Quran favorites list with full ayah text
+- Hadith favorites list with full hadith text
+- Copy buttons for Arabic and translation/English separately
+- Share buttons per item
+- Remove from favorites buttons
 - Empty states with CTAs
-- Count badges showing number of items
+- Count badges showing totals
+- Error handling with retry
 
-**V1:** ✅ Complete - Quran favorites list  
-**Later:** Hadith favorites, category filters, notes, export
+**Data Sources:**
+- Supabase (favorites table)
+- Auth context for user authentication
 
----
-
-## /zikr
-- Zikr counter (local)
-- Dua list (static JSON)
-
-**Later:** Sync to Supabase, streak tracking
-
----
-
-## /places/mosques
-- Google Places API (query: mosque)
-- Map + list view
-
-**Later only**
+**Future Enhancements (V1.1+):**
+- **V1.2:** Category filters
+- **V1.2:** Notes on favorites (personal reflections)
+- **V1.2:** Export to PDF/JSON
+- **V2.0:** Search within favorites
+- **V2.0:** Sort options (date, surah, collection)
 
 ---
 
-## /places/halal-food
-- Google Places API (query: halal restaurant)
+## /zikr (Zikr & Duas)
 
-**Later only**
+**V1.0 Status:** ✅ **Complete**
+
+**Features:**
+- Tasbeeh counter with 5 standard phrases
+- Goal tracking (default targets, custom targets, free count)
+- Fajr auto-reset (Islamic day boundary)
+- Audio and haptic feedback (toggleable)
+- Circular progress ring visualization
+- 20 duas across 8 categories
+- Dua cards with Arabic, transliteration, translation
+- Copy functionality for duas
+- State persistence (localStorage)
+- Offline-capable (no network required)
+
+**Data Sources:**
+- localStorage (zikr_state, feedback preferences)
+- Static JSON (duas library)
+- usePrayerTimes hook (for Fajr reset time)
+
+**Future Enhancements (V1.1+):**
+- **V1.1:** Expanded dua library (50 → 100+ duas)
+- **V1.2:** Wird programs (structured routines)
+- **V1.2:** Salawat, Istighfar counters
+- **V1.2:** Audio pronunciations for duas
+- **V1.2:** Dua search and filtering
+- **V1.3:** Cloud sync (Supabase)
+- **V1.3:** Streak tracking
+- **V1.3:** Custom phrase creation
+- **V2.0:** Group challenges
 
 ---
 
-## /settings
-- Read/write profile (Supabase)
-- Theme, location, method
+## /places/mosques (Mosque Finder)
 
-**V1:** Minimal preferences  
-**Later:** Notifications, language selection
+**V1.0 Status:** ✅ **Complete**
+
+**Features:**
+- OpenStreetMap Overpass API integration
+- Interactive map (MapLibre GL with OSM tiles)
+- List view with distance sorting
+- Location search (Nominatim autocomplete)
+- Current location button (browser geolocation)
+- Search radius selector (1-10 miles)
+- Distance unit toggle (miles/kilometers)
+- Detail dialog with full info
+- Platform-aware directions (Apple Maps for iOS, Google Maps for others)
+- Fallback mosque names (generated from address)
+
+**Data Sources:**
+- OpenStreetMap Overpass API (mosque data)
+- Nominatim API (geocoding)
+- MapLibre GL (map rendering)
+- localStorage (distance_unit preference)
+- Supabase profile (distance_unit for authenticated users)
+
+**Future Enhancements (V1.1+):**
+- **V1.1:** Save favorite mosques
+- **V1.1:** Prayer time integration
+- **V1.3:** User reviews and ratings
+- **V1.3:** Photo uploads
+- **V1.3:** Facility filters
+- **V2.0:** Operating hours filter
+- **V2.0:** Call directly from app
+
+---
+
+## /places/food (Halal Food Finder)
+
+**V1.0 Status:** ✅ **Complete**
+
+**Features:**
+- Geoapify Places API integration
+- Triple search strategy (sequential for quota conservation)
+- Interactive map (MapLibre GL)
+- List view with distance sorting
+- Location search (Nominatim)
+- Current location button
+- Search radius selector (1-10 miles)
+- Distance unit toggle (miles/kilometers)
+- Detail dialog with cuisine, facilities, hours
+- Facility badges (takeaway, delivery, wheelchair)
+- Platform-aware directions
+- Retry logic with exponential backoff
+- Dynamic timeouts based on radius
+
+**Data Sources:**
+- Geoapify Places API (halal food data)
+- Nominatim API (geocoding)
+- MapLibre GL (map rendering)
+- localStorage (distance_unit preference)
+- Supabase profile (distance_unit for authenticated users)
+
+**Future Enhancements (V1.1+):**
+- **V1.1:** Save favorite restaurants
+- **V1.3:** User reviews and ratings
+- **V1.3:** Photo uploads
+- **V1.3:** Dietary filters (vegan, gluten-free)
+- **V1.3:** Price range filtering
+- **V1.3:** Cuisine filters
+- **V2.0:** Operating hours filter
+- **V2.0:** Call/order directly from app
+
+---
+
+## /profile (Settings & Profile)
+
+**V1.0 Status:** ✅ **Complete**
+
+**Features:**
+- Display name (editable)
+- Email (read-only, from auth)
+- Theme toggle (in header, not in form)
+- Location preferences (stored automatically from prayer times page)
+- Calculation method (stored from prayer times)
+- Madhab (stored from prayer times)
+- Quran translation preference
+- Hadith language preference
+- Distance unit preference
+- Auth-protected (middleware enforcement)
+
+**Data Sources:**
+- Supabase (profiles table)
+- Auth context
+
+**Future Enhancements (V1.1+):**
+- **V1.1:** Profile picture upload
+- **V1.2:** Hijri offset manual adjustment
+- **V1.3:** Password reset flow
+- **V1.3:** Email verification
+- **V1.3:** Multi-language interface
+- **V1.3:** Notification preferences
+- **V1.3:** Custom themes
+- **V1.3:** Account deletion
+- **V1.3:** Data export (GDPR)
+- **V2.0:** Goal tracking
+- **V2.0:** Customizable dashboard
+
+---
+
+## /about (About & Acknowledgements)
+
+**V1.0 Status:** ✅ **Complete**
+
+**Features:**
+- Three tabs (Creator, About App, Acknowledgements)
+- URL-synced tab navigation
+- Creator profile with photo, contact, education, projects
+- App mission, features, tech stack, privacy principles
+- API and library acknowledgements with disclaimers
+- Copy-to-clipboard for contact info
+- Footer links on all pages
+- Mobile-responsive tabs
+
+**Data Sources:**
+- Static content
+- Public creator profile image
+
+**Future Enhancements (V1.1+):**
+- **V1.2:** Changelog section
+- **V1.3:** Contribution guide
+- **V2.0:** Support section (FAQs, troubleshooting)
+
+---
+
+## /admin (Admin Dashboard)
+
+**V1.0 Status:** ✅ **Complete**
+
+**Features:**
+- Admin-only access (RLS + ProtectedAdmin component)
+- Feedback management tab with filters
+- Inline editing (status, priority, category)
+- Admin notes textarea
+- Review tracking (reviewed_at, reviewed_by)
+- Analytics tab (total users, feedback metrics)
+- Admin card on main dashboard
+- Search and pagination
+
+**Data Sources:**
+- Supabase (feedback table, profiles table)
+- Admin context (is_admin flag)
+
+**Future Enhancements (V1.1+):**
+- **V1.2:** Enhanced analytics (feature usage, engagement)
+- **V1.3:** Email notifications on new feedback
+- **V2.0:** Bulk operations
+- **V2.0:** CSV export
+- **V2.0:** Multiple admin roles
+- **V2.0:** Audit log
+- **V2.0:** Dashboard customization
+
+---
+
+## Summary
+
+**Total Pages:** 10 (all complete in V1.0)  
+**Auth-Protected:** 3 (/profile, /charity, /admin)  
+**Public:** 7 (/, /times, /quran-hadith, /favorites, /zikr, /places/mosques, /places/food, /about)  
+**With Feedback Button:** All 10 pages
