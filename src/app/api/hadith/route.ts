@@ -4,6 +4,14 @@ import type { HadithAPIResponse, DailyHadithResponse, HadithLanguageId } from '@
 const HADITH_API_BASE_URL = 'https://hadithapi.com/api'
 const HADITH_API_KEY = process.env.HADITH_API_KEY
 
+// Debug logging
+console.log('=== HADITH API DEBUG ===')
+console.log('HADITH_API_KEY exists:', !!HADITH_API_KEY)
+console.log('HADITH_API_KEY length:', HADITH_API_KEY?.length)
+console.log('HADITH_API_KEY value:', HADITH_API_KEY ? HADITH_API_KEY.substring(0, 10) + '...' : 'undefined')
+console.log('All env vars starting with HADITH:', Object.keys(process.env).filter(k => k.includes('HADITH')))
+console.log('========================')
+
 // Approximate hadith counts for the two sahih collections
 const SAHIH_BUKHARI_COUNT = 7563
 const SAHIH_MUSLIM_COUNT = 7563
