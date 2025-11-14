@@ -307,11 +307,10 @@ END $$;
 -- Create index for admin queries
 CREATE INDEX IF NOT EXISTS idx_profiles_is_admin ON profiles(is_admin);
 
--- Set initial admin user (abir5611@gmail.com)
--- This will only work after the user has signed up and created a profile
-UPDATE profiles 
-SET is_admin = TRUE 
-WHERE id = (SELECT id FROM auth.users WHERE email = 'abir5611@gmail.com');
+-- Set initial admin user
+-- After your first user signs up, run this query with your email:
+-- UPDATE profiles SET is_admin = TRUE 
+-- WHERE id = (SELECT id FROM auth.users WHERE email = 'YOUR_EMAIL_HERE');
 
 -- ============================================
 -- 15. EXTEND FEEDBACK TABLE FOR ADMIN WORKFLOW

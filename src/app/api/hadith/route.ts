@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import type { HadithAPIResponse, DailyHadithResponse, HadithLanguageId } from '@/types/hadith.types'
 
 const HADITH_API_BASE_URL = 'https://hadithapi.com/api'
-// Temporary fallback - remove after .env.local is working
-const HADITH_API_KEY = process.env.HADITH_API_KEY || '$2y$10$5v38H9m4hOEA84i8Zy16urBcqIZMqgmM66z4Fb6s2ZVI1Wd1AUa'
+const HADITH_API_KEY = process.env.HADITH_API_KEY
 
 // Approximate hadith counts for the two sahih collections
 const SAHIH_BUKHARI_COUNT = 7563
