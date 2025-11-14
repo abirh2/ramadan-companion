@@ -22,7 +22,9 @@ describe('useHadithOfTheDay', () => {
     narrator: "Narrated 'Umar bin Al-Khattab",
     book: 'Sahih Bukhari',
     bookSlug: 'sahih-bukhari',
+    bookWriter: 'Imam Bukhari',
     chapter: 'Belief',
+    chapterArabic: 'الإيمان',
     hadithNumber: '1',
     status: 'Sahih',
   }

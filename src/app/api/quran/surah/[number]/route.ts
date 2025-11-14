@@ -4,7 +4,8 @@ import type {
   AlQuranCloudSurahMultiResponse, 
   QuranTranslationId,
   FullSurahResponse,
-  AyahPair
+  AyahPair,
+  QuranSurah
 } from '@/types/quran.types'
 
 const ALQURAN_CLOUD_BASE_URL = 'https://api.alquran.cloud/v1'
@@ -85,9 +86,19 @@ export async function GET(
       }
     })
     
+    // Extract surah metadata from the API response
+    const surah: QuranSurah = {
+      number: arabicSurah.number,
+      name: arabicSurah.name,
+      englishName: arabicSurah.englishName,
+      englishNameTranslation: arabicSurah.englishNameTranslation,
+      numberOfAyahs: arabicSurah.numberOfAyahs,
+      revelationType: arabicSurah.revelationType,
+    }
+    
     // Format response
     const formattedResponse: FullSurahResponse = {
-      surah: arabicSurah.surah,
+      surah,
       ayahs: ayahPairs,
       translation,
     }

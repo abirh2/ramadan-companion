@@ -395,8 +395,8 @@ export default function QuranHadithPage() {
                 {/* Translation Selector */}
                 <div className="border-t pt-4">
                   <TranslationSelector
-                    value={selectedTranslation}
-                    onValueChange={setTranslation}
+                    currentTranslation={selectedTranslation}
+                    onTranslationChange={setTranslation}
                     disabled={loading}
                   />
                 </div>
