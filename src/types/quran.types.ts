@@ -40,11 +40,30 @@ export interface AlQuranCloudSingleResponse {
   data: QuranAyah
 }
 
-// Response from AlQuran Cloud API for multiple editions
+// Response from AlQuran Cloud API for multiple editions (single ayah)
 export interface AlQuranCloudMultiResponse {
   code: number
   status: string
   data: QuranAyah[]
+}
+
+// Surah data with all ayahs (used for full surah endpoint)
+export interface QuranSurahData {
+  number: number
+  name: string
+  englishName: string
+  englishNameTranslation: string
+  revelationType: 'Meccan' | 'Medinan'
+  numberOfAyahs: number
+  ayahs: QuranAyah[]
+  edition: QuranEdition
+}
+
+// Response from AlQuran Cloud API for multiple editions (full surah)
+export interface AlQuranCloudSurahMultiResponse {
+  code: number
+  status: string
+  data: QuranSurahData[]
 }
 
 // Our formatted response from /api/quran

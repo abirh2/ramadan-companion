@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSurahByNumber, isValidSurahNumber } from '@/lib/quranData'
 import type { 
-  AlQuranCloudMultiResponse, 
+  AlQuranCloudSurahMultiResponse, 
   QuranTranslationId,
   FullSurahResponse,
   AyahPair
@@ -54,7 +54,7 @@ export async function GET(
       throw new Error(`AlQuran Cloud API error: ${response.status}`)
     }
     
-    const data: AlQuranCloudMultiResponse = await response.json()
+    const data: AlQuranCloudSurahMultiResponse = await response.json()
     
     // Validate response
     if (!data.data || data.data.length !== 3) {
