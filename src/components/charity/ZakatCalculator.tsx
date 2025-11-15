@@ -53,9 +53,9 @@ export function ZakatCalculator({ onLogAsDonation }: ZakatCalculatorProps) {
   return (
     <Card className="rounded-xl">
       <CardHeader>
-        <button
+        <div
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full text-left flex items-center justify-between hover:opacity-80 transition-opacity"
+          className="w-full text-left flex items-center justify-between hover:opacity-80 transition-opacity cursor-pointer"
         >
           <div>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -66,10 +66,10 @@ export function ZakatCalculator({ onLogAsDonation }: ZakatCalculatorProps) {
               Calculate your zakat (2.5% of eligible wealth)
             </CardDescription>
           </div>
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" onClick={(e) => e.stopPropagation()}>
             {isExpanded ? 'Collapse' : 'Expand'}
           </Button>
-        </button>
+        </div>
       </CardHeader>
 
       {isExpanded && (
