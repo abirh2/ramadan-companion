@@ -201,7 +201,7 @@ export function PrayerStatistics({
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
-          ) : !statistics || statistics.totalDaysTracked === 0 ? (
+          ) : !statistics || statistics.totalDays === 0 ? (
             <div className="text-center py-12 space-y-3">
               <Calendar className="h-12 w-12 text-muted-foreground mx-auto" />
               <p className="text-muted-foreground">

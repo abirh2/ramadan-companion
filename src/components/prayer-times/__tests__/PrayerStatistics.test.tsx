@@ -304,7 +304,7 @@ describe('PrayerStatistics', () => {
     it('shows empty state when totalDays is 0', async () => {
       const emptyStatistics: PrayerStatisticsType = {
         ...mockStatistics,
-        totalDaysTracked: 0,
+        totalDays: 0,
       }
 
       render(
