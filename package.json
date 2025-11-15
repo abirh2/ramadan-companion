@@ -8,13 +8,12 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --no-turbopack",
     "start": "next start",
     "lint": "eslint",
     "test": "jest --watch",
     "test:ci": "jest --ci",
-    "test:coverage": "jest --coverage",
-    "postinstall": "npm rebuild lightningcss"
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
