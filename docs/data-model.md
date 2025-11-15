@@ -171,6 +171,59 @@ Admins access feedback via:
 
 ---
 
+## Table: prayer_tracking
+Track daily prayer completion for authenticated users.
+
+| Field | Type | Description | Status |
+|--------|------|-------------|--------|
+| id | uuid (PK) | unique record ID, auto-generated | **Active (V1.1)** |
+| user_id | uuid (FK) | references profiles.id, CASCADE delete | **Active (V1.1)** |
+| date | date | prayer date (YYYY-MM-DD format) | **Active (V1.1)** |
+| fajr_completed | boolean | Fajr prayer completed (default: false) | **Active (V1.1)** |
+| dhuhr_completed | boolean | Dhuhr prayer completed (default: false) | **Active (V1.1)** |
+| asr_completed | boolean | Asr prayer completed (default: false) | **Active (V1.1)** |
+| maghrib_completed | boolean | Maghrib prayer completed (default: false) | **Active (V1.1)** |
+| isha_completed | boolean | Isha prayer completed (default: false) | **Active (V1.1)** |
+| created_at | timestamptz | auto timestamp | **Active (V1.1)** |
+| updated_at | timestamptz | auto timestamp, auto-updated via trigger | **Active (V1.1)** |
+
+**Purpose:** Enable users to track their daily prayer completion with historical analytics. Supports completion rate tracking, trends analysis, and per-prayer breakdown.
+
+**V1.1:** Prayer completion tracking with historical statistics (7/30/90 days, all-time), line charts, pie charts, and per-prayer analytics  
+**Later:** Streak tracking, reminders based on completion patterns, goal setting
+
+**Data Model Design:**
+- One row per day per user (UNIQUE constraint on user_id + date)
+- Boolean fields for each of the 5 daily prayers
+- Supports toggling (mark complete/incomplete)
+- No timestamp tracking (tracks completion only, not timing)
+
+**Dual-Storage Pattern:**
+- **Guest users:** Today's data stored in localStorage only (resets at midnight)
+- **Authenticated users:** Persistent database storage with cross-device sync
+- **Auto-sync:** localStorage data migrates to database on sign-in
+
+**Indexes:**
+- `idx_prayer_tracking_user_date` (user_id, date DESC) - Query by user and date range
+- `idx_prayer_tracking_user_id` (user_id) - Query all records for user
+
+**RLS Policies:**
+- **SELECT:** Users can view their own prayer tracking only (`auth.uid() = user_id`)
+- **INSERT:** Users can insert their own prayer tracking only (`auth.uid() = user_id`)
+- **UPDATE:** Users can update their own prayer tracking only (`auth.uid() = user_id`)
+- **DELETE:** Not allowed (preserve history)
+
+**Triggers:**
+- `prayer_tracking_updated_at` - Auto-update updated_at timestamp on record modification
+
+**Integration:**
+- UI: `/times` page with checkboxes next to each prayer
+- Analytics: Collapsible statistics section with line/pie charts
+- Hook: `usePrayerTracking` with dual-storage pattern
+- Utilities: `prayerTracking.ts` for localStorage and calculation functions
+
+---
+
 ## Table: zikr_logs (Future)
 Track daily zikr counts across devices.
 

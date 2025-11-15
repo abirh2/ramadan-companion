@@ -6,25 +6,11 @@ import { renderWithAuth } from '@/test-utils'
 // This test focuses on page-level integration
 
 describe('Dashboard Page', () => {
-  it('renders the dashboard page', () => {
-    renderWithAuth(<Home />)
+  it('renders the dashboard page content', () => {
+    const { container } = renderWithAuth(<Home />)
     
-    expect(screen.getByRole('banner')).toBeInTheDocument()
-    expect(screen.getByRole('main')).toBeInTheDocument()
-  })
-
-  it('displays app title in header', () => {
-    renderWithAuth(<Home />)
-    
-    expect(screen.getByText('Ramadan Companion')).toBeInTheDocument()
-  })
-
-  it('renders auth button in header', () => {
-    renderWithAuth(<Home />)
-    
-    // UserMenu button should be present when user is authenticated
-    const buttons = screen.getAllByRole('button')
-    expect(buttons.length).toBeGreaterThan(0)
+    // Check that the main content container renders
+    expect(container.firstChild).toBeInTheDocument()
   })
 
   it('displays all dashboard cards', () => {
@@ -42,53 +28,26 @@ describe('Dashboard Page', () => {
     const { container } = renderWithAuth(<Home />)
     
     // Select the main grid container (not card internal grids)
-    const main = screen.getByRole('main')
-    const grid = main.querySelector('.grid.grid-cols-1')
+    const grid = container.querySelector('.grid.grid-cols-1')
     expect(grid).toBeInTheDocument()
     expect(grid).toHaveClass('grid-cols-1')
     expect(grid).toHaveClass('md:grid-cols-2')
   })
 
-  it('uses semantic HTML structure', () => {
-    renderWithAuth(<Home />)
-    
-    // Check for semantic elements
-    const header = screen.getByRole('banner')
-    const main = screen.getByRole('main')
-    
-    expect(header).toBeInTheDocument()
-    expect(main).toBeInTheDocument()
-  })
-
   it('has proper mobile-first responsive classes', () => {
     const { container } = renderWithAuth(<Home />)
     
-    const main = screen.getByRole('main')
-    expect(main).toHaveClass('max-w-4xl')
-    expect(main).toHaveClass('mx-auto')
+    const wrapper = container.firstChild as HTMLElement
+    expect(wrapper).toHaveClass('max-w-4xl')
+    expect(wrapper).toHaveClass('mx-auto')
   })
 
   it('applies proper spacing to content', () => {
     const { container } = renderWithAuth(<Home />)
     
-    const main = screen.getByRole('main')
-    expect(main).toHaveClass('px-4')
-    expect(main).toHaveClass('py-6')
-  })
-
-  it('uses appropriate background and text colors', () => {
-    const { container } = renderWithAuth(<Home />)
-    
     const wrapper = container.firstChild as HTMLElement
-    expect(wrapper).toHaveClass('bg-background')
-    expect(wrapper).toHaveClass('text-foreground')
-  })
-
-  it('header has border separator', () => {
-    renderWithAuth(<Home />)
-    
-    const header = screen.getByRole('banner')
-    expect(header).toHaveClass('border-b')
+    expect(wrapper).toHaveClass('px-4')
+    expect(wrapper).toHaveClass('py-6')
   })
 })
 

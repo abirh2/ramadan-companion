@@ -218,11 +218,189 @@ Display accurate prayer times and Qibla direction based on user location with ci
 
 **Future Enhancements (V1.1+):**
 - **V1.1:** Prayer time notifications (Web Push API)
-- **V1.1:** Prayer tracking (mark prayers as completed, daily progress)
 - **V1.2:** Monthly/weekly prayer time calendar view
 - **V1.3:** Phone compass integration (DeviceOrientationEvent for live Qibla arrow)
 - **V1.3:** Advanced calculation options (higher latitude methods, manual time tuning)
 - **V2.0:** Prayer time analytics and insights
+
+---
+
+## 2A. Prayer Tracking (`/times` integrated)
+
+### Functionality
+Enable users to track daily prayer completion with checkboxes, view completion summary, and access historical analytics with charts and trends.
+
+### Data Flow
+- **Guest Users (Not Authenticated):**
+  - Today's completion stored in localStorage (`prayer_tracking_YYYY-MM-DD`)
+  - Data resets at midnight (00:00 local time)
+  - No historical analytics (current day only)
+  - Auto-sync to database on sign-in
+
+- **Authenticated Users:**
+  - Persistent storage in Supabase `prayer_tracking` table
+  - Historical data with cross-device sync
+  - Full analytics: 7 days, 30 days, 90 days, all-time
+  - One row per day with 5 boolean fields (fajr_completed, dhuhr_completed, asr_completed, maghrib_completed, isha_completed)
+
+### Implementation Details
+
+**Database Schema (`prayer_tracking` table):**
+- `id` (uuid, PK), `user_id` (uuid, FK), `date` (date)
+- Boolean fields: `fajr_completed`, `dhuhr_completed`, `asr_completed`, `maghrib_completed`, `isha_completed`
+- `created_at`, `updated_at` timestamps
+- UNIQUE constraint on (user_id, date)
+- RLS policies: users can only view/modify their own records
+
+**Core Hook (`usePrayerTracking`):**
+- Dual-storage pattern (localStorage for guests, Supabase for authenticated)
+- Fetches today's completion + historical data for authenticated users
+- `togglePrayer(prayer)` - Toggle completion status (check/uncheck)
+- `setTimeRange(range)` - Change analytics time range
+- `refetch()` - Refresh data
+- Auto-sync localStorage to database on sign-in
+- Midnight reset detection (refetches at day change)
+
+**UI Components:**
+- `PrayerCheckbox` - Individual prayer checkbox with visual feedback (CheckCircle2/Circle icons)
+- `PrayerCompletionSummary` - "3/5 prayers completed (60%)" display
+- `PrayerStatistics` - Collapsible accordion with full analytics
+
+**Page Integration (`/app/times/page.tsx`):**
+- Checkboxes appear next to each prayer in schedule
+- Completion summary in prayer schedule card header
+- Statistics section below prayer schedule (collapsed by default)
+- Works for both guest and authenticated users
+
+### Analytics Features (Authenticated Users Only)
+
+**Time Range Options:**
+- 7 Days, 30 Days, 90 Days, All Time
+- Selector buttons at top of statistics section
+
+**Visualizations:**
+1. **Statistics Summary (Grid):**
+   - Overall completion rate (%)
+   - Total prayers completed / total prayers
+   - Days tracked
+   - Perfect days (5/5 completions)
+
+2. **Line Chart - Daily Completion Trend:**
+   - X-axis: Date (MM/DD format)
+   - Y-axis: Prayers completed (0-5 scale)
+   - Shows daily completion pattern over time
+   - Responsive, 250px height
+
+3. **Pie Chart - Overall Completion:**
+   - Completed vs Incomplete prayers
+   - Donut chart with inner radius
+   - Visual percentage breakdown
+
+4. **Per-Prayer Breakdown:**
+   - List view with progress bars for each prayer
+   - Fajr, Dhuhr, Asr, Maghrib, Isha completion rates
+   - Format: "24/30 (80%)"
+
+5. **Most Consistent Prayer:**
+   - Highlighted card showing prayer with highest completion rate
+   - Award icon + percentage
+
+**Charts Library:** Recharts (line/pie charts with responsive containers)
+
+### Behavior
+
+**Toggle Logic:**
+- Click checkbox to mark prayer completed/incomplete
+- Optimistic UI update (instant feedback)
+- Saves to localStorage (guest) or database (authenticated)
+- Recalculates total completion and percentage
+- For authenticated users: refetches statistics after toggle
+
+**Midnight Reset:**
+- localStorage data for old dates cleaned up automatically
+- Hook checks for date change every minute
+- Refetches fresh data when new day detected
+
+**Auto-Sync on Sign-In:**
+- When user signs in, today's localStorage data migrates to database
+- Only syncs if at least 1 prayer is completed
+- Prevents overwriting existing database records
+- Cleans up localStorage after sync
+
+**Guest User Prompt:**
+- Statistics section shows sign-in prompt for guest users
+- "Sign in to track your prayer history and view detailed statistics"
+- Link to `/profile` page for authentication
+
+### UI States
+
+**Loading State:**
+- Spinner in statistics section while fetching data
+- Time range buttons disabled during load
+
+**Empty State:**
+- "No prayer tracking data yet" message with calendar icon
+- Appears when no historical data exists
+- Encourages user to start tracking
+
+**Error State:**
+- Handled gracefully with error messages
+- Doesn't block checkbox functionality
+
+### Utility Functions (`/src/lib/prayerTracking.ts`)
+
+- `getTodayDateString()` - Returns YYYY-MM-DD for today
+- `getDateRangeForTimeRange(range)` - Calculate start/end dates for time ranges
+- `calculateStatistics(records, timeRange)` - Compute completion stats from records
+- `saveTodayToLocalStorage(completion)` - Save today's data to localStorage
+- `getTodayFromLocalStorage()` - Load today's data from localStorage
+- `clearOldLocalStorageData()` - Remove past dates (cleanup)
+- `syncLocalStorageToDatabase(userId)` - Migrate today's data on sign-in
+- `prayerToColumnName(prayer)` - Convert prayer name to DB column name
+- `hasCrossedMidnight(lastCheckDate)` - Detect day change
+
+### Storage Strategy
+
+**LocalStorage Keys:**
+- Format: `prayer_tracking_YYYY-MM-DD`
+- Stores `DailyPrayerCompletion` object as JSON
+- Automatic cleanup of old dates
+
+**Database Records:**
+- One row per user per day
+- Boolean flags for each prayer
+- No deletion (preserve history)
+- Updated via UPSERT pattern (check for existing record, then update or insert)
+
+### Testing
+
+**Hook Tests (`__tests__/usePrayerTracking.test.tsx`):**
+- Guest user localStorage flow
+- Authenticated user database flow
+- Toggle prayer completion
+- Time range changes
+- Auto-sync on sign-in
+- Midnight reset
+- Error handling
+
+**Component Tests:**
+- `PrayerCheckboxes.test.tsx` - Checkbox rendering, toggle functionality, completion summary
+- `PrayerStatistics.test.tsx` - Guest prompt, expand/collapse, time range selector, charts rendering, empty state
+
+### Performance Considerations
+- Statistics calculation happens client-side (no extra API calls)
+- Checkbox toggles use optimistic updates (instant UI feedback)
+- Time range changes trigger single database query
+- Charts only render when section is expanded (lazy rendering)
+
+**V1.1 Status:** ✅ **Complete** (November 2024) - Prayer completion tracking, dual-storage pattern, historical analytics with charts, time range filtering, per-prayer breakdown, guest user support, auto-sync
+
+**Future Enhancements (V1.2+):**
+- **V1.2:** Streak tracking (consecutive days with all prayers completed)
+- **V1.2:** Prayer time proximity tracking ("prayed on time" vs "late")
+- **V1.3:** Goal setting (target completion rates)
+- **V1.3:** Reminders based on completion patterns
+- **V2.0:** Social features (share progress with friends, community challenges)
 
 ---
 

@@ -68,7 +68,7 @@ This document outlines the development milestones and future vision for the Rama
 ## V1.1 – Quick Wins & Polish 🚧
 
 **Timeline:** 2-3 weeks  
-**Status:** IN PROGRESS - 1 of 10 features complete  
+**Status:** IN PROGRESS - 2 of 10 features complete  
 **Focus:** High-impact enhancements, bug fixes, UX improvements  
 **Theme:** Enhance existing features and add most-requested capabilities
 
@@ -78,7 +78,7 @@ This document outlines the development milestones and future vision for the Rama
 | 🔥 High | Full Quran Browser | Search by surah/ayah, juz navigation, browse all 114 surahs | ✅ **Complete** (Nov 2024) |
 | 🔥 High | Prayer Time Notifications | Web Push API for prayer reminders | 📋 Planned |
 | 🔥 High | Expanded Dua Library | 50 → 100+ duas with new categories | 📋 Planned |
-| 🔥 High | Prayer Tracking | Mark prayers as completed, daily progress | 📋 Planned |
+| 🔥 High | Prayer Tracking | Mark prayers as completed, daily progress, historical analytics | ✅ **Complete** (Nov 2024) |
 | 🟡 Medium | Recurring Donations | Track monthly/yearly recurring charity | 📋 Planned |
 | 🟡 Medium | CSV Export | Download donation history for taxes | 📋 Planned |
 | 🟡 Medium | Multi-currency | USD, EUR, GBP, CAD, conversion support | 📋 Planned |
@@ -90,6 +90,7 @@ This document outlines the development milestones and future vision for the Rama
 | Feature | Completion Date | Description |
 |---------|----------------|-------------|
 | **Full Quran Browser** | November 2024 | Complete browsing experience with 114 surahs, Juz navigation, bookmarks (dual-storage), favorites integration, translation switching, auto-resume, ayah sharing, search, list/grid views |
+| **Prayer Tracking** | November 2024 | Daily prayer completion tracking with checkboxes, completion summary, historical analytics (7/30/90 days, all-time), line charts, pie charts, per-prayer breakdown, dual-storage for guests and authenticated users, auto-sync on sign-in |
 
 ### Technical Enhancements
 - **PWA Manifest:** Make app installable on mobile devices

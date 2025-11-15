@@ -4,11 +4,17 @@ import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Clock, Sunrise, Loader2 } from 'lucide-react'
 import { usePrayerTimes } from '@/hooks/usePrayerTimes'
+import { usePrayerTracking } from '@/hooks/usePrayerTracking'
+import { useAuth } from '@/hooks/useAuth'
 import { QiblaCompass } from '@/components/prayer-times/QiblaCompass'
 import { PrayerTimesSettings } from '@/components/prayer-times/PrayerTimesSettings'
+import { PrayerCheckbox, PrayerCompletionSummary } from '@/components/prayer-times/PrayerCheckboxes'
+import { PrayerStatistics } from '@/components/prayer-times/PrayerStatistics'
 import { FeedbackButton } from '@/components/FeedbackButton'
+import type { PrayerName } from '@/types/prayer-tracking.types'
 
 export default function TimesPage() {
+  const { user } = useAuth()
   const {
     prayerTimes,
     nextPrayer,
@@ -22,6 +28,16 @@ export default function TimesPage() {
     updateCalculationMethod,
     updateMadhab,
   } = usePrayerTimes()
+
+  const {
+    todayCompletion,
+    statistics,
+    timeRange,
+    loading: trackingLoading,
+    accountCreatedAt,
+    togglePrayer,
+    setTimeRange,
+  } = usePrayerTracking()
 
   // Format time to 12-hour format
   const formatTime = (timeString: string) => {
@@ -134,13 +150,22 @@ export default function TimesPage() {
               {/* Prayer Schedule */}
               <Card className="rounded-2xl shadow-sm">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-base font-medium">Today's Prayer Times</CardTitle>
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <CardTitle className="text-base font-medium">Today's Prayer Times</CardTitle>
+                    <PrayerCompletionSummary todayCompletion={todayCompletion} />
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
                     {prayerSchedule.map((prayer) => {
                       const timeUntil = prayer.isPrayer ? getTimeUntil(prayer.time) : null
                       const isNext = nextPrayer?.name === prayer.name
+                      const isPrayerCompleted =
+                        todayCompletion && prayer.isPrayer
+                          ? todayCompletion[
+                              `${prayer.name.toLowerCase()}_completed` as keyof typeof todayCompletion
+                            ]
+                          : false
 
                       return (
                         <div
@@ -150,10 +175,19 @@ export default function TimesPage() {
                           }`}
                         >
                           <div className="flex items-center gap-3">
+                            {prayer.isPrayer && todayCompletion && (
+                              <PrayerCheckbox
+                                prayerName={prayer.name as PrayerName}
+                                completed={isPrayerCompleted as boolean}
+                                onToggle={togglePrayer}
+                              />
+                            )}
                             {prayer.name === 'Sunrise' ? (
                               <Sunrise className="h-5 w-5 text-muted-foreground" />
                             ) : (
-                              <Clock className={`h-5 w-5 ${isNext ? 'text-primary' : 'text-muted-foreground'}`} />
+                              <Clock
+                                className={`h-5 w-5 ${isNext ? 'text-primary' : 'text-muted-foreground'}`}
+                              />
                             )}
                             <div>
                               <p className={`font-medium ${isNext ? 'text-primary' : 'text-foreground'}`}>
@@ -181,6 +215,16 @@ export default function TimesPage() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Prayer Statistics */}
+              <PrayerStatistics
+                statistics={statistics}
+                timeRange={timeRange}
+                onTimeRangeChange={setTimeRange}
+                loading={trackingLoading}
+                isAuthenticated={!!user}
+                accountCreatedAt={accountCreatedAt}
+              />
             </div>
 
             {/* Right Column - Sidebar */}

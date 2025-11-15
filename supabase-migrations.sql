@@ -453,3 +453,60 @@ USING (
   )
 );
 
+-- ============================================
+-- 17. CREATE PRAYER TRACKING TABLE
+-- ============================================
+
+-- Prayer tracking table for daily prayer completion
+CREATE TABLE IF NOT EXISTS prayer_tracking (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  date DATE NOT NULL,
+  fajr_completed BOOLEAN DEFAULT FALSE,
+  dhuhr_completed BOOLEAN DEFAULT FALSE,
+  asr_completed BOOLEAN DEFAULT FALSE,
+  maghrib_completed BOOLEAN DEFAULT FALSE,
+  isha_completed BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, date)
+);
+
+-- Create indexes for prayer tracking queries
+CREATE INDEX IF NOT EXISTS idx_prayer_tracking_user_date ON prayer_tracking(user_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_prayer_tracking_user_id ON prayer_tracking(user_id);
+
+-- Enable RLS for prayer_tracking table
+ALTER TABLE prayer_tracking ENABLE ROW LEVEL SECURITY;
+
+-- ============================================
+-- 18. CREATE RLS POLICIES - PRAYER TRACKING
+-- ============================================
+
+-- Drop existing policies if any
+DROP POLICY IF EXISTS "Users can view their own prayer tracking" ON prayer_tracking;
+DROP POLICY IF EXISTS "Users can insert their own prayer tracking" ON prayer_tracking;
+DROP POLICY IF EXISTS "Users can update their own prayer tracking" ON prayer_tracking;
+
+-- Users can view their own prayer tracking
+CREATE POLICY "Users can view their own prayer tracking"
+ON prayer_tracking FOR SELECT
+USING (auth.uid() = user_id);
+
+-- Users can insert their own prayer tracking
+CREATE POLICY "Users can insert their own prayer tracking"
+ON prayer_tracking FOR INSERT
+WITH CHECK (auth.uid() = user_id);
+
+-- Users can update their own prayer tracking
+CREATE POLICY "Users can update their own prayer tracking"
+ON prayer_tracking FOR UPDATE
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+-- Trigger for automatic updated_at on prayer_tracking
+DROP TRIGGER IF EXISTS prayer_tracking_updated_at ON prayer_tracking;
+CREATE TRIGGER prayer_tracking_updated_at
+  BEFORE UPDATE ON prayer_tracking
+  FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+

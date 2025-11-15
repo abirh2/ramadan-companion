@@ -69,3 +69,30 @@ jest.mock('@/lib/supabase/server', () => ({
   })),
 }))
 
+// Mock the legacy supabaseClient to prevent initialization errors
+jest.mock('@/lib/supabaseClient', () => ({
+  supabase: {
+    auth: {
+      getSession: jest.fn(),
+      onAuthStateChange: jest.fn(() => ({
+        data: { subscription: { unsubscribe: jest.fn() } },
+      })),
+      signInWithPassword: jest.fn(),
+      signUp: jest.fn(),
+      signInWithOAuth: jest.fn(),
+      signOut: jest.fn(),
+    },
+    from: jest.fn(() => ({
+      select: jest.fn(() => ({
+        eq: jest.fn(() => ({
+          single: jest.fn().mockResolvedValue({ data: null, error: null }),
+        })),
+      })),
+      insert: jest.fn().mockResolvedValue({ data: null, error: null }),
+      upsert: jest.fn().mockResolvedValue({ data: null, error: null }),
+      update: jest.fn().mockResolvedValue({ data: null, error: null }),
+      delete: jest.fn().mockResolvedValue({ data: null, error: null }),
+    })),
+  },
+}))
+
