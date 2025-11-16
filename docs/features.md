@@ -494,6 +494,13 @@ Show one ayah and one hadith per day (same for all users) and allow favorites. *
     - Pool: ~15,000 hadiths across both Sahih collections
   - **Seeded randomness** ensures predictability (same seed = same ayah/hadith)
   - Balances impactful content with full collection coverage
+- **Cross-reference detection & resolution (Hadith only):**
+  - Some hadiths are cross-references (e.g., "A similar hadith has been narrated...") rather than complete text
+  - API automatically detects cross-references using pattern matching
+  - Fallback mechanism searches adjacent hadith numbers (±1, ±2, ±3...) up to 10 attempts
+  - Search sequence is deterministic: original → +1 → -1 → +2 → -2 → +3 → -3, etc.
+  - Users always receive complete hadiths with full Arabic text and English/Urdu translations
+  - Maintains global consistency (same date = same hadith for all users, including fallback)
 - **Daily content viewable without auth**
 - **Favorites stored in Supabase `favorites` table with RLS**
 - **Favorite button shows login prompt if not authenticated**

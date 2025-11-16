@@ -257,8 +257,27 @@
 
 **Caching:** 24 hours (revalidate: 86400) - Same hadith all day
 
+**Cross-Reference Detection & Fallback:**
+- Some hadiths in the collections are cross-references (referencing other narrations instead of containing full text)
+- The API automatically detects cross-references using pattern matching on the English text
+- When a cross-reference is detected, the API searches adjacent hadith numbers (±1, ±2, ±3...) up to 10 attempts
+- Search sequence: original → +1 → -1 → +2 → -2 → +3 → -3, etc. (deterministic)
+- Users always receive complete hadiths with full text in all languages
+- The fallback sequence is deterministic based on date seed, ensuring all users see the same hadith each day
+
+**Cross-Reference Detection Patterns:**
+- "similar hadith"
+- "like this has been narrated"
+- "transmitted through another chain"
+- "narrated through another chain"
+- "has been transmitted on the authority"
+- "hadith like this"
+- "narrated by" (in reference context)
+- "similar tradition"
+- Empty or whitespace-only English text
+
 **Error Handling:**
-- 500: HadithAPI error, missing API key, or network failure
+- 500: HadithAPI error, missing API key, network failure, or no complete hadith found after 10 attempts
 
 **External API:**
 - Base URL: `https://hadithapi.com/api`

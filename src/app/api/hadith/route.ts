@@ -155,6 +155,46 @@ function getDailyHadithSelection(): { book: 'sahih-bukhari' | 'sahih-muslim'; ha
   }
 }
 
+/**
+ * Check if a hadith text is a cross-reference note rather than complete hadith content
+ * Cross-references typically contain phrases indicating the hadith is narrated elsewhere
+ */
+function isCrossReference(hadithEnglish: string): boolean {
+  if (!hadithEnglish || hadithEnglish.trim().length === 0) {
+    return true // Empty text is considered incomplete
+  }
+
+  const patterns = [
+    'similar hadith',
+    'like this has been narrated',
+    'transmitted through another chain',
+    'narrated through another chain',
+    'has been transmitted on the authority',
+    'hadith like this',
+    'similar tradition',
+    'this tradition has been',
+    'narrated from another chain',
+  ]
+  
+  const lowerText = hadithEnglish.toLowerCase()
+  
+  // Check for short text that's likely just a cross-reference
+  // Complete hadiths are typically longer than 100 characters
+  if (lowerText.length < 100 && patterns.some(pattern => lowerText.includes(pattern))) {
+    return true
+  }
+  
+  // For longer texts, only match if they start with these patterns (more specific)
+  const startPatterns = [
+    'a similar hadith',
+    'a hadith like this',
+    'this hadith',
+    'similar tradition',
+  ]
+  
+  return startPatterns.some(pattern => lowerText.startsWith(pattern))
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Validate API key
@@ -172,27 +212,65 @@ export async function GET(request: NextRequest) {
     // Calculate today's hadith
     const { book, hadithNumber } = getDailyHadithSelection()
 
-    // Fetch hadith from HadithAPI
-    // Note: API requires hadithNumber parameter and book parameter
-    const apiUrl = `${HADITH_API_BASE_URL}/hadiths/?apiKey=${HADITH_API_KEY}&hadithNumber=${hadithNumber}&book=${book}&paginate=1`
+    // Try initial hadith, then adjacent ones if cross-reference detected
+    // This ensures users always see complete hadiths with full text
+    const MAX_ATTEMPTS = 10
+    let attempts = 0
+    let finalHadith = null
 
-    const response = await fetch(apiUrl, {
-      next: { revalidate: 86400 }, // Cache for 24 hours (same hadith all day)
-    })
+    while (attempts < MAX_ATTEMPTS && !finalHadith) {
+      // Calculate offset: 0, +1, -1, +2, -2, +3, -3, +4, -4, +5
+      const offset = attempts === 0 ? 0 : 
+                     attempts % 2 === 1 ? Math.ceil(attempts / 2) : 
+                     -Math.ceil(attempts / 2)
+      
+      const tryNumber = hadithNumber + offset
 
-    if (!response.ok) {
-      throw new Error(`HadithAPI error: ${response.status}`)
+      // Skip invalid hadith numbers
+      if (tryNumber < 1) {
+        attempts++
+        continue
+      }
+
+      try {
+        // Fetch hadith from HadithAPI
+        const apiUrl = `${HADITH_API_BASE_URL}/hadiths/?apiKey=${HADITH_API_KEY}&hadithNumber=${tryNumber}&book=${book}&paginate=1`
+        
+        const response = await fetch(apiUrl, {
+          next: { revalidate: 86400 }, // Cache for 24 hours (same hadith all day)
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          
+          // Validate response structure
+          if (data.status === 200 && data.hadiths?.data?.[0]) {
+            const hadith = data.hadiths.data[0]
+            
+            // Check if this is a complete hadith (not a cross-reference)
+            if (!isCrossReference(hadith.hadithEnglish)) {
+              finalHadith = hadith
+              break
+            } else {
+              console.log(`Hadith ${tryNumber} is a cross-reference, trying next...`)
+            }
+          }
+        }
+      } catch (fetchError) {
+        console.error(`Error fetching hadith ${tryNumber}:`, fetchError)
+        // Continue to next attempt
+      }
+
+      attempts++
     }
 
-    const data = await response.json()
-
-    // Validate response - API returns hadiths.data array, not single hadith
-    if (data.status !== 200 || !data.hadiths || !data.hadiths.data || data.hadiths.data.length === 0) {
-      throw new Error('Invalid response from HadithAPI')
+    // If no complete hadith found after all attempts
+    if (!finalHadith) {
+      throw new Error('Could not find complete hadith after multiple attempts. All nearby hadiths appear to be cross-references.')
     }
 
-    // Extract first hadith from the array
-    const hadith = data.hadiths.data[0]
+    // Extract the found hadith
+    const hadith = finalHadith
 
     // Format response
     const formattedResponse: DailyHadithResponse = {
