@@ -229,12 +229,12 @@ You can safely add:
 
 1. **Tailwind Plugins**
 
-   * `@tailwindcss/typography` (optional)
+   * `@tailwindcss/typography`
 
      * Better prose for Quran/hadith content (`prose` classes).
-     * Not currently installed but can be added if needed for article-style content.
-   
-   **Note:** We use **Tailwind CSS v3.4.17** (stable) for production reliability. Tailwind v4 is still in alpha/beta and has compatibility issues with native build tooling on some platforms.
+   * `tailwindcss-animate`
+
+     * Smooth, minimal animations (already used by shadcn).
 
 2. **Pattern / Background Generators**
 
