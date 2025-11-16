@@ -1,30 +1,52 @@
-### Recently Completed
+### Recently Completed (V1.1)
 | Feature | Completion Date | Description |
 |---------|----------------|-------------|
 | **Full Quran Browser** | November 2024 | Complete browsing experience with 114 surahs, Juz navigation, bookmarks (dual-storage), favorites integration, translation switching, auto-resume, ayah sharing, search, list/grid views |
 | **Prayer Tracking** | November 2024 | Daily prayer completion tracking with checkboxes, completion summary, historical analytics (7/30/90 days, all-time), line charts, pie charts, per-prayer breakdown, dual-storage for guests and authenticated users, auto-sync on sign-in |
 | **Prayer Time Notifications** | November 2024 | Browser notifications at exact prayer times with authentic hadith quotes, per-prayer toggle controls, automatic rescheduling, dual-storage pattern for guests and authenticated users, cross-device preference sync |
+| **PWA Installation** | November 2024 | Progressive Web App with offline support, platform-specific install banners (iOS Safari/Chrome, Android, Desktop), service worker caching, installable on home screen |
 
-### Technical Enhancements
-- **PWA Manifest:** Make app installable on mobile devices
-- **Notification Permission Flow:** User-friendly permission request UI
-- **Service Worker:** Offline caching strategy for core pages
-- **Image Optimization:** WebP format, lazy loading, compression
-- **Performance:** Code splitting, bundle size reduction
-- **Currency API Integration:** Real-time conversion rates
-- **Database Migrations:** New tables for prayers, favorites, recurring donations
+---
 
-### Bug Fixes & Polish
-- Address user-reported feedback from feedback system
-- Mobile UI refinements (spacing, touch targets)
-- Loading state improvements (skeletons, spinners)
-- Error handling enhancements (retry logic, better messages)
-- Accessibility improvements (ARIA labels, keyboard nav)
+## V1.1 – Polish & Core Enhancements 📋
+
+**Timeline:** October - November 2024  
+**Focus:** Complete core features, performance optimization, PWA capabilities  
+**Status:** 🟡 **Partially Complete** (November 2024)
+
+### ✅ Completed Features
+
+#### Core Features
+- [x] **Full Quran Browser** - 114 surahs with translations, bookmarks, Juz navigation
+- [x] **Prayer Tracking** - Daily logs with historical analytics and charts
+- [x] **Prayer Time Notifications** - Browser notifications with hadith quotes
+- [x] **PWA Installation** - iOS/Android/Desktop support with platform-specific guidance
+
+#### Technical Enhancements
+- [x] **PWA Manifest** - App installable on mobile devices
+- [x] **Notification Permission Flow** - User-friendly permission request UI
+- [x] **Service Worker** - Offline caching strategy for core pages
+- [x] **iOS Browser Detection** - Platform-specific install guidance for iOS Chrome/Firefox/Edge
+- [x] **Database Migrations** - New tables for prayers, favorites, bookmarks
+
+### 🚧 Remaining Work
+
+#### Performance & Optimization
+- [ ] **Image Optimization** - WebP format conversion, lazy loading, compression
+- [ ] **Performance** - Code splitting, bundle size reduction, tree shaking
+- [ ] **Currency API Integration** - Real-time exchange rates for donation tracking
+
+#### Polish & UX
+- [ ] **User Feedback Fixes** - Address issues from feedback system
+- [ ] **Mobile UI Refinements** - Improve spacing, touch targets, responsiveness
+- [ ] **Loading State Improvements** - Add skeletons, better spinners
+- [ ] **Error Handling** - Better retry logic, more helpful error messages
+- [ ] **Accessibility** - Complete ARIA labels, keyboard navigation improvements
 
 ### Dependencies
-- **ExchangeRate-API.com:** Free tier (1500 requests/month)
-- **Web Push API:** Native browser support (no external service)
-- **Supabase Storage:** Image hosting (free tier sufficient)
+- **ExchangeRate-API.com** - Free tier (1500 requests/month) for currency conversion
+- **Web Push API** - Native browser support (no external service needed)
+- **Supabase Storage** - Image hosting (free tier sufficient)
 
 ---
 
