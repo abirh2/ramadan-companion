@@ -1,6 +1,6 @@
 # Architecture Overview
 
-**Version 1.0 Complete** (November 2024)
+**Version 1.1 In Progress** (November 2024)
 
 ## High-Level Project Structure
 
@@ -78,6 +78,7 @@
 | **User Feedback** | Supabase | Cloud (open insert, admin read) | No | ✅ V1.0 |
 | **Admin Dashboard** | Supabase | Cloud (admin-only RLS) | Yes (admin) | ✅ V1.0 |
 | **About Page** | Static content | None | No | ✅ V1.0 |
+| **PWA Installation** | Service Worker + Manifest | Browser Cache + localStorage | No | ✅ V1.1 |
 
 ## Data Separation
 
@@ -190,7 +191,8 @@
 | Mosque data | 1 hour | Community data may update |
 | Food places | 1 hour | Business data may change |
 
-All caching implemented via Next.js `revalidate` option in `fetch()` calls.
+API caching implemented via Next.js `revalidate` option in `fetch()` calls.
+Service worker caching implements Cache-First (static assets) and Network-First (dynamic content) strategies.
 
 ---
 
@@ -205,9 +207,15 @@ All caching implemented via Next.js `revalidate` option in `fetch()` calls.
 - Local prayer time fallback (no API needed)
 - LocalStorage for instant preference loading
 
-**Planned (V1.1+):**
-- Service worker for offline caching
+**V1.1 Implemented:**
+- Service worker with intelligent caching (Cache-First for static, Network-First for dynamic)
+- Offline support for critical pages and API responses
+- PWA installability with app shortcuts
+- Smart install prompts with engagement tracking
+
+**Planned (V1.2+):**
 - Code splitting improvements
 - Bundle size reduction
 - WebP image format
 - CDN integration for static assets
+- Web Push notifications for prayer times

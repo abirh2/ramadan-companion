@@ -1,0 +1,55 @@
+{
+  "name": "Ramadan Companion",
+  "short_name": "Ramadan",
+  "description": "Islamic companion for prayer times, Quran, Hadith, and charity tracking",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f3f0",
+  "theme_color": "#0f3d3e",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["lifestyle", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Prayer Times",
+      "url": "/times",
+      "description": "View today's prayer times"
+    },
+    {
+      "name": "Quran & Hadith",
+      "url": "/quran-hadith",
+      "description": "Read daily ayah and hadith"
+    },
+    {
+      "name": "Zikr Counter",
+      "url": "/zikr",
+      "description": "Track dhikr and duas"
+    }
+  ]
+}
+

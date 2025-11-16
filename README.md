@@ -25,8 +25,8 @@ A modern, minimal web app built for Muslims to assist with daily worship and ref
 - ✅ **Dark Mode** - Beautiful theme switching for day and night
 - ✅ **Mobile-First** - Responsive design optimized for all devices
 - ✅ **Privacy-First** - Your data stays secure with Supabase RLS policies
-- ✅ **Offline Fallback** - Prayer times work without internet (local calculation)
-- ✅ **PWA-Ready** - Installable as a progressive web app with service worker support
+- ✅ **Offline Support** - Works offline with intelligent caching and local prayer time calculation
+- ✅ **Installable PWA** 🆕 - Install on iOS, Android, and Desktop for native app experience with offline access
 
 ## Getting Started
 
@@ -102,11 +102,12 @@ We're actively working on the next version with exciting enhancements:
 
 ### Recently Completed (V1.1)
 - ✅ **Full Quran Browser** - Complete browsing experience with 114 surahs, Juz navigation, bookmarks (dual-storage), favorites integration, translation switching, auto-resume, ayah sharing, search, list/grid views
+- ✅ **Prayer Tracking** - Mark prayers as completed and track daily progress with historical analytics, charts, and per-prayer breakdown
+- ✅ **PWA Installation** - Full progressive web app support with smart install prompts, offline caching, and platform-specific install guides
 
 ### Coming Soon (V1.1)
 - 🔔 **Prayer Time Notifications** - Push notifications for prayer reminders
 - 🤲 **Expanded Dua Library** - 100+ duas with new categories (illness, travel, marriage, children)
-- ✅ **Prayer Tracking** - Mark prayers as completed and track daily progress
 - 💰 **Recurring Donations** - Track monthly/yearly recurring charity commitments
 - 📊 **CSV Export** - Download donation history for tax receipts
 - 💱 **Multi-currency Support** - USD, EUR, GBP, CAD with live conversion rates
