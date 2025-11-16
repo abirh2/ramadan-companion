@@ -2221,3 +2221,140 @@ Enable users to install Ramadan Companion as a progressive web app on their devi
 
 
 
+
+---
+
+## Prayer Time Notifications (V1.1)
+
+### Functionality
+Enable users to receive browser notifications at exact prayer times with motivational reminders from authentic hadith.
+
+### Implementation Status
+✅ **Fully Implemented (V1.1 - November 2024)**
+
+### Features
+- **Browser-based notifications** using Web Push API and Service Worker
+- **Per-prayer control** - Enable/disable individual prayers (Fajr, Dhuhr, Asr, Maghrib, Isha)
+- **Master toggle** - Enable/disable all notifications at once
+- **Motivational hadith quotes** - 10 curated quotes from Sahih collections
+- **Automatic rescheduling** - Notifications reschedule after each prayer passes
+- **Dual-storage pattern** - Works for guest users (localStorage) and authenticated users (Supabase profile)
+- **Cross-device sync** - Preferences sync across devices for authenticated users
+
+### User Flow
+1. User navigates to `/times` page
+2. Clicks "Enable Notifications" button in NotificationSettings card
+3. Browser requests notification permission
+4. On grant, all 5 prayers are enabled by default
+5. User can toggle individual prayers on/off
+6. Notifications appear at exact prayer times with hadith quotes
+7. Clicking notification opens `/times` page
+
+### Technical Implementation
+
+**Components:**
+- `NotificationSettings` - Main UI component on `/times` page
+- `useNotifications` - Hook for permission and preference management
+- `notifications.ts` - Core scheduling and browser API logic
+- `prayerQuotes.ts` - Curated hadith quote collection
+- Service Worker - Push and click event handlers
+
+**Notification Format:**
+```
+Title: "Time for Fajr Prayer - 5:30 AM"
+Body: "Whoever prays Fajr is under Allah's protection - Sahih Muslim"
+Icon: App icon (192x192)
+Click Action: Opens /times page
+```
+
+**Hadith Quote Collection:**
+- 10 authentic quotes from Sahih Bukhari, Sahih Muslim, and verified Sahih collections
+- Prayer-specific quotes (Fajr virtue, Asr paradise, Isha congregation)
+- General prayer importance quotes
+- Proper source attribution included
+
+**Scheduling Logic:**
+- Notifications scheduled using `setTimeout` based on prayer times
+- Automatically reschedule when:
+  - Prayer passes (detected every second in countdown)
+  - Location/calculation method changes
+  - Day changes (midnight crossing)
+- Tomorrow's Fajr scheduled proactively after Isha
+
+**Preference Storage:**
+```json
+{
+  "enabled": true,
+  "prayers": {
+    "Fajr": true,
+    "Dhuhr": true,
+    "Asr": false,
+    "Maghrib": true,
+    "Isha": true
+  }
+}
+```
+
+### UI Locations
+
+**Primary:** `/times` page - NotificationSettings card in right sidebar
+- Permission request button
+- Master enable/disable toggle
+- Individual prayer checkboxes with descriptions
+- Status indicator (X prayers enabled)
+
+**Secondary:** `/profile` page - Notification Preferences summary (read-only)
+- Shows enabled/disabled status
+- Lists enabled prayers with checkmarks
+- "Manage" link to `/times` page
+- Only visible if notifications are enabled
+
+### Browser Compatibility
+- ✅ Chrome/Edge (Desktop & Android)
+- ✅ Safari (iOS 16.4+, macOS)
+- ✅ Firefox (Desktop)
+- ⚠️ iOS Chrome/Firefox - Must use Safari (iOS restriction)
+
+### Permission States
+
+**Not Supported:**
+- Shows compatibility message
+- Suggests using Chrome, Edge, or Safari
+
+**Default (Not Requested):**
+- Shows "Enable Notifications" button
+- Explains feature benefits
+
+**Denied:**
+- Shows instructions to re-enable in browser settings
+- Step-by-step guide for unblocking
+
+**Granted:**
+- Shows full preferences UI
+- Master toggle and individual prayer controls
+
+### Error Handling
+- Graceful degradation when notification API unavailable
+- Silent failure for optional browser features
+- User-friendly error messages
+- Permission denial handled with instructions
+
+### Testing
+- Comprehensive test suite for `useNotifications` hook
+- Component tests for `NotificationSettings` UI
+- Covers 12+ scenarios including:
+  - Browser support detection
+  - Permission flow (grant, deny, already granted)
+  - Individual prayer toggles
+  - Enable/disable all
+  - Guest vs authenticated user storage
+  - Error handling
+
+**V1.1 Status:** ✅ **Complete** (November 2024)
+
+**Future Enhancements (V1.2+):**
+- **V1.2:** Reminder timing options (5/10/15 minutes before prayer)
+- **V1.2:** Custom notification sounds
+- **V1.2:** Snooze functionality
+- **V1.3:** Notification history log
+- **V2.0:** Advanced scheduling (weekday/weekend differences)

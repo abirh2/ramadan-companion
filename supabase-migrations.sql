@@ -510,3 +510,23 @@ CREATE TRIGGER prayer_tracking_updated_at
   BEFORE UPDATE ON prayer_tracking
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
+-- ============================================
+-- 19. ADD NOTIFICATION PREFERENCES TO PROFILES
+-- ============================================
+
+-- Add notification_preferences JSONB field to profiles table
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'profiles' 
+    AND column_name = 'notification_preferences'
+  ) THEN
+    ALTER TABLE profiles ADD COLUMN notification_preferences JSONB DEFAULT '{"enabled": false, "prayers": {"Fajr": true, "Dhuhr": true, "Asr": true, "Maghrib": true, "Isha": true}}'::jsonb;
+  END IF;
+END $$;
+
+-- Add comment for documentation
+COMMENT ON COLUMN profiles.notification_preferences IS 'User preferences for prayer time notifications. Stores enabled state and per-prayer toggles.';
+

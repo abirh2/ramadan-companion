@@ -3,17 +3,21 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { createClient } from '@/lib/supabase/client';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Bell, BellOff, Check, ExternalLink } from 'lucide-react';
 import { FeedbackButton } from '@/components/FeedbackButton';
+import { useNotifications } from '@/hooks/useNotifications';
+import type { PrayerName } from '@/types/notification.types';
 
 export default function ProfilePage() {
   const { user, profile, loading, refreshProfile } = useAuth();
   const router = useRouter();
   const supabase = createClient();
+  const { preferences, isSupported } = useNotifications();
 
   const [displayName, setDisplayName] = useState('');
   const [saving, setSaving] = useState(false);
@@ -86,6 +90,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Content */}
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>Account Information</CardTitle>
@@ -140,6 +145,86 @@ export default function ProfilePage() {
             </form>
           </CardContent>
         </Card>
+
+        {/* Notification Preferences Summary */}
+        {isSupported && preferences.enabled && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Bell className="h-5 w-5 text-primary" />
+                  <CardTitle>Notification Preferences</CardTitle>
+                </div>
+                <Link href="/times">
+                  <Button variant="ghost" size="sm">
+                    Manage
+                    <ExternalLink className="h-4 w-4 ml-2" />
+                  </Button>
+                </Link>
+              </div>
+              <CardDescription>
+                Your prayer time notification settings
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Bell className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    Notifications are enabled
+                  </p>
+                </div>
+
+                <div className="space-y-2 mt-4">
+                  <p className="text-sm font-medium">Enabled Prayers:</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(Object.entries(preferences.prayers) as [PrayerName, boolean][]).map(
+                      ([prayer, enabled]) =>
+                        enabled && (
+                          <div
+                            key={prayer}
+                            className="flex items-center gap-2 text-sm"
+                          >
+                            <Check className="h-4 w-4 text-primary" />
+                            <span>{prayer}</span>
+                          </div>
+                        )
+                    )}
+                  </div>
+                </div>
+
+                <p className="text-xs text-muted-foreground mt-4">
+                  You'll receive notifications at exact prayer times with
+                  motivational reminders from authentic hadith.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Show disabled state if supported but not enabled */}
+        {isSupported && !preferences.enabled && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <BellOff className="h-5 w-5 text-muted-foreground" />
+                <CardTitle>Notification Preferences</CardTitle>
+              </div>
+              <CardDescription>
+                Prayer time notifications are currently disabled
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link href="/times">
+                <Button variant="outline" size="sm">
+                  Enable Notifications
+                  <ExternalLink className="h-4 w-4 ml-2" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
       {/* Feedback Button */}
       <FeedbackButton pagePath="/profile" />

@@ -10,6 +10,7 @@ import { QiblaCompass } from '@/components/prayer-times/QiblaCompass'
 import { PrayerTimesSettings } from '@/components/prayer-times/PrayerTimesSettings'
 import { PrayerCheckbox, PrayerCompletionSummary } from '@/components/prayer-times/PrayerCheckboxes'
 import { PrayerStatistics } from '@/components/prayer-times/PrayerStatistics'
+import { NotificationSettings } from '@/components/prayer-times/NotificationSettings'
 import { FeedbackButton } from '@/components/FeedbackButton'
 import type { PrayerName } from '@/types/prayer-tracking.types'
 
@@ -241,6 +242,9 @@ export default function TimesPage() {
                 onMadhabChange={updateMadhab}
                 onLocationChange={updateLocation}
               />
+
+              {/* Notification Settings */}
+              <NotificationSettings />
             </div>
           </div>
         )}

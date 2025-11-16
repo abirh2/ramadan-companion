@@ -21,6 +21,7 @@ import {
   MECCA_COORDS,
 } from '@/lib/location'
 import { calculatePrayerTimesLocal, validatePrayerTimes } from '@/lib/prayerTimes'
+import { scheduleNotifications, getNotificationPreferences, cancelNotifications } from '@/lib/notifications'
 
 // Prayer names in order (excluding Sunrise for next prayer calculation)
 const PRAYER_NAMES = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const
@@ -55,6 +56,7 @@ export function usePrayerTimes(): UsePrayerTimesResult {
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const mountedRef = useRef(true)
   const lastDateRef = useRef<string>(new Date().toDateString())
+  const lastPrayerNameRef = useRef<string | null>(null)
 
   // Calculate next prayer and countdown
   const calculateNextPrayer = useCallback((
@@ -330,6 +332,9 @@ export function usePrayerTimes(): UsePrayerTimesResult {
 
       // Calculate next prayer with tomorrow's times if available
       const nextPrayer = calculateNextPrayer(prayerTimes, tomorrowTimes)
+      
+      // Initialize lastPrayerNameRef
+      lastPrayerNameRef.current = nextPrayer?.name || null
 
       setState({
         prayerTimes,
@@ -343,6 +348,12 @@ export function usePrayerTimes(): UsePrayerTimesResult {
         loading: false,
         error: null,
       })
+
+      // Schedule notifications if enabled
+      const notificationPreferences = getNotificationPreferences(profile)
+      if (notificationPreferences.enabled) {
+        scheduleNotifications(prayerTimes, notificationPreferences)
+      }
 
       // Start countdown interval
       if (intervalRef.current) {
@@ -361,6 +372,18 @@ export function usePrayerTimes(): UsePrayerTimesResult {
         }
         
         const updatedNextPrayer = calculateNextPrayer(prayerTimes!, tomorrowTimes)
+        
+        // Check if prayer just passed - reschedule notifications if needed
+        const currentPrayerName = updatedNextPrayer?.name || null
+        if (currentPrayerName && lastPrayerNameRef.current && currentPrayerName !== lastPrayerNameRef.current) {
+          console.log('[PrayerTimes] Prayer changed, rescheduling notifications')
+          const notificationPreferences = getNotificationPreferences(profile)
+          if (notificationPreferences.enabled && prayerTimes) {
+            scheduleNotifications(prayerTimes, notificationPreferences)
+          }
+        }
+        lastPrayerNameRef.current = currentPrayerName
+        
         setState((prev) => ({ ...prev, nextPrayer: updatedNextPrayer }))
       }, 1000)
     } catch (error) {
@@ -388,6 +411,8 @@ export function usePrayerTimes(): UsePrayerTimesResult {
         clearInterval(intervalRef.current)
         intervalRef.current = null
       }
+      // Clear all scheduled notifications on unmount
+      cancelNotifications()
     }
   }, [fetchData])
 

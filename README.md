@@ -8,6 +8,7 @@ A modern, minimal web app built for Muslims to assist with daily worship and ref
 
 ### Core Features
 - ✅ **Prayer Times & Qibla** - Accurate daily prayer times with 7 calculation methods, live countdown, Qibla compass, and offline fallback
+- ✅ **Prayer Notifications** 🆕 V1.1 - Browser notifications at exact prayer times with motivational hadith quotes and per-prayer control
 - ✅ **Ramadan Countdown** - Track days until Ramadan with Hijri calendar integration and iftar/suhoor timers
 - ✅ **Quran Browser** 🆕 - Browse all 114 surahs with translations, Juz navigation, bookmarks, search, and auto-resume reading position
 - ✅ **Daily Quran** - Weighted random ayah selection with 4 translations (Asad, Sahih International, Pickthall, Yusuf Ali)
@@ -103,10 +104,10 @@ We're actively working on the next version with exciting enhancements:
 ### Recently Completed (V1.1)
 - ✅ **Full Quran Browser** - Complete browsing experience with 114 surahs, Juz navigation, bookmarks (dual-storage), favorites integration, translation switching, auto-resume, ayah sharing, search, list/grid views
 - ✅ **Prayer Tracking** - Mark prayers as completed and track daily progress with historical analytics, charts, and per-prayer breakdown
+- ✅ **Prayer Time Notifications** - Browser notifications at exact prayer times with authentic hadith quotes, per-prayer toggle controls, and automatic rescheduling
 - ✅ **PWA Installation** - Full progressive web app support with smart install prompts, offline caching, and platform-specific install guides
 
 ### Coming Soon (V1.1)
-- 🔔 **Prayer Time Notifications** - Push notifications for prayer reminders
 - 🤲 **Expanded Dua Library** - 100+ duas with new categories (illness, travel, marriage, children)
 - 💰 **Recurring Donations** - Track monthly/yearly recurring charity commitments
 - 📊 **CSV Export** - Download donation history for tax receipts

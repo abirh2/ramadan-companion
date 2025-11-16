@@ -208,7 +208,7 @@ function isHtmlPage(pathname) {
          pathname.endsWith('/');
 }
 
-// Message event - for future communication with main app
+// Message event - for communication with main app
 self.addEventListener('message', (event) => {
   console.log('[SW] Message received:', event.data);
   
@@ -216,41 +216,63 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
   
-  // Future: Handle notification-related messages
-  // if (event.data && event.data.type === 'SCHEDULE_NOTIFICATION') {
-  //   // Handle prayer time notification scheduling
-  // }
+  // Handle notification scheduling messages
+  if (event.data && event.data.type === 'SCHEDULE_NOTIFICATION') {
+    console.log('[SW] Scheduling notification:', event.data.prayer);
+    // Notification scheduling is handled by the main app using setTimeout
+    // Service worker just shows notifications when triggered
+  }
 });
 
-// Future: Push event for Web Push notifications
-// self.addEventListener('push', (event) => {
-//   console.log('[SW] Push notification received');
-//   
-//   const data = event.data?.json() || {};
-//   const title = data.title || 'Ramadan Companion';
-//   const options = {
-//     body: data.body || 'Prayer time reminder',
-//     icon: '/icon-192.png',
-//     badge: '/icon-192-maskable.png',
-//     tag: data.tag || 'prayer-notification',
-//     requireInteraction: false,
-//   };
-//   
-//   event.waitUntil(
-//     self.registration.showNotification(title, options)
-//   );
-// });
+// Push event for Web Push notifications (prayer time reminders)
+self.addEventListener('push', (event) => {
+  console.log('[SW] Push notification received');
+  
+  const data = event.data?.json() || {};
+  const title = data.title || 'Prayer Time Reminder';
+  const options = {
+    body: data.body || 'Time for prayer',
+    icon: '/icon-192.png',
+    badge: '/icon-192-maskable.png',
+    tag: data.tag || 'prayer-notification',
+    requireInteraction: false,
+    silent: false,
+    data: data.data || { url: '/times' },
+  };
+  
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
 
-// Future: Notification click event
-// self.addEventListener('notificationclick', (event) => {
-//   console.log('[SW] Notification clicked');
-//   
-//   event.notification.close();
-//   
-//   event.waitUntil(
-//     clients.openWindow('/times')
-//   );
-// });
+// Notification click event - navigate to prayer times page
+self.addEventListener('notificationclick', (event) => {
+  console.log('[SW] Notification clicked:', event.notification.tag);
+  
+  // Close the notification
+  event.notification.close();
+  
+  // Get the URL from notification data, default to /times
+  const urlToOpen = event.notification.data?.url || '/times';
+  
+  // Open or focus the app
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        // Check if there's already a window open
+        for (const client of clientList) {
+          if (client.url.includes(urlToOpen) && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        
+        // If no window is open, open a new one
+        if (clients.openWindow) {
+          return clients.openWindow(urlToOpen);
+        }
+      })
+  );
+});
 
 console.log('[SW] Service worker loaded');
 

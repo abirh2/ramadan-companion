@@ -1,4 +1,5 @@
 import { User as SupabaseUser, Session as SupabaseSession } from '@supabase/supabase-js';
+import { NotificationPreferences } from './notification.types';
 
 export type User = SupabaseUser;
 export type Session = SupabaseSession;
@@ -22,6 +23,7 @@ export interface Profile {
   hadith_language?: string;
   distance_unit?: string;
   is_admin?: boolean;
+  notification_preferences?: NotificationPreferences;
 }
 
 export interface AuthContextType {
