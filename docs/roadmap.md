@@ -101,6 +101,9 @@ This document outlines the development milestones and future vision for the Rama
 - **Currency API Integration:** Real-time conversion rates
 - **Database Migrations:** New tables for prayers, favorites, recurring donations
 
+### Technical Decisions (November 2024)
+- **CSS Framework:** Using **Tailwind CSS v3.4.17** (stable) instead of v4 (alpha). V4's `lightningcss` native bindings caused build failures on Vercel's Linux environment due to missing platform-specific dependencies. V3 provides production-ready stability with standard PostCSS toolchain.
+
 ### Bug Fixes & Polish
 - Address user-reported feedback from feedback system
 - Mobile UI refinements (spacing, touch targets)
