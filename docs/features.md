@@ -2053,6 +2053,10 @@ Enable users to install Ramadan Companion as a progressive web app on their devi
 **Smart Install Prompt Component:**
 - Detects `beforeinstallprompt` event (PWA installability)
 - Tracks user engagement: page views (2+ visits) OR location enabled
+- **Platform-specific banners:**
+  - **Desktop/Android Chrome:** Standard install button with native prompt
+  - **iOS Safari:** Manual installation instructions with link to detailed guide
+  - **iOS Chrome/Firefox/Edge:** "Open in Safari" message with copy link button (iOS restricts PWA installation to Safari only)
 - Dismissible banner with 7-day cooldown
 - Triggers native platform install dialog
 - Auto-hides when app is already installed (standalone mode detection)
