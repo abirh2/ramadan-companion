@@ -210,23 +210,23 @@ export function useNotifications(): UseNotificationsResult {
   // Disable all notifications
   const disableAll = useCallback(async (): Promise<void> => {
     try {
-      // Unsubscribe from push
-      const unsubscribed = await unsubscribeFromPush()
+      // Get subscription BEFORE unsubscribing (so we can delete from backend)
+      const registration = await navigator.serviceWorker.ready
+      const subscription = await registration.pushManager.getSubscription()
       
-      if (unsubscribed) {
-        // Remove from backend
-        const registration = await navigator.serviceWorker.ready
-        const subscription = await registration.pushManager.getSubscription()
+      // Unsubscribe from push (browser-side)
+      if (subscription) {
+        await subscription.unsubscribe()
         
-        if (subscription) {
-          await fetch('/api/push/unsubscribe', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ endpoint: subscription.endpoint }),
-          })
-        }
+        // Remove from backend database
+        await fetch('/api/push/unsubscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ endpoint: subscription.endpoint }),
+        })
       }
 
+      // Update preferences
       const newPreferences: NotificationPreferences = {
         ...state.preferences,
         enabled: false,
