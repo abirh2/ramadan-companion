@@ -374,21 +374,10 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
 
         {/* Bearing Information */}
         <div className="mt-4 text-center space-y-1">
-          {mode === 'static' ? (
-            <>
-              <p className="text-2xl font-bold text-foreground">
-                {bearing.toFixed(1)}° {compassDirection}
-              </p>
-              <p className="text-xs text-muted-foreground">Direction to Mecca</p>
-            </>
-          ) : (
-            <>
-              <p className="text-lg font-semibold text-foreground">
-                Point arrow to Kaaba
-              </p>
-              <p className="text-xs text-muted-foreground">Hold phone flat and rotate</p>
-            </>
-          )}
+          <p className="text-2xl font-bold text-foreground">
+            {bearing.toFixed(1)}° {compassDirection}
+          </p>
+          <p className="text-xs text-muted-foreground">Direction to Mecca</p>
         </div>
       </CardContent>
     </Card>

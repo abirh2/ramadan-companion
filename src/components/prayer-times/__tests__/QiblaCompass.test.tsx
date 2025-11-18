@@ -288,17 +288,19 @@ describe('QiblaCompass', () => {
       await user.click(dynamicButton)
 
       await waitFor(() => {
-        // Dynamic mode: shows Kaaba emoji instead of N
+        // Dynamic mode: shows Kaaba emoji instead of N/S/E/W
         expect(screen.getByText('🕋')).toBeInTheDocument()
         expect(screen.queryByText('N')).not.toBeInTheDocument()
         expect(screen.queryByText('E')).not.toBeInTheDocument()
         expect(screen.queryByText('S')).not.toBeInTheDocument()
         expect(screen.queryByText('W')).not.toBeInTheDocument()
         
-        // Different instruction text
-        expect(screen.getByText(/Point arrow to Kaaba/i)).toBeInTheDocument()
-        expect(screen.getByText(/Hold phone flat and rotate/i)).toBeInTheDocument()
-        expect(screen.queryByText(/58\.5° NE/i)).not.toBeInTheDocument()
+        // Still shows bearing info in dynamic mode
+        expect(screen.getByText(/58\.5° NE/i)).toBeInTheDocument()
+        expect(screen.getByText(/Direction to Mecca/i)).toBeInTheDocument()
+        
+        // Shows hold phone flat reminder
+        expect(screen.getByText(/Hold phone flat for best results/i)).toBeInTheDocument()
       })
     })
   })
