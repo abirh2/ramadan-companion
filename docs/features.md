@@ -2330,7 +2330,7 @@ Click Action: Opens /times page
 - Proper source attribution included
 
 **Scheduling Logic (V1.2 - Web Push API):**
-- **Backend cron job** runs every 5 minutes via Vercel Cron (`*/5 * * * *`)
+- **Backend cron job** runs every 5 minutes via external cron service (see `docs/external-cron-setup.md`)
 - **For each user with notifications enabled:**
   1. Calculate today's prayer times based on user's location and preferences
   2. Get current time in user's timezone

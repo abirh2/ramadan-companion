@@ -1,9 +1,4 @@
 {
-  "crons": [
-    {
-      "path": "/api/push/schedule",
-      "schedule": "*/5 * * * *"
-    }
-  ]
+  "buildCommand": "next build"
 }
 

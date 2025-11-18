@@ -72,6 +72,7 @@ Ready to deploy? See **[DEPLOYMENT.md](DEPLOYMENT.md)** for complete deployment 
 2. Import repository in [Vercel](https://vercel.com)
 3. Add environment variables (Supabase credentials)
 4. Deploy!
+5. **Set up external cron service** for prayer notifications (see [external-cron-setup.md](docs/external-cron-setup.md))
 
 ## Documentation
 
