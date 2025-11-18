@@ -226,9 +226,17 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
 
         {/* Mode Indicator */}
         {mode === 'dynamic' && (
-          <div className="mb-3 flex items-center gap-2 text-xs text-muted-foreground">
-            <div className={`w-2 h-2 rounded-full ${aligned ? 'bg-green-500 animate-pulse' : 'bg-blue-500'}`} />
-            <span>{aligned ? 'Aligned with Qibla' : 'Tracking device orientation'}</span>
+          <div className="mb-3 space-y-2">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <div className={`w-2 h-2 rounded-full ${aligned ? 'bg-green-500 animate-pulse' : 'bg-blue-500'}`} />
+              <span>{aligned ? 'Aligned with Qibla' : 'Tracking device orientation'}</span>
+            </div>
+            <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg">
+              <span className="text-base">📱</span>
+              <span className="text-xs font-medium text-blue-800 dark:text-blue-200">
+                Hold phone flat for best results
+              </span>
+            </div>
           </div>
         )}
 
@@ -337,29 +345,50 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
             </g>
           </svg>
 
-          {/* Cardinal direction labels */}
-          <div className="absolute top-1 left-1/2 -translate-x-1/2 text-xs font-semibold text-foreground">
-            N
-          </div>
-          <div className="absolute right-1 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground">
-            E
-          </div>
-          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-xs font-medium text-muted-foreground">
-            S
-          </div>
-          <div className="absolute left-1 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground">
-            W
-          </div>
+          {/* Direction labels - different for static vs dynamic mode */}
+          {mode === 'static' ? (
+            <>
+              {/* Static mode: Show cardinal directions (N, E, S, W) */}
+              <div className="absolute top-1 left-1/2 -translate-x-1/2 text-xs font-semibold text-foreground">
+                N
+              </div>
+              <div className="absolute right-1 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground">
+                E
+              </div>
+              <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-xs font-medium text-muted-foreground">
+                S
+              </div>
+              <div className="absolute left-1 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground">
+                W
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Dynamic mode: Show Qibla icon at top (target to align with) */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 text-2xl">
+                🕋
+              </div>
+            </>
+          )}
         </div>
 
         {/* Bearing Information */}
         <div className="mt-4 text-center space-y-1">
-          <p className="text-2xl font-bold text-foreground">
-            {bearing.toFixed(1)}° {compassDirection}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Direction to Mecca {mode === 'dynamic' ? '(Hold phone flat)' : ''}
-          </p>
+          {mode === 'static' ? (
+            <>
+              <p className="text-2xl font-bold text-foreground">
+                {bearing.toFixed(1)}° {compassDirection}
+              </p>
+              <p className="text-xs text-muted-foreground">Direction to Mecca</p>
+            </>
+          ) : (
+            <>
+              <p className="text-lg font-semibold text-foreground">
+                Point arrow to Kaaba
+              </p>
+              <p className="text-xs text-muted-foreground">Hold phone flat and rotate</p>
+            </>
+          )}
         </div>
       </CardContent>
     </Card>

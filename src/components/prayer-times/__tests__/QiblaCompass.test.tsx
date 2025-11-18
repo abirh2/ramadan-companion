@@ -62,13 +62,18 @@ describe('QiblaCompass', () => {
     expect(svg).toBeInTheDocument()
   })
 
-  it('displays cardinal directions', () => {
+  it('displays cardinal directions in static mode', () => {
+    // Desktop: no mobile, so always static mode
+    jest.mocked(orientation.isMobileDevice).mockReturnValue(false)
+    jest.mocked(orientation.hasOrientationSupport).mockReturnValue(false)
+
     render(<QiblaCompass qiblaDirection={mockQiblaDirection} loading={false} error={null} />)
 
     expect(screen.getByText('N')).toBeInTheDocument()
     expect(screen.getByText('E')).toBeInTheDocument()
     expect(screen.getByText('S')).toBeInTheDocument()
     expect(screen.getByText('W')).toBeInTheDocument()
+    expect(screen.getByText(/Direction to Mecca/i)).toBeInTheDocument()
   })
 
   it('handles null qiblaDirection gracefully', () => {
@@ -261,7 +266,7 @@ describe('QiblaCompass', () => {
       })
     })
 
-    it('shows instruction to hold phone flat in dynamic mode', async () => {
+    it('shows Kaaba icon and updated instructions in dynamic mode', async () => {
       const user = userEvent.setup()
       
       // Setup mobile device
@@ -273,14 +278,27 @@ describe('QiblaCompass', () => {
 
       render(<QiblaCompass qiblaDirection={mockQiblaDirection} loading={false} error={null} />)
 
-      // Initially in static mode - no instruction
-      expect(screen.queryByText(/Hold phone flat/i)).not.toBeInTheDocument()
+      // Static mode: shows cardinal directions and bearing
+      expect(screen.getByText('N')).toBeInTheDocument()
+      expect(screen.getByText(/58\.5° NE/i)).toBeInTheDocument()
+      expect(screen.getByText(/Direction to Mecca/i)).toBeInTheDocument()
+      expect(screen.queryByText('🕋')).not.toBeInTheDocument()
 
       const dynamicButton = screen.getByText(/Dynamic/i)
       await user.click(dynamicButton)
 
       await waitFor(() => {
-        expect(screen.getByText(/Hold phone flat/i)).toBeInTheDocument()
+        // Dynamic mode: shows Kaaba emoji instead of N
+        expect(screen.getByText('🕋')).toBeInTheDocument()
+        expect(screen.queryByText('N')).not.toBeInTheDocument()
+        expect(screen.queryByText('E')).not.toBeInTheDocument()
+        expect(screen.queryByText('S')).not.toBeInTheDocument()
+        expect(screen.queryByText('W')).not.toBeInTheDocument()
+        
+        // Different instruction text
+        expect(screen.getByText(/Point arrow to Kaaba/i)).toBeInTheDocument()
+        expect(screen.getByText(/Hold phone flat and rotate/i)).toBeInTheDocument()
+        expect(screen.queryByText(/58\.5° NE/i)).not.toBeInTheDocument()
       })
     })
   })
