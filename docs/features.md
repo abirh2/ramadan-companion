@@ -152,7 +152,8 @@ Display accurate prayer times and Qibla direction based on user location with ci
 **Key Components:**
 - `usePrayerTimes()` hook - Core logic for fetching and calculating prayer times with automatic fallback
 - `/src/lib/prayerTimes.ts` - Local prayer times calculation utility using PrayTime library
-- `QiblaCompass` - SVG-based circular compass with rotated arrow
+- `QiblaCompass` - SVG-based circular compass with rotated arrow (static + dynamic modes)
+- `/src/lib/orientation.ts` - Device orientation utilities for dynamic compass
 - `PrayerTimesSettings` - Calculation method selector + location management
 
 ### Behavior
@@ -215,12 +216,58 @@ Display accurate prayer times and Qibla direction based on user location with ci
 - ✅ Transparent UX - users unaware of source
 - ✅ Future-ready - foundation for advanced options (higher latitude adjustments, custom tuning)
 
-**V1 Status:** ✅ **Complete** (November 2024) - Daily times, countdown, static Qibla compass, city selection, location display, automatic fallback calculation, 7 calculation methods, madhab support
+### Dynamic Qibla Compass (Mobile Only)
+
+**Feature:** Real-time compass that rotates as user moves their phone, always pointing toward Mecca.
+
+**Platform Availability:**
+- ✅ **iOS Safari:** Full support (requires permission)
+- ✅ **Android Chrome/Edge/Firefox:** Full support (no permission needed)
+- ❌ **iOS Chrome/Firefox/Edge:** Not supported (Apple WebKit restrictions)
+- ❌ **Desktop:** Feature unavailable (no magnetometer sensor)
+
+**User Experience:**
+1. **Desktop:** Shows static compass only (no dynamic option)
+2. **Mobile:** Shows toggle button "Dynamic" / "Static"
+3. **iOS:** Permission prompt on first enable (similar to notifications)
+4. **Android:** Immediate access, no permission needed
+
+**Dynamic Mode Features:**
+- Real-time rotation as device rotates
+- Green arrow when aligned with Qibla (±5°)
+- Accuracy indicator with calibration instructions
+- "Hold phone flat" instruction for best results
+- Smooth CSS transitions (0.3s ease-out)
+- Low accuracy warning (>15°) with figure-8 calibration guide
+- Toggle back to static mode anytime
+
+**Technical Implementation:**
+- **API:** DeviceOrientationEvent (native browser API, zero cost)
+- **Calculation:** `rotation = qiblaBearing - deviceHeading`
+- **Permission:** iOS 13+ requires `DeviceOrientationEvent.requestPermission()`
+- **Accuracy:** Magnetometer-based, typically ±5-10° (affected by magnetic interference)
+- **Fallback Chain:**
+  1. Mobile + permission granted → Dynamic compass
+  2. Mobile + permission denied → Static compass
+  3. Desktop / no sensor → Static compass
+
+**Limitations:**
+- Requires device magnetometer (all modern phones have this)
+- Accuracy affected by magnetic interference (metal objects, electronics)
+- Best results when phone held flat (parallel to ground)
+- Requires periodic calibration (figure-8 motion)
+- Not available in iOS Chrome/Firefox (Apple restriction)
+
+**Files:**
+- `/src/lib/orientation.ts` - Device orientation utilities
+- `/src/components/prayer-times/QiblaCompass.tsx` - Compass component with dynamic mode
+- `/src/types/ramadan.types.ts` - CompassMode type
+
+**V1 Status:** ✅ **Complete** (November 2024) - Daily times, countdown, Qibla compass (static + dynamic), city selection, location display, automatic fallback calculation, 7 calculation methods, madhab support
 
 **Future Enhancements (V1.1+):**
 - **V1.1:** Prayer time notifications (Web Push API)
 - **V1.2:** Monthly/weekly prayer time calendar view
-- **V1.3:** Phone compass integration (DeviceOrientationEvent for live Qibla arrow)
 - **V1.3:** Advanced calculation options (higher latitude methods, manual time tuning)
 - **V2.0:** Prayer time analytics and insights
 

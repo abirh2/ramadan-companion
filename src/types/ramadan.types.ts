@@ -110,6 +110,9 @@ export interface QiblaApiResponse {
   data: QiblaData
 }
 
+// Compass Mode for Dynamic Qibla Compass
+export type CompassMode = 'static' | 'dynamic'
+
 // Calculation Methods
 export type CalculationMethodId = '1' | '2' | '3' | '4' | '5' | '7' | '0'
 
