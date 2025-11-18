@@ -416,7 +416,28 @@ Show notification (works even when app closed)
 ✅ **Background notifications** - Works even when app is closed  
 ✅ **Reliable** - Backend scheduling eliminates client-side timer issues  
 ✅ **Scalable** - Handles notifications for all users efficiently  
-✅ **Cross-device** - Users can have multiple subscriptions (phone, tablet, desktop)
+✅ **Cross-device** - Users can have multiple subscriptions (phone, tablet, desktop)  
+✅ **Proper cleanup** - Subscription removal from both browser and database (bug fixed Nov 2024)
+
+### Authentication Requirement
+
+🔐 **Web Push API requires authentication.** Users must be logged in to enable notifications because:
+- Push subscriptions need a user ID for database storage
+- Backend needs to associate subscriptions with user profiles
+- Location and preference data requires authentication
+
+**UI Behavior:**
+- Guest users see "Sign In to Enable" prompt
+- Clicking prompt redirects to `/profile` page for authentication
+- After login, user can enable notifications normally
+
+### Bug Fixes (November 2024)
+
+**Subscription Cleanup Bug:**
+- **Issue:** Disabling notifications removed subscription from browser but NOT from database
+- **Root Cause:** Code tried to get subscription endpoint AFTER unsubscribing (returned null)
+- **Fix:** Capture subscription endpoint BEFORE unsubscribing, then send to backend for deletion
+- **Result:** Proper cleanup prevents zombie subscriptions and wasted backend resources
 
 ---
 

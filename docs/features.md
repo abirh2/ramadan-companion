@@ -2276,22 +2276,27 @@ Enable users to receive browser notifications at exact prayer times with motivat
 - **✅ NEW: Web Push API** - Notifications work even when app is closed or backgrounded
 - **✅ NEW: Backend scheduling** - Vercel cron job handles notification timing
 - **✅ NEW: iOS support** - Background notifications now work on iOS Safari
+- **🔐 Requires Authentication** - Users must be logged in to enable notifications (Web Push requires user ID)
 - **Browser-based notifications** using Web Push API and Service Worker
 - **Per-prayer control** - Enable/disable individual prayers (Fajr, Dhuhr, Asr, Maghrib, Isha)
 - **Master toggle** - Enable/disable all notifications at once
 - **Motivational hadith quotes** - 10 curated quotes from Sahih collections
 - **Push subscriptions** - Stored in Supabase for multi-device support
-- **Dual-storage pattern** - Works for authenticated users (requires login for Web Push)
-- **Cross-device sync** - Preferences and subscriptions sync across devices
+- **Multi-device independence** - Each device has separate subscription; enabling on phone doesn't affect desktop
+- **Cross-device sync** - Preferences sync across devices; notifications only sent to devices with active subscriptions
+- **Proper cleanup** - Disabling notifications removes subscription from both browser and database
 
 ### User Flow
-1. User navigates to `/times` page
-2. Clicks "Enable Notifications" button in NotificationSettings card
-3. Browser requests notification permission
-4. On grant, all 5 prayers are enabled by default
-5. User can toggle individual prayers on/off
-6. Notifications appear at exact prayer times with hadith quotes
-7. Clicking notification opens `/times` page
+1. **User must be logged in** (if not, shows "Sign In to Enable" prompt with link to `/profile`)
+2. User navigates to `/times` page
+3. Clicks "Enable Notifications" button in NotificationSettings card
+4. Browser requests notification permission
+5. On grant, Web Push subscription is created and saved to database
+6. All 5 prayers are enabled by default
+7. User can toggle individual prayers on/off
+8. Notifications appear at exact prayer times with hadith quotes
+9. Clicking notification opens `/times` page
+10. Disabling notifications removes subscription from browser and database
 
 ### Technical Implementation
 
@@ -2328,13 +2333,32 @@ Click Action: Opens /times page
 - **Backend cron job** runs daily at midnight UTC via Vercel Cron
 - **For each user with notifications enabled:**
   1. Calculate today's prayer times based on user's location and preferences
-  2. Send push notification via Web Push API at exact prayer time
-  3. Service Worker receives push and displays notification
+  2. Fetch all active push subscriptions for that user
+  3. Send push notification via Web Push API at exact prayer time to each subscription
+  4. Service Worker receives push and displays notification
 - **Benefits:**
   - Works when app is closed or backgrounded (iOS, Android, Desktop)
   - No client-side setTimeout limitations
   - Scalable for all users
   - Reliable delivery
+
+**Multi-Device Behavior:**
+- **Each device is independent:** Enabling notifications on iPhone doesn't enable on Desktop
+- **Database schema:** `UNIQUE(user_id, endpoint)` allows multiple subscriptions per user
+- **Notification delivery:** Backend sends to ALL active subscriptions for a user
+- **Example scenarios:**
+  - iPhone enabled, Desktop never enabled → Only iPhone receives notifications ✅
+  - iPhone enabled, Desktop enabled → Both receive notifications ✅
+  - User disables on iPhone → Only Desktop continues receiving notifications ✅
+
+**Subscription Cleanup (Bug Fix - Nov 2024):**
+- **Critical fix:** Subscription endpoint captured BEFORE browser unsubscribe
+- **Cleanup flow:** 
+  1. Get subscription endpoint from browser
+  2. Unsubscribe from browser push
+  3. Delete subscription from database using saved endpoint
+- **Previous bug:** Endpoint was captured AFTER unsubscribe, causing database orphans
+- **Result:** No zombie subscriptions; backend doesn't waste resources on dead endpoints
 
 **Preference Storage:**
 ```json
@@ -2372,21 +2396,30 @@ Click Action: Opens /times page
 
 ### Permission States
 
+**Not Logged In:**
+- Shows "Sign In to Enable" prompt
+- Explains authentication requirement for Web Push
+- Links to `/profile` page for login
+
 **Not Supported:**
 - Shows compatibility message
 - Suggests using Chrome, Edge, or Safari
+- iOS users directed to Safari (only browser with Web Push support)
 
 **Default (Not Requested):**
 - Shows "Enable Notifications" button
-- Explains feature benefits
+- Explains feature benefits (background notifications, hadith quotes)
 
 **Denied:**
 - Shows instructions to re-enable in browser settings
 - Step-by-step guide for unblocking
+- Links to browser settings help
 
 **Granted:**
 - Shows full preferences UI
 - Master toggle and individual prayer controls
+- Status indicator showing enabled prayer count
+- iOS tip about installing PWA to home screen
 
 ### Error Handling
 - Graceful degradation when notification API unavailable
