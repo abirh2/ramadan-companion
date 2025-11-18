@@ -2,6 +2,8 @@
  * Donation types for Charity & Zakat Tracker
  */
 
+import type { CurrencyCode } from './currency.types'
+
 /**
  * Database donation record (matches Supabase schema)
  */
@@ -26,6 +28,7 @@ export interface Donation {
  */
 export interface DonationFormData {
   amount: number
+  currency?: CurrencyCode
   type: 'zakat' | 'sadaqah' | 'other'
   date: string // ISO date string (YYYY-MM-DD)
   charity_name?: string
@@ -87,4 +90,18 @@ export interface DonationFilters {
   type?: 'zakat' | 'sadaqah' | 'other'
   category?: string
 }
+
+/**
+ * Donation with conversion information
+ */
+export interface DonationWithConversion extends Donation {
+  convertedAmount: number
+  convertedCurrency: CurrencyCode
+  conversionRate: number
+}
+
+/**
+ * Currency view mode for display
+ */
+export type CurrencyViewMode = 'original' | 'converted'
 

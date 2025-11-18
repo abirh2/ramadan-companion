@@ -462,3 +462,106 @@ This approach minimizes API calls while ensuring good coverage.
 
 **Environment Variable:**
 - `GEOAPIFY_API_KEY`: Required API key for Geoapify (stored in .env.local, server-side only)
+
+---
+
+## /api/currency
+**Status:** ✅ Implemented (V1.1)
+
+**Purpose:** Fetch real-time exchange rates from fawazahmed0 Currency API
+
+**Method:** GET
+
+**Parameters:**
+- `base` (required): Base currency code (ISO 4217, e.g., 'USD', 'EUR', 'GBP', 'XAU', 'XAG')
+- `symbols` (optional): Comma-separated list of target currencies (e.g., 'EUR,GBP,JPY')
+
+**Response Format:**
+```json
+{
+  "base": "USD",
+  "date": "2025-11-16",
+  "rates": {
+    "EUR": 0.92,
+    "GBP": 0.79,
+    "JPY": 149.50,
+    "XAU": 0.00048,
+    "XAG": 0.038
+  }
+}
+```
+
+**Caching:** 24 hours (revalidate: 86400)
+
+**Filtering:**
+- Automatically excludes ILS (Israeli Shekel) from all responses
+- Automatically excludes all cryptocurrencies (BTC, ETH, USDT, etc.)
+- Includes precious metals: XAU (Gold), XAG (Silver) for zakat nisab calculations
+
+**Fallback Mechanism:**
+- Primary CDN: `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/{base}.min.json`
+- Fallback CDN: `https://latest.currency-api.pages.dev/v1/currencies/{base}.min.json`
+- Automatically switches to fallback if primary fails
+
+**Error Handling:**
+- 400: Invalid currency code (< 3 characters)
+- 500: Both primary and fallback CDNs unavailable or error
+
+**External API:**
+- Provider: fawazahmed0 Currency API
+- 200+ currencies including precious metals
+- No API key required
+- Free, open-source, CDN-hosted
+- Rates updated daily
+- Response transformed from `{ date, {base}: { {target}: rate } }` to standard format
+
+---
+
+## /api/currency/list
+**Status:** ✅ Implemented (V1.1)
+
+**Purpose:** Fetch list of all supported currencies from fawazahmed0 Currency API
+
+**Method:** GET
+
+**Parameters:** None
+
+**Response Format:**
+```json
+[
+  { "code": "USD", "name": "United States Dollar" },
+  { "code": "EUR", "name": "Euro" },
+  { "code": "GBP", "name": "British Pound Sterling" },
+  { "code": "XAU", "name": "Gold" },
+  { "code": "XAG", "name": "Silver" }
+]
+```
+
+**Caching:** 7 days (revalidate: 604800)
+
+**Sorting:** Alphabetically by currency name
+
+**Filtering:**
+- Automatically excludes ILS (Israeli Shekel) from results
+- Automatically excludes all cryptocurrencies (BTC, ETH, USDT, XRP, BNB, ADA, DOGE, SOL, etc.)
+- Includes all fiat currencies and precious metals (XAU, XAG)
+
+**Fallback Mechanism:**
+- Primary CDN: `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies.min.json`
+- Fallback CDN: `https://latest.currency-api.pages.dev/v1/currencies.min.json`
+- Automatically switches to fallback if primary fails
+
+**Error Handling:**
+- 500: Both primary and fallback CDNs unavailable or error
+
+**External API:**
+- Provider: fawazahmed0 Currency API
+- 200+ currencies including precious metals
+- No API key required
+- Free, open-source, CDN-hosted
+- No API key required
+- Static data (rarely changes)
+
+**Notes:**
+- Used to populate currency selectors in donation form and zakat calculator
+- Supports ~30+ currencies (all Frankfurter currencies except ILS)

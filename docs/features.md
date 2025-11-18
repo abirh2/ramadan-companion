@@ -785,14 +785,16 @@ interface BookmarkData {
 ## 6. Charity & Zakat Tracker (`/charity`)
 
 ### Functionality
-Comprehensive donation tracking with monthly insights, visualizations, and zakat calculator. **Requires authentication.**
+Comprehensive donation tracking with multi-currency support, monthly insights, visualizations, and zakat calculator. **Requires authentication.**
 
 ### Implementation Status
-✅ **Fully Implemented (V1)**
+✅ **Fully Implemented (V1.1)**
 - Full CRUD operations for donations
+- **Multi-currency support with live exchange rates (Frankfurter API)**
+- **Currency view toggle: original currencies vs. converted to preferred currency**
 - Monthly tracking with calendar and list views
 - Interactive charts (line, bar, pie)
-- Zakat calculator with auto-populate
+- Zakat calculator with currency selection
 - Dashboard integration with live totals
 - View toggle with localStorage persistence
 
@@ -802,8 +804,8 @@ Supabase `donations` table with RLS policies.
 **Database Fields:**
 - `id` (uuid) - Primary key
 - `user_id` (uuid) - Foreign key to profiles table
-- `amount` (numeric) - Donation amount in USD
-- `currency` (text) - Default 'USD'
+- `amount` (numeric) - Donation amount (stored in original currency)
+- `currency` (text) - Currency code (ISO 4217, e.g., 'USD', 'EUR', 'GBP')
 - `type` (text) - 'zakat', 'sadaqah', or 'other'
 - `category` (text) - Optional category (e.g., Education, Medical)
 - `charity_name` (text) - Name of charity/organization
@@ -812,6 +814,8 @@ Supabase `donations` table with RLS policies.
 - `notes` (text) - Optional notes
 - `is_recurring` (boolean) - Future use
 - `created_at`, `updated_at` - Auto timestamps
+
+**Note:** Donations are stored in their original currency to preserve accuracy. Currency conversions for display are performed using live exchange rates from fawazahmed0 Currency API (200+ currencies, daily updates, CDN-hosted with fallback).
 
 **RLS Policies:**
 - Users can only view, create, update, and delete their own donations
@@ -825,12 +829,22 @@ Supabase `donations` table with RLS policies.
 - All operations require valid user session
 
 **Donation Management:**
-- **Add:** Click "Add Donation" → modal form → save to Supabase
-- **Edit:** Click edit icon on any donation → pre-filled modal → update
+- **Add:** Click "Add Donation" → modal form → select currency → save to Supabase
+- **Edit:** Click edit icon on any donation → pre-filled modal (including currency) → update
 - **Delete:** Click delete icon → confirmation dialog → permanent removal
-- Form fields: amount (required), type (required), date (required), charity name, category, notes
+- Form fields: amount (required), **currency selector** (required), type (required), date (required), charity name, category, notes
+- **Currency Selector:** Searchable dropdown with flag emojis, supports 200+ currencies including gold (XAU) and silver (XAG) for zakat nisab reference (excludes ILS and cryptocurrencies)
 - Real-time validation: amount > 0, required fields checked
 - Success/error feedback with toast-style messages
+
+**Multi-Currency Features:**
+- **Currency View Toggle:** Switch between "Original Currencies" and "Convert to [USD]" modes
+- **Preferred Currency Selector:** Choose display currency for conversions (defaults to USD)
+- **Live Exchange Rates:** Powered by fawazahmed0 Currency API with 24-hour caching and CDN fallback
+- **View Mode Persistence:** User's preference saved to localStorage
+- **Automatic Conversion:** Summary totals, charts, and statistics always display in preferred currency when in converted mode
+- **Original Currency Preservation:** Donations stored in their original currency for accuracy
+- **Precious Metals Support:** Gold (XAU) and Silver (XAG) included for zakat nisab calculations
 
 **Monthly Tracking:**
 - **Two view modes:** Calendar grid and List accordion
@@ -852,22 +866,27 @@ Supabase `donations` table with RLS policies.
 - **This Year:** Sum of donations in current calendar year
 - **All Time:** Lifetime total of all donations
 - Displayed in 3 prominent cards at top of page
+- **Displays in preferred currency** with conversion indicator
+- **Converting state:** Shows "Converting..." during exchange rate fetches
 - Real-time updates after add/edit/delete
 
 **Charts & Visualizations:**
-- **Line Chart:** Monthly donation trends over time (X: months, Y: USD amount)
+- **Line Chart:** Monthly donation trends over time (X: months, Y: amount in preferred currency)
 - **Bar Chart:** Last 12 months comparison with visual bars
 - **Pie Chart:** Breakdown by type (zakat vs sadaqah vs other) with percentages
+- **Currency Note:** "All amounts shown in [USD]" displayed below charts
+- **Always Converted:** Charts always show amounts in preferred currency for consistency
 - Built with recharts library (responsive, mobile-friendly)
 - Empty state: "Add donations to see charts"
 - Color-coded type badges: Green (zakat), Blue (sadaqah), Gray (other)
 
 **Zakat Calculator:**
 - Expandable/collapsible section
-- Input fields: Cash, Savings, Gold, Silver, Business Assets, Debts
+- **Currency Selector:** Choose currency for zakat calculation (at top of calculator)
+- Input fields: Cash, Savings, Gold, Silver, Business Assets, Debts (all in selected currency)
 - Live calculation: (Total Assets - Debts) × 2.5%
-- Display breakdown: Total Assets, Debts, Net Zakatable Wealth, Zakat Due
-- "Log as Donation" button pre-fills form with calculated amount and type=zakat
+- Display breakdown: Total Assets, Debts, Net Zakatable Wealth, Zakat Due (formatted in selected currency)
+- "Log as Donation" button pre-fills form with calculated amount, selected currency, and type=zakat
 - Educational note about consulting scholars
 
 **Recommended Charities Placeholder:**
@@ -877,7 +896,26 @@ Supabase `donations` table with RLS policies.
 - Dashed border styling to indicate placeholder status
 
 ### APIs
-None (Supabase only). All operations through Supabase client.
+
+**Currency Exchange Rates (fawazahmed0 API):**
+- `/api/currency?base={currency}&symbols={comma-separated}` - Get exchange rates
+  - Primary: `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/{base}.min.json`
+  - Fallback: `https://latest.currency-api.pages.dev/v1/currencies/{base}.min.json`
+  - 24-hour cache (rates update daily)
+  - Supports 200+ currencies including gold (XAU) and silver (XAG)
+  - Automatically filters out ILS (Israeli Shekel) and cryptocurrencies
+  - Returns: `{ base: 'USD', date: '2025-11-16', rates: { EUR: 0.92, XAU: 0.00048, ... } }`
+
+- `/api/currency/list` - Get list of all supported currencies
+  - Primary: `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies.min.json`
+  - Fallback: `https://latest.currency-api.pages.dev/v1/currencies.min.json`
+  - 7-day cache (static data)
+  - Filters out cryptocurrencies and ILS
+  - Returns sorted array: `[{ code: 'USD', name: 'United States Dollar' }, { code: 'XAU', name: 'Gold' }, ...]`
+  - Excludes ILS (Israeli Shekel)
+
+**Donation CRUD:**
+- All operations through Supabase client with RLS enforcement
 
 ### Key Components
 
@@ -949,9 +987,11 @@ None (Supabase only). All operations through Supabase client.
 
 ### Currency & Localization
 - **V1:** USD only (hardcoded)
-- Format: `Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })`
-- Display: $0.00 format with 2 decimal places
+- **V1.1:** Multi-currency support (200+ currencies via fawazahmed0 API, excludes ILS and cryptocurrencies, includes gold/silver for zakat nisab)
+- Format: `Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode })`
+- Display: Currency-specific format with 2 decimal places (e.g., $0.00, €0.00, £0.00)
 - Input: Number input with step="0.01"
+- Fallback mechanism: Primary CDN → Fallback CDN for reliability
 
 ### State Management
 - React hooks + local component state (no global store)

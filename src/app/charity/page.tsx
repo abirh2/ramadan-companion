@@ -13,9 +13,12 @@ import { ListViewAccordion } from '@/components/charity/ListViewAccordion'
 import { ChartsSection } from '@/components/charity/ChartsSection'
 import { ZakatCalculator } from '@/components/charity/ZakatCalculator'
 import { RecommendedCharities } from '@/components/charity/RecommendedCharities'
+import { CurrencyViewToggle } from '@/components/charity/CurrencyViewToggle'
+import { CurrencyPreferenceSelector } from '@/components/charity/CurrencyPreferenceSelector'
 import { deleteDonation } from '@/lib/donations'
 import { useAuth } from '@/hooks/useAuth'
 import { FeedbackButton } from '@/components/FeedbackButton'
+import { formatCurrency } from '@/lib/currency'
 import type { Donation } from '@/types/donation.types'
 import {
   Dialog,
@@ -30,7 +33,20 @@ type ViewMode = 'calendar' | 'list'
 
 export default function CharityPage() {
   const { user } = useAuth()
-  const { donations, loading, error, refetch, isEmpty, summary } = useDonations()
+  const {
+    donations,
+    displayDonations,
+    loading,
+    error,
+    refetch,
+    isEmpty,
+    summary,
+    viewMode: currencyViewMode,
+    setViewMode: setCurrencyViewMode,
+    preferredCurrency,
+    setPreferredCurrency,
+    converting,
+  } = useDonations()
   const [viewMode, setViewMode] = useState<ViewMode>('calendar')
   const [formOpen, setFormOpen] = useState(false)
   const [editingDonation, setEditingDonation] = useState<Donation | undefined>()
@@ -91,14 +107,14 @@ export default function CharityPage() {
     await refetch()
   }
 
-  const handleLogZakat = (amount: number) => {
+  const handleLogZakat = (amount: number, currency: string = preferredCurrency) => {
     setEditingDonation({
       id: '',
       user_id: '',
       created_at: '',
       updated_at: '',
       amount,
-      currency: 'USD',
+      currency,
       type: 'zakat',
       date: new Date().toISOString().split('T')[0],
       category: null,
@@ -110,11 +126,8 @@ export default function CharityPage() {
     setFormOpen(true)
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount)
+  const formatAmount = (amount: number, currency: string) => {
+    return formatCurrency(amount, currency)
   }
 
   return (
@@ -160,24 +173,52 @@ export default function CharityPage() {
           {/* Content */}
           {!loading && !error && (
             <div className="space-y-6">
+              {/* Currency Controls */}
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between p-4 bg-muted/50 rounded-xl">
+                <CurrencyViewToggle
+                  value={currencyViewMode}
+                  onChange={setCurrencyViewMode}
+                  preferredCurrency={preferredCurrency}
+                />
+                <CurrencyPreferenceSelector
+                  value={preferredCurrency}
+                  onChange={setPreferredCurrency}
+                />
+              </div>
+
               {/* Summary Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card className="rounded-xl">
                   <CardContent className="p-6">
                     <p className="text-sm text-muted-foreground mb-1">This Ramadan</p>
-                    <p className="text-3xl font-bold">{formatCurrency(summary.ramadanTotal)}</p>
+                    <p className="text-3xl font-bold">
+                      {formatAmount(summary.ramadanTotal, preferredCurrency)}
+                    </p>
+                    {converting && (
+                      <p className="text-xs text-muted-foreground mt-1">Converting...</p>
+                    )}
                   </CardContent>
                 </Card>
                 <Card className="rounded-xl">
                   <CardContent className="p-6">
                     <p className="text-sm text-muted-foreground mb-1">This Year</p>
-                    <p className="text-3xl font-bold">{formatCurrency(summary.yearlyTotal)}</p>
+                    <p className="text-3xl font-bold">
+                      {formatAmount(summary.yearlyTotal, preferredCurrency)}
+                    </p>
+                    {converting && (
+                      <p className="text-xs text-muted-foreground mt-1">Converting...</p>
+                    )}
                   </CardContent>
                 </Card>
                 <Card className="rounded-xl">
                   <CardContent className="p-6">
                     <p className="text-sm text-muted-foreground mb-1">All Time</p>
-                    <p className="text-3xl font-bold">{formatCurrency(summary.allTimeTotal)}</p>
+                    <p className="text-3xl font-bold">
+                      {formatAmount(summary.allTimeTotal, preferredCurrency)}
+                    </p>
+                    {converting && (
+                      <p className="text-xs text-muted-foreground mt-1">Converting...</p>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -231,23 +272,32 @@ export default function CharityPage() {
               {/* Monthly View */}
               {!isEmpty && viewMode === 'calendar' && (
                 <MonthlyView
-                  donations={donations}
+                  donations={displayDonations}
                   onEdit={handleEditDonation}
                   onDelete={handleDeleteDonation}
+                  viewMode={currencyViewMode}
+                  preferredCurrency={preferredCurrency}
                 />
               )}
 
               {/* List View */}
               {!isEmpty && viewMode === 'list' && (
                 <ListViewAccordion
-                  donations={donations}
+                  donations={displayDonations}
                   onEdit={handleEditDonation}
                   onDelete={handleDeleteDonation}
+                  viewMode={currencyViewMode}
+                  preferredCurrency={preferredCurrency}
                 />
               )}
 
               {/* Charts Section */}
-              {!isEmpty && <ChartsSection donations={donations} />}
+              {!isEmpty && (
+                <ChartsSection
+                  donations={displayDonations}
+                  preferredCurrency={preferredCurrency}
+                />
+              )}
 
               {/* Zakat Calculator */}
               <ZakatCalculator onLogAsDonation={handleLogZakat} />
@@ -282,7 +332,7 @@ export default function CharityPage() {
             <div className="py-4">
               <p className="text-sm">
                 <span className="font-semibold">
-                  {formatCurrency(Number(deletingDonation.amount))}
+                  {formatAmount(Number(deletingDonation.amount), deletingDonation.currency)}
                 </span>
                 {' '}•{' '}
                 <span className="capitalize">{deletingDonation.type}</span>

@@ -5,14 +5,18 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Calculator, Plus } from 'lucide-react'
+import { CurrencySelector } from './CurrencySelector'
+import { formatCurrency, getPreferredCurrency } from '@/lib/currency'
 import type { ZakatCalculationInputs, ZakatCalculation } from '@/types/donation.types'
+import type { CurrencyCode } from '@/types/currency.types'
 
 interface ZakatCalculatorProps {
-  onLogAsDonation: (amount: number) => void
+  onLogAsDonation: (amount: number, currency: string) => void
 }
 
 export function ZakatCalculator({ onLogAsDonation }: ZakatCalculatorProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [selectedCurrency, setSelectedCurrency] = useState<CurrencyCode>(getPreferredCurrency())
   const [inputs, setInputs] = useState<ZakatCalculationInputs>({
     cash: 0,
     savings: 0,
@@ -38,11 +42,8 @@ export function ZakatCalculator({ onLogAsDonation }: ZakatCalculatorProps) {
 
   const calculation = calculateZakat()
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount)
+  const formatAmount = (amount: number) => {
+    return formatCurrency(amount, selectedCurrency)
   }
 
   const handleInputChange = (field: keyof ZakatCalculationInputs, value: string) => {
@@ -74,6 +75,18 @@ export function ZakatCalculator({ onLogAsDonation }: ZakatCalculatorProps) {
 
       {isExpanded && (
         <CardContent className="space-y-6">
+          {/* Currency Selector */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Currency</label>
+            <CurrencySelector
+              value={selectedCurrency}
+              onChange={setSelectedCurrency}
+            />
+            <p className="text-xs text-muted-foreground">
+              Enter all amounts in {selectedCurrency}
+            </p>
+          </div>
+
           {/* Input Fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -171,25 +184,25 @@ export function ZakatCalculator({ onLogAsDonation }: ZakatCalculatorProps) {
           <div className="border-t pt-6 space-y-3">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Total Assets:</span>
-              <span className="font-medium">{formatCurrency(calculation.totalAssets)}</span>
+              <span className="font-medium">{formatAmount(calculation.totalAssets)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Minus Debts:</span>
-              <span className="font-medium">- {formatCurrency(calculation.totalDebts)}</span>
+              <span className="font-medium">- {formatAmount(calculation.totalDebts)}</span>
             </div>
             <div className="flex justify-between text-sm border-t pt-3">
               <span className="text-muted-foreground">Net Zakatable Wealth:</span>
-              <span className="font-semibold">{formatCurrency(calculation.netAssets)}</span>
+              <span className="font-semibold">{formatAmount(calculation.netAssets)}</span>
             </div>
             <div className="flex justify-between items-center bg-primary/5 p-4 rounded-lg border-2 border-primary/20">
               <div>
                 <p className="text-sm text-muted-foreground">Zakat Due (2.5%):</p>
                 <p className="text-2xl font-bold text-primary">
-                  {formatCurrency(calculation.zakatAmount)}
+                  {formatAmount(calculation.zakatAmount)}
                 </p>
               </div>
               <Button
-                onClick={() => onLogAsDonation(calculation.zakatAmount)}
+                onClick={() => onLogAsDonation(calculation.zakatAmount, selectedCurrency)}
                 disabled={calculation.zakatAmount <= 0}
                 size="sm"
               >

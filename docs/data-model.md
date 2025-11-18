@@ -73,7 +73,7 @@ This ensures authenticated users get cross-device sync while guest users still h
 ---
 
 ## Table: donations
-Track zakat and sadaqah donations.
+Track zakat and sadaqah donations with multi-currency support.
 
 | Field | Type | Description |
 |--------|------|-------------|
@@ -81,8 +81,8 @@ Track zakat and sadaqah donations.
 | user_id | uuid (FK) | references profiles.id, CASCADE delete |
 | created_at | timestamptz | auto timestamp |
 | updated_at | timestamptz | auto timestamp, auto-updated via trigger |
-| amount | numeric(10,2) | donation amount |
-| currency | text | default USD |
+| amount | numeric(10,2) | donation amount (stored in original currency) |
+| currency | text | ISO 4217 currency code (e.g., 'USD', 'EUR', 'GBP') |
 | type | text | 'zakat', 'sadaqah', or 'other' |
 | category | text | optional category |
 | charity_name | text | name of charity |
@@ -92,7 +92,17 @@ Track zakat and sadaqah donations.
 | is_recurring | boolean | default false |
 
 **V1:** CRUD for donations with RLS  
-**Later:** Recurring donations, multi-currency summaries
+**V1.1:** ✅ Multi-currency support with live exchange rates (Frankfurter API), currency view toggle, preferred currency selector  
+**Later:** Recurring donations
+
+**Multi-Currency Implementation:**
+- Donations stored in their original currency for accuracy
+- Currency conversions performed at display time using live exchange rates
+- Frankfurter API provides ~30+ currencies (excluding ILS)
+- User can toggle between "Original Currencies" and "Convert to [Preferred Currency]" views
+- Preferred currency stored in localStorage (not in profiles table)
+- Exchange rates cached for 24 hours
+- Summary totals and charts always show in preferred currency when in converted mode
 
 **RLS Policies:**
 - Users can view their own donations only

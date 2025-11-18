@@ -4,12 +4,16 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Edit, Trash2, ChevronDown } from 'lucide-react'
 import { useState } from 'react'
-import type { Donation } from '@/types/donation.types'
+import { formatCurrency } from '@/lib/currency'
+import type { DonationWithConversion, CurrencyViewMode } from '@/types/donation.types'
+import type { CurrencyCode } from '@/types/currency.types'
 
 interface ListViewAccordionProps {
-  donations: Donation[]
-  onEdit: (donation: Donation) => void
-  onDelete: (donation: Donation) => void
+  donations: DonationWithConversion[]
+  onEdit: (donation: DonationWithConversion) => void
+  onDelete: (donation: DonationWithConversion) => void
+  viewMode: CurrencyViewMode
+  preferredCurrency: CurrencyCode
 }
 
 interface MonthGroup {
@@ -17,10 +21,10 @@ interface MonthGroup {
   monthLabel: string
   total: number
   count: number
-  donations: Donation[]
+  donations: DonationWithConversion[]
 }
 
-export function ListViewAccordion({ donations, onEdit, onDelete }: ListViewAccordionProps) {
+export function ListViewAccordion({ donations, onEdit, onDelete, viewMode, preferredCurrency }: ListViewAccordionProps) {
   const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set())
 
   // Group donations by month
@@ -49,7 +53,7 @@ export function ListViewAccordion({ donations, onEdit, onDelete }: ListViewAccor
     }
 
     const group = monthMap.get(monthKey)!
-    group.total += Number(donation.amount)
+    group.total += Number(donation.convertedAmount)
     group.count += 1
     group.donations.push(donation)
   })
@@ -67,11 +71,8 @@ export function ListViewAccordion({ donations, onEdit, onDelete }: ListViewAccor
     setExpandedMonths(newExpanded)
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount)
+  const formatAmount = (amount: number, currency: string) => {
+    return formatCurrency(amount, currency)
   }
 
   const formatDate = (dateString: string) => {
@@ -129,7 +130,7 @@ export function ListViewAccordion({ donations, onEdit, onDelete }: ListViewAccor
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-xl font-bold">{formatCurrency(group.total)}</p>
+                <p className="text-xl font-bold">{formatAmount(group.total, preferredCurrency)}</p>
               </div>
             </button>
 
@@ -164,7 +165,7 @@ export function ListViewAccordion({ donations, onEdit, onDelete }: ListViewAccor
                           <tr key={donation.id} className="border-b last:border-0 hover:bg-muted/30">
                             <td className="py-3 px-2 text-sm">{formatDate(donation.date)}</td>
                             <td className="py-3 px-2 text-sm text-right font-semibold">
-                              {formatCurrency(Number(donation.amount))}
+                              {formatAmount(Number(donation.convertedAmount), donation.convertedCurrency)}
                             </td>
                             <td className="py-3 px-2">
                               <span

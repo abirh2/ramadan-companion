@@ -16,13 +16,16 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
-import type { Donation } from '@/types/donation.types'
+import { formatCurrency } from '@/lib/currency'
+import type { DonationWithConversion } from '@/types/donation.types'
+import type { CurrencyCode } from '@/types/currency.types'
 
 interface ChartsSectionProps {
-  donations: Donation[]
+  donations: DonationWithConversion[]
+  preferredCurrency: CurrencyCode
 }
 
-export function ChartsSection({ donations }: ChartsSectionProps) {
+export function ChartsSection({ donations, preferredCurrency }: ChartsSectionProps) {
   if (donations.length === 0) {
     return (
       <Card className="rounded-xl">
@@ -41,6 +44,11 @@ export function ChartsSection({ donations }: ChartsSectionProps) {
 
   return (
     <div className="space-y-6">
+      {/* Currency Note */}
+      <p className="text-xs text-muted-foreground text-center">
+        All amounts shown in {preferredCurrency}
+      </p>
+
       {/* Line Chart - Monthly Trends */}
       <Card className="rounded-xl">
         <CardHeader>
@@ -58,7 +66,7 @@ export function ChartsSection({ donations }: ChartsSectionProps) {
               <YAxis
                 className="text-xs"
                 tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                tickFormatter={(value) => `$${value}`}
+                tickFormatter={(value) => formatCurrency(value, preferredCurrency).replace(/\.\d+$/, '')}
               />
               <Tooltip
                 contentStyle={{
@@ -66,7 +74,7 @@ export function ChartsSection({ donations }: ChartsSectionProps) {
                   border: '1px solid hsl(var(--border))',
                   borderRadius: '8px',
                 }}
-                formatter={(value: number) => [`$${value.toFixed(2)}`, 'Amount']}
+                formatter={(value: number) => [formatCurrency(value, preferredCurrency), 'Amount']}
               />
               <Legend />
               <Line
@@ -158,7 +166,7 @@ export function ChartsSection({ donations }: ChartsSectionProps) {
 }
 
 // Helper function to prepare monthly data
-function prepareMonthlyData(donations: Donation[]) {
+function prepareMonthlyData(donations: DonationWithConversion[]) {
   const monthlyMap = new Map<string, number>()
 
   donations.forEach((donation) => {
@@ -170,7 +178,7 @@ function prepareMonthlyData(donations: Donation[]) {
     }).format(date)
 
     const current = monthlyMap.get(monthKey) || 0
-    monthlyMap.set(monthKey, current + Number(donation.amount))
+    monthlyMap.set(monthKey, current + Number(donation.convertedAmount))
   })
 
   // Convert to array and sort by date
@@ -194,7 +202,7 @@ function prepareMonthlyData(donations: Donation[]) {
 }
 
 // Helper function to prepare type data
-function prepareTypeData(donations: Donation[]) {
+function prepareTypeData(donations: DonationWithConversion[]) {
   const typeMap = new Map<string, number>([
     ['zakat', 0],
     ['sadaqah', 0],
@@ -203,7 +211,7 @@ function prepareTypeData(donations: Donation[]) {
 
   donations.forEach((donation) => {
     const current = typeMap.get(donation.type) || 0
-    typeMap.set(donation.type, current + Number(donation.amount))
+    typeMap.set(donation.type, current + Number(donation.convertedAmount))
   })
 
   const colors: Record<string, string> = {

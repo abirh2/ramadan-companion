@@ -1,15 +1,23 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { getDonations } from '@/lib/donations'
-import type { Donation, DonationSummary, DonationFilters } from '@/types/donation.types'
+import { convertAmount, formatCurrency, getPreferredCurrency, getViewMode } from '@/lib/currency'
+import type { Donation, DonationSummary, DonationFilters, DonationWithConversion, CurrencyViewMode } from '@/types/donation.types'
+import type { CurrencyCode } from '@/types/currency.types'
 
 interface UseDonationsResult {
   donations: Donation[]
+  displayDonations: DonationWithConversion[]
   loading: boolean
   error: string | null
   refetch: () => Promise<void>
   isEmpty: boolean
   summary: DonationSummary
+  viewMode: CurrencyViewMode
+  setViewMode: (mode: CurrencyViewMode) => void
+  preferredCurrency: CurrencyCode
+  setPreferredCurrency: (currency: CurrencyCode) => void
+  converting: boolean
 }
 
 export function useDonations(filters?: DonationFilters): UseDonationsResult {
@@ -24,8 +32,29 @@ export function useDonations(filters?: DonationFilters): UseDonationsResult {
     error: null,
   })
 
+  const [viewMode, setViewModeState] = useState<CurrencyViewMode>('original')
+  const [preferredCurrency, setPreferredCurrencyState] = useState<CurrencyCode>('USD')
+  const [displayDonations, setDisplayDonations] = useState<DonationWithConversion[]>([])
+  const [converting, setConverting] = useState(false)
+
   const isFetchingRef = useRef(false)
   const mountedRef = useRef(true)
+
+  // Initialize view mode and preferred currency from localStorage
+  useEffect(() => {
+    setViewModeState(getViewMode())
+    setPreferredCurrencyState(getPreferredCurrency())
+  }, [])
+
+  // Wrapper for setViewMode to update state
+  const setViewMode = useCallback((mode: CurrencyViewMode) => {
+    setViewModeState(mode)
+  }, [])
+
+  // Wrapper for setPreferredCurrency to update state
+  const setPreferredCurrency = useCallback((currency: CurrencyCode) => {
+    setPreferredCurrencyState(currency)
+  }, [])
 
   const fetchDonations = useCallback(async () => {
     if (!user || isFetchingRef.current) {
@@ -68,12 +97,77 @@ export function useDonations(filters?: DonationFilters): UseDonationsResult {
     }
   }, [user, filters])
 
-  // Calculate summary totals
+  // Convert donations when view mode or preferred currency changes
+  useEffect(() => {
+    async function convertDonations() {
+      if (viewMode === 'original') {
+        // In original mode, no conversion needed
+        setDisplayDonations(
+          state.donations.map((donation) => ({
+            ...donation,
+            convertedAmount: donation.amount,
+            convertedCurrency: donation.currency,
+            conversionRate: 1,
+          }))
+        )
+        return
+      }
+
+      // In converted mode, convert all donations to preferred currency
+      setConverting(true)
+      try {
+        const converted = await Promise.all(
+          state.donations.map(async (donation) => {
+            try {
+              const conversion = await convertAmount(
+                donation.amount,
+                donation.currency,
+                preferredCurrency
+              )
+              return {
+                ...donation,
+                convertedAmount: conversion.convertedAmount,
+                convertedCurrency: conversion.convertedCurrency,
+                conversionRate: conversion.rate,
+              }
+            } catch (error) {
+              console.error(`Error converting ${donation.currency} to ${preferredCurrency}:`, error)
+              // Fallback to original amount if conversion fails
+              return {
+                ...donation,
+                convertedAmount: donation.amount,
+                convertedCurrency: donation.currency,
+                conversionRate: 1,
+              }
+            }
+          })
+        )
+        setDisplayDonations(converted)
+      } catch (error) {
+        console.error('Error converting donations:', error)
+        // Fallback to original amounts
+        setDisplayDonations(
+          state.donations.map((donation) => ({
+            ...donation,
+            convertedAmount: donation.amount,
+            convertedCurrency: donation.currency,
+            conversionRate: 1,
+          }))
+        )
+      } finally {
+        setConverting(false)
+      }
+    }
+
+    convertDonations()
+  }, [state.donations, viewMode, preferredCurrency])
+
+  // Calculate summary totals (using converted amounts in converted mode)
   const summary: DonationSummary = {
     ramadanTotal: 0,
     yearlyTotal: 0,
     allTimeTotal: 0,
-    totalCount: state.donations.length,
+    totalCount: displayDonations.length,
   }
 
   const currentYear = new Date().getFullYear()
@@ -87,8 +181,8 @@ export function useDonations(filters?: DonationFilters): UseDonationsResult {
   const ramadanStart = new Date('2024-03-10') // Placeholder - will be dynamic
   const ramadanEnd = new Date('2024-04-09') // Placeholder - will be dynamic
 
-  state.donations.forEach((donation) => {
-    const amount = Number(donation.amount)
+  displayDonations.forEach((donation) => {
+    const amount = Number(donation.convertedAmount)
     const donationDate = new Date(donation.date)
 
     // All-time total
@@ -118,11 +212,17 @@ export function useDonations(filters?: DonationFilters): UseDonationsResult {
 
   return {
     donations: state.donations,
+    displayDonations,
     loading: state.loading,
     error: state.error,
     refetch: fetchDonations,
     isEmpty: state.donations.length === 0 && !state.loading,
     summary,
+    viewMode,
+    setViewMode,
+    preferredCurrency,
+    setPreferredCurrency,
+    converting,
   }
 }
 

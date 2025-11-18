@@ -4,12 +4,16 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight, Edit, Trash2 } from 'lucide-react'
-import type { Donation } from '@/types/donation.types'
+import { formatCurrency } from '@/lib/currency'
+import type { DonationWithConversion, CurrencyViewMode } from '@/types/donation.types'
+import type { CurrencyCode } from '@/types/currency.types'
 
 interface MonthlyViewProps {
-  donations: Donation[]
-  onEdit: (donation: Donation) => void
-  onDelete: (donation: Donation) => void
+  donations: DonationWithConversion[]
+  onEdit: (donation: DonationWithConversion) => void
+  onDelete: (donation: DonationWithConversion) => void
+  viewMode: CurrencyViewMode
+  preferredCurrency: CurrencyCode
 }
 
 interface MonthData {
@@ -18,10 +22,10 @@ interface MonthData {
   monthName: string
   total: number
   count: number
-  donations: Donation[]
+  donations: DonationWithConversion[]
 }
 
-export function MonthlyView({ donations, onEdit, onDelete }: MonthlyViewProps) {
+export function MonthlyView({ donations, onEdit, onDelete, viewMode, preferredCurrency }: MonthlyViewProps) {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [expandedMonth, setExpandedMonth] = useState<string | null>(null)
 
@@ -49,7 +53,7 @@ export function MonthlyView({ donations, onEdit, onDelete }: MonthlyViewProps) {
       return date.getFullYear() === selectedYear && date.getMonth() + 1 === month
     })
 
-    const total = monthDonations.reduce((sum, d) => sum + Number(d.amount), 0)
+    const total = monthDonations.reduce((sum, d) => sum + Number(d.convertedAmount), 0)
 
     return {
       year: selectedYear,
@@ -61,11 +65,8 @@ export function MonthlyView({ donations, onEdit, onDelete }: MonthlyViewProps) {
     }
   })
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount)
+  const formatAmount = (amount: number, currency: string) => {
+    return formatCurrency(amount, currency)
   }
 
   const formatDate = (dateString: string) => {
@@ -142,7 +143,7 @@ export function MonthlyView({ donations, onEdit, onDelete }: MonthlyViewProps) {
                   <p className="text-sm text-muted-foreground">No donations</p>
                 ) : (
                   <>
-                    <p className="text-2xl font-bold">{formatCurrency(monthData.total)}</p>
+                    <p className="text-2xl font-bold">{formatAmount(monthData.total, preferredCurrency)}</p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {monthData.count} {monthData.count === 1 ? 'donation' : 'donations'}
                     </p>
@@ -159,7 +160,7 @@ export function MonthlyView({ donations, onEdit, onDelete }: MonthlyViewProps) {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="font-semibold">
-                                  {formatCurrency(Number(donation.amount))}
+                                  {formatAmount(Number(donation.convertedAmount), donation.convertedCurrency)}
                                 </span>
                                 <span
                                   className={`text-xs px-2 py-0.5 rounded-full capitalize ${getTypeBadgeClass(

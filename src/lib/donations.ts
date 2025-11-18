@@ -63,7 +63,7 @@ export async function addDonation(
       .insert({
         user_id: userId,
         amount: data.amount,
-        currency: 'USD',
+        currency: data.currency || 'USD',
         type: data.type,
         date: data.date,
         charity_name: data.charity_name || null,
@@ -105,6 +105,7 @@ export async function updateDonation(
       .from('donations')
       .update({
         amount: data.amount,
+        currency: data.currency || 'USD',
         type: data.type,
         date: data.date,
         charity_name: data.charity_name || null,

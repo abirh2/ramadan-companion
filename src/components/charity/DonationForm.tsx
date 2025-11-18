@@ -14,6 +14,8 @@ import { Input } from '@/components/ui/input'
 import { Loader2 } from 'lucide-react'
 import { addDonation, updateDonation } from '@/lib/donations'
 import { useAuth } from '@/hooks/useAuth'
+import { getPreferredCurrency } from '@/lib/currency'
+import { CurrencySelector } from '@/components/charity/CurrencySelector'
 import type { Donation, DonationFormData } from '@/types/donation.types'
 
 interface DonationFormProps {
@@ -33,6 +35,7 @@ export function DonationForm({ open, onOpenChange, onSuccess, donation }: Donati
   // Form state
   const [formData, setFormData] = useState<DonationFormData>({
     amount: donation?.amount || 0,
+    currency: donation?.currency || getPreferredCurrency(),
     type: donation?.type || 'sadaqah',
     date: donation?.date || new Date().toISOString().split('T')[0],
     charity_name: donation?.charity_name || '',
@@ -46,6 +49,7 @@ export function DonationForm({ open, onOpenChange, onSuccess, donation }: Donati
     if (open) {
       setFormData({
         amount: donation?.amount || 0,
+        currency: donation?.currency || getPreferredCurrency(),
         type: donation?.type || 'sadaqah',
         date: donation?.date || new Date().toISOString().split('T')[0],
         charity_name: donation?.charity_name || '',
@@ -104,23 +108,38 @@ export function DonationForm({ open, onOpenChange, onSuccess, donation }: Donati
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Amount */}
-          <div className="space-y-2">
-            <label htmlFor="amount" className="text-sm font-medium">
-              Amount (USD) <span className="text-destructive">*</span>
-            </label>
-            <Input
-              id="amount"
-              type="number"
-              step="0.01"
-              min="0.01"
-              placeholder="0.00"
-              value={formData.amount || ''}
-              onChange={(e) =>
-                setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })
-              }
-              required
-            />
+          {/* Amount and Currency */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Amount */}
+            <div className="space-y-2">
+              <label htmlFor="amount" className="text-sm font-medium">
+                Amount <span className="text-destructive">*</span>
+              </label>
+              <Input
+                id="amount"
+                type="number"
+                step="0.01"
+                min="0.01"
+                placeholder="0.00"
+                value={formData.amount || ''}
+                onChange={(e) =>
+                  setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })
+                }
+                required
+              />
+            </div>
+
+            {/* Currency */}
+            <div className="space-y-2">
+              <label htmlFor="currency" className="text-sm font-medium">
+                Currency <span className="text-destructive">*</span>
+              </label>
+              <CurrencySelector
+                value={formData.currency || 'USD'}
+                onChange={(currency) => setFormData({ ...formData, currency })}
+                disabled={loading}
+              />
+            </div>
           </div>
 
           {/* Type */}
