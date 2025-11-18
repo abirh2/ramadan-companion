@@ -164,12 +164,13 @@ export function startOrientationTracking(callback: OrientationCallback): () => v
 
   // Create new listener
   const listener = (event: DeviceOrientationEvent) => {
-    // alpha: compass heading (0-360, 0=North, clockwise)
-    // Some devices use webkitCompassHeading instead
+    // CRITICAL iOS FIX: event.alpha on iOS is relative to page load orientation, NOT magnetic north
+    // webkitCompassHeading IS calibrated to true magnetic north
+    // Must prioritize webkitCompassHeading when available (iOS Safari)
     const webkitEvent = event as any
-    const alpha = event.alpha !== null 
-      ? event.alpha 
-      : (webkitEvent.webkitCompassHeading !== undefined ? webkitEvent.webkitCompassHeading : null)
+    const alpha = webkitEvent.webkitCompassHeading !== undefined
+      ? webkitEvent.webkitCompassHeading  // iOS Safari - true magnetic compass
+      : event.alpha  // Android - use alpha (Android alpha IS magnetic north)
     
     if (alpha === null) {
       // No compass data available
