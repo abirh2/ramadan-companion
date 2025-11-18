@@ -31,12 +31,51 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
 let scheduledNotifications: Map<PrayerName, ScheduledNotification> = new Map()
 
 /**
+ * Detect if device is iOS
+ * @returns true if running on iOS
+ */
+export function isIOS(): boolean {
+  if (typeof window === 'undefined') return false
+  const ua = navigator.userAgent
+  return /iPad|iPhone|iPod/.test(ua)
+}
+
+/**
+ * Detect iOS browser type
+ * @returns 'safari' | 'chrome' | 'firefox' | 'edge' | 'other' | 'not-ios'
+ */
+export function getIOSBrowser(): string {
+  if (!isIOS()) return 'not-ios'
+  
+  const ua = navigator.userAgent
+  if (/CriOS/.test(ua)) return 'chrome'
+  if (/FxiOS/.test(ua)) return 'firefox'
+  if (/EdgiOS/.test(ua)) return 'edge'
+  if (/Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua)) return 'safari'
+  
+  return 'other'
+}
+
+/**
  * Check if notifications are supported by the browser
+ * IMPORTANT: On iOS, only Safari supports Web Push notifications
+ * iOS Chrome/Firefox/Edge use WebKit and do NOT support notifications
  * @returns true if notifications are supported
  */
 export function isNotificationSupported(): boolean {
   if (typeof window === 'undefined') return false
-  return 'Notification' in window && 'serviceWorker' in navigator
+  
+  // Check basic API support
+  const hasAPI = 'Notification' in window && 'serviceWorker' in navigator
+  
+  // On iOS, only Safari supports notifications
+  // All other iOS browsers (Chrome, Firefox, Edge) use WebKit without notification support
+  if (isIOS()) {
+    const browser = getIOSBrowser()
+    return hasAPI && browser === 'safari'
+  }
+  
+  return hasAPI
 }
 
 /**

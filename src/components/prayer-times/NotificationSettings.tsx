@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { useNotifications } from '@/hooks/useNotifications'
+import { isIOS, getIOSBrowser } from '@/lib/notifications'
 import type { PrayerName } from '@/types/notification.types'
 
 const PRAYER_INFO: Record<
@@ -47,16 +48,39 @@ export function NotificationSettings() {
 
   // Browser not supported
   if (!isSupported) {
+    const deviceIsIOS = isIOS()
+    const iosBrowser = getIOSBrowser()
+    
     return (
       <Card className="p-6">
         <div className="flex items-start gap-3">
           <Smartphone className="h-5 w-5 text-muted-foreground mt-0.5" />
           <div className="flex-1">
             <h3 className="font-semibold text-sm">Prayer Notifications</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Notifications are not supported in your browser. Try using Chrome,
-              Edge, or Safari for the best experience.
-            </p>
+            
+            {deviceIsIOS && iosBrowser !== 'safari' ? (
+              // iOS non-Safari browser
+              <div className="text-sm text-muted-foreground mt-1 space-y-2">
+                <p>
+                  You're using {iosBrowser === 'chrome' ? 'Chrome' : iosBrowser === 'firefox' ? 'Firefox' : iosBrowser === 'edge' ? 'Edge' : 'a browser'} on iOS.
+                  Due to Apple's restrictions, notifications only work in <strong>Safari</strong> on iOS devices.
+                </p>
+                <p>
+                  <strong>To enable notifications:</strong>
+                </p>
+                <ol className="list-decimal ml-4 space-y-1">
+                  <li>Open this site in Safari</li>
+                  <li>Install the app to your home screen</li>
+                  <li>Open the installed app and enable notifications</li>
+                </ol>
+              </div>
+            ) : (
+              // Non-iOS or other unsupported browser
+              <p className="text-sm text-muted-foreground mt-1">
+                Notifications are not supported in your browser. Try using Chrome,
+                Edge, or Safari for the best experience.
+              </p>
+            )}
           </div>
         </div>
       </Card>
@@ -190,6 +214,24 @@ export function NotificationSettings() {
                 </div>
               )
             })}
+          </div>
+        )}
+
+        {/* iOS limitation warning */}
+        {isIOS() && preferences.enabled && (
+          <div className="flex items-start gap-2 text-xs text-amber-700 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/20 p-3 rounded-md border border-amber-200 dark:border-amber-900">
+            <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="font-medium">iOS Limitation</p>
+              <p className="text-amber-600 dark:text-amber-400">
+                Due to iOS restrictions, notifications only work while the app is <strong>open and active</strong>.
+                If you close or background the app, notifications will not appear.
+              </p>
+              <p className="text-amber-600 dark:text-amber-400">
+                For reliable prayer reminders on iOS, consider using the Clock app's built-in alarms
+                or the Shortcuts app to create custom prayer time reminders.
+              </p>
+            </div>
           </div>
         )}
 
