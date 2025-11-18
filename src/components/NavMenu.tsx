@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Menu, BookOpen, Clock, Heart, DollarSign, MessageCircle, Sparkles } from 'lucide-react'
+import { Menu, BookOpen, Clock, Heart, DollarSign, MessageCircle, Sparkles, Compass } from 'lucide-react'
 
 export function NavMenu() {
   return (
@@ -36,6 +36,13 @@ export function NavMenu() {
           <DropdownMenuItem className="cursor-pointer">
             <Clock className="h-4 w-4 mr-2" />
             Prayer Times
+          </DropdownMenuItem>
+        </Link>
+        
+        <Link href="/times#qibla">
+          <DropdownMenuItem className="cursor-pointer">
+            <Compass className="h-4 w-4 mr-2" />
+            Qibla Finder
           </DropdownMenuItem>
         </Link>
         

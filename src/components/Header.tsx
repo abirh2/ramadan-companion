@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { AuthButton } from '@/components/auth/AuthButton'
 import { NavMenu } from '@/components/NavMenu'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 export function Header() {
   return (
@@ -10,6 +11,7 @@ export function Header() {
           Ramadan Companion
         </Link>
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <NavMenu />
           <AuthButton />
         </div>

@@ -36,7 +36,7 @@ It is meant to be concrete enough that any developer or designer can implement c
   - Mobile: single-column layout for cards.
   - Desktop: 2-column grid for dashboard cards.
 - Page structure:
-  - **Global header** (sticky): "Ramadan Companion" title + NavMenu + AuthButton
+  - **Global header** (sticky): "Ramadan Companion" title + ThemeToggle + NavMenu + AuthButton
   - **Page content area**: Back button + page title + content
   - Footer is optional and minimal (version, small credits).
 
@@ -45,7 +45,8 @@ It is meant to be concrete enough that any developer or designer can implement c
 **Global Header** (in `src/app/layout.tsx`):
 - Present on ALL pages
 - Sticky at top: `sticky top-0 z-50`
-- Contains: App title (clickable link to home) + Navigation menu + Auth button
+- Contains: App title (clickable link to home) + Theme toggle + Navigation menu + Auth button
+- Theme toggle is always visible (no login required)
 - Never duplicated per-page
 
 **Page-Level Navigation** (in page content):

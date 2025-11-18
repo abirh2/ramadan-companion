@@ -11,13 +11,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, Settings, LogOut, Moon, Sun, Heart } from 'lucide-react';
-import { useTheme } from 'next-themes';
+import { User, Settings, LogOut, Heart } from 'lucide-react';
 
 export function UserMenu() {
   const { user, profile, signOut } = useAuth();
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
 
   const handleSignOut = async () => {
     await signOut();
@@ -30,10 +28,6 @@ export function UserMenu() {
 
   const handleFavorites = () => {
     router.push('/favorites');
-  };
-
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
   const displayName = profile?.display_name || user?.email?.split('@')[0] || 'User';
@@ -61,14 +55,6 @@ export function UserMenu() {
         <DropdownMenuItem onClick={handleFavorites}>
           <Heart className="mr-2 h-4 w-4" />
           <span>Favorites</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={toggleTheme}>
-          {theme === 'dark' ? (
-            <Sun className="mr-2 h-4 w-4" />
-          ) : (
-            <Moon className="mr-2 h-4 w-4" />
-          )}
-          <span>Toggle theme</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleProfile}>
           <Settings className="mr-2 h-4 w-4" />

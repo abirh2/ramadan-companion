@@ -231,7 +231,9 @@ export default function TimesPage() {
             {/* Right Column - Sidebar */}
             <div className="space-y-6">
               {/* Qibla Compass */}
-              <QiblaCompass qiblaDirection={qiblaDirection} loading={false} error={null} />
+              <div id="qibla">
+                <QiblaCompass qiblaDirection={qiblaDirection} loading={false} error={null} />
+              </div>
 
               {/* Settings */}
               <PrayerTimesSettings

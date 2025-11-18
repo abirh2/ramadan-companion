@@ -40,17 +40,20 @@ User authentication and profile management using Supabase Auth.
 2. **Protected features:** Charity tracker and favorites require authentication
 3. **Login modal:** Click "Login" button in header → modal with tabs (Sign In / Sign Up)
 4. **OAuth flow:** Click Google/GitHub → redirect to OAuth → callback → authenticated
-5. **User menu:** When authenticated, user icon in header opens sheet with profile link, theme toggle, sign out
+5. **User menu:** When authenticated, user icon in header opens sheet with profile link, favorites, sign out
+6. **Theme toggle:** Always visible in header (sun/moon icon) - no authentication required
 
 ### Data
 - `profiles` table auto-created on signup via trigger
-- User preferences stored in profile (timezone, theme, calculation method, etc.)
+- User preferences stored in profile (timezone, calculation method, etc.)
+- Theme preference stored in localStorage (accessible to all users)
 - Protected by RLS - users can only access their own data
 
 ### UI Components
 - `AuthButton` - Header button (shows "Login" or user icon)
 - `LoginModal` - Email/password form with OAuth buttons
-- `UserMenu` - Sheet with profile link, theme toggle, sign out
+- `UserMenu` - Sheet with profile link, favorites, sign out
+- `ThemeToggle` - Public theme switcher (always visible in header)
 - `ProtectedFeature` - Wrapper component that shows login prompt if unauthenticated
 
 ### APIs
@@ -145,9 +148,13 @@ Display accurate prayer times and Qibla direction based on user location with ci
 **Full Prayer Times Page (`/app/times/page.tsx`):**
 - Hero section: Large next prayer countdown
 - Complete prayer schedule (Fajr → Isha + Sunrise)
-- Qibla compass with bearing and direction
+- Qibla compass with bearing and direction (accessible via `/times#qibla` anchor)
 - Settings panel for calculation method and location
 - Responsive layout (mobile single-column, desktop 2-column)
+
+**Navigation:**
+- Direct access via hamburger menu: "Qibla Finder" → `/times#qibla`
+- Also accessible via "Prayer Times" page (scroll to compass section)
 
 **Key Components:**
 - `usePrayerTimes()` hook - Core logic for fetching and calculating prayer times with automatic fallback
