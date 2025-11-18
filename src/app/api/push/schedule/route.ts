@@ -130,9 +130,12 @@ export async function POST(request: NextRequest) {
         const prayerTime = prayerTimes[prayerName]
         const prayerMinutes = parseTimeToMinutes(prayerTime)
         
-        // Only send notification if current time matches prayer time within 2-minute window
-        if (!isWithinTimeWindow(currentMinutes, prayerMinutes, 2)) {
-          continue // Not time for this prayer yet
+        // Only send notification if current time is AT or AFTER prayer time (within 5-minute window)
+        // Never send before prayer time - only send when prayer time has arrived or just passed
+        // 5-minute window matches cron interval to guarantee zero missed notifications
+        // Worst case: prayer at 5:30:01, last cron at 5:30, next cron at 5:35 (needs 5min window)
+        if (currentMinutes < prayerMinutes || currentMinutes > prayerMinutes + 5) {
+          continue // Too early or too late
         }
 
         const quote = getRandomPrayerQuote(prayerName)

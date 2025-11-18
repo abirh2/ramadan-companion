@@ -2334,14 +2334,16 @@ Click Action: Opens /times page
 - **For each user with notifications enabled:**
   1. Calculate today's prayer times based on user's location and preferences
   2. Get current time in user's timezone
-  3. Check if current time matches any prayer time within ±2 minute window
+  3. Check if current time is AT or AFTER any prayer time (within 5-minute window)
   4. If match found, fetch all active push subscriptions for that user
   5. Send push notification via Web Push API to each subscription
   6. Service Worker receives push and displays notification
 - **Time Matching:**
-  - 5-minute polling interval with 2-minute window
-  - Notifications sent when current time is within 2 minutes of prayer time
-  - Example: Fajr at 5:30 AM → notification sent between 5:28-5:32 AM
+  - 5-minute polling interval with 5-minute window AFTER prayer time
+  - Notifications sent only AT or AFTER prayer time (never before)
+  - Window matches cron interval to guarantee zero missed notifications
+  - Worst case: prayer at 5:30:01, cron at 5:35 (needs 5-minute window to catch)
+  - Example: Fajr at 5:30 AM → notification sent between 5:30-5:35 AM (not before 5:30)
 - **Benefits:**
   - Works when app is closed or backgrounded (iOS, Android, Desktop)
   - No client-side setTimeout limitations
