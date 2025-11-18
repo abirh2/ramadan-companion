@@ -217,19 +217,14 @@ export function NotificationSettings() {
           </div>
         )}
 
-        {/* iOS limitation warning */}
+        {/* iOS PWA reminder */}
         {isIOS() && preferences.enabled && (
-          <div className="flex items-start gap-2 text-xs text-amber-700 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/20 p-3 rounded-md border border-amber-200 dark:border-amber-900">
+          <div className="flex items-start gap-2 text-xs text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/20 p-3 rounded-md border border-blue-200 dark:border-blue-900">
             <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <p className="font-medium">iOS Limitation</p>
-              <p className="text-amber-600 dark:text-amber-400">
-                Due to iOS restrictions, notifications only work while the app is <strong>open and active</strong>.
-                If you close or background the app, notifications will not appear.
-              </p>
-              <p className="text-amber-600 dark:text-amber-400">
-                For reliable prayer reminders on iOS, consider using the Clock app's built-in alarms
-                or the Shortcuts app to create custom prayer time reminders.
+              <p className="font-medium">iOS Tip</p>
+              <p className="text-blue-600 dark:text-blue-300">
+                For best results on iOS, <strong>install this app to your home screen</strong> using Safari's "Add to Home Screen" feature. Notifications will work even when the app is closed.
               </p>
             </div>
           </div>
