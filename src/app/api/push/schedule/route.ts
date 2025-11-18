@@ -12,6 +12,47 @@ webpush.setVapidDetails(
   process.env.VAPID_PRIVATE_KEY!
 )
 
+/**
+ * Parse prayer time string (HH:MM) to minutes since midnight
+ * @param timeString - Time in 24-hour format (e.g., "05:30", "13:45")
+ * @returns Minutes since midnight
+ */
+function parseTimeToMinutes(timeString: string): number {
+  const [hours, minutes] = timeString.split(':').map(Number)
+  return hours * 60 + minutes
+}
+
+/**
+ * Get current time in minutes since midnight for a specific timezone
+ * @param timezone - IANA timezone string (e.g., 'America/New_York')
+ * @returns Minutes since midnight in the specified timezone
+ */
+function getCurrentTimeInTimezone(timezone: string): number {
+  const now = new Date()
+  const timeString = now.toLocaleTimeString('en-US', {
+    timeZone: timezone,
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+  return parseTimeToMinutes(timeString)
+}
+
+/**
+ * Check if current time matches prayer time within a window
+ * @param currentMinutes - Current time in minutes since midnight
+ * @param prayerMinutes - Prayer time in minutes since midnight
+ * @param windowMinutes - Window size in minutes (default: 2)
+ * @returns True if within window
+ */
+function isWithinTimeWindow(
+  currentMinutes: number,
+  prayerMinutes: number,
+  windowMinutes: number = 2
+): boolean {
+  return Math.abs(currentMinutes - prayerMinutes) <= windowMinutes
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Verify cron secret (security)
@@ -76,17 +117,28 @@ export async function POST(request: NextRequest) {
         continue
       }
 
-      // Schedule notifications for each enabled prayer
+      // Get current time in user's timezone (use UTC as fallback)
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+      const currentMinutes = getCurrentTimeInTimezone(timezone)
+
+      // Check notifications for each enabled prayer
       const prayerNames: PrayerName[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
       
       for (const prayerName of prayerNames) {
         if (!prefs.prayers?.[prayerName]) continue
 
         const prayerTime = prayerTimes[prayerName]
+        const prayerMinutes = parseTimeToMinutes(prayerTime)
+        
+        // Only send notification if current time matches prayer time within 2-minute window
+        if (!isWithinTimeWindow(currentMinutes, prayerMinutes, 2)) {
+          continue // Not time for this prayer yet
+        }
+
         const quote = getRandomPrayerQuote(prayerName)
         
         const payload = JSON.stringify({
-          title: `Time for ${prayerName} Prayer`,
+          title: `Time for ${prayerName} Prayer - ${prayerTime}`,
           body: `${quote.text} - ${quote.source}`,
           icon: '/icon-192.png',
           badge: '/icon-192-maskable.png',

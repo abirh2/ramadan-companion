@@ -68,6 +68,7 @@
 | 🟡 Medium | Notes on Favorites | Personal reflections on saved content | Supabase (notes field) |
 | 🟡 Medium | Quran Progress Tracking | Track reading progress by juz/surah | Supabase (reading_progress table) |
 | 🟡 Medium | Hadith Search | Keyword search, filter by authenticity | Client-side filtering |
+| 🟢 Low | Exact-Minute Notification Scheduling | Replace 5-minute polling with dynamic job scheduler for exact-minute prayer notifications | Trigger.dev or similar (±2 min → exact minute) |
 | 🟢 Low | Social Sharing | WhatsApp/Twitter share integration | Native share API |
 
 ### Technical Components
