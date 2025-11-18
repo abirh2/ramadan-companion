@@ -245,6 +245,10 @@ Display accurate prayer times and Qibla direction based on user location with ci
 - **API:** DeviceOrientationEvent (native browser API, zero cost)
 - **Calculation:** `rotation = qiblaBearing - deviceHeading`
 - **Permission:** iOS 13+ requires `DeviceOrientationEvent.requestPermission()`
+- **Heading Source:**
+  - iOS Safari: Uses `webkitCompassHeading` (true magnetic north)
+  - Android: Uses `event.alpha` (magnetic north on Android)
+  - Critical: iOS `event.alpha` is relative to page load, NOT magnetic north
 - **Accuracy:** Magnetometer-based, typically ±5-10° (affected by magnetic interference)
 - **Fallback Chain:**
   1. Mobile + permission granted → Dynamic compass
