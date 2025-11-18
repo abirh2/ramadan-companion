@@ -171,14 +171,10 @@ export async function saveNotificationPreferences(
       const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
 
-      //Get user's timezone
-      const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
-      
       const { error } = await supabase
         .from('profiles')
         .update({
           notification_preferences: preferences,
-          timezone: userTimezone,
           updated_at: new Date().toISOString(),
         })
         .eq('id', profile.id)

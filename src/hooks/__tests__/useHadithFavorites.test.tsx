@@ -7,6 +7,9 @@ import type { HadithFavoriteData } from '@/types/hadith.types'
 jest.mock('@/hooks/useAuth')
 jest.mock('@/lib/favorites')
 
+import * as useAuthModule from '@/hooks/useAuth'
+
+const mockUseAuth = useAuthModule.useAuth as jest.MockedFunction<typeof useAuthModule.useAuth>
 const mockAddHadithFavorite = addHadithFavorite as jest.MockedFunction<typeof addHadithFavorite>
 const mockRemoveHadithFavorite = removeHadithFavorite as jest.MockedFunction<typeof removeHadithFavorite>
 const mockCheckIsHadithFavorited = checkIsHadithFavorited as jest.MockedFunction<typeof checkIsHadithFavorited>
@@ -35,8 +38,7 @@ describe('useHadithFavorites', () => {
   })
 
   it('should check favorite status on mount for authenticated user', async () => {
-    const { useAuth } = require('@/hooks/useAuth')
-    useAuth.mockReturnValue({ user: mockUser })
+    mockUseAuth.mockReturnValue({ user: mockUser } as any)
 
     const { result } = renderHook(() => useHadithFavorites(mockHadithData))
 
@@ -53,8 +55,7 @@ describe('useHadithFavorites', () => {
   })
 
   it('should not check favorite status for unauthenticated user', async () => {
-    const { useAuth } = require('@/hooks/useAuth')
-    useAuth.mockReturnValue({ user: null })
+    mockUseAuth.mockReturnValue({ user: null } as any)
 
     const { result } = renderHook(() => useHadithFavorites(mockHadithData))
 
@@ -67,8 +68,7 @@ describe('useHadithFavorites', () => {
   })
 
   it('should add hadith to favorites', async () => {
-    const { useAuth } = require('@/hooks/useAuth')
-    useAuth.mockReturnValue({ user: mockUser })
+    mockUseAuth.mockReturnValue({ user: mockUser } as any)
     mockAddHadithFavorite.mockResolvedValue({ success: true })
 
     const { result } = renderHook(() => useHadithFavorites(mockHadithData))
@@ -85,8 +85,7 @@ describe('useHadithFavorites', () => {
   })
 
   it('should remove hadith from favorites', async () => {
-    const { useAuth } = require('@/hooks/useAuth')
-    useAuth.mockReturnValue({ user: mockUser })
+    mockUseAuth.mockReturnValue({ user: mockUser } as any)
     mockCheckIsHadithFavorited.mockResolvedValue({ isFavorited: true })
     mockRemoveHadithFavorite.mockResolvedValue({ success: true })
 
@@ -108,8 +107,7 @@ describe('useHadithFavorites', () => {
   })
 
   it('should not toggle favorite when user is not authenticated', async () => {
-    const { useAuth } = require('@/hooks/useAuth')
-    useAuth.mockReturnValue({ user: null })
+    mockUseAuth.mockReturnValue({ user: null } as any)
 
     const { result } = renderHook(() => useHadithFavorites(mockHadithData))
 

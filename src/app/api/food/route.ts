@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
     const MIN_RESULTS = 5 // Minimum results before trying next strategy
     
     let allFoods: HalalFoodData[] = []
-    let strategiesUsed = { strict: 0, category: 0, cuisine: 0 }
+    const strategiesUsed = { strict: 0, category: 0, cuisine: 0 }
     
     // Strategy 1: Strict name search (most specific)
     try {

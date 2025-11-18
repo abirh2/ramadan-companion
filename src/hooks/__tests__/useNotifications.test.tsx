@@ -31,6 +31,37 @@ describe('useNotifications', () => {
   beforeEach(() => {
     jest.clearAllMocks()
 
+    // Mock service worker API
+    const mockSubscription = {
+      endpoint: 'https://test-endpoint.com',
+      unsubscribe: jest.fn().mockResolvedValue(true),
+    }
+
+    const mockPushManager = {
+      getSubscription: jest.fn().mockResolvedValue(mockSubscription),
+      subscribe: jest.fn().mockResolvedValue(mockSubscription),
+    }
+
+    const mockRegistration = {
+      pushManager: mockPushManager,
+    }
+
+    Object.defineProperty(global, 'navigator', {
+      value: {
+        serviceWorker: {
+          ready: Promise.resolve(mockRegistration),
+        },
+      },
+      writable: true,
+      configurable: true,
+    })
+
+    // Mock fetch for API calls
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    })
+
     // Default mocks
     mockUseAuth.mockReturnValue({
       user: null,

@@ -16,8 +16,11 @@ jest.mock('@/components/auth/LoginModal', () => ({
   LoginModal: () => <div data-testid="login-modal">Login Modal</div>,
 }))
 
-const mockUseHadithOfTheDay = require('@/hooks/useHadithOfTheDay').useHadithOfTheDay
-const mockUseHadithFavorites = require('@/hooks/useHadithFavorites').useHadithFavorites
+import * as useHadithOfTheDayModule from '@/hooks/useHadithOfTheDay'
+import * as useHadithFavoritesModule from '@/hooks/useHadithFavorites'
+
+const mockUseHadithOfTheDay = useHadithOfTheDayModule.useHadithOfTheDay as jest.MockedFunction<typeof useHadithOfTheDayModule.useHadithOfTheDay>
+const mockUseHadithFavorites = useHadithFavoritesModule.useHadithFavorites as jest.MockedFunction<typeof useHadithFavoritesModule.useHadithFavorites>
 
 describe('HadithCard', () => {
   const mockHadithData = {

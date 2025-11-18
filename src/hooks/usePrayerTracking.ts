@@ -82,7 +82,7 @@ export function usePrayerTracking(): UsePrayerTrackingResult {
         }
 
         // Find or create today's record
-        let todayRecord = records?.find((r) => r.date === today)
+        const todayRecord = records?.find((r) => r.date === today)
         let todayCompletion: DailyPrayerCompletion
 
         if (todayRecord) {

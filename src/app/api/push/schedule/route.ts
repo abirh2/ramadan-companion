@@ -46,13 +46,14 @@ function getCurrentTimeInTimezone(timezone: string): number {
  * @param windowMinutes - Window size in minutes (default: 2)
  * @returns True if within window
  */
-function isWithinTimeWindow(
-  currentMinutes: number,
-  prayerMinutes: number,
-  windowMinutes: number = 2
-): boolean {
-  return Math.abs(currentMinutes - prayerMinutes) <= windowMinutes
-}
+// Helper function for time window validation (currently unused but kept for future use)
+// function isWithinTimeWindow(
+//   currentMinutes: number,
+//   prayerMinutes: number,
+//   windowMinutes: number = 2
+// ): boolean {
+//   return Math.abs(currentMinutes - prayerMinutes) <= windowMinutes
+// }
 
 export async function POST(request: NextRequest) {
   try {

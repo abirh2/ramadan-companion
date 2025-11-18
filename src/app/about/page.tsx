@@ -13,15 +13,25 @@ import { FeedbackButton } from '@/components/FeedbackButton'
 function AboutContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [activeTab, setActiveTab] = useState('creator')
+  const [activeTab, setActiveTab] = useState(() => {
+    const tab = searchParams.get('tab')
+    if (tab && ['creator', 'app', 'install', 'acknowledgements'].includes(tab)) {
+      return tab
+    }
+    return 'creator'
+  })
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     const tab = searchParams.get('tab')
     if (tab && ['creator', 'app', 'install', 'acknowledgements'].includes(tab)) {
-      setActiveTab(tab)
+      if (tab !== activeTab) {
+        setActiveTab(tab)
+      }
+    } else if (activeTab !== 'creator') {
+      setActiveTab('creator')
     }
-  }, [searchParams])
+  }, [searchParams, activeTab])
 
   const handleTabChange = (value: string) => {
     setActiveTab(value)

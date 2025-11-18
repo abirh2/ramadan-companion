@@ -72,16 +72,14 @@ export function useZikr(): UseZikrResult {
     const fajrTime = prayerTimes.Fajr || null
     
     if (shouldResetForFajr(state.lastResetDate, fajrTime)) {
-      setState((prevState) => {
-        const resetState = resetZikrCounter(prevState)
-        saveZikrState(resetState)
-        return resetState
-      })
+      const resetState = resetZikrCounter(state)
+      setState(resetState)
+      saveZikrState(resetState)
     }
 
     hasCheckedResetRef.current = true
     setLoading(false)
-  }, [prayerTimes, state.lastResetDate])
+  }, [prayerTimes, state, state.lastResetDate])
 
   // Save state to localStorage whenever it changes
   useEffect(() => {

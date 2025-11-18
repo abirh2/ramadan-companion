@@ -8,7 +8,6 @@ import type {
 const ALQURAN_CLOUD_BASE_URL = 'https://api.alquran.cloud/v1'
 const ARABIC_EDITION = 'quran-uthmani'
 const DEFAULT_TRANSLATION: QuranTranslationId = 'en.asad'
-const TOTAL_AYAHS = 6236
 
 /**
  * Weighted Ayah Ranges

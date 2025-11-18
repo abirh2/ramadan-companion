@@ -104,7 +104,7 @@ describe('/api/currency', () => {
   it('should handle invalid currency code', async () => {
     const request = new NextRequest('http://localhost:3000/api/currency?base=INVALID')
     const response = await GET(request)
-    const data = await response.json()
+    await response.json()
 
     // Frankfurter will return error, we should handle it
     expect(response.status).toBeGreaterThanOrEqual(400)

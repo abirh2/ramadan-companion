@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import type { HadithAPIResponse, DailyHadithResponse, HadithLanguageId } from '@/types/hadith.types'
+import type { DailyHadithResponse, HadithLanguageId } from '@/types/hadith.types'
 
 const HADITH_API_BASE_URL = 'https://hadithapi.com/api'
 const HADITH_API_KEY = process.env.HADITH_API_KEY
-
-// Approximate hadith counts for the two sahih collections
-const SAHIH_BUKHARI_COUNT = 7563
-const SAHIH_MUSLIM_COUNT = 7563
 
 /**
  * Weighted Hadith Ranges
@@ -205,9 +201,6 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       )
     }
-
-    const searchParams = request.nextUrl.searchParams
-    const language = (searchParams.get('language') || 'english') as HadithLanguageId
 
     // Calculate today's hadith
     const { book, hadithNumber } = getDailyHadithSelection()

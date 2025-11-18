@@ -6,7 +6,9 @@ jest.mock('@/hooks/usePrayerTimes', () => ({
   usePrayerTimes: jest.fn(),
 }))
 
-const mockUsePrayerTimes = require('@/hooks/usePrayerTimes').usePrayerTimes
+import * as usePrayerTimesModule from '@/hooks/usePrayerTimes'
+
+const mockUsePrayerTimes = usePrayerTimesModule.usePrayerTimes as jest.MockedFunction<typeof usePrayerTimesModule.usePrayerTimes>
 
 describe('NextPrayerCard', () => {
   beforeEach(() => {

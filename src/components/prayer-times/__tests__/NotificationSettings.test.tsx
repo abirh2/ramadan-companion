@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { screen, fireEvent, waitFor } from '@testing-library/react'
+import { renderWithAuth } from '@/test-utils'
 import { NotificationSettings } from '../NotificationSettings'
 import * as useNotificationsHook from '@/hooks/useNotifications'
 
@@ -49,7 +50,7 @@ describe('NotificationSettings', () => {
         isSupported: false,
       })
 
-      render(<NotificationSettings />)
+      renderWithAuth(<NotificationSettings />)
 
       expect(
         screen.getByText(/Notifications are not supported in your browser/i)
@@ -57,7 +58,7 @@ describe('NotificationSettings', () => {
     })
 
     it('should show enable button when notifications are supported', () => {
-      render(<NotificationSettings />)
+      renderWithAuth(<NotificationSettings />)
 
       expect(screen.getByRole('button', { name: /Enable Notifications/i })).toBeInTheDocument()
     })
@@ -65,7 +66,7 @@ describe('NotificationSettings', () => {
 
   describe('Permission States', () => {
     it('should show enable button when permission is default', () => {
-      render(<NotificationSettings />)
+      renderWithAuth(<NotificationSettings />)
 
       expect(screen.getByRole('button', { name: /Enable Notifications/i })).toBeInTheDocument()
       expect(
@@ -79,7 +80,7 @@ describe('NotificationSettings', () => {
         permission: 'denied',
       })
 
-      render(<NotificationSettings />)
+      renderWithAuth(<NotificationSettings />)
 
       expect(screen.getByText(/Notifications Blocked/i)).toBeInTheDocument()
       expect(
@@ -103,7 +104,7 @@ describe('NotificationSettings', () => {
         },
       })
 
-      render(<NotificationSettings />)
+      renderWithAuth(<NotificationSettings />)
 
       expect(screen.getByText('Fajr')).toBeInTheDocument()
       expect(screen.getByText('Dhuhr')).toBeInTheDocument()
@@ -117,7 +118,7 @@ describe('NotificationSettings', () => {
     it('should call requestPermission when enable button is clicked', async () => {
       mockRequestPermission.mockResolvedValue(true)
 
-      render(<NotificationSettings />)
+      renderWithAuth(<NotificationSettings />)
 
       const enableButton = screen.getByRole('button', { name: /Enable Notifications/i })
       fireEvent.click(enableButton)
@@ -133,7 +134,7 @@ describe('NotificationSettings', () => {
         loading: true,
       })
 
-      render(<NotificationSettings />)
+      renderWithAuth(<NotificationSettings />)
 
       expect(screen.getByRole('button', { name: /Requesting.../i })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /Requesting.../i })).toBeDisabled()
@@ -157,7 +158,7 @@ describe('NotificationSettings', () => {
         },
       })
 
-      render(<NotificationSettings />)
+      renderWithAuth(<NotificationSettings />)
 
       expect(screen.getByText(/3 prayers enabled/i)).toBeInTheDocument()
     })
@@ -180,7 +181,7 @@ describe('NotificationSettings', () => {
         },
       })
 
-      render(<NotificationSettings />)
+      renderWithAuth(<NotificationSettings />)
 
       const masterToggle = screen.getAllByRole('switch')[0]
       fireEvent.click(masterToggle)
@@ -208,7 +209,7 @@ describe('NotificationSettings', () => {
         },
       })
 
-      render(<NotificationSettings />)
+      renderWithAuth(<NotificationSettings />)
 
       const masterToggle = screen.getAllByRole('switch')[0]
       fireEvent.click(masterToggle)
@@ -238,7 +239,7 @@ describe('NotificationSettings', () => {
     })
 
     it('should show checkmarks for enabled prayers', () => {
-      render(<NotificationSettings />)
+      renderWithAuth(<NotificationSettings />)
 
       // Count checkmark icons (there should be 3: Fajr, Asr, Maghrib)
       const checkmarks = document.querySelectorAll('.lucide-check')
@@ -248,7 +249,7 @@ describe('NotificationSettings', () => {
     it('should call togglePrayer when individual prayer toggle is clicked', async () => {
       mockTogglePrayer.mockResolvedValue()
 
-      render(<NotificationSettings />)
+      renderWithAuth(<NotificationSettings />)
 
       // Find all switches (1 master + 5 prayers = 6 total)
       const switches = screen.getAllByRole('switch')
@@ -262,7 +263,7 @@ describe('NotificationSettings', () => {
     })
 
     it('should show prayer descriptions', () => {
-      render(<NotificationSettings />)
+      renderWithAuth(<NotificationSettings />)
 
       expect(screen.getByText('Dawn prayer')).toBeInTheDocument()
       expect(screen.getByText('Midday prayer')).toBeInTheDocument()
@@ -296,7 +297,7 @@ describe('NotificationSettings', () => {
         refetch: mockRefetch,
       })
 
-      render(<NotificationSettings />)
+      renderWithAuth(<NotificationSettings />)
 
       expect(screen.getByText('Failed to save preferences')).toBeInTheDocument()
     })
@@ -319,7 +320,7 @@ describe('NotificationSettings', () => {
         },
       })
 
-      render(<NotificationSettings />)
+      renderWithAuth(<NotificationSettings />)
 
       expect(screen.getByText('Disabled')).toBeInTheDocument()
       // Individual prayers should not be shown when disabled

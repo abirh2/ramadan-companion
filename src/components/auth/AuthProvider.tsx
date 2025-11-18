@@ -57,7 +57,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Fetch profile when user changes
   useEffect(() => {
     if (user) {
-      refreshProfile();
+      // Call async function to fetch profile
+      void refreshProfile();
     } else {
       setProfile(null);
     }

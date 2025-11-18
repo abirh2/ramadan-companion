@@ -16,21 +16,22 @@ import type { ServiceWorkerState } from '@/types/pwa.types'
  * - Logs registration status for debugging
  */
 export function ServiceWorkerRegistration() {
-  const [swState, setSwState] = useState<ServiceWorkerState>({
-    isSupported: false,
-    isRegistered: false,
-    registration: null,
-    error: null,
+  const [swState, setSwState] = useState<ServiceWorkerState>(() => {
+    const isSupported = typeof window !== 'undefined' && 'serviceWorker' in navigator
+    return {
+      isSupported,
+      isRegistered: false,
+      registration: null,
+      error: null,
+    }
   })
 
   useEffect(() => {
     // Check if service workers are supported
-    if (!('serviceWorker' in navigator)) {
+    if (!swState.isSupported) {
       console.log('[PWA] Service Workers not supported in this browser')
       return
     }
-
-    setSwState((prev) => ({ ...prev, isSupported: true }))
 
     // Register service worker
     const registerServiceWorker = async () => {

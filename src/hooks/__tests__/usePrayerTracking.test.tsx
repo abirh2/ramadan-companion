@@ -8,7 +8,10 @@ jest.mock('../useAuth')
 jest.mock('@/lib/supabase/client')
 jest.mock('@/lib/prayerTracking')
 
+import * as supabaseClientModule from '@/lib/supabase/client'
+
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
+const mockCreateClient = supabaseClientModule.createClient as jest.MockedFunction<typeof supabaseClientModule.createClient>
 
 describe('usePrayerTracking', () => {
   beforeEach(() => {
@@ -148,8 +151,7 @@ describe('usePrayerTracking', () => {
       })
 
       // Mock Supabase client
-      const { createClient } = require('@/lib/supabase/client')
-      createClient.mockReturnValue(mockSupabase)
+      mockCreateClient.mockReturnValue(mockSupabase as any)
 
       // Mock utility functions
       jest.spyOn(prayerTrackingLib, 'getTodayDateString').mockReturnValue('2024-01-15')

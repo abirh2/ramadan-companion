@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import type { CurrencyCode } from '@/types/currency.types'
 import { CurrencySelector } from './CurrencySelector'
 import { getPreferredCurrency, setPreferredCurrency } from '@/lib/currency'

@@ -13,6 +13,14 @@ jest.mock('web-push')
 jest.mock('@/lib/prayerQuotes')
 jest.mock('@/lib/timezone')
 
+import * as supabaseServerModule from '@/lib/supabase/server'
+import * as webpushModule from 'web-push'
+import * as prayerQuotesModule from '@/lib/prayerQuotes'
+
+const mockCreateServiceRoleClient = supabaseServerModule.createServiceRoleClient as jest.MockedFunction<typeof supabaseServerModule.createServiceRoleClient>
+const mockWebpush = webpushModule as jest.Mocked<typeof webpushModule>
+const mockGetRandomPrayerQuote = prayerQuotesModule.getRandomPrayerQuote as jest.MockedFunction<typeof prayerQuotesModule.getRandomPrayerQuote>
+
 describe('POST /api/push/schedule - Timezone Handling', () => {
   let mockRequest: Partial<NextRequest>
   
@@ -71,8 +79,7 @@ describe('POST /api/push/schedule - Timezone Handling', () => {
       delete: jest.fn().mockReturnThis(),
     }
 
-    const { createServiceRoleClient } = require('@/lib/supabase/server')
-    createServiceRoleClient.mockReturnValue(mockSupabase)
+    mockCreateServiceRoleClient.mockReturnValue(mockSupabase as any)
 
     // Configure Supabase mock for subscriptions
     mockSupabase.from.mockImplementation((table: string) => {
@@ -90,13 +97,11 @@ describe('POST /api/push/schedule - Timezone Handling', () => {
     })
 
     // Mock web-push
-    const webpush = require('web-push')
-    webpush.setVapidDetails = jest.fn()
-    webpush.sendNotification = jest.fn().mockResolvedValue({ statusCode: 201 })
+    mockWebpush.setVapidDetails = jest.fn()
+    mockWebpush.sendNotification = jest.fn().mockResolvedValue({ statusCode: 201 } as any)
 
     // Mock prayer quotes
-    const { getRandomPrayerQuote } = require('@/lib/prayerQuotes')
-    getRandomPrayerQuote.mockReturnValue({
+    mockGetRandomPrayerQuote.mockReturnValue({
       text: 'Test hadith quote',
       source: 'Sahih Bukhari 123',
       prayerName: 'Fajr',
@@ -129,7 +134,7 @@ describe('POST /api/push/schedule - Timezone Handling', () => {
         location_lng: -0.1278,
       }
 
-      const mockSupabase = require('@/lib/supabase/server').createServiceRoleClient()
+      const mockSupabase = mockCreateServiceRoleClient()
       mockSupabase.not.mockResolvedValue({
         data: [londonProfile],
         error: null,
@@ -158,7 +163,7 @@ describe('POST /api/push/schedule - Timezone Handling', () => {
         location_lng: 55.2708,
       }
 
-      const mockSupabase = require('@/lib/supabase/server').createServiceRoleClient()
+      const mockSupabase = mockCreateServiceRoleClient()
       mockSupabase.not.mockResolvedValue({
         data: [dubaiProfile],
         error: null,
@@ -203,7 +208,7 @@ describe('POST /api/push/schedule - Timezone Handling', () => {
 
     it('should handle user traveling between timezones', async () => {
       // Initial location: NYC
-      let mockGetTimezoneFromCoordinates = jest.spyOn(
+      const mockGetTimezoneFromCoordinates = jest.spyOn(
         timezoneModule,
         'getTimezoneFromCoordinates'
       )
@@ -223,7 +228,7 @@ describe('POST /api/push/schedule - Timezone Handling', () => {
         location_lng: -118.2437,
       }
 
-      const mockSupabase = require('@/lib/supabase/server').createServiceRoleClient()
+      const mockSupabase = mockCreateServiceRoleClient()
       mockSupabase.not.mockResolvedValue({
         data: [laProfile],
         error: null,
@@ -248,7 +253,7 @@ describe('POST /api/push/schedule - Timezone Handling', () => {
       )
       mockGetTimezoneFromCoordinates.mockReturnValue('America/New_York')
 
-      const webpush = require('web-push')
+      const webpush = mockWebpush
       let capturedPayload: string | undefined
 
       webpush.sendNotification.mockImplementation((_sub: any, payload: string) => {
@@ -320,7 +325,7 @@ describe('POST /api/push/schedule - Timezone Handling', () => {
         location_lng: null,
       }
 
-      const mockSupabase = require('@/lib/supabase/server').createServiceRoleClient()
+      const mockSupabase = mockCreateServiceRoleClient()
       mockSupabase.not.mockResolvedValue({
         data: [profileWithoutLocation],
         error: null,
