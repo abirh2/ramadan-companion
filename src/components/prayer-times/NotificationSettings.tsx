@@ -1,10 +1,12 @@
 'use client'
 
-import { Bell, BellOff, Check, AlertCircle, Smartphone } from 'lucide-react'
+import { Bell, BellOff, Check, AlertCircle, Smartphone, LogIn } from 'lucide-react'
+import Link from 'next/link'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { useNotifications } from '@/hooks/useNotifications'
+import { useAuth } from '@/hooks/useAuth'
 import { isIOS, getIOSBrowser } from '@/lib/notifications'
 import type { PrayerName } from '@/types/notification.types'
 
@@ -34,6 +36,7 @@ const PRAYER_INFO: Record<
  * - Error handling
  */
 export function NotificationSettings() {
+  const { user } = useAuth()
   const {
     isSupported,
     permission,
@@ -81,6 +84,29 @@ export function NotificationSettings() {
                 Edge, or Safari for the best experience.
               </p>
             )}
+          </div>
+        </div>
+      </Card>
+    )
+  }
+
+  // Not logged in - require authentication for Web Push
+  if (!user) {
+    return (
+      <Card className="p-6">
+        <div className="flex items-start gap-3">
+          <LogIn className="h-5 w-5 text-primary mt-0.5" />
+          <div className="flex-1">
+            <h3 className="font-semibold text-sm">Prayer Notifications</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Sign in to enable prayer time notifications. You'll receive notifications at exact prayer times, even when the app is closed.
+            </p>
+            <Link href="/profile">
+              <Button className="mt-4" size="sm">
+                <LogIn className="h-4 w-4 mr-2" />
+                Sign In to Enable
+              </Button>
+            </Link>
           </div>
         </div>
       </Card>

@@ -23,12 +23,13 @@ import {
  * 
  * Features:
  * - Check browser support and permission status
- * - Request notification permission
+ * - Request notification permission (requires authentication)
+ * - Subscribe/unsubscribe to Web Push API
  * - Load/save preferences (dual-storage: localStorage + profile)
  * - Toggle individual prayer notifications
  * - Enable/disable all notifications
  * 
- * Supports both guest users (localStorage) and authenticated users (Supabase profile)
+ * Note: Web Push API requires authentication. Users must be logged in to receive notifications.
  */
 export function useNotifications(): UseNotificationsResult {
   const { profile } = useAuth()
