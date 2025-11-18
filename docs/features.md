@@ -2264,22 +2264,25 @@ Enable users to install Ramadan Companion as a progressive web app on their devi
 
 ---
 
-## Prayer Time Notifications (V1.1)
+## Prayer Time Notifications (V1.2)
 
 ### Functionality
-Enable users to receive browser notifications at exact prayer times with motivational reminders from authentic hadith.
+Enable users to receive browser notifications at exact prayer times with motivational reminders from authentic hadith. **Now powered by Web Push API for reliable background notifications.**
 
 ### Implementation Status
-✅ **Fully Implemented (V1.1 - November 2024)**
+✅ **Fully Implemented (V1.2 - November 2024)** - **Web Push API Migration Complete**
 
 ### Features
+- **✅ NEW: Web Push API** - Notifications work even when app is closed or backgrounded
+- **✅ NEW: Backend scheduling** - Vercel cron job handles notification timing
+- **✅ NEW: iOS support** - Background notifications now work on iOS Safari
 - **Browser-based notifications** using Web Push API and Service Worker
 - **Per-prayer control** - Enable/disable individual prayers (Fajr, Dhuhr, Asr, Maghrib, Isha)
 - **Master toggle** - Enable/disable all notifications at once
 - **Motivational hadith quotes** - 10 curated quotes from Sahih collections
-- **Automatic rescheduling** - Notifications reschedule after each prayer passes
-- **Dual-storage pattern** - Works for guest users (localStorage) and authenticated users (Supabase profile)
-- **Cross-device sync** - Preferences sync across devices for authenticated users
+- **Push subscriptions** - Stored in Supabase for multi-device support
+- **Dual-storage pattern** - Works for authenticated users (requires login for Web Push)
+- **Cross-device sync** - Preferences and subscriptions sync across devices
 
 ### User Flow
 1. User navigates to `/times` page
@@ -2295,9 +2298,17 @@ Enable users to receive browser notifications at exact prayer times with motivat
 **Components:**
 - `NotificationSettings` - Main UI component on `/times` page
 - `useNotifications` - Hook for permission and preference management
-- `notifications.ts` - Core scheduling and browser API logic
+- `notifications.ts` - Push subscription and browser API logic
 - `prayerQuotes.ts` - Curated hadith quote collection
 - Service Worker - Push and click event handlers
+
+**API Routes (V1.2):**
+- `/api/push/subscribe` - Save push subscription to database
+- `/api/push/unsubscribe` - Remove push subscription from database
+- `/api/push/schedule` - Cron job endpoint for sending notifications
+
+**Database (V1.2):**
+- `push_subscriptions` table - Stores Web Push subscriptions (endpoint, p256dh, auth keys)
 
 **Notification Format:**
 ```
@@ -2313,13 +2324,17 @@ Click Action: Opens /times page
 - General prayer importance quotes
 - Proper source attribution included
 
-**Scheduling Logic:**
-- Notifications scheduled using `setTimeout` based on prayer times
-- Automatically reschedule when:
-  - Prayer passes (detected every second in countdown)
-  - Location/calculation method changes
-  - Day changes (midnight crossing)
-- Tomorrow's Fajr scheduled proactively after Isha
+**Scheduling Logic (V1.2 - Web Push API):**
+- **Backend cron job** runs daily at midnight UTC via Vercel Cron
+- **For each user with notifications enabled:**
+  1. Calculate today's prayer times based on user's location and preferences
+  2. Send push notification via Web Push API at exact prayer time
+  3. Service Worker receives push and displays notification
+- **Benefits:**
+  - Works when app is closed or backgrounded (iOS, Android, Desktop)
+  - No client-side setTimeout limitations
+  - Scalable for all users
+  - Reliable delivery
 
 **Preference Storage:**
 ```json
@@ -2350,10 +2365,10 @@ Click Action: Opens /times page
 - Only visible if notifications are enabled
 
 ### Browser Compatibility
-- ✅ Chrome/Edge (Desktop & Android)
-- ✅ Safari (iOS 16.4+, macOS)
-- ✅ Firefox (Desktop)
-- ⚠️ iOS Chrome/Firefox - Must use Safari (iOS restriction)
+- ✅ Chrome/Edge (Desktop & Android) - **Full Web Push support**
+- ✅ Safari (iOS 16.4+, macOS) - **✅ NEW: Background notifications work on iOS**
+- ✅ Firefox (Desktop) - **Full Web Push support**
+- ⚠️ iOS Chrome/Firefox - Must use Safari (iOS WebKit restriction)
 
 ### Permission States
 

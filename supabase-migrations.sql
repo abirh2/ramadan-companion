@@ -530,3 +530,46 @@ END $$;
 -- Add comment for documentation
 COMMENT ON COLUMN profiles.notification_preferences IS 'User preferences for prayer time notifications. Stores enabled state and per-prayer toggles.';
 
+-- ============================================
+-- 20. CREATE PUSH SUBSCRIPTIONS TABLE
+-- ============================================
+
+-- Push subscriptions table for Web Push API notifications
+-- Stores browser push subscription endpoints and keys for each user
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  endpoint TEXT NOT NULL,
+  p256dh TEXT NOT NULL,
+  auth TEXT NOT NULL,
+  user_agent TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, endpoint)
+);
+
+-- Index for efficient user lookups
+CREATE INDEX IF NOT EXISTS idx_push_subscriptions_user_id ON push_subscriptions(user_id);
+
+-- RLS policies for push subscriptions
+ALTER TABLE push_subscriptions ENABLE ROW LEVEL SECURITY;
+
+-- Users can only manage their own subscriptions
+CREATE POLICY "Users can insert own subscriptions"
+  ON push_subscriptions FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can view own subscriptions"
+  ON push_subscriptions FOR SELECT
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own subscriptions"
+  ON push_subscriptions FOR DELETE
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+-- Add comment for documentation
+COMMENT ON TABLE push_subscriptions IS 'Stores Web Push API subscription endpoints for prayer time notifications. Each user can have multiple subscriptions (different browsers/devices).';
+

@@ -5,8 +5,8 @@ import type {
   NotificationPreferences,
   PrayerName,
   ScheduledNotification,
+  PushSubscription,
 } from '@/types/notification.types'
-import type { PrayerTime } from '@/types/ramadan.types'
 import { getRandomPrayerQuote } from './prayerQuotes'
 
 // LocalStorage keys
@@ -27,8 +27,8 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
   },
 }
 
-// Store for active notification timeouts
-let scheduledNotifications: Map<PrayerName, ScheduledNotification> = new Map()
+// Note: Notification scheduling now handled by backend cron job + Web Push API
+// No more client-side setTimeout scheduling
 
 /**
  * Detect if device is iOS
@@ -191,183 +191,94 @@ export async function saveNotificationPreferences(
 }
 
 /**
- * Format time for notification display (12-hour format with AM/PM)
- * @param timeString - Time in HH:MM format
- * @returns Formatted time string
+ * Subscribe to push notifications using Web Push API
+ * Returns subscription object or null if failed
  */
-function formatTimeForNotification(timeString: string): string {
-  const [hours, minutes] = timeString.split(':').map(Number)
-  const period = hours >= 12 ? 'PM' : 'AM'
-  const displayHours = hours % 12 || 12
-  return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`
-}
-
-/**
- * Show a browser notification with prayer details
- * @param prayerName - Name of the prayer
- * @param prayerTime - Time of the prayer
- */
-async function showNotification(
-  prayerName: PrayerName,
-  prayerTime: string
-): Promise<void> {
-  if (!isNotificationSupported()) {
-    console.warn('[Notifications] Not supported')
-    return
-  }
-
-  if (Notification.permission !== 'granted') {
-    console.warn('[Notifications] Permission not granted')
-    return
-  }
+export async function subscribeToPush(): Promise<PushSubscription | null> {
+  if (!isNotificationSupported()) return null
+  if (Notification.permission !== 'granted') return null
 
   try {
-    // Get service worker registration
     const registration = await navigator.serviceWorker.ready
 
-    // Get random prayer quote
-    const quote = getRandomPrayerQuote(prayerName)
+    // Check if already subscribed
+    let subscription = await registration.pushManager.getSubscription()
 
-    // Format time for display
-    const formattedTime = formatTimeForNotification(prayerTime)
-
-    // Show notification
-    await registration.showNotification(
-      `Time for ${prayerName} Prayer - ${formattedTime}`,
-      {
-        body: `${quote.text} - ${quote.source}`,
-        icon: '/icon-192.png',
-        badge: '/icon-192-maskable.png',
-        tag: `prayer-${prayerName.toLowerCase()}`,
-        requireInteraction: false,
-        silent: false,
-        data: {
-          prayerName,
-          url: '/times',
-        },
+    if (!subscription) {
+      // Get VAPID public key from env
+      const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+      if (!vapidPublicKey) {
+        throw new Error('VAPID public key not configured')
       }
-    )
 
-    console.log(`[Notifications] Shown for ${prayerName}`)
+      // Subscribe with VAPID key
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+      })
+    }
+
+    // Convert to our format
+    const keys = subscription.toJSON().keys
+    if (!keys?.p256dh || !keys?.auth) {
+      throw new Error('Invalid subscription keys')
+    }
+
+    return {
+      endpoint: subscription.endpoint,
+      keys: {
+        p256dh: keys.p256dh,
+        auth: keys.auth,
+      },
+    }
   } catch (error) {
-    console.error(`[Notifications] Failed to show for ${prayerName}:`, error)
-  }
-}
-
-/**
- * Schedule a notification for a specific prayer time
- * @param prayerName - Name of the prayer
- * @param prayerTime - Time of the prayer (HH:MM format)
- * @returns ScheduledNotification or null if not scheduled
- */
-function scheduleSingleNotification(
-  prayerName: PrayerName,
-  prayerTime: string
-): ScheduledNotification | null {
-  const now = new Date()
-  
-  // Parse prayer time
-  const [hours, minutes] = prayerTime.split(':').map(Number)
-  const prayerDate = new Date(now)
-  prayerDate.setHours(hours, minutes, 0, 0)
-
-  // Calculate time until prayer
-  const timeUntil = prayerDate.getTime() - now.getTime()
-
-  // Only schedule if prayer is in the future
-  if (timeUntil <= 0) {
-    console.log(`[Notifications] ${prayerName} already passed, skipping`)
+    console.error('[Notifications] Push subscription failed:', error)
     return null
   }
-
-  // Clear existing timeout for this prayer if any
-  const existing = scheduledNotifications.get(prayerName)
-  if (existing?.timeoutId) {
-    clearTimeout(existing.timeoutId)
-  }
-
-  // Schedule notification
-  const timeoutId = setTimeout(() => {
-    showNotification(prayerName, prayerTime)
-    // Remove from scheduled map after showing
-    scheduledNotifications.delete(prayerName)
-  }, timeUntil)
-
-  const scheduled: ScheduledNotification = {
-    prayerName,
-    scheduledTime: prayerDate,
-    timeoutId,
-  }
-
-  scheduledNotifications.set(prayerName, scheduled)
-
-  console.log(
-    `[Notifications] Scheduled ${prayerName} for ${prayerDate.toLocaleTimeString()} (in ${Math.round(timeUntil / 1000 / 60)} minutes)`
-  )
-
-  return scheduled
 }
 
 /**
- * Schedule notifications for all enabled prayers
- * @param prayerTimes - Today's prayer times
- * @param preferences - Notification preferences
+ * Unsubscribe from push notifications
  */
-export function scheduleNotifications(
-  prayerTimes: PrayerTime,
-  preferences: NotificationPreferences
-): void {
-  // Check if notifications are enabled
-  if (!preferences.enabled) {
-    console.log('[Notifications] Disabled, not scheduling')
-    return
-  }
+export async function unsubscribeFromPush(): Promise<boolean> {
+  try {
+    const registration = await navigator.serviceWorker.ready
+    const subscription = await registration.pushManager.getSubscription()
 
-  // Check permission
-  if (getNotificationPermission() !== 'granted') {
-    console.warn('[Notifications] Permission not granted, cannot schedule')
-    return
-  }
-
-  // Cancel existing notifications first
-  cancelNotifications()
-
-  console.log('[Notifications] Scheduling prayers:', preferences.prayers)
-
-  // Schedule each enabled prayer
-  const prayerNames: PrayerName[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
-  
-  prayerNames.forEach((prayerName) => {
-    if (preferences.prayers[prayerName]) {
-      const prayerTime = prayerTimes[prayerName]
-      if (prayerTime) {
-        scheduleSingleNotification(prayerName, prayerTime)
-      }
+    if (subscription) {
+      await subscription.unsubscribe()
+      return true
     }
-  })
+    return false
+  } catch (error) {
+    console.error('[Notifications] Unsubscribe failed:', error)
+    return false
+  }
 }
 
 /**
- * Cancel all scheduled notifications
+ * Helper to convert VAPID key to Uint8Array
+ */
+function urlBase64ToUint8Array(base64String: string): BufferSource {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+
+  const rawData = window.atob(base64)
+  const outputArray = new Uint8Array(rawData.length)
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i)
+  }
+  return outputArray as BufferSource
+}
+
+/**
+ * Cancel all scheduled notifications (legacy no-op)
+ * Notifications are now handled by backend cron + Web Push API
  */
 export function cancelNotifications(): void {
-  console.log('[Notifications] Cancelling all scheduled notifications')
-  
-  scheduledNotifications.forEach((notification) => {
-    if (notification.timeoutId) {
-      clearTimeout(notification.timeoutId)
-    }
-  })
-  
-  scheduledNotifications.clear()
-}
-
-/**
- * Get all currently scheduled notifications
- * @returns Array of scheduled notifications
- */
-export function getScheduledNotifications(): ScheduledNotification[] {
-  return Array.from(scheduledNotifications.values())
+  console.log('[Notifications] No-op: notifications handled by backend')
+  // No-op: Backend cron job now handles notification scheduling via Web Push API
 }
 
 /**

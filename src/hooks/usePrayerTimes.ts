@@ -21,7 +21,6 @@ import {
   MECCA_COORDS,
 } from '@/lib/location'
 import { calculatePrayerTimesLocal, validatePrayerTimes } from '@/lib/prayerTimes'
-import { scheduleNotifications, getNotificationPreferences, cancelNotifications } from '@/lib/notifications'
 
 // Prayer names in order (excluding Sunrise for next prayer calculation)
 const PRAYER_NAMES = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const
@@ -349,11 +348,7 @@ export function usePrayerTimes(): UsePrayerTimesResult {
         error: null,
       })
 
-      // Schedule notifications if enabled
-      const notificationPreferences = getNotificationPreferences(profile)
-      if (notificationPreferences.enabled) {
-        scheduleNotifications(prayerTimes, notificationPreferences)
-      }
+      // Note: Notifications now handled by backend cron + Web Push API
 
       // Start countdown interval
       if (intervalRef.current) {
@@ -373,15 +368,8 @@ export function usePrayerTimes(): UsePrayerTimesResult {
         
         const updatedNextPrayer = calculateNextPrayer(prayerTimes!, tomorrowTimes)
         
-        // Check if prayer just passed - reschedule notifications if needed
+        // Track prayer changes (notifications now handled by backend)
         const currentPrayerName = updatedNextPrayer?.name || null
-        if (currentPrayerName && lastPrayerNameRef.current && currentPrayerName !== lastPrayerNameRef.current) {
-          console.log('[PrayerTimes] Prayer changed, rescheduling notifications')
-          const notificationPreferences = getNotificationPreferences(profile)
-          if (notificationPreferences.enabled && prayerTimes) {
-            scheduleNotifications(prayerTimes, notificationPreferences)
-          }
-        }
         lastPrayerNameRef.current = currentPrayerName
         
         setState((prev) => ({ ...prev, nextPrayer: updatedNextPrayer }))
@@ -411,8 +399,7 @@ export function usePrayerTimes(): UsePrayerTimesResult {
         clearInterval(intervalRef.current)
         intervalRef.current = null
       }
-      // Clear all scheduled notifications on unmount
-      cancelNotifications()
+      // Note: Notifications now handled by backend cron + Web Push API
     }
   }, [fetchData])
 

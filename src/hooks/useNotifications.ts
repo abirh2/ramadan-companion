@@ -14,6 +14,8 @@ import {
   getNotificationPreferences,
   saveNotificationPreferences,
   DEFAULT_NOTIFICATION_PREFERENCES,
+  subscribeToPush,
+  unsubscribeFromPush,
 } from '@/lib/notifications'
 
 /**
@@ -88,6 +90,22 @@ export function useNotifications(): UseNotificationsResult {
       const granted = await requestNotificationPermission()
 
       if (granted) {
+        // Subscribe to push notifications
+        const subscription = await subscribeToPush()
+        
+        if (subscription) {
+          // Save subscription to backend
+          try {
+            await fetch('/api/push/subscribe', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(subscription),
+            })
+          } catch (error) {
+            console.error('[useNotifications] Failed to save subscription:', error)
+          }
+        }
+
         // Automatically enable notifications with all prayers on
         const newPreferences: NotificationPreferences = {
           enabled: true,
@@ -191,6 +209,23 @@ export function useNotifications(): UseNotificationsResult {
   // Disable all notifications
   const disableAll = useCallback(async (): Promise<void> => {
     try {
+      // Unsubscribe from push
+      const unsubscribed = await unsubscribeFromPush()
+      
+      if (unsubscribed) {
+        // Remove from backend
+        const registration = await navigator.serviceWorker.ready
+        const subscription = await registration.pushManager.getSubscription()
+        
+        if (subscription) {
+          await fetch('/api/push/unsubscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ endpoint: subscription.endpoint }),
+          })
+        }
+      }
+
       const newPreferences: NotificationPreferences = {
         ...state.preferences,
         enabled: false,

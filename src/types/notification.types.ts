@@ -22,6 +22,26 @@ export interface PrayerQuote {
   prayer?: PrayerName // Specific prayer this quote relates to
 }
 
+// Web Push API Subscription Types
+export interface PushSubscription {
+  endpoint: string
+  keys: {
+    p256dh: string
+    auth: string
+  }
+}
+
+export interface PushSubscriptionDB {
+  id: string
+  user_id: string
+  endpoint: string
+  p256dh: string
+  auth: string
+  user_agent: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface ScheduledNotification {
   prayerName: PrayerName
   scheduledTime: Date
