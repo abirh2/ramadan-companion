@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceRoleClient } from '@/lib/supabase/server'
 import webpush from 'web-push'
 import { getRandomPrayerQuote } from '@/lib/prayerQuotes'
 import { calculatePrayerTimesLocal } from '@/lib/prayerTimes'
@@ -22,7 +22,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const supabase = await createClient()
+    // Use service role client to bypass RLS policies
+    const supabase = createServiceRoleClient()
 
     // Get all users with notification preferences enabled
     const { data: profiles, error: profilesError } = await supabase
