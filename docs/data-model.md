@@ -39,7 +39,11 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_admin boolean DEFAULT FALSE;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS notification_preferences JSONB DEFAULT '{"enabled": false, "prayers": {"Fajr": true, "Dhuhr": true, "Asr": true, "Maghrib": true, "Isha": true}}'::jsonb;
 ```
 
-**Note on timezone:** The `timezone` field exists in the schema but is not used by the application. The app automatically uses the browser's detected timezone (`Intl.DateTimeFormat().resolvedOptions().timeZone`) for all time-based calculations. This provides accurate times for the user's current location without requiring manual configuration.
+**Note on timezone:** The `timezone` field exists in the schema but is not used for storage. Instead, timezone is dynamically calculated from user coordinates:
+- **Client-side (browser):** Automatically uses browser's detected timezone (`Intl.DateTimeFormat().resolvedOptions().timeZone`)
+- **Server-side (notifications):** Automatically calculates timezone from user's lat/lng coordinates using `geo-tz` library
+- **Benefit:** If user travels to new timezone, prayer times and notifications automatically adjust without manual configuration
+- **No storage needed:** Timezone is always calculated from coordinates, ensuring accuracy even when user moves
 
 **Dual-Storage Pattern:** All user preferences (location, calculation_method, madhab, quran_translation, hadith_language, notification_preferences) follow a dual-storage pattern:
 - **Authenticated users:** Settings saved to both Supabase profile AND localStorage for cross-device sync

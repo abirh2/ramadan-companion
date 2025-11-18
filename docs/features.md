@@ -2332,24 +2332,32 @@ Click Action: Opens /times page
 **Scheduling Logic (V1.2 - Web Push API):**
 - **Backend cron job** runs every 5 minutes via external cron service (see `docs/external-cron-setup.md`)
 - **For each user with notifications enabled:**
-  1. Calculate today's prayer times based on user's location and preferences
-  2. Get current time in user's timezone
-  3. Check if current time is AT or AFTER any prayer time (within 5-minute window)
-  4. If match found, fetch all active push subscriptions for that user
-  5. Send push notification via Web Push API to each subscription
-  6. Service Worker receives push and displays notification
+  1. Detect user's timezone from their coordinates (using `geo-tz` library)
+  2. Calculate today's prayer times in user's local timezone
+  3. Get current time in user's timezone
+  4. Check if current time is AT or AFTER any prayer time (within 5-minute window)
+  5. If match found, fetch all active push subscriptions for that user
+  6. Send push notification via Web Push API to each subscription
+  7. Service Worker receives push and displays notification
+- **Timezone Handling:**
+  - Timezone automatically detected from user's lat/lng coordinates
+  - Uses offline `geo-tz` library (no external API calls required)
+  - Prayer times calculated in user's actual timezone (e.g., "America/New_York", "Asia/Dubai")
+  - **Automatic travel adjustment:** If user travels to new timezone, next notification uses new timezone
+  - No manual timezone configuration needed
 - **Time Matching:**
   - 5-minute polling interval with 5-minute window AFTER prayer time
   - Notifications sent only AT or AFTER prayer time (never before)
   - Window matches cron interval to guarantee zero missed notifications
   - Worst case: prayer at 5:30:01, cron at 5:35 (needs 5-minute window to catch)
-  - Example: Fajr at 5:30 AM → notification sent between 5:30-5:35 AM (not before 5:30)
+  - Example: Fajr at 5:30 AM EST → notification sent between 5:30-5:35 AM EST (not UTC)
 - **Benefits:**
   - Works when app is closed or backgrounded (iOS, Android, Desktop)
   - No client-side setTimeout limitations
-  - Location updates automatically reflected in next polling cycle
+  - Location AND timezone updates automatically reflected in next polling cycle
   - Scalable for all users
   - Reliable delivery
+  - Correct local times in notification messages
 
 **Multi-Device Behavior:**
 - **Each device is independent:** Enabling notifications on iPhone doesn't enable on Desktop

@@ -3,6 +3,7 @@ import { createServiceRoleClient } from '@/lib/supabase/server'
 import webpush from 'web-push'
 import { getRandomPrayerQuote } from '@/lib/prayerQuotes'
 import { calculatePrayerTimesLocal } from '@/lib/prayerTimes'
+import { getTimezoneFromCoordinates } from '@/lib/timezone'
 import type { PrayerName } from '@/types/notification.types'
 
 // Configure web-push
@@ -97,12 +98,18 @@ export async function POST(request: NextRequest) {
         continue
       }
 
+      // Get user's timezone from their coordinates
+      const userTimezone = getTimezoneFromCoordinates(
+        profile.location_lat,
+        profile.location_lng
+      )
+
       const prayerTimes = calculatePrayerTimesLocal(
         profile.location_lat,
         profile.location_lng,
         (profile.calculation_method || '4') as any,
         (profile.madhab || '0') as any,
-        undefined, // timezone - will use browser default
+        userTimezone, // User's actual timezone from coordinates
         new Date() // date - today
       )
 
@@ -117,9 +124,8 @@ export async function POST(request: NextRequest) {
         continue
       }
 
-      // Get current time in user's timezone (use UTC as fallback)
-      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
-      const currentMinutes = getCurrentTimeInTimezone(timezone)
+      // Get current time in user's timezone
+      const currentMinutes = getCurrentTimeInTimezone(userTimezone)
 
       // Check notifications for each enabled prayer
       const prayerNames: PrayerName[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']

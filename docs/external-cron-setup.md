@@ -130,6 +130,12 @@ jobs:
 }
 ```
 
+**Timezone Handling:**
+- **Automatic detection:** Timezone is calculated from each user's lat/lng coordinates using `geo-tz` library
+- **No manual configuration:** Users don't need to set timezone manually
+- **Travel-aware:** If user travels to a new timezone, notifications automatically adjust
+- **Example:** User in NYC (40.7128, -74.0060) → timezone detected as "America/New_York" → notifications sent at local NYC times, not UTC
+
 ---
 
 ## Monitoring & Debugging
