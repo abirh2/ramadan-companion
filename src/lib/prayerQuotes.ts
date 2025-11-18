@@ -71,7 +71,24 @@ export const PRAYER_QUOTES: PrayerQuote[] = [
 ]
 
 /**
+ * Simple hash function to generate consistent but varied indices
+ * @param str - String to hash
+ * @returns Hash value
+ */
+function simpleHash(str: string): number {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i)
+    hash = (hash << 5) - hash + char
+    hash = hash & hash // Convert to 32-bit integer
+  }
+  return Math.abs(hash)
+}
+
+/**
  * Get a random prayer quote, optionally filtered by specific prayer
+ * Uses date + prayer name + hour for deterministic but varied selection
+ * This ensures different quotes across different prayers and days
  * @param prayerName - Optional prayer name to filter quotes
  * @returns A random prayer quote
  */
@@ -83,8 +100,16 @@ export function getRandomPrayerQuote(prayerName?: PrayerName): PrayerQuote {
       )
     : PRAYER_QUOTES
 
-  // Return random quote from relevant pool
-  const randomIndex = Math.floor(Math.random() * relevantQuotes.length)
+  // Create a seed based on date, prayer, and hour for variety
+  const now = new Date()
+  const dateString = now.toISOString().split('T')[0] // YYYY-MM-DD
+  const hour = now.getHours()
+  const seed = `${dateString}-${prayerName || 'general'}-${hour}`
+  
+  // Use hash to get deterministic but varied index
+  const hash = simpleHash(seed)
+  const randomIndex = hash % relevantQuotes.length
+  
   return relevantQuotes[randomIndex]
 }
 

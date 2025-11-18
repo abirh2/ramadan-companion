@@ -24,6 +24,18 @@ function parseTimeToMinutes(timeString: string): number {
 }
 
 /**
+ * Convert 24-hour time to 12-hour format with AM/PM
+ * @param time24 - Time in 24-hour format (e.g., "14:14", "05:30")
+ * @returns Time in 12-hour format (e.g., "2:14 PM", "5:30 AM")
+ */
+function format12Hour(time24: string): string {
+  const [hours, minutes] = time24.split(':').map(Number)
+  const period = hours >= 12 ? 'PM' : 'AM'
+  const hours12 = hours % 12 || 12 // Convert 0 to 12 for midnight
+  return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`
+}
+
+/**
  * Get current time in minutes since midnight for a specific timezone
  * @param timezone - IANA timezone string (e.g., 'America/New_York')
  * @returns Minutes since midnight in the specified timezone
@@ -148,7 +160,7 @@ export async function POST(request: NextRequest) {
         const quote = getRandomPrayerQuote(prayerName)
         
         const payload = JSON.stringify({
-          title: `Time for ${prayerName} Prayer - ${prayerTime}`,
+          title: `Time for ${prayerName} - ${format12Hour(prayerTime)}`,
           body: `${quote.text} - ${quote.source}`,
           icon: '/icon-192.png',
           badge: '/icon-192-maskable.png',
