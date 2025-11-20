@@ -53,8 +53,8 @@ export default function HalalFoodPage() {
     setDialogOpen(true)
   }
 
-  const handleLocationSelect = (newLocation: LocationData) => {
-    setCustomLocation(newLocation)
+  const handleLocationSelect = async (newLocation: LocationData) => {
+    await setCustomLocation(newLocation)
   }
 
   const handleDistanceUnitToggle = async (unit: DistanceUnit) => {
@@ -217,7 +217,7 @@ export default function HalalFoodPage() {
               >
                 OpenStreetMap
               </a>
-              . Results include places with "halal" in their name, halal category, and cuisines traditionally halal (Pakistani, Turkish, Lebanese, Syrian, Arab, Kebab). Coverage may vary by area and halal certification should be verified with the establishment.
+              . Results include places with &quot;halal&quot; in their name, halal category, and cuisines traditionally halal (Pakistani, Turkish, Lebanese, Syrian, Arab, Kebab). Coverage may vary by area and halal certification should be verified with the establishment.
             </p>
           </div>
         )}

@@ -7,7 +7,7 @@ import type { LocationData } from '@/types/ramadan.types'
 import { geocodeCity, requestGeolocation } from '@/lib/location'
 
 interface LocationSearchProps {
-  onLocationSelect: (location: LocationData) => void
+  onLocationSelect: (location: LocationData) => Promise<void>
   currentLocation: LocationData | null
 }
 
@@ -46,8 +46,8 @@ export function LocationSearch({ onLocationSelect, currentLocation }: LocationSe
   }, [searchQuery])
 
   const handleSuggestionClick = useCallback(
-    (suggestion: { lat: number; lng: number; displayName: string }) => {
-      onLocationSelect({
+    async (suggestion: { lat: number; lng: number; displayName: string }) => {
+      await onLocationSelect({
         lat: suggestion.lat,
         lng: suggestion.lng,
         city: suggestion.displayName,
@@ -65,7 +65,7 @@ export function LocationSearch({ onLocationSelect, currentLocation }: LocationSe
     try {
       const location = await requestGeolocation()
       if (location) {
-        onLocationSelect(location)
+        await onLocationSelect(location)
       } else {
         alert('Unable to detect your location. Please check browser permissions.')
       }

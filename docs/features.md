@@ -21,7 +21,8 @@ It provides enough detail for any developer or AI agent to implement the app end
 13. User Feedback System
 14. Admin Dashboard
 15. PWA Installation
-16. API Reference Links
+16. Accessibility Features
+17. API Reference Links
 
 ---
 
@@ -1375,6 +1376,21 @@ Find and display nearby mosques with interactive map and list views.
 5. Mosques sorted by distance (nearest first)
 6. Client displays distances in user's preferred unit (mi/km)
 
+### Location Persistence
+All location updates (manual search or Locate button) automatically persist to both localStorage and Supabase profile (if authenticated). This ensures location survives page refreshes, navigation, and works across devices for authenticated users.
+
+**Storage Priority:**
+- **Write:** All location updates save to localStorage + profile (if authenticated)
+- **Read:** Profile (if authenticated) → localStorage → no location
+
+**Behavior:**
+- **Locate button (📍):** Detects current location → persists to storage → shows results
+- **Manual search:** User searches city/address → persists to storage → shows results
+- **Page refresh/navigation:** Reads persisted location → shows results from last known location
+- **Cross-device sync:** Authenticated users see their location on all devices
+
+This fixes the bug where moving locations within the same city (e.g., Bronx → Manhattan) would revert to old location after refresh.
+
 ### Distance Calculation
 - **Haversine formula** for accurate Earth-surface distances
 - Internal storage: kilometers (matches API standard)
@@ -1507,6 +1523,21 @@ Find and display halal restaurants and food places with interactive map and list
 5. Distances calculated using Haversine formula (in km)
 6. Food places sorted by distance (nearest first)
 7. Client displays distances in user's preferred unit (mi/km)
+
+### Location Persistence
+All location updates (manual search or Locate button) automatically persist to both localStorage and Supabase profile (if authenticated). This ensures location survives page refreshes, navigation, and works across devices for authenticated users.
+
+**Storage Priority:**
+- **Write:** All location updates save to localStorage + profile (if authenticated)
+- **Read:** Profile (if authenticated) → localStorage → no location
+
+**Behavior:**
+- **Locate button (📍):** Detects current location → persists to storage → shows results
+- **Manual search:** User searches city/address → persists to storage → shows results
+- **Page refresh/navigation:** Reads persisted location → shows results from last known location
+- **Cross-device sync:** Authenticated users see their location on all devices
+
+This fixes the bug where moving locations within the same city (e.g., Bronx → Manhattan) would revert to old location after refresh.
 
 ### Sequential Search Strategy
 **Smart API quota management:**
@@ -2303,7 +2334,240 @@ Enable users to install Ramadan Companion as a progressive web app on their devi
 
 ---
 
-## 16. API Reference Links
+## 16. Accessibility Features
+
+### Overview
+The Ramadan Companion app is built with comprehensive accessibility features to ensure all users, including those using assistive technologies, can fully access and use the application.
+
+### WCAG 2.1 AA Compliance
+The app follows Web Content Accessibility Guidelines (WCAG) 2.1 Level AA standards for:
+- **Perceivable:** Content is presented in ways users can perceive
+- **Operable:** Interface components and navigation are operable
+- **Understandable:** Information and operation of UI is understandable
+- **Robust:** Content can be interpreted reliably by assistive technologies
+
+### Core Accessibility Features
+
+#### 1. Skip Navigation
+- **Skip to Main Content** link appears on keyboard focus
+- Allows keyboard users to bypass repetitive navigation
+- Links to `#main-content` ID on main element
+- Positioned at top of page, visually hidden until focused
+
+#### 2. Semantic HTML Structure
+- Proper heading hierarchy (h1 > h2 > h3)
+- Semantic landmarks: `<header>`, `<nav>`, `<main>`, `<section>`, `<aside>`
+- ARIA labels for sections and regions
+- Screen reader-only headings for hidden structure
+
+**Example Page Structure:**
+```tsx
+<header>  {/* Global navigation */}
+  <nav aria-label="Main navigation">
+<main id="main-content" tabIndex={-1}>  {/* Main content */}
+  <section aria-label="Prayer times">
+    <h2 id="section-title">Today's Prayers</h2>
+  </section>
+</main>
+```
+
+#### 3. ARIA Labels and Descriptions
+All interactive elements have descriptive labels:
+- **Buttons:** Descriptive purpose (e.g., "Add new donation", not just "Add")
+- **Links:** Context about destination (e.g., "View all prayer times")
+- **Icons:** `aria-hidden="true"` with text alternatives
+- **Form inputs:** Associated `<label>` elements with proper `for` attributes
+- **Live regions:** `aria-live` for dynamic content updates
+- **Status messages:** `role="status"` or `role="alert"` for announcements
+
+#### 4. Keyboard Navigation
+Full keyboard accessibility throughout the app:
+
+**Global Navigation:**
+- `Tab` - Navigate forward through interactive elements
+- `Shift + Tab` - Navigate backward
+- `Enter` - Activate links and buttons
+- `Escape` - Close modals and dropdowns
+- `Arrow Keys` - Navigate within menus and lists
+
+**Feature-Specific:**
+- **Zikr Counter:** `Space` or `Enter` to increment count
+- **Qibla Compass:** `Enter` or `Space` to toggle dynamic mode
+- **Forms:** Standard keyboard navigation with clear focus indicators
+
+#### 5. Focus Management
+- Visible focus indicators on all interactive elements
+- Focus ring styling: 2-3px ring with high contrast
+- Focus trapping in modals and dialogs
+- Logical tab order matching visual layout
+- Focus moved to first element when opening modals
+
+#### 6. Screen Reader Support
+Comprehensive screen reader announcements:
+
+**Dynamic Content:**
+- Prayer time countdowns (aria-live="polite")
+- Next prayer updates
+- Ramadan countdown changes
+- Zikr counter progress
+- Form validation errors (aria-live="assertive")
+
+**Loading States:**
+- "Loading prayer times..." announcements
+- Loading spinners with `role="status"`
+- `aria-busy="true"` on loading containers
+
+**Error States:**
+- Error messages with `role="alert"`
+- Form field errors with `aria-describedby`
+- `aria-invalid` on invalid form inputs
+
+#### 7. Form Accessibility
+All forms follow accessibility best practices:
+- Associated labels for all inputs (not just placeholders)
+- `aria-required="true"` for required fields
+- `aria-describedby` linking inputs to help text and errors
+- `aria-invalid` for validation state
+- Clear error messages announced to screen readers
+- Logical form field order
+
+**Example:**
+```tsx
+<label htmlFor="amount">Amount</label>
+<input
+  id="amount"
+  type="number"
+  required
+  aria-required="true"
+  aria-invalid={hasError}
+  aria-describedby="amount-error"
+/>
+<span id="amount-error" role="alert">
+  {error}
+</span>
+```
+
+#### 8. Color and Contrast
+- Text meets WCAG AA contrast ratios (4.5:1 for normal text)
+- Visual indicators don't rely solely on color
+- Dark mode with appropriate contrast
+- Status colors (green for completed, red for errors) supplemented with icons/text
+
+#### 9. Responsive Text
+- Minimum font size: 14px (text-sm)
+- Text scales with browser zoom
+- Line height for readability (leading-relaxed)
+- No text in images (for screen readers)
+
+#### 10. Interactive Component Accessibility
+
+**Dashboard Cards:**
+- Card purpose announced ("Next Prayer card")
+- Loading states announced
+- Error states with proper roles
+- aria-live regions for dynamic content
+
+**Modal Dialogs:**
+- `aria-labelledby` and `aria-describedby` for modal titles/descriptions
+- Focus trapped within modal
+- `Escape` key closes modal
+- Focus returned to trigger element on close
+
+**Dropdown Menus:**
+- `role="menu"` and `role="menuitem"` attributes
+- Keyboard navigation with arrow keys
+- Proper `aria-expanded` states
+
+### Keyboard Shortcuts Reference
+
+| Action | Shortcut | Context |
+|--------|----------|---------|
+| Navigate forward | `Tab` | Global |
+| Navigate backward | `Shift + Tab` | Global |
+| Activate element | `Enter` or `Space` | Buttons, links |
+| Close modal | `Escape` | Modals, dropdowns |
+| Increment counter | `Space` or `Enter` | Zikr counter |
+| Toggle compass mode | `Enter` or `Space` | Qibla compass |
+
+### Screen Reader Announcements
+
+**What Gets Announced:**
+- Page titles and headings
+- Button and link purposes
+- Form labels and errors
+- Loading states ("Loading prayer times...")
+- Success messages ("Donation saved successfully")
+- Error messages ("Unable to load data")
+- Dynamic updates (prayer countdowns, progress bars)
+- Status changes (goal reached, prayer completed)
+
+**Live Region Priorities:**
+- `polite` - General updates that don't interrupt (prayer time changes)
+- `assertive` - Important alerts that interrupt (form errors, critical messages)
+
+### Testing and Validation
+
+**Accessibility Testing:**
+- Manual keyboard navigation testing
+- Screen reader testing (NVDA, JAWS, VoiceOver)
+- Automated testing with jest-axe
+- Focus management verification
+- ARIA attribute validation
+
+**Test Coverage:**
+- All interactive components
+- Form validation flows
+- Modal focus trapping
+- Keyboard navigation paths
+- Live region announcements
+
+### Accessibility Utilities
+
+**Helper Functions:**
+- `generateAriaLabel()` - Create descriptive ARIA labels
+- `generateCardAriaLabel()` - Labels for card components
+- `formatCountdownForScreenReader()` - Time formatting for screen readers
+- `shouldHandleKeyboardEvent()` - Filter keyboard events from inputs
+- `trapFocus()` - Implement focus trapping in modals
+
+**Custom Hook:**
+- `useAnnouncer()` - Manage screen reader announcements
+  - `announce(message, priority)` - Announce to screen readers
+  - `clear()` - Clear all announcements
+
+**Example Usage:**
+```tsx
+import { useAnnouncer } from '@/hooks/useAnnouncer'
+
+function MyComponent() {
+  const { announce } = useAnnouncer()
+  
+  const handleSubmit = async () => {
+    try {
+      await saveDonation()
+      announce('Donation saved successfully', 'polite')
+    } catch (error) {
+      announce('Failed to save donation', 'assertive')
+    }
+  }
+}
+```
+
+### Future Enhancements
+
+**V1.2+:**
+- High contrast mode option
+- Reduced motion preference support
+- Font size adjustment controls
+- Voice navigation support
+- Arabic language RTL accessibility
+- Custom keyboard shortcut configuration
+
+**V1 Status:** ✅ **Complete** (November 2024) - Full WCAG 2.1 AA compliance, comprehensive keyboard navigation, screen reader support, semantic HTML, ARIA labels, focus management, and accessibility testing
+
+---
+
+## 17. API Reference Links
 
 | Category | API | Documentation |
 |-----------|-----|---------------|

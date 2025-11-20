@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { HalalFoodData, DistanceUnit } from '@/types/places.types'
 import type { LocationData } from '@/types/ramadan.types'
-import { getUserLocation } from '@/lib/location'
+import { getUserLocation, saveLocationToStorage } from '@/lib/location'
 import { getDistanceUnit, milesToMeters } from '@/lib/places'
 import { useAuth } from './useAuth'
 
@@ -17,7 +17,7 @@ interface UseHalalFoodResult {
   location: LocationData | null
   searchFood: (lat: number, lng: number, radiusMiles: number) => Promise<void>
   updateRadius: (radiusMiles: number) => Promise<void>
-  setCustomLocation: (location: LocationData) => void
+  setCustomLocation: (location: LocationData) => Promise<void>
   toggleDistanceUnit: (unit: DistanceUnit) => void
   refetch: () => Promise<void>
 }
@@ -95,8 +95,9 @@ export function useHalalFood(): UseHalalFoodResult {
   )
 
   const setCustomLocation = useCallback(
-    (newLocation: LocationData) => {
+    async (newLocation: LocationData) => {
       setLocation(newLocation)
+      await saveLocationToStorage(newLocation.lat, newLocation.lng, newLocation.city, newLocation.type)
       searchFood(newLocation.lat, newLocation.lng, searchRadiusMiles)
     },
     [searchFood, searchRadiusMiles]

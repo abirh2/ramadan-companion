@@ -53,8 +53,8 @@ export default function MosquesPage() {
     setDialogOpen(true)
   }
 
-  const handleLocationSelect = (newLocation: LocationData) => {
-    setCustomLocation(newLocation)
+  const handleLocationSelect = async (newLocation: LocationData) => {
+    await setCustomLocation(newLocation)
   }
 
   const handleDistanceUnitToggle = async (unit: DistanceUnit) => {

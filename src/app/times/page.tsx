@@ -90,26 +90,28 @@ export default function TimesPage() {
         <Link 
           href="/" 
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-3"
+          aria-label="Navigate back to homepage"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           <span className="text-sm">Back to Home</span>
         </Link>
         <h1 className="text-3xl font-bold">Prayer Times</h1>
+        <p className="text-muted-foreground mt-2">Track your daily prayers and find the Qibla direction</p>
       </div>
 
       {loading ? (
           // Loading State
-          <div className="flex items-center justify-center py-20">
+          <div className="flex items-center justify-center py-20" role="status" aria-live="polite">
             <div className="text-center space-y-3">
-              <Loader2 className="h-12 w-12 animate-spin text-muted-foreground mx-auto" />
+              <Loader2 className="h-12 w-12 animate-spin text-muted-foreground mx-auto" aria-hidden="true" />
               <p className="text-muted-foreground">Loading prayer times...</p>
             </div>
           </div>
         ) : error ? (
           // Error State
-          <div className="flex items-center justify-center py-20">
+          <div className="flex items-center justify-center py-20" role="alert" aria-live="assertive">
             <div className="text-center space-y-3 max-w-md">
-              <Clock className="h-12 w-12 text-muted-foreground mx-auto" />
+              <Clock className="h-12 w-12 text-muted-foreground mx-auto" aria-hidden="true" />
               <h2 className="text-xl font-semibold">Unable to Load Prayer Times</h2>
               <p className="text-muted-foreground">{error}</p>
               <p className="text-sm text-muted-foreground">
@@ -120,13 +122,13 @@ export default function TimesPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column - Main Content */}
-            <div className="lg:col-span-2 space-y-6">
+            <section className="lg:col-span-2 space-y-6" aria-label="Prayer times and statistics">
               {/* Next Prayer Hero */}
-              <Card className="rounded-2xl shadow-md border-accent/30">
+              <Card className="rounded-2xl shadow-md border-accent/30" role="article">
                 <CardHeader className="pb-4">
                   <div className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-accent" />
-                    <CardTitle className="text-base font-medium text-muted-foreground">
+                    <Clock className="h-5 w-5 text-accent" aria-hidden="true" />
+                    <CardTitle className="text-base font-medium text-muted-foreground" id="next-prayer-title">
                       Next Prayer
                     </CardTitle>
                   </div>
@@ -149,10 +151,10 @@ export default function TimesPage() {
               </Card>
 
               {/* Prayer Schedule */}
-              <Card className="rounded-2xl shadow-sm">
+              <Card className="rounded-2xl shadow-sm" role="article">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between flex-wrap gap-2">
-                    <CardTitle className="text-base font-medium">Today's Prayer Times</CardTitle>
+                    <CardTitle className="text-base font-medium" id="prayer-schedule-title">Today&apos;s Prayer Times</CardTitle>
                     <PrayerCompletionSummary todayCompletion={todayCompletion} />
                   </div>
                 </CardHeader>
@@ -226,28 +228,35 @@ export default function TimesPage() {
                 isAuthenticated={!!user}
                 accountCreatedAt={accountCreatedAt}
               />
-            </div>
+            </section>
 
             {/* Right Column - Sidebar */}
-            <div className="space-y-6">
+            <aside className="space-y-6" aria-label="Qibla compass and settings">
               {/* Qibla Compass */}
-              <div id="qibla">
+              <section id="qibla" aria-labelledby="qibla-title">
+                <h2 id="qibla-title" className="sr-only">Qibla Compass</h2>
                 <QiblaCompass qiblaDirection={qiblaDirection} loading={false} error={null} />
-              </div>
+              </section>
 
               {/* Settings */}
-              <PrayerTimesSettings
-                calculationMethod={calculationMethod}
-                madhab={madhab}
-                location={location}
-                onCalculationMethodChange={updateCalculationMethod}
-                onMadhabChange={updateMadhab}
-                onLocationChange={updateLocation}
-              />
+              <section aria-labelledby="settings-title">
+                <h2 id="settings-title" className="sr-only">Prayer Settings</h2>
+                <PrayerTimesSettings
+                  calculationMethod={calculationMethod}
+                  madhab={madhab}
+                  location={location}
+                  onCalculationMethodChange={updateCalculationMethod}
+                  onMadhabChange={updateMadhab}
+                  onLocationChange={updateLocation}
+                />
+              </section>
 
               {/* Notification Settings */}
-              <NotificationSettings />
-            </div>
+              <section aria-labelledby="notification-settings-title">
+                <h2 id="notification-settings-title" className="sr-only">Notification Settings</h2>
+                <NotificationSettings />
+              </section>
+            </aside>
           </div>
         )}
 
