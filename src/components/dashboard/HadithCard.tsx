@@ -76,8 +76,6 @@ export function HadithCard() {
     switch (selectedLanguage) {
       case 'urdu':
         return hadithUrdu
-      case 'arabic':
-        return hadithArabic
       case 'english':
       default:
         return hadithEnglish
