@@ -11,8 +11,9 @@ export default function QuranBrowserPage() {
         <Link 
           href="/" 
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-3"
+          aria-label="Navigate back to homepage"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           <span className="text-sm">Back to Home</span>
         </Link>
         <h1 className="text-3xl font-bold mb-2">Quran Browser</h1>
@@ -22,16 +23,16 @@ export default function QuranBrowserPage() {
       </div>
 
       <Tabs defaultValue="surah" className="w-full">
-        <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-6">
+        <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-6" aria-label="Quran browsing options">
           <TabsTrigger value="surah">By Surah</TabsTrigger>
           <TabsTrigger value="juz">By Juz</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="surah">
+        <TabsContent value="surah" role="tabpanel">
           <SurahSelector />
         </TabsContent>
 
-        <TabsContent value="juz">
+        <TabsContent value="juz" role="tabpanel">
           <JuzList />
         </TabsContent>
       </Tabs>

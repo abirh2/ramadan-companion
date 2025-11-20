@@ -43,14 +43,20 @@ export function QuranCard() {
     await toggleFavorite()
   }
 
+  const cardAriaLabel = !loading && !error && surah 
+    ? `Quran of the Day. Surah ${surah.englishName}, verse ${numberInSurah}. ${translation?.text}. Click to view more.`
+    : loading 
+    ? 'Loading Quran of the Day'
+    : 'Quran of the Day card'
+
   return (
     <>
-      <Link href="/quran-hadith" className="block">
-        <Card className="rounded-2xl shadow-sm transition-all hover:shadow-md hover:scale-[1.01] cursor-pointer">
+      <Link href="/quran-hadith" className="block" aria-label={cardAriaLabel}>
+        <Card className="rounded-2xl shadow-sm transition-all hover:shadow-md hover:scale-[1.01] cursor-pointer" role="article">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4 text-muted-foreground" />
+                <BookOpen className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   Quran of the Day
                 </CardTitle>
@@ -61,22 +67,29 @@ export function QuranCard() {
                 className="h-7 w-7"
                 onClick={handleFavoriteClick}
                 disabled={favLoading}
+                aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
               >
                 <Heart 
-                  className={`h-3.5 w-3.5 ${isFavorited ? 'fill-current text-red-500' : ''}`} 
+                  className={`h-3.5 w-3.5 ${isFavorited ? 'fill-current text-red-500' : ''}`}
+                  aria-hidden="true"
                 />
+                <span className="sr-only">
+                  {isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                </span>
               </Button>
             </div>
           </CardHeader>
         <CardContent className="space-y-3">
           {loading && (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <div className="flex items-center justify-center py-8" role="status">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
+              <span className="sr-only">Loading Quran verse...</span>
             </div>
           )}
 
           {error && (
-            <div className="text-sm text-destructive py-4">
+            <div className="text-sm text-destructive py-4" role="alert" aria-live="polite">
               Failed to load daily ayah. Please try again later.
             </div>
           )}
@@ -88,6 +101,7 @@ export function QuranCard() {
                   className="text-lg leading-relaxed text-right font-serif" 
                   dir="rtl"
                   lang="ar"
+                  aria-label={`Arabic text: ${arabic.text}`}
                 >
                   {arabic.text}
                 </p>

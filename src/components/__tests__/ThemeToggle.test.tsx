@@ -15,22 +15,23 @@ describe('ThemeToggle', () => {
   it('renders theme toggle button', () => {
     render(<ThemeToggle />)
     
-    const button = screen.getByRole('button', { name: /toggle theme/i })
+    const button = screen.getByRole('button', { name: /switch to (light|dark) mode/i })
     expect(button).toBeInTheDocument()
   })
 
   it('has proper accessibility attributes', () => {
     render(<ThemeToggle />)
     
-    const button = screen.getByRole('button', { name: /toggle theme/i })
-    expect(button).toHaveAttribute('aria-label', 'Toggle theme')
+    const button = screen.getByRole('button', { name: /switch to (light|dark) mode/i })
+    expect(button).toHaveAttribute('aria-label')
+    expect(button.getAttribute('aria-label')).toMatch(/Switch to (light|dark) mode/)
   })
 
   it('toggles from light to dark theme when clicked', async () => {
     const user = userEvent.setup()
     render(<ThemeToggle />)
     
-    const button = screen.getByRole('button', { name: /toggle theme/i })
+    const button = screen.getByRole('button', { name: /switch to (light|dark) mode/i })
     await user.click(button)
     
     // Just verify button click works - theme toggle logic is mocked
@@ -40,7 +41,7 @@ describe('ThemeToggle', () => {
   it('renders sun icon for light theme', () => {
     render(<ThemeToggle />)
     
-    const button = screen.getByRole('button', { name: /toggle theme/i })
+    const button = screen.getByRole('button', { name: /switch to dark mode/i })
     expect(button).toBeInTheDocument()
   })
 

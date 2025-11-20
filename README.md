@@ -10,7 +10,7 @@ A modern, minimal web app built for Muslims to assist with daily worship and ref
 - ✅ **Prayer Times & Qibla** - Accurate daily prayer times with 7 calculation methods, live countdown, Qibla compass, and offline fallback
 - ✅ **Prayer Notifications** 🆕 V1.1 - Browser notifications at exact prayer times with motivational hadith quotes and per-prayer control
 - ✅ **Ramadan Countdown** - Track days until Ramadan with Hijri calendar integration and iftar/suhoor timers
-- ✅ **Quran Browser** 🆕 - Browse all 114 surahs with translations, Juz navigation, bookmarks, search, and auto-resume reading position
+- ✅ **Quran Browser** 🆕 - Browse all 114 surahs with translations, Juz navigation, manual bookmarks with explicit controls, search, and favorites
 - ✅ **Daily Quran** - Weighted random ayah selection with 4 translations (Asad, Sahih International, Pickthall, Yusuf Ali)
 - ✅ **Daily Hadith** - Authentic hadith from Sahih Bukhari and Muslim with English/Urdu/Arabic text and grading
 - ✅ **Charity Tracker** - Full donation CRUD with monthly calendar/list views, line/bar/pie charts, and zakat calculator
@@ -28,6 +28,7 @@ A modern, minimal web app built for Muslims to assist with daily worship and ref
 - ✅ **Privacy-First** - Your data stays secure with Supabase RLS policies
 - ✅ **Offline Support** - Works offline with intelligent caching and local prayer time calculation
 - ✅ **Installable PWA** 🆕 - Install on iOS, Android, and Desktop for native app experience with offline access
+- ✅ **Accessibility** 🆕 - WCAG 2.1 AA compliant with full keyboard navigation, screen reader support, and semantic HTML
 
 ## Getting Started
 
@@ -103,10 +104,11 @@ See [docs/README.md](docs/README.md) for the complete documentation index.
 We're actively working on the next version with exciting enhancements:
 
 ### Recently Completed (V1.1)
-- ✅ **Full Quran Browser** - Complete browsing experience with 114 surahs, Juz navigation, bookmarks (dual-storage), favorites integration, translation switching, auto-resume, ayah sharing, search, list/grid views
+- ✅ **Full Quran Browser** - Complete browsing experience with 114 surahs, Juz navigation, manual bookmarks with dual-storage, favorites integration, translation switching, bookmark indicators, ayah sharing, search, list/grid views
 - ✅ **Prayer Tracking** - Mark prayers as completed and track daily progress with historical analytics, charts, and per-prayer breakdown
 - ✅ **Prayer Time Notifications** - Browser notifications at exact prayer times with authentic hadith quotes, per-prayer toggle controls, and automatic rescheduling
 - ✅ **PWA Installation** - Full progressive web app support with smart install prompts, offline caching, and platform-specific install guides
+- ✅ **Accessibility** - WCAG 2.1 AA compliance with complete keyboard navigation, comprehensive ARIA labels, screen reader support, skip links, focus management, and semantic HTML structure
 
 ### Coming Soon (V1.1)
 - 🤲 **Expanded Dua Library** - 100+ duas with new categories (illness, travel, marriage, children)

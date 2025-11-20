@@ -26,11 +26,14 @@ export function AyahActions({
 }: AyahActionsProps) {
   const { user } = useAuth()
   const { isFavorited, addFavorite, removeFavorite } = useQuranBrowserFavorites()
-  const { saveBookmark } = useQuranBookmarks()
+  const { saveBookmark, deleteBookmark, getBookmark } = useQuranBookmarks()
   const [copied, setCopied] = useState(false)
-  const [bookmarked, setBookmarked] = useState(false)
 
   const isFav = isFavorited(globalNumber)
+  
+  // Check if this specific ayah is bookmarked
+  const bookmark = getBookmark(surahNumber)
+  const isBookmarked = bookmark?.ayah_number === ayahNumber
 
   const handleCopy = async () => {
     const textToCopy = `${arabicText}\n\n${translationText}\n\n— Quran ${surahNumber}:${ayahNumber} (${surahName})`
@@ -61,9 +64,13 @@ export function AyahActions({
   }
 
   const handleBookmark = async () => {
-    await saveBookmark(surahNumber, ayahNumber)
-    setBookmarked(true)
-    setTimeout(() => setBookmarked(false), 2000)
+    if (isBookmarked) {
+      // Remove bookmark if clicking on the currently bookmarked ayah
+      await deleteBookmark(surahNumber)
+    } else {
+      // Save new bookmark (overwrites any previous bookmark in this surah)
+      await saveBookmark(surahNumber, ayahNumber)
+    }
   }
 
   const handleShare = async () => {
@@ -111,18 +118,13 @@ export function AyahActions({
         {isFav ? 'Favorited' : 'Favorite'}
       </Button>
 
-      <Button variant="outline" size="sm" onClick={handleBookmark}>
-        {bookmarked ? (
-          <>
-            <Check className="h-4 w-4 mr-2" />
-            Bookmarked
-          </>
-        ) : (
-          <>
-            <Bookmark className="h-4 w-4 mr-2" />
-            Bookmark
-          </>
-        )}
+      <Button
+        variant={isBookmarked ? 'default' : 'outline'}
+        size="sm"
+        onClick={handleBookmark}
+      >
+        <Bookmark className={`h-4 w-4 mr-2 ${isBookmarked ? 'fill-current' : ''}`} />
+        {isBookmarked ? 'Bookmarked' : 'Bookmark'}
       </Button>
 
       <Button variant="outline" size="sm" onClick={handleShare}>

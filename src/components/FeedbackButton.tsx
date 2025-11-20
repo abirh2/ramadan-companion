@@ -99,18 +99,18 @@ export function FeedbackButton({ pagePath }: FeedbackButtonProps) {
       </div>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px]" aria-labelledby="feedback-title" aria-describedby="feedback-description">
           <DialogHeader>
-            <DialogTitle>Share Your Feedback</DialogTitle>
-            <DialogDescription>
+            <DialogTitle id="feedback-title">Share Your Feedback</DialogTitle>
+            <DialogDescription id="feedback-description">
               Help us improve by reporting issues or suggesting new features.
               Your feedback is anonymous.
             </DialogDescription>
           </DialogHeader>
 
           {success ? (
-            <div className="py-8 text-center space-y-4">
-              <CheckCircle className="h-12 w-12 mx-auto text-green-600 dark:text-green-400" />
+            <div className="py-8 text-center space-y-4" role="status" aria-live="polite">
+              <CheckCircle className="h-12 w-12 mx-auto text-green-600 dark:text-green-400" aria-hidden="true" />
               <div>
                 <p className="text-lg font-semibold">Thank you!</p>
                 <p className="text-sm text-muted-foreground">
@@ -119,7 +119,7 @@ export function FeedbackButton({ pagePath }: FeedbackButtonProps) {
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6" aria-label="Feedback form">
               {/* Feedback Type Selection */}
               <div className="space-y-3">
                 <label className="text-sm font-medium">
@@ -156,9 +156,11 @@ export function FeedbackButton({ pagePath }: FeedbackButtonProps) {
                   {feedbackType === 'problem'
                     ? 'Describe the problem'
                     : 'Describe your suggestion'}
+                  <span className="sr-only">(required, minimum 10 characters)</span>
                 </label>
                 <textarea
                   id="feedback-content"
+                  name="feedback-content"
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   placeholder={
@@ -169,16 +171,20 @@ export function FeedbackButton({ pagePath }: FeedbackButtonProps) {
                   className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
                   disabled={submitting}
                   required
+                  aria-required="true"
+                  aria-invalid={error !== null}
+                  aria-describedby="feedback-help feedback-error"
+                  minLength={10}
                 />
-                <p className="text-xs text-muted-foreground">
+                <p id="feedback-help" className="text-xs text-muted-foreground">
                   Minimum 10 characters
                 </p>
               </div>
 
               {/* Error Message */}
               {error && (
-                <div className="rounded-md bg-destructive/10 border border-destructive/20 p-3">
-                  <p className="text-sm text-destructive">{error}</p>
+                <div className="rounded-md bg-destructive/10 border border-destructive/20 p-3" role="alert" aria-live="polite">
+                  <p id="feedback-error" className="text-sm text-destructive">{error}</p>
                 </div>
               )}
 
@@ -196,11 +202,16 @@ export function FeedbackButton({ pagePath }: FeedbackButtonProps) {
                   variant="outline"
                   onClick={() => setOpen(false)}
                   disabled={submitting}
+                  aria-label="Cancel and close feedback dialog"
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={submitting || content.trim().length < 10}>
-                  {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Button 
+                  type="submit" 
+                  disabled={submitting || content.trim().length < 10}
+                  aria-label={submitting ? 'Submitting feedback...' : 'Submit feedback'}
+                >
+                  {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
                   Submit Feedback
                 </Button>
               </DialogFooter>

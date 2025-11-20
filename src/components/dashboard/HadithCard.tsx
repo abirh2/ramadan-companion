@@ -98,14 +98,20 @@ export function HadithCard() {
     }
   }
 
+  const cardAriaLabel = !loading && !error && book 
+    ? `Hadith of the Day. ${getSelectedText()}. Narrated by ${narrator}. From ${book}, hadith ${hadithNumber}. Grading: ${status}. Click to view more.`
+    : loading 
+    ? 'Loading Hadith of the Day'
+    : 'Hadith of the Day card'
+
   return (
     <>
-      <Link href="/quran-hadith" className="block">
-        <Card className="rounded-2xl shadow-sm transition-all hover:shadow-md hover:scale-[1.01] cursor-pointer">
+      <Link href="/quran-hadith" className="block" aria-label={cardAriaLabel}>
+        <Card className="rounded-2xl shadow-sm transition-all hover:shadow-md hover:scale-[1.01] cursor-pointer" role="article">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <ScrollText className="h-4 w-4 text-muted-foreground" />
+                <ScrollText className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   Hadith of the Day
                 </CardTitle>
@@ -116,20 +122,26 @@ export function HadithCard() {
                 className="h-7 w-7"
                 onClick={handleFavoriteClick}
                 disabled={favLoading}
+                aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
               >
-                <Heart className={`h-3.5 w-3.5 ${isFavorited ? 'fill-current text-red-500' : ''}`} />
+                <Heart className={`h-3.5 w-3.5 ${isFavorited ? 'fill-current text-red-500' : ''}`} aria-hidden="true" />
+                <span className="sr-only">
+                  {isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                </span>
               </Button>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
             {loading && (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              <div className="flex items-center justify-center py-8" role="status">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
+                <span className="sr-only">Loading hadith...</span>
               </div>
             )}
 
             {error && (
-              <div className="text-sm text-destructive py-4">
+              <div className="text-sm text-destructive py-4" role="alert" aria-live="polite">
                 Failed to load daily hadith. Please try again later.
               </div>
             )}
@@ -138,7 +150,7 @@ export function HadithCard() {
               <>
                 {/* Arabic Text */}
                 <div className="space-y-2">
-                  <p className="text-base leading-relaxed text-right font-serif" dir="rtl" lang="ar">
+                  <p className="text-base leading-relaxed text-right font-serif" dir="rtl" lang="ar" aria-label={`Arabic text: ${hadithArabic}`}>
                     {hadithArabic}
                   </p>
                 </div>
@@ -172,7 +184,7 @@ export function HadithCard() {
                       )}
                     </div>
                     {status && (
-                      <span className={`text-xs font-medium ${getStatusColor(status)}`}>
+                      <span className={`text-xs font-medium ${getStatusColor(status)}`} role="status" aria-label={`Hadith grading: ${status}`}>
                         {status}
                       </span>
                     )}

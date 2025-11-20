@@ -316,6 +316,62 @@ END $$;
 
 ---
 
+## Quran Bookmarks System
+
+**Date Updated:** November 20, 2024
+
+### Overview
+
+The Quran reader includes a manual bookmarking system that allows users to save their reading position within each surah. The bookmark system has been redesigned to eliminate auto-scroll bugs and provide explicit user control.
+
+### User Experience
+
+**Saving Bookmarks:**
+- Each ayah has a bookmark button in its action row (next to favorite and share buttons)
+- Click bookmark icon to save current position
+- One bookmark per surah (saving new ayah overwrites previous)
+- Click bookmark again on same ayah to remove bookmark
+- Visual feedback: filled icon = bookmarked, outline = not bookmarked
+
+**Navigating to Bookmarks:**
+- **In Surah Reader:** "Go to Bookmark (Ayah X)" button appears in controls when bookmark exists
+- **On Main Quran Page:** Bookmarked surahs show "Bookmark: Ayah X" badge
+- **In Juz View:** Shows bookmark info for start surah if applicable
+- Clicking any bookmark indicator smoothly scrolls to saved position
+
+**Navigation Behavior:**
+- Opening a surah always starts at the top (predictable behavior)
+- Juz/Ayah links scroll to specified ayah (no auto-scroll to bookmark)
+- User explicitly clicks "Go to Bookmark" to jump to saved position
+
+### Technical Implementation
+
+**Files Modified:**
+- `src/components/quran/AyahActions.tsx` - Per-ayah bookmark toggle button
+- `src/components/quran/SurahReader.tsx` - "Go to Bookmark" button, removed auto-scroll
+- `src/components/quran/SurahList.tsx` - Bookmark badges in list view
+- `src/components/quran/SurahGrid.tsx` - Bookmark badges in grid view
+- `src/components/quran/JuzList.tsx` - Bookmark info in Juz cards
+
+**Key Changes:**
+- Removed automatic scroll-to-bookmark on page load
+- Removed automatic bookmark saving while scrolling
+- Added explicit bookmark button to each ayah
+- Added "Go to Bookmark" navigation button
+- Added bookmark indicators on main Quran browsing page
+
+**Data Storage:**
+- Uses existing `useQuranBookmarks` hook and storage utilities
+- Dual-storage pattern: localStorage + Supabase (for authenticated users)
+- One bookmark per surah stored in `quran_bookmarks` table
+
+### Bug Fixes
+
+**Issue:** Auto-scroll loop when navigating to Juz/Ayah
+- **Root Cause:** Scroll effect had `getBookmark` in dependencies, triggering re-scroll when bookmark saved
+- **Solution:** Removed auto-scroll behavior, made bookmarking explicit and user-controlled
+- **Result:** Predictable navigation, no unwanted auto-scrolling
+
 ## Future Enhancements (Out of V1 Scope)
 
 - [ ] Hadith of the Day implementation (using Sunnah.com API)
@@ -326,6 +382,7 @@ END $$;
 - [ ] Tafsir (commentary) integration
 - [ ] Edit notes on favorite items
 - [ ] Export favorites to PDF/JSON
+- [ ] Bookmark notes/annotations
 
 ---
 

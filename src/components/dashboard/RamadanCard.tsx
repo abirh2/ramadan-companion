@@ -10,18 +10,19 @@ export function RamadanCard() {
   // Loading state
   if (countdown.loading) {
     return (
-      <Card className="rounded-2xl shadow-md border-accent/30">
+      <Card className="rounded-2xl shadow-md border-accent/30" role="article" aria-busy="true" aria-label="Loading Ramadan countdown">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-2">
-            <Moon className="h-5 w-5 text-accent" />
+            <Moon className="h-5 w-5 text-accent" aria-hidden="true" />
             <CardTitle className="text-base font-medium text-muted-foreground">
               Ramadan {countdown.ramadanYear}
             </CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-2 py-8">
-          <div className="flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <div className="flex items-center justify-center" role="status">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-hidden="true" />
+            <span className="sr-only">Loading Ramadan countdown...</span>
           </div>
         </CardContent>
       </Card>
@@ -31,10 +32,10 @@ export function RamadanCard() {
   // Error state
   if (countdown.error) {
     return (
-      <Card className="rounded-2xl shadow-md border-accent/30">
+      <Card className="rounded-2xl shadow-md border-accent/30" role="article" aria-live="polite" aria-label="Error loading Ramadan countdown">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-2">
-            <Moon className="h-5 w-5 text-accent" />
+            <Moon className="h-5 w-5 text-accent" aria-hidden="true" />
             <CardTitle className="text-base font-medium text-muted-foreground">
               Ramadan {countdown.ramadanYear}
             </CardTitle>
@@ -63,11 +64,13 @@ export function RamadanCard() {
 
   // Before Ramadan state
   if (!countdown.isRamadan && countdown.timeUntilEvent) {
+    const cardAriaLabel = `Ramadan ${countdown.ramadanYear} countdown. Starts in ${countdown.timeUntilEvent}. Expected start date: ${formatDate(countdown.ramadanStartDate)}`
+    
     return (
-      <Card className="rounded-2xl shadow-md border-accent/30">
+      <Card className="rounded-2xl shadow-md border-accent/30" role="article" aria-label={cardAriaLabel}>
         <CardHeader className="pb-4">
           <div className="flex items-center gap-2">
-            <Moon className="h-5 w-5 text-accent" />
+            <Moon className="h-5 w-5 text-accent" aria-hidden="true" />
             <CardTitle className="text-base font-medium text-muted-foreground">
               Ramadan {countdown.ramadanYear}
             </CardTitle>
@@ -78,7 +81,7 @@ export function RamadanCard() {
             <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
               Starts in
             </p>
-            <p className="text-3xl md:text-4xl font-bold text-foreground tabular-nums tracking-tight">
+            <p className="text-3xl md:text-4xl font-bold text-foreground tabular-nums tracking-tight" aria-live="polite" aria-atomic="true">
               {countdown.timeUntilEvent}
             </p>
           </div>
@@ -92,11 +95,15 @@ export function RamadanCard() {
 
   // During Ramadan state
   if (countdown.isRamadan && countdown.currentRamadanDay) {
+    const cardAriaLabel = countdown.nextEvent && countdown.timeUntilEvent
+      ? `Ramadan ${countdown.ramadanYear}, Day ${countdown.currentRamadanDay}. ${countdown.timeUntilEvent} until ${countdown.nextEvent === 'iftar' ? 'Iftar at Maghrib' : 'Suhoor ends at Fajr'}`
+      : `Ramadan Mubarak. Day ${countdown.currentRamadanDay} of 30`
+    
     return (
-      <Card className="rounded-2xl shadow-md border-accent/30">
+      <Card className="rounded-2xl shadow-md border-accent/30" role="article" aria-label={cardAriaLabel}>
         <CardHeader className="pb-4">
           <div className="flex items-center gap-2">
-            <Moon className="h-5 w-5 text-accent" />
+            <Moon className="h-5 w-5 text-accent" aria-hidden="true" />
             <CardTitle className="text-base font-medium text-muted-foreground">
               Ramadan {countdown.ramadanYear} • Day {countdown.currentRamadanDay}
             </CardTitle>
@@ -105,7 +112,7 @@ export function RamadanCard() {
         <CardContent className="space-y-2">
           {countdown.nextEvent && countdown.timeUntilEvent ? (
             <>
-              <p className="text-4xl font-bold text-foreground tabular-nums">
+              <p className="text-4xl font-bold text-foreground tabular-nums" aria-live="polite" aria-atomic="true">
                 {countdown.timeUntilEvent}
               </p>
               <p className="text-sm text-muted-foreground">
@@ -131,10 +138,10 @@ export function RamadanCard() {
 
   // Fallback
   return (
-    <Card className="rounded-2xl shadow-md border-accent/30">
+    <Card className="rounded-2xl shadow-md border-accent/30" role="article" aria-label={`Ramadan ${countdown.ramadanYear}. Preparing countdown data.`}>
       <CardHeader className="pb-4">
         <div className="flex items-center gap-2">
-          <Moon className="h-5 w-5 text-accent" />
+          <Moon className="h-5 w-5 text-accent" aria-hidden="true" />
           <CardTitle className="text-base font-medium text-muted-foreground">
             Ramadan {countdown.ramadanYear}
           </CardTitle>

@@ -361,14 +361,183 @@ The arrangement on the dashboard should reflect this order.
 
 ## 9. Accessibility
 
-* Maintain at least **WCAG AA contrast** for text and important UI elements.
-* Font size minimum:
+The Ramadan Companion app follows WCAG 2.1 Level AA standards to ensure accessibility for all users, including those using assistive technologies.
 
-  * Body text: `text-sm` (14px) minimum, avoid `text-xs` for anything essential.
-* Interactive elements:
+### 9.1 Visual Accessibility
 
-  * Clearly distinguishable focus state.
-  * Tap targets large enough on mobile (min 44x44px).
+* **Color Contrast:**
+  * Maintain at least **WCAG AA contrast ratio** (4.5:1) for text and important UI elements
+  * Large text (18px+): minimum 3:1 contrast ratio
+  * Don't rely solely on color to convey information (use icons, text, patterns)
+
+* **Font Sizes:**
+  * Body text: `text-sm` (14px) minimum for essential content
+  * Avoid `text-xs` for anything critical
+  * All text must be resizable without loss of functionality
+
+* **Focus Indicators:**
+  * All interactive elements must have visible focus states
+  * Focus ring: 2-3px solid outline with high contrast
+  * Default: `focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`
+  * Never remove focus indicators (`outline: none` without replacement)
+
+* **Touch Targets:**
+  * Minimum 44x44px for mobile tap targets
+  * Adequate spacing between interactive elements
+  * Buttons use `size` prop: `sm` (32px), `default` (36px), `lg` (40px)
+
+### 9.2 Keyboard Accessibility
+
+* **Tab Order:**
+  * Logical tab order matching visual layout
+  * Use `tabIndex={-1}` for programmatic focus only (e.g., skip link targets)
+  * Never use positive `tabIndex` values
+
+* **Keyboard Shortcuts:**
+  * `Tab` / `Shift+Tab` - Navigate between elements
+  * `Enter` / `Space` - Activate buttons and links
+  * `Escape` - Close modals and dropdowns
+  * Custom shortcuts must not conflict with browser/screen reader shortcuts
+
+* **Focus Management:**
+  * Focus trapped in open modals
+  * Focus returned to trigger element when modal closes
+  * Skip link provided to bypass navigation
+
+### 9.3 Semantic HTML
+
+* **Landmarks:**
+  * Use semantic HTML elements: `<header>`, `<nav>`, `<main>`, `<section>`, `<aside>`, `<footer>`
+  * Main content must have `id="main-content"` for skip link
+  * Sections should have `aria-label` or `aria-labelledby`
+
+* **Heading Hierarchy:**
+  * One `<h1>` per page (page title)
+  * Proper nesting: h1 > h2 > h3 (don't skip levels)
+  * Use headings for structure, not just styling
+
+* **Interactive Elements:**
+  * Buttons for actions: `<button>` or `<Button>`
+  * Links for navigation: `<a>` or `<Link>`
+  * Don't use `<div>` or `<span>` for clickable elements
+
+### 9.4 ARIA Labels and Roles
+
+* **When to Use ARIA:**
+  * When semantic HTML alone isn't sufficient
+  * For dynamic content updates
+  * Custom interactive widgets
+  * **Rule:** No ARIA is better than bad ARIA
+
+* **Common Patterns:**
+  ```tsx
+  // Icon buttons
+  <Button aria-label="Close dialog" size="icon">
+    <X className="h-4 w-4" aria-hidden="true" />
+  </Button>
+
+  // Loading states
+  <div role="status" aria-live="polite">
+    <Loader2 aria-hidden="true" />
+    <span className="sr-only">Loading...</span>
+  </div>
+
+  // Form inputs
+  <label htmlFor="email">Email</label>
+  <input
+    id="email"
+    aria-required="true"
+    aria-invalid={hasError}
+    aria-describedby="email-error"
+  />
+  <span id="email-error" role="alert">{error}</span>
+
+  // Dynamic content
+  <div aria-live="polite" aria-atomic="true">
+    {countdown}
+  </div>
+  ```
+
+* **Screen Reader Only Content:**
+  * Use `sr-only` class for visually hidden content
+  * Use `aria-hidden="true"` for decorative images/icons
+
+### 9.5 Forms and Validation
+
+* **Labels:**
+  * Every input must have an associated `<label>`
+  * Use `htmlFor` / `id` to link labels to inputs
+  * Don't rely solely on placeholders
+
+* **Required Fields:**
+  * Visual indicator (asterisk) with `aria-label="required"`
+  * `required` attribute on input
+  * `aria-required="true"` for screen readers
+
+* **Validation:**
+  * Error messages with `role="alert"` or `aria-live="assertive"`
+  * Link errors to fields with `aria-describedby`
+  * Mark invalid fields with `aria-invalid="true"`
+  * Show errors inline near the field
+
+### 9.6 Dynamic Content
+
+* **Live Regions:**
+  * `aria-live="polite"` - Announcements that don't interrupt (prayer times, countdowns)
+  * `aria-live="assertive"` - Important alerts (errors, critical messages)
+  * `aria-atomic="true"` - Announce entire region content on change
+
+* **Loading States:**
+  * Use `role="status"` for loading indicators
+  * Provide text alternative: `<span className="sr-only">Loading...</span>`
+  * Use `aria-busy="true"` on loading containers
+
+* **Status Messages:**
+  * Success: `role="status"` with `aria-live="polite"`
+  * Errors: `role="alert"` with `aria-live="assertive"`
+  * Always provide text, not just color/icons
+
+### 9.7 Accessible Components
+
+* **Modals/Dialogs:**
+  * Use `Dialog` component from shadcn/ui (built-in accessibility)
+  * `aria-labelledby` points to dialog title
+  * `aria-describedby` points to dialog description
+  * Focus trapped within modal
+  * `Escape` key closes modal
+
+* **Dropdowns:**
+  * Use `DropdownMenu` component (Radix UI based)
+  * Proper `role="menu"` and `role="menuitem"`
+  * Keyboard navigation with arrow keys
+  * `aria-expanded` state management
+
+* **Tabs:**
+  * Use `Tabs` component from shadcn/ui
+  * `role="tablist"`, `role="tab"`, `role="tabpanel"`
+  * Arrow key navigation between tabs
+  * `aria-selected` state
+
+### 9.8 Testing Checklist
+
+**Before Marking Complete:**
+- [ ] All images have alt text (or `aria-hidden` if decorative)
+- [ ] All buttons/links have descriptive labels
+- [ ] Forms have associated labels
+- [ ] Keyboard navigation works throughout
+- [ ] Focus indicators are visible
+- [ ] Color contrast meets WCAG AA
+- [ ] Screen reader announcements are logical
+- [ ] Modal focus management works
+- [ ] Loading/error states are announced
+- [ ] Heading hierarchy is correct
+
+**Tools:**
+- Manual keyboard testing (unplug mouse)
+- Screen reader testing (NVDA, JAWS, VoiceOver)
+- Browser DevTools accessibility inspector
+- jest-axe for automated testing
+- Lighthouse accessibility audit
 
 ---
 

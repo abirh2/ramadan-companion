@@ -97,26 +97,27 @@ export function DonationForm({ open, onOpenChange, onSuccess, donation }: Donati
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px]" aria-labelledby="donation-form-title" aria-describedby="donation-form-description">
         <DialogHeader>
-          <DialogTitle>{isEditMode ? 'Edit Donation' : 'Add Donation'}</DialogTitle>
-          <DialogDescription>
+          <DialogTitle id="donation-form-title">{isEditMode ? 'Edit Donation' : 'Add Donation'}</DialogTitle>
+          <DialogDescription id="donation-form-description">
             {isEditMode
               ? 'Update the details of your donation.'
               : 'Track your sadaqah, zakat, or other charitable contributions.'}
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" aria-label={isEditMode ? 'Edit donation form' : 'Add donation form'}>
           {/* Amount and Currency */}
           <div className="grid grid-cols-2 gap-4">
             {/* Amount */}
             <div className="space-y-2">
               <label htmlFor="amount" className="text-sm font-medium">
-                Amount <span className="text-destructive">*</span>
+                Amount <span className="text-destructive" aria-label="required">*</span>
               </label>
               <Input
                 id="amount"
+                name="amount"
                 type="number"
                 step="0.01"
                 min="0.01"
@@ -126,18 +127,22 @@ export function DonationForm({ open, onOpenChange, onSuccess, donation }: Donati
                   setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })
                 }
                 required
+                aria-required="true"
+                aria-invalid={!!(error && formData.amount <= 0)}
+                aria-describedby={error && formData.amount <= 0 ? 'amount-error' : undefined}
               />
             </div>
 
             {/* Currency */}
             <div className="space-y-2">
               <label htmlFor="currency" className="text-sm font-medium">
-                Currency <span className="text-destructive">*</span>
+                Currency <span className="text-destructive" aria-label="required">*</span>
               </label>
               <CurrencySelector
                 value={formData.currency || 'USD'}
                 onChange={(currency) => setFormData({ ...formData, currency })}
                 disabled={loading}
+                aria-label="Select currency"
               />
             </div>
           </div>
@@ -145,16 +150,19 @@ export function DonationForm({ open, onOpenChange, onSuccess, donation }: Donati
           {/* Type */}
           <div className="space-y-2">
             <label htmlFor="type" className="text-sm font-medium">
-              Type <span className="text-destructive">*</span>
+              Type <span className="text-destructive" aria-label="required">*</span>
             </label>
             <select
               id="type"
+              name="type"
               value={formData.type}
               onChange={(e) =>
                 setFormData({ ...formData, type: e.target.value as 'zakat' | 'sadaqah' | 'other' })
               }
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               required
+              aria-required="true"
+              aria-label="Donation type"
             >
               <option value="sadaqah">Sadaqah</option>
               <option value="zakat">Zakat</option>
@@ -165,14 +173,16 @@ export function DonationForm({ open, onOpenChange, onSuccess, donation }: Donati
           {/* Date */}
           <div className="space-y-2">
             <label htmlFor="date" className="text-sm font-medium">
-              Date <span className="text-destructive">*</span>
+              Date <span className="text-destructive" aria-label="required">*</span>
             </label>
             <Input
               id="date"
+              name="date"
               type="date"
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
               required
+              aria-required="true"
             />
           </div>
 
@@ -183,10 +193,12 @@ export function DonationForm({ open, onOpenChange, onSuccess, donation }: Donati
             </label>
             <Input
               id="charity_name"
+              name="charity_name"
               type="text"
               placeholder="e.g., Islamic Relief, Local Masjid"
               value={formData.charity_name || ''}
               onChange={(e) => setFormData({ ...formData, charity_name: e.target.value })}
+              aria-label="Charity name (optional)"
             />
           </div>
 
@@ -197,10 +209,12 @@ export function DonationForm({ open, onOpenChange, onSuccess, donation }: Donati
             </label>
             <Input
               id="category"
+              name="category"
               type="text"
               placeholder="e.g., Education, Food, Medical"
               value={formData.category || ''}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              aria-label="Donation category (optional)"
             />
           </div>
 
@@ -211,17 +225,24 @@ export function DonationForm({ open, onOpenChange, onSuccess, donation }: Donati
             </label>
             <textarea
               id="notes"
+              name="notes"
               placeholder="Optional notes about this donation"
               value={formData.notes || ''}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               rows={3}
+              aria-label="Donation notes (optional)"
             />
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+            <div 
+              className="rounded-md bg-destructive/10 p-3 text-sm text-destructive" 
+              role="alert" 
+              aria-live="polite"
+              id="form-error"
+            >
               {error}
             </div>
           )}
@@ -232,11 +253,16 @@ export function DonationForm({ open, onOpenChange, onSuccess, donation }: Donati
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={loading}
+              aria-label="Cancel and close dialog"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button 
+              type="submit" 
+              disabled={loading}
+              aria-label={loading ? 'Saving donation...' : `${isEditMode ? 'Update' : 'Add'} donation`}
+            >
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
               {isEditMode ? 'Update' : 'Add'} Donation
             </Button>
           </DialogFooter>

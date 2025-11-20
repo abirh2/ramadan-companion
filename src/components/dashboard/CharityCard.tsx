@@ -16,16 +16,22 @@ export function CharityCard() {
     }).format(amount)
   }
 
+  const cardAriaLabel = !loading && !error
+    ? `Charity Tracker. This Ramadan: ${formatCurrency(summary.ramadanTotal)}. All time: ${formatCurrency(summary.allTimeTotal)}. ${summary.totalCount} ${summary.totalCount === 1 ? 'donation' : 'donations'} recorded. Click to view details.`
+    : loading
+    ? 'Loading charity tracker'
+    : 'Charity Tracker card'
+
   return (
     <ProtectedFeature
       title="Charity Tracker"
       description="Sign in to track your sadaqah and zakat donations"
     >
-      <Link href="/charity" className="block">
-        <Card className="rounded-2xl shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+      <Link href="/charity" className="block" aria-label={cardAriaLabel}>
+        <Card className="rounded-2xl shadow-sm hover:shadow-md transition-shadow cursor-pointer" role="article">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <Heart className="h-4 w-4 text-muted-foreground" />
+              <Heart className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Charity Tracker
               </CardTitle>
@@ -33,13 +39,14 @@ export function CharityCard() {
           </CardHeader>
           <CardContent className="space-y-3">
             {loading && (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              <div className="flex items-center justify-center py-4" role="status">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
+                <span className="sr-only">Loading charity data...</span>
               </div>
             )}
 
             {error && !loading && (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3" role="alert" aria-live="polite">
                 <div>
                   <p className="text-xs text-muted-foreground">This Ramadan</p>
                   <p className="text-xl font-semibold">$0.00</p>
@@ -55,12 +62,12 @@ export function CharityCard() {
               <>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <p className="text-xs text-muted-foreground">This Ramadan</p>
-                    <p className="text-xl font-semibold">{formatCurrency(summary.ramadanTotal)}</p>
+                    <p className="text-xs text-muted-foreground" id="ramadan-total-label">This Ramadan</p>
+                    <p className="text-xl font-semibold" aria-labelledby="ramadan-total-label">{formatCurrency(summary.ramadanTotal)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">All Time</p>
-                    <p className="text-xl font-semibold">{formatCurrency(summary.allTimeTotal)}</p>
+                    <p className="text-xs text-muted-foreground" id="alltime-total-label">All Time</p>
+                    <p className="text-xl font-semibold" aria-labelledby="alltime-total-label">{formatCurrency(summary.allTimeTotal)}</p>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">

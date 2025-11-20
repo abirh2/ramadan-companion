@@ -102,7 +102,7 @@ describe('HadithCard', () => {
 
     render(<HadithCard />)
 
-    const heartButton = screen.getByRole('button', { name: '' })
+    const heartButton = screen.getByRole('button', { name: /add to favorites/i })
     await userEvent.click(heartButton)
 
     expect(mockToggleFavorite).toHaveBeenCalled()

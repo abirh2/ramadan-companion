@@ -36,11 +36,17 @@ export function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button 
+          variant="outline" 
+          size="sm"
+          aria-label={`User menu for ${displayName}`}
+          title="Open user menu"
+        >
           <User className="h-4 w-4" />
+          <span className="sr-only">User menu</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align="end" className="w-56" aria-label="User menu">
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{displayName}</p>
@@ -52,17 +58,17 @@ export function UserMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleFavorites}>
-          <Heart className="mr-2 h-4 w-4" />
+        <DropdownMenuItem onClick={handleFavorites} role="menuitem">
+          <Heart className="mr-2 h-4 w-4" aria-hidden="true" />
           <span>Favorites</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleProfile}>
-          <Settings className="mr-2 h-4 w-4" />
+        <DropdownMenuItem onClick={handleProfile} role="menuitem">
+          <Settings className="mr-2 h-4 w-4" aria-hidden="true" />
           <span>Profile Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
-          <LogOut className="mr-2 h-4 w-4" />
+        <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive" role="menuitem">
+          <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
           <span>Sign Out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

@@ -136,14 +136,16 @@ export default function CharityPage() {
         <Link 
           href="/" 
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-3"
+          aria-label="Navigate back to homepage"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           <span className="text-sm">Back to Home</span>
         </Link>
         <div className="flex items-center gap-2">
-          <Heart className="h-8 w-8 text-primary" />
+          <Heart className="h-8 w-8 text-primary" aria-hidden="true" />
           <h1 className="text-3xl font-bold">Charity Tracker</h1>
         </div>
+        <p className="text-muted-foreground mt-2">Track your sadaqah, zakat, and charitable contributions</p>
       </div>
 
       <ProtectedFeature
@@ -152,18 +154,19 @@ export default function CharityPage() {
         >
           {/* Loading State */}
           {loading && (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-hidden="true" />
+              <span className="sr-only">Loading charity data...</span>
             </div>
           )}
 
           {/* Error State */}
           {error && !loading && (
-            <Card className="rounded-xl">
+            <Card className="rounded-xl" role="alert" aria-live="assertive">
               <CardContent className="p-6 text-center">
                 <p className="text-destructive mb-2">Failed to load donations</p>
                 <p className="text-sm text-muted-foreground mb-4">{error}</p>
-                <Button onClick={refetch} variant="outline" size="sm">
+                <Button onClick={refetch} variant="outline" size="sm" aria-label="Try loading donations again">
                   Try Again
                 </Button>
               </CardContent>
@@ -174,7 +177,9 @@ export default function CharityPage() {
           {!loading && !error && (
             <div className="space-y-6">
               {/* Currency Controls */}
-              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between p-4 bg-muted/50 rounded-xl">
+              <section aria-labelledby="currency-controls-title">
+                <h2 id="currency-controls-title" className="sr-only">Currency Options</h2>
+                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between p-4 bg-muted/50 rounded-xl">
                 <CurrencyViewToggle
                   value={currencyViewMode}
                   onChange={setCurrencyViewMode}
@@ -184,10 +189,13 @@ export default function CharityPage() {
                   value={preferredCurrency}
                   onChange={setPreferredCurrency}
                 />
-              </div>
+                </div>
+              </section>
 
               {/* Summary Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <section aria-labelledby="donation-summary-title">
+                <h2 id="donation-summary-title" className="sr-only">Donation Summary</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card className="rounded-xl">
                   <CardContent className="p-6">
                     <p className="text-sm text-muted-foreground mb-1">This Ramadan</p>
@@ -221,33 +229,41 @@ export default function CharityPage() {
                     )}
                   </CardContent>
                 </Card>
-              </div>
+                </div>
+              </section>
 
               {/* Actions Bar */}
-              <div className="flex items-center justify-between">
+              <section aria-labelledby="actions-title">
+                <h2 id="actions-title" className="sr-only">Donation Actions</h2>
+                <div className="flex items-center justify-between">
                 <div className="flex gap-2">
                   <Button
                     variant={viewMode === 'calendar' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleViewModeChange('calendar')}
+                    aria-label="Switch to calendar view"
+                    aria-pressed={viewMode === 'calendar'}
                   >
-                    <LayoutGrid className="h-4 w-4 mr-2" />
+                    <LayoutGrid className="h-4 w-4 mr-2" aria-hidden="true" />
                     Calendar
                   </Button>
                   <Button
                     variant={viewMode === 'list' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleViewModeChange('list')}
+                    aria-label="Switch to list view"
+                    aria-pressed={viewMode === 'list'}
                   >
-                    <List className="h-4 w-4 mr-2" />
+                    <List className="h-4 w-4 mr-2" aria-hidden="true" />
                     List
                   </Button>
                 </div>
-                <Button onClick={handleAddDonation}>
-                  <Plus className="h-4 w-4 mr-2" />
+                <Button onClick={handleAddDonation} aria-label="Add a new donation">
+                  <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
                   Add Donation
                 </Button>
-              </div>
+                </div>
+              </section>
 
               {/* Empty State */}
               {isEmpty && (

@@ -29,19 +29,20 @@ export function NextPrayerCard() {
   // Loading state
   if (loading) {
     return (
-      <Link href="/times" className="block">
-        <Card className="rounded-2xl shadow-sm transition-shadow hover:shadow-md">
+      <Link href="/times" className="block" aria-label="Loading next prayer time">
+        <Card className="rounded-2xl shadow-sm transition-shadow hover:shadow-md" role="article" aria-busy="true">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" />
+              <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Next Prayer
               </CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-2 py-6">
-            <div className="flex items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <div className="flex items-center justify-center" role="status">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
+              <span className="sr-only">Loading prayer times...</span>
             </div>
           </CardContent>
         </Card>
@@ -52,11 +53,11 @@ export function NextPrayerCard() {
   // Error state
   if (error) {
     return (
-      <Link href="/times" className="block">
-        <Card className="rounded-2xl shadow-sm transition-shadow hover:shadow-md">
+      <Link href="/times" className="block" aria-label="Unable to load prayer times. Tap to view settings.">
+        <Card className="rounded-2xl shadow-sm transition-shadow hover:shadow-md" role="article" aria-live="polite">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" />
+              <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Next Prayer
               </CardTitle>
@@ -72,19 +73,21 @@ export function NextPrayerCard() {
   }
 
   // Success state
+  const cardAriaLabel = `Next prayer: ${nextPrayer?.name}${nextPrayer?.isTomorrow ? ' tomorrow' : ''} in ${nextPrayer?.countdown}. Scheduled for ${nextPrayer?.time ? formatTime(nextPrayer.time) : ''}. Click to view all prayer times.`
+
   return (
-    <Link href="/times" className="block">
-      <Card className="rounded-2xl shadow-sm cursor-pointer transition-shadow hover:shadow-md">
+    <Link href="/times" className="block" aria-label={cardAriaLabel}>
+      <Card className="rounded-2xl shadow-sm cursor-pointer transition-shadow hover:shadow-md" role="article">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Next Prayer
             </CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-2">
-          <p className="text-2xl font-semibold">
+          <p className="text-2xl font-semibold" aria-live="polite" aria-atomic="true">
             {nextPrayer?.name}{nextPrayer?.isTomorrow ? ' (tomorrow)' : ''} in {nextPrayer?.countdown}
           </p>
           <div className="space-y-0.5">
@@ -93,7 +96,7 @@ export function NextPrayerCard() {
             </p>
             {location && (
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <MapPin className="h-3 w-3" />
+                <MapPin className="h-3 w-3" aria-hidden="true" />
                 <span className="truncate">{location.city}</span>
               </div>
             )}

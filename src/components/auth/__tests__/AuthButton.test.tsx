@@ -47,7 +47,7 @@ describe('AuthButton', () => {
 
     render(<AuthButton />);
     
-    expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /sign in to your account/i })).toBeInTheDocument();
   });
 
   it('shows UserMenu when user is authenticated', () => {

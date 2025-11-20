@@ -3,6 +3,8 @@
 import { useEffect, useRef } from 'react'
 import { useFullSurah } from '@/hooks/useFullSurah'
 import { useQuranBookmarks } from '@/hooks/useQuranBookmarks'
+import { Button } from '@/components/ui/button'
+import { Bookmark } from 'lucide-react'
 import { SurahHeader } from './SurahHeader'
 import { AyahCard } from './AyahCard'
 import { TranslationSelector } from './TranslationSelector'
@@ -17,56 +19,35 @@ interface SurahReaderProps {
 
 export function SurahReader({ surahNumber, surahMetadata, initialAyah }: SurahReaderProps) {
   const { surahData, loading, error, translation, setTranslation } = useFullSurah(surahNumber)
-  const { saveBookmark, getBookmark } = useQuranBookmarks()
+  const { getBookmark } = useQuranBookmarks()
   const ayahRefs = useRef<{ [key: number]: HTMLDivElement | null }>({})
 
-  // Scroll to initial ayah or last bookmark
+  // Get bookmark for current surah
+  const bookmark = getBookmark(surahNumber)
+
+  // Scroll to initial ayah if provided (from Juz/Ayah navigation)
   useEffect(() => {
-    if (!surahData) return
+    if (!surahData || !initialAyah) return
 
-    const targetAyah = initialAyah || getBookmark(surahNumber)?.ayah_number
-
-    if (targetAyah && ayahRefs.current[targetAyah]) {
+    if (ayahRefs.current[initialAyah]) {
       setTimeout(() => {
-        ayahRefs.current[targetAyah]?.scrollIntoView({
+        ayahRefs.current[initialAyah]?.scrollIntoView({
           behavior: 'smooth',
           block: 'center',
         })
       }, 300)
     }
-  }, [surahData, initialAyah, surahNumber, getBookmark])
+  }, [surahData, initialAyah])
 
-  // Auto-save bookmark when scrolling (debounced)
-  useEffect(() => {
-    if (!surahData) return
-
-    const handleScroll = () => {
-      // Find the ayah currently in view
-      const ayahElements = Object.entries(ayahRefs.current)
-      for (const [ayahNum, element] of ayahElements) {
-        if (element) {
-          const rect = element.getBoundingClientRect()
-          if (rect.top >= 0 && rect.top <= window.innerHeight / 2) {
-            // This ayah is in the upper half of the viewport
-            saveBookmark(surahNumber, parseInt(ayahNum))
-            break
-          }
-        }
-      }
+  // Handle Go to Bookmark button click
+  const handleGoToBookmark = () => {
+    if (bookmark && ayahRefs.current[bookmark.ayah_number]) {
+      ayahRefs.current[bookmark.ayah_number]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
     }
-
-    let timeoutId: NodeJS.Timeout
-    const debouncedScroll = () => {
-      clearTimeout(timeoutId)
-      timeoutId = setTimeout(handleScroll, 1000)
-    }
-
-    window.addEventListener('scroll', debouncedScroll)
-    return () => {
-      window.removeEventListener('scroll', debouncedScroll)
-      clearTimeout(timeoutId)
-    }
-  }, [surahData, surahNumber, saveBookmark])
+  }
 
   if (loading) {
     return (
@@ -95,10 +76,23 @@ export function SurahReader({ surahNumber, surahMetadata, initialAyah }: SurahRe
 
       {/* Controls */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-        <TranslationSelector
-          currentTranslation={translation}
-          onTranslationChange={setTranslation}
-        />
+        <div className="flex flex-wrap gap-2 items-center">
+          <TranslationSelector
+            currentTranslation={translation}
+            onTranslationChange={setTranslation}
+          />
+          {bookmark && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleGoToBookmark}
+              className="gap-2"
+            >
+              <Bookmark className="h-4 w-4" />
+              Go to Bookmark (Ayah {bookmark.ayah_number})
+            </Button>
+          )}
+        </div>
         <AyahRangeLookup
           surahNumber={surahNumber}
           totalAyahs={surahMetadata.numberOfAyahs}

@@ -15,10 +15,10 @@ export function PlacesCard() {
   const { nearestFood, loading: foodLoading, error: foodError, distanceUnit: foodDistanceUnit } = useHalalFood()
 
   return (
-    <Card className="rounded-2xl shadow-sm">
+    <Card className="rounded-2xl shadow-sm" role="article" aria-label="Nearby Places: Mosques and Halal Food">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-muted-foreground" />
+          <MapPin className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Nearby Places
           </CardTitle>
@@ -26,18 +26,19 @@ export function PlacesCard() {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="mosques" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-2" aria-label="Nearby places tabs">
             <TabsTrigger value="mosques">Mosques</TabsTrigger>
             <TabsTrigger value="halal-food">Halal Food</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="mosques" className="mt-4 space-y-3">
+          <TabsContent value="mosques" className="mt-4 space-y-3" role="tabpanel">
             {mosquesLoading ? (
-              <div className="flex items-center justify-center py-6">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              <div className="flex items-center justify-center py-6" role="status">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
+                <span className="sr-only">Loading nearby mosques...</span>
               </div>
             ) : mosquesError ? (
-              <div className="text-center py-6">
+              <div className="text-center py-6" role="alert" aria-live="polite">
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Unable to find nearby mosques
                 </p>
@@ -68,11 +69,12 @@ export function PlacesCard() {
                       e.preventDefault()
                       openMapsApp(nearestMosque.lat, nearestMosque.lng, nearestMosque.name)
                     }}
+                    aria-label={`Get directions to ${nearestMosque.name}`}
                   >
-                    <Navigation className="h-3.5 w-3.5 mr-1.5" />
+                    <Navigation className="h-3.5 w-3.5 mr-1.5" aria-hidden="true" />
                     Directions
                   </Button>
-                  <Link href="/places/mosques" className="flex-1">
+                  <Link href="/places/mosques" className="flex-1" aria-label="View all nearby mosques">
                     <Button variant="default" size="sm" className="w-full">
                       View All
                     </Button>
@@ -85,7 +87,7 @@ export function PlacesCard() {
                   No mosques found nearby
                 </p>
                 <Link href="/places/mosques">
-                  <Button variant="outline" size="sm" className="mt-3">
+                  <Button variant="outline" size="sm" className="mt-3" aria-label="Search for mosques in a different area">
                     Search in Different Area
                   </Button>
                 </Link>
@@ -93,13 +95,14 @@ export function PlacesCard() {
             )}
           </TabsContent>
           
-          <TabsContent value="halal-food" className="mt-4 space-y-3">
+          <TabsContent value="halal-food" className="mt-4 space-y-3" role="tabpanel">
             {foodLoading ? (
-              <div className="flex items-center justify-center py-6">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              <div className="flex items-center justify-center py-6" role="status">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
+                <span className="sr-only">Loading halal food places...</span>
               </div>
             ) : foodError ? (
-              <div className="text-center py-6">
+              <div className="text-center py-6" role="alert" aria-live="polite">
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Unable to find halal food places
                 </p>
@@ -135,11 +138,12 @@ export function PlacesCard() {
                       e.preventDefault()
                       openMapsApp(nearestFood.lat, nearestFood.lng, nearestFood.name)
                     }}
+                    aria-label={`Get directions to ${nearestFood.name}`}
                   >
-                    <Navigation className="h-3.5 w-3.5 mr-1.5" />
+                    <Navigation className="h-3.5 w-3.5 mr-1.5" aria-hidden="true" />
                     Directions
                   </Button>
-                  <Link href="/places/food" className="flex-1">
+                  <Link href="/places/food" className="flex-1" aria-label="View all halal food places">
                     <Button variant="default" size="sm" className="w-full">
                       View All
                     </Button>
@@ -152,7 +156,7 @@ export function PlacesCard() {
                   No halal food places found nearby
                 </p>
                 <Link href="/places/food">
-                  <Button variant="outline" size="sm" className="mt-3">
+                  <Button variant="outline" size="sm" className="mt-3" aria-label="Search for halal food in a different area">
                     Search in Different Area
                   </Button>
                 </Link>

@@ -720,11 +720,12 @@ Full Quran browsing experience allowing users to select and read all 114 surahs 
 - `quran_bookmarks` table - Stores reading positions (surah number + ayah number)
   - `user_id` (uuid) - Foreign key to profiles
   - `surah_number` (integer) - Surah being read (1-114)
-  - `ayah_number` (integer) - Last ayah position
-  - `updated_at` (timestamp) - Auto-updated on scroll
+  - `ayah_number` (integer) - Saved ayah position
+  - `updated_at` (timestamp) - Updated when bookmark changed
   - **Unique constraint:** (user_id, surah_number) - One bookmark per surah per user
   - **RLS Policies:** Users can only access their own bookmarks
   - **Dual-storage:** Bookmarks saved to both Supabase (authenticated users) and localStorage (guest users)
+  - **Manual control:** Users explicitly save/remove bookmarks via button clicks
 
 ### UI & Navigation
 
@@ -734,9 +735,12 @@ Full Quran browsing experience allowing users to select and read all 114 surahs 
   - **View Toggle:** Switch between List view and Grid view
   - **Search:** Filter surahs by name, translation, or number
   - **List View:** All 114 surahs with number badge, English/Arabic names, metadata (Meccan/Medinan, ayah count)
+    - **Bookmark badges:** Shows "Bookmark: Ayah X" for bookmarked surahs
   - **Grid View:** Card-based layout with centered Arabic names and metadata
+    - **Bookmark badges:** Shows "Bookmark: Ayah X" for bookmarked surahs
 - **Juz Tab:**
   - 30 Juz cards showing start/end positions (surah:ayah format)
+  - **Bookmark info:** Shows bookmark in start surah if it exists
   - Click to navigate to starting surah at specific ayah
 
 **Surah Reading Page (`/quran/[surahNumber]`):**
@@ -745,6 +749,7 @@ Full Quran browsing experience allowing users to select and read all 114 surahs 
   - Surah info banner: Arabic name, English name, translation, revelation type, ayah count
 - **Controls:**
   - Translation selector dropdown (saves to profile/localStorage)
+  - **Go to Bookmark button:** Appears when bookmark exists, shows "Go to Bookmark (Ayah X)" and scrolls to saved position
   - Ayah range lookup: Jump to specific ayah number with "Go" button
 - **Ayah Display:**
   - Vertical scrollable list of all ayahs in surah
@@ -755,10 +760,17 @@ Full Quran browsing experience allowing users to select and read all 114 surahs 
     - **Action buttons:**
       - **Copy:** Copies Arabic + translation + reference
       - **Favorite:** Adds to favorites (heart icon, shows login modal if unauthenticated)
-      - **Bookmark:** Saves reading position
+      - **Bookmark:** Toggle button to save/remove reading position (filled = bookmarked, outline = not bookmarked)
       - **Share:** Native share API or copy link to specific ayah
-- **Auto-scroll:** Resumes to last bookmarked ayah or jumps to URL-specified ayah
-- **Auto-bookmark:** Saves reading position on scroll (debounced, updates every 1 second)
+- **Navigation Behavior:**
+  - Opening surah always starts at top (predictable)
+  - Juz/Ayah links scroll to specified ayah
+  - User explicitly clicks "Go to Bookmark" button to jump to saved position
+- **Bookmark Management:**
+  - One bookmark per surah (saving new ayah overwrites previous)
+  - Click bookmark button to save current ayah position
+  - Click again on same ayah to remove bookmark
+  - Visual feedback: filled icon when bookmarked, outline when not
 
 **Navigation Menu:**
 - Dropdown menu in header next to AuthButton
@@ -784,13 +796,13 @@ Full Quran browsing experience allowing users to select and read all 114 surahs 
 
 **Components:**
 - `SurahSelector` - Search and view toggle controls
-- `SurahList` - List view of all surahs
-- `SurahGrid` - Grid view of all surahs
-- `JuzList` - 30 Juz cards with navigation
-- `SurahReader` - Main reading interface with scroll tracking
+- `SurahList` - List view of all surahs with bookmark badges
+- `SurahGrid` - Grid view of all surahs with bookmark badges
+- `JuzList` - 30 Juz cards with navigation and bookmark info
+- `SurahReader` - Main reading interface with "Go to Bookmark" button
 - `SurahHeader` - Surah info banner
 - `AyahCard` - Individual ayah display (Arabic + translation)
-- `AyahActions` - Copy/favorite/bookmark/share buttons
+- `AyahActions` - Copy/favorite/bookmark/share buttons (bookmark toggle with visual feedback)
 - `AyahRangeLookup` - Jump to specific ayah
 - `TranslationSelector` - Dropdown for translation selection
 
@@ -827,7 +839,9 @@ interface BookmarkData {
 }
 ```
 
-**V1.1 Status:** ✅ **Complete** (November 2024) - Full surah browser with 114 surahs, Juz navigation, bookmarks, favorites integration, search, multiple views, translation switching, auto-scroll resume, ayah sharing
+**V1.1 Status:** ✅ **Complete** (November 2024) - Full surah browser with 114 surahs, Juz navigation, manual bookmarks with explicit controls, bookmark badges on main page, favorites integration, search, multiple views, translation switching, ayah sharing
+
+**V1.1.1 Update (November 20, 2024):** Bookmark system redesigned for better UX - removed auto-scroll and auto-save, added per-ayah bookmark buttons, "Go to Bookmark" navigation button, and bookmark indicators on main Quran page
 
 **Future Enhancements (V1.2+):**
 - **V1.2:** Reading progress statistics (total ayahs read, completion percentage)

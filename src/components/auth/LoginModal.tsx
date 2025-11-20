@@ -68,64 +68,104 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" aria-labelledby="login-title" aria-describedby="login-description">
         <DialogHeader>
-          <DialogTitle>Welcome</DialogTitle>
-          <DialogDescription>
+          <DialogTitle id="login-title">Welcome</DialogTitle>
+          <DialogDescription id="login-description">
             Sign in to save your charity donations and favorite content
           </DialogDescription>
         </DialogHeader>
 
         <Tabs value={mode} onValueChange={(v) => setMode(v as 'signin' | 'signup')}>
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-2" aria-label="Authentication mode">
             <TabsTrigger value="signin">Sign In</TabsTrigger>
             <TabsTrigger value="signup">Sign Up</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="signin" className="space-y-4">
-            <form onSubmit={handleEmailAuth} className="space-y-3">
-              <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+          <TabsContent value="signin" className="space-y-4" role="tabpanel">
+            <form onSubmit={handleEmailAuth} className="space-y-3" aria-label="Sign in form">
+              <div>
+                <label htmlFor="signin-email" className="sr-only">Email address</label>
+                <Input
+                  id="signin-email"
+                  name="email"
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={loading}
+                  aria-required="true"
+                  autoComplete="email"
+                />
+              </div>
+              <div>
+                <label htmlFor="signin-password" className="sr-only">Password</label>
+                <Input
+                  id="signin-password"
+                  name="password"
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={loading}
+                  aria-required="true"
+                  autoComplete="current-password"
+                />
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full" 
                 disabled={loading}
-              />
-              <Input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={loading}
-              />
-              <Button type="submit" className="w-full" disabled={loading}>
+                aria-label={loading ? 'Signing in, please wait' : 'Sign in'}
+              >
                 {loading ? 'Signing in...' : 'Sign In'}
               </Button>
             </form>
           </TabsContent>
 
-          <TabsContent value="signup" className="space-y-4">
-            <form onSubmit={handleEmailAuth} className="space-y-3">
-              <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+          <TabsContent value="signup" className="space-y-4" role="tabpanel">
+            <form onSubmit={handleEmailAuth} className="space-y-3" aria-label="Sign up form">
+              <div>
+                <label htmlFor="signup-email" className="sr-only">Email address</label>
+                <Input
+                  id="signup-email"
+                  name="email"
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={loading}
+                  aria-required="true"
+                  autoComplete="email"
+                />
+              </div>
+              <div>
+                <label htmlFor="signup-password" className="sr-only">Password (minimum 6 characters)</label>
+                <Input
+                  id="signup-password"
+                  name="password"
+                  type="password"
+                  placeholder="Password (min 6 characters)"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  disabled={loading}
+                  aria-required="true"
+                  aria-describedby="password-requirements"
+                  autoComplete="new-password"
+                />
+                <p id="password-requirements" className="sr-only">Password must be at least 6 characters long</p>
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full" 
                 disabled={loading}
-              />
-              <Input
-                type="password"
-                placeholder="Password (min 6 characters)"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                disabled={loading}
-              />
-              <Button type="submit" className="w-full" disabled={loading}>
+                aria-label={loading ? 'Creating account, please wait' : 'Create account'}
+              >
                 {loading ? 'Creating account...' : 'Sign Up'}
               </Button>
             </form>
@@ -133,7 +173,11 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
         </Tabs>
 
         {error && (
-          <p className={`text-sm ${error.includes('Check your email') ? 'text-green-600' : 'text-destructive'}`}>
+          <p 
+            className={`text-sm ${error.includes('Check your email') ? 'text-green-600' : 'text-destructive'}`}
+            role={error.includes('Check your email') ? 'status' : 'alert'}
+            aria-live="polite"
+          >
             {error}
           </p>
         )}
@@ -154,8 +198,9 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
           onClick={() => handleOAuth('google')}
           disabled={loading}
           className="w-full"
+          aria-label="Continue with Google"
         >
-          <svg className="h-5 w-5" viewBox="0 0 24 24">
+          <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
             <path
               fill="#4285F4"
               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"

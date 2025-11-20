@@ -76,6 +76,14 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
     }
   }, [mode, handleEnableDynamic])
 
+  // Handle keyboard events for mode toggle
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handleToggleMode()
+    }
+  }, [handleToggleMode])
+
   // Start/stop orientation tracking based on mode
   useEffect(() => {
     if (mode === 'dynamic' && canUseDynamicCompass) {
@@ -184,19 +192,25 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
               variant="ghost"
               size="sm"
               onClick={handleToggleMode}
+              onKeyDown={handleKeyDown}
               disabled={isEnabling}
               className="h-7 text-xs"
+              aria-label={mode === 'dynamic' ? 'Switch to static compass mode' : 'Switch to dynamic compass mode'}
+              title={mode === 'dynamic' ? 'Switch to static mode' : 'Switch to dynamic mode'}
             >
               {isEnabling ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
+                <>
+                  <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                  <span className="sr-only">Loading...</span>
+                </>
               ) : mode === 'dynamic' ? (
                 <>
-                  <Compass className="h-3 w-3 mr-1" />
+                  <Compass className="h-3 w-3 mr-1" aria-hidden="true" />
                   Static
                 </>
               ) : (
                 <>
-                  <Navigation className="h-3 w-3 mr-1" />
+                  <Navigation className="h-3 w-3 mr-1" aria-hidden="true" />
                   Dynamic
                 </>
               )}
@@ -227,12 +241,12 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
         {/* Mode Indicator */}
         {mode === 'dynamic' && (
           <div className="mb-3 space-y-2">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <div className={`w-2 h-2 rounded-full ${aligned ? 'bg-green-500 animate-pulse' : 'bg-blue-500'}`} />
+            <div className="flex items-center gap-2 text-xs text-muted-foreground" role="status" aria-live="polite">
+              <div className={`w-2 h-2 rounded-full ${aligned ? 'bg-green-500 animate-pulse' : 'bg-blue-500'}`} aria-hidden="true" />
               <span>{aligned ? 'Aligned with Qibla' : 'Tracking device orientation'}</span>
             </div>
-            <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg">
-              <span className="text-base">📱</span>
+            <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg" role="note">
+              <span className="text-base" aria-hidden="true">📱</span>
               <span className="text-xs font-medium text-blue-800 dark:text-blue-200">
                 Hold phone flat for best results
               </span>
@@ -374,7 +388,7 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
 
         {/* Bearing Information */}
         <div className="mt-4 text-center space-y-1">
-          <p className="text-2xl font-bold text-foreground">
+          <p className="text-2xl font-bold text-foreground" aria-live="polite" aria-atomic="true">
             {bearing.toFixed(1)}° {compassDirection}
           </p>
           <p className="text-xs text-muted-foreground">Direction to Mecca</p>
