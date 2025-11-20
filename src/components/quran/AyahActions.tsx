@@ -3,11 +3,8 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Copy, Heart, Share2, Bookmark, Check } from 'lucide-react'
-import { useQuranBrowserFavorites } from '@/hooks/useQuranBrowserFavorites'
-import { useQuranBookmarks } from '@/hooks/useQuranBookmarks'
-import { useAuth } from '@/hooks/useAuth'
 import { AyahAudioPlayer } from './AyahAudioPlayer'
-import type { QuranReciterId } from '@/types/quran.types'
+import type { QuranReciterId, QuranFavoriteData, BookmarkData } from '@/types/quran.types'
 
 interface AyahActionsProps {
   surahNumber: number
@@ -17,6 +14,12 @@ interface AyahActionsProps {
   arabicText: string
   translationText: string
   reciter: QuranReciterId
+  isFavorited: (ayahNumber: number) => boolean
+  addFavorite: (data: QuranFavoriteData) => Promise<boolean>
+  removeFavorite: (ayahNumber: number) => Promise<boolean>
+  getBookmark: (surahNumber: number) => BookmarkData | undefined
+  saveBookmark: (surahNumber: number, ayahNumber: number) => Promise<boolean>
+  deleteBookmark: (surahNumber: number) => Promise<boolean>
 }
 
 export function AyahActions({
@@ -27,10 +30,13 @@ export function AyahActions({
   arabicText,
   translationText,
   reciter,
+  isFavorited,
+  addFavorite,
+  removeFavorite,
+  getBookmark,
+  saveBookmark,
+  deleteBookmark,
 }: AyahActionsProps) {
-  const { user } = useAuth()
-  const { isFavorited, addFavorite, removeFavorite } = useQuranBrowserFavorites()
-  const { saveBookmark, deleteBookmark, getBookmark } = useQuranBookmarks()
   const [copied, setCopied] = useState(false)
 
   const isFav = isFavorited(globalNumber)

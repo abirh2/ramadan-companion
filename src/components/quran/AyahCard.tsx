@@ -2,16 +2,33 @@
 
 import { Card } from '@/components/ui/card'
 import { AyahActions } from './AyahActions'
-import type { AyahPair, QuranReciterId } from '@/types/quran.types'
+import type { AyahPair, QuranReciterId, QuranFavoriteData, BookmarkData } from '@/types/quran.types'
 
 interface AyahCardProps {
   ayahPair: AyahPair
   surahNumber: number
   surahName: string
   reciter: QuranReciterId
+  isFavorited: (ayahNumber: number) => boolean
+  addFavorite: (data: QuranFavoriteData) => Promise<boolean>
+  removeFavorite: (ayahNumber: number) => Promise<boolean>
+  getBookmark: (surahNumber: number) => BookmarkData | undefined
+  saveBookmark: (surahNumber: number, ayahNumber: number) => Promise<boolean>
+  deleteBookmark: (surahNumber: number) => Promise<boolean>
 }
 
-export function AyahCard({ ayahPair, surahNumber, surahName, reciter }: AyahCardProps) {
+export function AyahCard({ 
+  ayahPair, 
+  surahNumber, 
+  surahName, 
+  reciter,
+  isFavorited,
+  addFavorite,
+  removeFavorite,
+  getBookmark,
+  saveBookmark,
+  deleteBookmark
+}: AyahCardProps) {
   const { arabic, transliteration, translation, numberInSurah, globalNumber } = ayahPair
 
   return (
@@ -55,6 +72,12 @@ export function AyahCard({ ayahPair, surahNumber, surahName, reciter }: AyahCard
         arabicText={arabic.text}
         translationText={translation.text}
         reciter={reciter}
+        isFavorited={isFavorited}
+        addFavorite={addFavorite}
+        removeFavorite={removeFavorite}
+        getBookmark={getBookmark}
+        saveBookmark={saveBookmark}
+        deleteBookmark={deleteBookmark}
       />
     </Card>
   )

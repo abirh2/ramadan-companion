@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useFullSurah } from '@/hooks/useFullSurah'
 import { useQuranBookmarks } from '@/hooks/useQuranBookmarks'
+import { useQuranBrowserFavorites } from '@/hooks/useQuranBrowserFavorites'
 import { Button } from '@/components/ui/button'
 import { Bookmark, ArrowUp } from 'lucide-react'
 import { SurahHeader } from './SurahHeader'
@@ -22,7 +23,8 @@ interface SurahReaderProps {
 
 export function SurahReader({ surahNumber, surahMetadata, initialAyah }: SurahReaderProps) {
   const { surahData, loading, error, translation, setTranslation } = useFullSurah(surahNumber)
-  const { getBookmark } = useQuranBookmarks()
+  const { getBookmark, saveBookmark, deleteBookmark } = useQuranBookmarks()
+  const { isFavorited, addFavorite, removeFavorite } = useQuranBrowserFavorites()
   const ayahRefs = useRef<{ [key: number]: HTMLDivElement | null }>({})
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [reciter, setReciter] = useState<QuranReciterId>(DEFAULT_RECITER)
@@ -140,6 +142,12 @@ export function SurahReader({ surahNumber, surahMetadata, initialAyah }: SurahRe
               surahNumber={surahNumber}
               surahName={surahMetadata.englishName}
               reciter={reciter}
+              isFavorited={isFavorited}
+              addFavorite={addFavorite}
+              removeFavorite={removeFavorite}
+              getBookmark={getBookmark}
+              saveBookmark={saveBookmark}
+              deleteBookmark={deleteBookmark}
             />
           </div>
         ))}
