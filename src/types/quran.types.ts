@@ -181,3 +181,49 @@ export type QuranReciterId =
   | 'ar.mahermuaiqly'       // Maher Al Muaiqly
   | 'ar.minshawi'           // Muhammad Siddiq Al-Minshawi
 
+// Tafsir Types (V1.2)
+
+// Translated name structure from Quran.com API
+export interface TafsirTranslatedName {
+  name: string
+  language_name: string
+}
+
+// Tafsir resource definition from Quran.com API
+export interface TafsirResource {
+  id: number
+  name: string
+  author_name: string
+  slug: string
+  language_name: string
+  translated_name: TafsirTranslatedName
+}
+
+// Response from Quran.com API for tafsir list
+export interface QuranComTafsirListResponse {
+  tafsirs: TafsirResource[]
+}
+
+// Tafsir content from Quran.com API
+export interface TafsirContent {
+  verses: {
+    [key: string]: {
+      id: number
+    }
+  }
+  resource_id: number
+  resource_name: string
+  language_id: number
+  slug: string
+  translated_name: TafsirTranslatedName
+  text: string // HTML formatted text
+}
+
+// Response from Quran.com API for tafsir content
+export interface QuranComTafsirContentResponse {
+  tafsir: TafsirContent
+}
+
+// Default tafsir ID (Ibn Kathir - English)
+export const DEFAULT_TAFSIR_ID = 169
+

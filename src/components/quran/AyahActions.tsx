@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Copy, Heart, Share2, Bookmark, Check } from 'lucide-react'
+import { Copy, Heart, Share2, Bookmark, Check, BookOpen } from 'lucide-react'
 import { AyahAudioPlayer } from './AyahAudioPlayer'
+import { TafsirDialog } from './TafsirDialog'
 import type { QuranReciterId, QuranFavoriteData, BookmarkData } from '@/types/quran.types'
 
 interface AyahActionsProps {
@@ -38,6 +39,7 @@ export function AyahActions({
   deleteBookmark,
 }: AyahActionsProps) {
   const [copied, setCopied] = useState(false)
+  const [tafsirOpen, setTafsirOpen] = useState(false)
 
   const isFav = isFavorited(globalNumber)
   
@@ -146,6 +148,20 @@ export function AyahActions({
         <Share2 className="h-4 w-4 mr-2" />
         Share
       </Button>
+
+      <Button variant="outline" size="sm" onClick={() => setTafsirOpen(true)}>
+        <BookOpen className="h-4 w-4 mr-2" />
+        Tafsir
+      </Button>
+
+      {/* Tafsir Dialog */}
+      <TafsirDialog
+        open={tafsirOpen}
+        onOpenChange={setTafsirOpen}
+        surahNumber={surahNumber}
+        surahName={surahName}
+        ayahNumber={ayahNumber}
+      />
     </div>
   )
 }

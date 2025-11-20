@@ -372,14 +372,181 @@ The Quran reader includes a manual bookmarking system that allows users to save 
 - **Solution:** Removed auto-scroll behavior, made bookmarking explicit and user-controlled
 - **Result:** Predictable navigation, no unwanted auto-scrolling
 
+## Tafsir (Commentary) Integration
+
+**Date Implemented:** November 20, 2024
+
+### Overview
+
+Successfully implemented tafsir (scholarly commentary) feature allowing users to read explanations and context for each Quran ayah. The feature integrates Quran.com API to provide access to 20+ tafsir resources in multiple languages.
+
+### Implementation Details
+
+**API Integration:**
+- **External API:** Quran.com API v4
+- **Tafsir List Endpoint:** `GET https://api.quran.com/api/v4/resources/tafsirs`
+- **Tafsir Content Endpoint:** `GET https://api.quran.com/api/v4/tafsirs/{id}/by_ayah/{surah}:{ayah}`
+- **Caching Strategy:** 7-day server-side cache for both endpoints (static content)
+
+**Next.js API Routes:**
+1. `/api/quran/tafsirs/route.ts` - Proxies tafsir list endpoint
+2. `/api/quran/tafsirs/[id]/[surah]/[ayah]/route.ts` - Proxies tafsir content with validation
+
+**TypeScript Types (quran.types.ts):**
+```typescript
+interface TafsirResource {
+  id: number
+  name: string
+  author_name: string
+  slug: string
+  language_name: string
+  translated_name: TafsirTranslatedName
+}
+
+interface TafsirContent {
+  verses: { [key: string]: { id: number } }
+  resource_id: number
+  resource_name: string
+  language_id: number
+  slug: string
+  translated_name: TafsirTranslatedName
+  text: string // HTML formatted
+}
+
+const DEFAULT_TAFSIR_ID = 169 // Ibn Kathir (Abridged)
+```
+
+**Custom Hook (useTafsir.ts):**
+- Fetches tafsir list on mount
+- Manages selected tafsir ID (session-only state)
+- Fetches tafsir content for specific ayah
+- Handles loading and error states
+- Provides `clearContent()` function for cleanup
+
+**UI Components:**
+
+1. **TafsirDialog (TafsirDialog.tsx):**
+   - Modal dialog with ayah reference in title
+   - Dropdown selector for tafsir source selection
+   - Grouped by language (English first, then alphabetically)
+   - HTML content rendering with prose styling
+   - Loading and error states
+   - Keyboard accessible (Escape to close)
+
+2. **Integration (AyahActions.tsx):**
+   - Added "Tafsir" button with BookOpen icon
+   - Button opens TafsirDialog
+   - Passes surah number, surah name, and ayah number to dialog
+
+**User Experience:**
+- Click "Tafsir" button on any ayah card
+- Dialog opens with Ibn Kathir commentary (default)
+- Dropdown allows switching between 20+ tafsir sources
+- Tafsirs grouped by language (English, Arabic, Bengali, Turkish, etc.)
+- Content fetches automatically when dialog opens or tafsir changes
+- Selection persists for current session only
+- Close with X button or Escape key
+
+**Tafsir Sources Available:**
+- **English:** Ibn Kathir (Abridged), Tafsir al-Jalalayn, Maarif-ul-Quran
+- **Arabic:** Tafsir Muyassar, Al-Tafsir al-Wasit, Tafsir Ibn Kathir (full)
+- **Bengali:** Tafsir Ahsanul Bayaan, Tafsir Abu Bakr Zakaria, Tafsir Fathul Majid
+- **Turkish:** Diyanet İşleri, Elmalılı Hamdi Yazır
+- **Urdu, Indonesian, and more** (20+ total)
+
+### Files Created/Modified
+
+**Created (7 files):**
+1. `src/app/api/quran/tafsirs/route.ts` - Tafsir list API route
+2. `src/app/api/quran/tafsirs/[id]/[surah]/[ayah]/route.ts` - Tafsir content API route
+3. `src/hooks/useTafsir.ts` - Custom hook for tafsir data management
+4. `src/components/quran/TafsirDialog.tsx` - Dialog component
+5. `src/components/quran/__tests__/TafsirDialog.test.tsx` - Component tests
+6. `src/hooks/__tests__/useTafsir.test.tsx` - Hook tests
+
+**Modified (2 files):**
+1. `src/types/quran.types.ts` - Added tafsir-related types
+2. `src/components/quran/AyahActions.tsx` - Added tafsir button integration
+
+**Documentation Updated:**
+1. `docs/features.md` - Added tafsir feature specification
+2. `docs/quran-implementation.md` - This document
+
+### Testing
+
+**Test Coverage:**
+- **Component Tests:** 9 tests for TafsirDialog
+- **Hook Tests:** 7 tests for useTafsir
+- **Total:** 16 tests passing ✅
+
+**Test Scenarios:**
+- Dialog rendering (open/closed states)
+- Tafsir content display
+- Tafsir selector functionality
+- Language grouping logic
+- Content fetching on dialog open
+- Content clearing on dialog close
+- Tafsir selection changes
+- Loading and error states
+- Accessibility attributes
+
+### Technical Decisions
+
+**Session-Only Persistence:**
+- Tafsir selection persists for current session only (similar to reciter preference)
+- No localStorage or database persistence
+- Simplifies implementation and reduces storage complexity
+- Users can easily try different tafsirs without affecting saved preferences
+
+**HTML Content Rendering:**
+- Quran.com API returns tafsir text as HTML
+- Rendered using `dangerouslySetInnerHTML` with prose styling
+- HTML is from trusted source (Quran.com API)
+- Provides rich formatting (headings, paragraphs, lists)
+
+**Language Grouping:**
+- Tafsirs grouped by `language_name` field from API
+- English group displayed first for primary audience
+- Other languages sorted alphabetically
+- Improves UX for multilingual users
+
+**Caching Strategy:**
+- 7-day cache for tafsir list (rarely changes)
+- 7-day cache for tafsir content (static scholarly content)
+- Reduces API calls and improves performance
+- Next.js ISR handles cache invalidation
+
+### Success Criteria - ALL MET ✅
+
+- ✅ Tafsir button appears on every ayah card
+- ✅ Clicking button opens dialog with Ibn Kathir tafsir (default)
+- ✅ Dialog includes selector to switch between available tafsirs
+- ✅ Tafsir content displays with proper HTML formatting
+- ✅ Tafsirs grouped by language with English first
+- ✅ Loading states show during fetch
+- ✅ Error states display helpful messages
+- ✅ Dialog is keyboard accessible (Escape to close)
+- ✅ Tests pass with good coverage (16 tests)
+- ✅ Documentation reflects actual implementation
+- ✅ API routes properly cache responses
+- ✅ Session-only state management works correctly
+
+### Future Enhancements
+
+- [ ] Tafsir preference persistence (localStorage + profile)
+- [ ] Copy tafsir text to clipboard
+- [ ] Print/export tafsir for offline reading
+- [ ] Search within tafsir text
+- [ ] Cross-reference between tafsirs (compare views)
+- [ ] Font size adjustment for tafsir text
+- [ ] Bookmark/favorite specific tafsir passages
+
 ## Future Enhancements (Out of V1 Scope)
 
 - [ ] Hadith of the Day implementation (using Sunnah.com API)
 - [ ] Search Quran by surah/ayah number
 - [ ] Category filters for favorites
 - [ ] Share to social media (not just clipboard)
-- [ ] Audio recitation integration
-- [ ] Tafsir (commentary) integration
 - [ ] Edit notes on favorite items
 - [ ] Export favorites to PDF/JSON
 - [ ] Bookmark notes/annotations

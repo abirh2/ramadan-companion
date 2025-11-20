@@ -897,9 +897,64 @@ interface BookmarkData {
 - **V1.3:** Background playback using Service Worker
 - **V1.3:** Download audio for offline listening
 
+### Tafsir (Commentary) Integration (V1.2)
+
+**Status:** ✅ **Complete** (November 2024)
+
+**Functionality:**
+- **Per-ayah tafsir button:** Each ayah card includes a "Tafsir" button to view scholarly commentary
+- **Multiple tafsir sources:** Dropdown selector with 20+ tafsir resources from Quran.com API
+- **Multilingual support:** Tafsirs available in English, Arabic, Bengali, Turkish, Urdu, and more
+- **Grouped by language:** Selector groups tafsirs by language with English first
+- **Default tafsir:** Ibn Kathir (Abridged) - ID 169
+- **Session-only persistence:** Tafsir selection persists for current session (similar to reciter)
+
+**Available Tafsirs (Sample):**
+- **English:** Ibn Kathir (Abridged), Tafsir al-Jalalayn, Maarif-ul-Quran
+- **Arabic:** Tafsir Muyassar, Al-Tafsir al-Wasit, Tafsir Ibn Kathir
+- **Bengali:** Tafsir Ahsanul Bayaan, Tafsir Abu Bakr Zakaria, Tafsir Fathul Majid
+- **Turkish:** Diyanet İşleri, Elmalılı Hamdi Yazır
+- And more...
+
+**API & Data:**
+- **Quran.com API:** `https://api.quran.com/api/v4/resources/tafsirs` (list)
+- **Tafsir Content:** `https://api.quran.com/api/v4/tafsirs/{id}/by_ayah/{surah}:{ayah}`
+- **Caching:** 7-day server-side cache for both list and content
+- **Format:** HTML-formatted text with proper semantic markup
+
+**UI/UX:**
+- **Dialog presentation:** Tafsir opens in a modal dialog with ayah reference in title
+- **Content display:** HTML-formatted text with proper typography (prose styling)
+- **Loading states:** Shows "Loading tafsir..." during fetch
+- **Error handling:** User-friendly error messages for API failures
+- **Accessibility:** Keyboard navigation (Escape to close), ARIA labels, focus management
+
+**User Flow:**
+1. Open any surah in Quran Browser (`/quran/[surahNumber]`)
+2. Click "Tafsir" button on any ayah card
+3. Dialog opens with Ibn Kathir commentary (default)
+4. Use dropdown to switch between different tafsir sources
+5. Tafsir content updates immediately
+6. Selection persists for current session
+7. Close dialog with X button or Escape key
+
+**Implementation:**
+- **Types:** `TafsirResource`, `TafsirContent`, `QuranComTafsirListResponse` in `quran.types.ts`
+- **API Routes:** `/api/quran/tafsirs` (list), `/api/quran/tafsirs/[id]/[surah]/[ayah]` (content)
+- **Hook:** `useTafsir` - manages list fetching, content fetching, and selection state
+- **Component:** `TafsirDialog` - dialog with selector and content display
+- **Integration:** Added to `AyahActions` component (BookOpen icon from lucide-react)
+- **Tests:** 16 tests passing (9 component + 7 hook tests)
+
+**Future Enhancements (V1.3+):**
+- **V1.3:** Tafsir preference persistence (localStorage + profile)
+- **V1.3:** Copy tafsir text to clipboard
+- **V1.3:** Print/export tafsir for offline reading
+- **V1.3:** Search within tafsir text
+- **V1.3:** Cross-reference between tafsirs (compare views)
+
 **Future Enhancements (V1.2+):**
 - **V1.2:** Reading progress statistics (total ayahs read, completion percentage)
-- **V1.2:** Tafsir (commentary) integration for each ayah
 - **V1.2:** Word-by-word translation view
 - **V1.2:** Night reading mode with adjusted colors
 - **V1.2:** Ayah-level notes and reflections
