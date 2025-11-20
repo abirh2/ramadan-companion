@@ -7,7 +7,7 @@
  * - Guest users: Saved to localStorage only
  */
 
-import { supabase } from './supabaseClient'
+import { createClient } from './supabase/client'
 import type { BookmarkData } from '@/types/quran.types'
 
 const BOOKMARKS_STORAGE_KEY = 'ramadan-companion-quran-bookmarks'
@@ -20,6 +20,7 @@ export async function getBookmarks(userId?: string): Promise<BookmarkData[]> {
   // For authenticated users, try Supabase first
   if (userId) {
     try {
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('quran_bookmarks')
         .select('*')
@@ -27,7 +28,12 @@ export async function getBookmarks(userId?: string): Promise<BookmarkData[]> {
         .order('updated_at', { ascending: false })
       
       if (error) {
-        console.error('Error fetching bookmarks from Supabase:', error)
+        console.error('Error fetching bookmarks from Supabase:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        })
         // Fall through to localStorage
       } else if (data) {
         return data
@@ -80,6 +86,7 @@ export async function saveBookmark(
     try {
       console.log('Attempting to save bookmark to Supabase:', { userId, surahNumber, ayahNumber })
       
+      const supabase = createClient()
       // Upsert: Insert or update if exists (based on user_id + surah_number unique constraint)
       const { data, error } = await supabase
         .from('quran_bookmarks')
@@ -169,6 +176,7 @@ export async function deleteBookmark(
   // Delete from Supabase if authenticated
   if (userId) {
     try {
+      const supabase = createClient()
       const { error } = await supabase
         .from('quran_bookmarks')
         .delete()
@@ -176,7 +184,12 @@ export async function deleteBookmark(
         .eq('surah_number', surahNumber)
       
       if (error) {
-        console.error('Error deleting bookmark from Supabase:', error)
+        console.error('Error deleting bookmark from Supabase:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        })
         return { success: false, error: error.message }
       }
     } catch (err) {
@@ -211,13 +224,19 @@ export async function clearAllBookmarks(
   // Clear from Supabase if authenticated
   if (userId) {
     try {
+      const supabase = createClient()
       const { error } = await supabase
         .from('quran_bookmarks')
         .delete()
         .eq('user_id', userId)
       
       if (error) {
-        console.error('Error clearing bookmarks from Supabase:', error)
+        console.error('Error clearing bookmarks from Supabase:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        })
         return { success: false, error: error.message }
       }
     } catch (err) {

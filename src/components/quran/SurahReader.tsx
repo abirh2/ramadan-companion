@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useFullSurah } from '@/hooks/useFullSurah'
 import { useQuranBookmarks } from '@/hooks/useQuranBookmarks'
 import { Button } from '@/components/ui/button'
-import { Bookmark } from 'lucide-react'
+import { Bookmark, ArrowUp } from 'lucide-react'
 import { SurahHeader } from './SurahHeader'
 import { AyahCard } from './AyahCard'
 import { TranslationSelector } from './TranslationSelector'
@@ -21,6 +21,7 @@ export function SurahReader({ surahNumber, surahMetadata, initialAyah }: SurahRe
   const { surahData, loading, error, translation, setTranslation } = useFullSurah(surahNumber)
   const { getBookmark } = useQuranBookmarks()
   const ayahRefs = useRef<{ [key: number]: HTMLDivElement | null }>({})
+  const [showScrollTop, setShowScrollTop] = useState(false)
 
   // Get bookmark for current surah
   const bookmark = getBookmark(surahNumber)
@@ -39,6 +40,16 @@ export function SurahReader({ surahNumber, surahMetadata, initialAyah }: SurahRe
     }
   }, [surahData, initialAyah])
 
+  // Show/hide scroll-to-top button based on scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400)
+    }
+    
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   // Handle Go to Bookmark button click
   const handleGoToBookmark = () => {
     if (bookmark && ayahRefs.current[bookmark.ayah_number]) {
@@ -47,6 +58,14 @@ export function SurahReader({ surahNumber, surahMetadata, initialAyah }: SurahRe
         block: 'center',
       })
     }
+  }
+
+  // Handle scroll to top button click
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    })
   }
 
   if (loading) {
@@ -116,6 +135,18 @@ export function SurahReader({ surahNumber, surahMetadata, initialAyah }: SurahRe
           </div>
         ))}
       </div>
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <Button
+          onClick={scrollToTop}
+          size="icon"
+          className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-40 h-12 w-12 rounded-full shadow-lg transition-opacity"
+          aria-label="Scroll to top"
+        >
+          <ArrowUp className="h-5 w-5" />
+        </Button>
+      )}
     </div>
   )
 }

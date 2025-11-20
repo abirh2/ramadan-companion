@@ -43,7 +43,12 @@ export async function addQuranFavorite(
     })
 
     if (error) {
-      console.error('Error adding favorite:', error)
+      console.error('Error adding favorite:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      })
       return { success: false, error: error.message }
     }
 
@@ -75,7 +80,12 @@ export async function removeQuranFavorite(
       .eq('source_id', ayahNumber.toString())
 
     if (error) {
-      console.error('Error removing favorite:', error)
+      console.error('Error removing favorite:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      })
       return { success: false, error: error.message }
     }
 
@@ -108,7 +118,12 @@ export async function checkIsQuranFavorited(
       .maybeSingle()
 
     if (error) {
-      console.error('Error checking favorite:', error)
+      console.error('Error checking favorite:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      })
       return { isFavorited: false, error: error.message }
     }
 
@@ -140,13 +155,18 @@ export async function getFavorites(
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('Error fetching favorites:', error)
+      console.error('Error fetching favorites:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      })
       return { favorites: [], error: error.message }
     }
 
     return { favorites: data || [] }
   } catch (error) {
-    console.error('Error fetching favorites:', error)
+    console.error('Error fetching favorites (catch):', error)
     return {
       favorites: [],
       error: error instanceof Error ? error.message : 'Failed to fetch favorites',
@@ -185,7 +205,12 @@ export async function addHadithFavorite(
     })
 
     if (error) {
-      console.error('Error adding hadith favorite:', error)
+      console.error('Error adding hadith favorite:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      })
       return { success: false, error: error.message }
     }
 
@@ -218,7 +243,12 @@ export async function removeHadithFavorite(
       .eq('source_id', `${bookSlug}:${hadithNumber}`)
 
     if (error) {
-      console.error('Error removing hadith favorite:', error)
+      console.error('Error removing hadith favorite:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      })
       return { success: false, error: error.message }
     }
 
@@ -252,7 +282,12 @@ export async function checkIsHadithFavorited(
       .maybeSingle()
 
     if (error) {
-      console.error('Error checking hadith favorite:', error)
+      console.error('Error checking hadith favorite:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      })
       return { isFavorited: false, error: error.message }
     }
 

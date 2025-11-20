@@ -3,7 +3,7 @@
  * Handles anonymous and authenticated user feedback
  */
 
-import { supabase } from './supabaseClient'
+import { createClient } from './supabase/client'
 import type { FeedbackSubmission, FeedbackSubmissionResult } from '@/types/feedback.types'
 
 /**
@@ -29,6 +29,7 @@ export async function submitFeedback(
     }
 
     // Insert feedback into Supabase
+    const supabase = createClient()
     const { error } = await supabase
       .from('feedback')
       .insert(feedbackData)
