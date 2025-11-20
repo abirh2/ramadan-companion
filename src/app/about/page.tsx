@@ -210,35 +210,43 @@ function AboutContent() {
                 </div>
 
                 <div>
-                  <h3 className="font-semibold mb-2">Key Features (V1)</h3>
+                  <h3 className="font-semibold mb-2">Key Features (V1.1)</h3>
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">•</span>
-                      <span><strong className="text-foreground">Prayer Times & Qibla:</strong> Accurate prayer times based on your location with multiple calculation methods</span>
+                      <span><strong className="text-foreground">Prayer Times & Qibla:</strong> Accurate prayer times with multiple calculation methods and Qibla compass</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">•</span>
-                      <span><strong className="text-foreground">Ramadan Countdown:</strong> Track days until Ramadan and view Hijri calendar</span>
+                      <span><strong className="text-foreground">Prayer Notifications:</strong> Browser notifications at exact prayer times with hadith quotes</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">•</span>
-                      <span><strong className="text-foreground">Quran & Hadith:</strong> Daily inspirational verses and authentic hadith with translations</span>
+                      <span><strong className="text-foreground">Prayer Tracking:</strong> Track daily prayers with historical analytics and charts</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">•</span>
-                      <span><strong className="text-foreground">Charity Tracker:</strong> Log and track your sadaqah and zakat donations</span>
+                      <span><strong className="text-foreground">Full Quran Browser:</strong> Browse 114 surahs with bookmarks, translations, and search</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">•</span>
-                      <span><strong className="text-foreground">Zikr Counter:</strong> Digital tasbih with customizable phrases and duas</span>
+                      <span><strong className="text-foreground">Daily Quran & Hadith:</strong> Inspirational verses and authentic hadith with translations</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">•</span>
-                      <span><strong className="text-foreground">Places Finder:</strong> Locate nearby mosques and halal restaurants</span>
+                      <span><strong className="text-foreground">Charity Tracker:</strong> Full donation management with charts and zakat calculator</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">•</span>
-                      <span><strong className="text-foreground">Favorites:</strong> Save your favorite Quran verses and hadiths</span>
+                      <span><strong className="text-foreground">Zikr & Duas:</strong> Digital tasbih with 20 categorized duas and goal tracking</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary mt-1">•</span>
+                      <span><strong className="text-foreground">Places Finder:</strong> Locate nearby mosques and halal restaurants with maps</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary mt-1">•</span>
+                      <span><strong className="text-foreground">PWA Support:</strong> Install as native app on iOS, Android, and Desktop</span>
                     </li>
                   </ul>
                 </div>
@@ -281,10 +289,11 @@ function AboutContent() {
                 </div>
 
                 <div>
-                  <h3 className="font-semibold mb-2">Future Roadmap</h3>
+                  <h3 className="font-semibold mb-2">Future Roadmap (V1.2+)</h3>
                   <p className="text-sm text-muted-foreground">
-                    Planned features include prayer notifications, Quran audio recitation, advanced zikr tracking, 
-                    and community features for sharing reflections and charitable opportunities.
+                    Planned features include Quran audio recitation with multiple reciters, hadith browser with 6 major collections, 
+                    tafsir commentary, Islamic calendar, performance optimizations, and community features for sharing reflections 
+                    and charitable opportunities.
                   </p>
                 </div>
               </CardContent>

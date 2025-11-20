@@ -62,7 +62,7 @@ None (Supabase Auth handles all authentication)
 
 **V1 Status:** ✅ **Complete** (November 2024) - Email/password + Google OAuth, profile management, protected routes, RLS security  
 
-**Future Enhancements (V1.1+):**
+**Future Enhancements (V1.2+):**
 - **V1.3:** Profile picture upload (Supabase Storage)
 - **V1.3:** Password reset flow (Supabase Auth recovery)
 - **V1.3:** Email verification
@@ -96,9 +96,9 @@ Centralized view of daily information and quick access to all modules.
 
 **V1 Status:** ✅ **Complete** (November 2024) - Ramadan (hero), Next Prayer, Quran, Hadith, Charity, Places (mosques + halal food), Zikr, Admin (for admin users)
 
-**Future Enhancements (V1.1+):**
-- **V1.1:** Prayer time integration with mosque listings
-- **V1.1:** Saved favorites for places
+**Future Enhancements (V1.2+):**
+- **V1.2:** Prayer time integration with mosque listings
+- **V1.2:** Saved favorites for places
 - **V1.3:** User reviews and ratings for mosques/restaurants
 - **V2.0:** Community feed with shared content
 
@@ -277,8 +277,8 @@ Display accurate prayer times and Qibla direction based on user location with ci
 
 **V1 Status:** ✅ **Complete** (November 2024) - Daily times, countdown, Qibla compass (static + dynamic), city selection, location display, automatic fallback calculation, 7 calculation methods, madhab support
 
-**Future Enhancements (V1.1+):**
-- **V1.1:** Prayer time notifications (Web Push API)
+**Future Enhancements (V1.2+):**
+- **V1.2:** Advanced notification settings (custom sounds, vibration patterns)
 - **V1.2:** Monthly/weekly prayer time calendar view
 - **V1.3:** Advanced calculation options (higher latitude methods, manual time tuning)
 - **V2.0:** Prayer time analytics and insights
@@ -491,7 +491,7 @@ Show countdown until Ramadan starts, and during Ramadan show iftar/suhoor timers
 
 **V1 Status:** ✅ **Complete** (November 2024) - Countdown display, Hijri offset setting, detailed timer format, browser timezone auto-detection, iftar/suhoor timers
 
-**Future Enhancements (V1.1+):**
+**Future Enhancements (V1.2+):**
 - **V1.2:** Full Hijri calendar view (month/year display)
 - **V1.2:** Important Islamic dates (Eid, Laylat al-Qadr, Ashura, Day of Arafah)
 - **V1.2:** Historical event annotations
@@ -1090,11 +1090,10 @@ Supabase `donations` table with RLS policies.
 
 **V1 Status:** ✅ **Complete** (November 2024) - Full CRUD, monthly tracking (calendar/list views), charts (line/bar/pie), zakat calculator, dashboard integration, auth protection, RLS enforcement, This Ramadan/This Year/All Time summaries
 
-**Future Enhancements (V1.1+):**
-- **V1.1:** Recurring donation tracking (monthly/yearly recurring commitments)
-- **V1.1:** Multi-currency support with live conversion (USD, EUR, GBP, CAD)
-- **V1.1:** CSV export for tax purposes
-- **V1.1:** Enhanced donation insights (trends, patterns, comparisons)
+**Future Enhancements (V1.2+):**
+- **V1.2:** Recurring donation tracking (monthly/yearly recurring commitments)
+- **V1.2:** CSV export for tax purposes
+- **V1.2:** Enhanced donation insights (trends, patterns, comparisons)
 - **V1.3:** Email receipts for donations
 - **V1.3:** Tax year summaries (fiscal year support)
 - **V2.0:** Charity recommendations database with ratings
@@ -1300,8 +1299,8 @@ shouldReset = (currentTime > todaysFajr) && (lastResetDate < today)
 
 **V1 Status:** ✅ **Complete** (November 2024) - Tasbeeh counter (5 phrases), goal tracking, Fajr auto-reset, audio/haptic feedback, 20 duas (8 categories), dashboard integration, free count mode, custom targets
 
-**Future Enhancements (V1.1+):**
-- **V1.1:** Expanded dua library (50 → 100+ duas with new categories)
+**Future Enhancements (V1.2+):**
+- **V1.2:** Expanded dua library (50 → 100+ duas with new categories)
 - **V1.2:** Expanded dhikr tracking (wird programs, Salawat, Istighfar counters)
 - **V1.2:** Dua audio pronunciations
 - **V1.2:** Dua search and filtering by category
@@ -1431,9 +1430,9 @@ This fixes the bug where moving locations within the same city (e.g., Bronx → 
 
 **V1 Status:** ✅ **Complete** (November 2024) - OpenStreetMap integration, interactive map (MapLibre GL), list view with distance sorting, location search (Nominatim), distance unit toggle (mi/km), directions (platform-aware), detail dialog with full info
 
-**Future Enhancements (V1.1+):**
-- **V1.1:** Save favorite mosques (Supabase favorites table)
-- **V1.1:** Prayer time integration (show next prayer time for each mosque)
+**Future Enhancements (V1.2+):**
+- **V1.2:** Save favorite mosques (Supabase favorites table)
+- **V1.2:** Prayer time integration (show next prayer time for each mosque)
 - **V1.3:** User reviews and ratings (facilities, cleanliness, programs)
 - **V1.3:** Photo uploads (community contributions)
 - **V1.3:** Facility filters (wheelchair access, parking, women's section)
@@ -1607,8 +1606,8 @@ This fixes the bug where moving locations within the same city (e.g., Bronx → 
 
 **V1 Status:** ✅ **Complete** (November 2024) - Geoapify integration, triple search strategy (sequential for quota conservation), interactive map (MapLibre GL), list view with distance sorting, location search, distance unit toggle (mi/km), directions, cuisine display, facility badges
 
-**Future Enhancements (V1.1+):**
-- **V1.1:** Save favorite restaurants (Supabase favorites table)
+**Future Enhancements (V1.2+):**
+- **V1.2:** Save favorite restaurants (Supabase favorites table)
 - **V1.3:** User reviews and ratings (food quality, halal certification verification)
 - **V1.3:** Photo uploads (food, restaurant interior)
 - **V1.3:** Dietary filters (vegan, gluten-free, nut-free)
@@ -1650,8 +1649,8 @@ Supabase `profiles` table with authenticated user data.
 
 **V1 Status:** ✅ **Complete** (November 2024) - Display name, email (read-only), theme toggle (in header), location preferences (lat/lng/city), calculation method, madhab, Quran translation, hadith language, distance unit
 
-**Future Enhancements (V1.1+):**
-- **V1.1:** Profile picture upload (Supabase Storage)
+**Future Enhancements (V1.2+):**
+- **V1.2:** Profile picture upload (Supabase Storage)
 - **V1.2:** Hijri offset manual adjustment
 - **V1.3:** Multi-language interface (Arabic, Urdu)
 - **V1.3:** Notification preferences (granular control for prayer times, Quran, charity)
@@ -1783,7 +1782,7 @@ Single page with three tabs using shadcn/ui Tabs component:
 
 **V1 Status:** ✅ **Complete** (November 2024) - Creator tab (profile, contact, education, projects), About App tab (mission, features, tech stack, privacy), Acknowledgements tab (APIs, libraries, disclaimers), tab navigation, copy-to-clipboard
 
-**Future Enhancements (V1.1+):**
+**Future Enhancements (V1.2+):**
 - **V1.2:** Changelog section (version history with dates)
 - **V1.3:** Contribution guide (how to contribute code, translations, content)
 - **V2.0:** Support section (FAQs, troubleshooting, community support)
@@ -1926,7 +1925,7 @@ Admins access feedback via Supabase dashboard:
 
 **V1 Status:** ✅ **Complete** (November 2024) - Anonymous feedback submission (all 10 pages), problem/suggestion type selection, character validation (10-5000), user-agent tracking, optional user_id attachment, success confirmation
 
-**Future Enhancements (V1.1+):**
+**Future Enhancements (V1.2+):**
 - **V1.3:** Email notifications to admins on new feedback
 - **V2.0:** Sentiment analysis (positive/negative/neutral classification)
 - **V2.0:** Spam protection (rate limiting, content filtering)
@@ -2141,7 +2140,7 @@ USING (EXISTS (SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profile
 
 **V1 Status:** ✅ **Complete** (November 2024) - Admin dashboard page, feedback management (filters, inline editing, status/priority/category), analytics panel (total users, feedback metrics), admin card on dashboard, RLS-enforced admin access, review tracking (reviewed_at, reviewed_by)
 
-**Future Enhancements (V1.1+):**
+**Future Enhancements (V1.2+):**
 - **V1.2:** Enhanced analytics (feature usage stats, user engagement metrics, geographic distribution)
 - **V1.3:** Email notifications on new feedback (digest emails)
 - **V2.0:** Bulk operations (bulk status updates, bulk categorization)
