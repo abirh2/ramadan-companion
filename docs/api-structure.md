@@ -403,6 +403,165 @@
 
 ---
 
+## /api/hadith/books
+**Status:** ✅ Implemented (Hadith Browser)
+
+**Purpose:** Proxy to HadithAPI books endpoint to fetch all available hadith collections
+
+**Method:** GET
+
+**Parameters:** None
+
+**Response Format:**
+```json
+{
+  "status": 200,
+  "message": "Books has been found.",
+  "books": [
+    {
+      "id": 1,
+      "bookName": "Sahih Bukhari",
+      "writerName": "Imam Bukhari",
+      "writerDeath": "256 ھ",
+      "bookSlug": "sahih-bukhari"
+    }
+  ]
+}
+```
+
+**Caching:** 24 hours (revalidate: 86400) - Books list is static
+
+**Error Handling:**
+- 500: HadithAPI error, missing API key, or network failure
+
+**External API:**
+- Endpoint: `https://hadithapi.com/api/books?apiKey={HADITH_API_KEY}`
+
+**Available Collections:**
+- Sahih Bukhari (`sahih-bukhari`)
+- Sahih Muslim (`sahih-muslim`)
+- Jami' Al-Tirmidhi (`al-tirmidhi`)
+- Sunan Abu Dawood (`abu-dawood`)
+- Sunan Ibn-e-Majah (`ibn-e-majah`)
+- Sunan An-Nasa'i (`sunan-nasai`)
+- Mishkat Al-Masabih (`mishkat`)
+- Musnad Ahmad (`musnad-ahmad`)
+- Al-Silsila Sahiha (`al-silsila-sahiha`)
+
+---
+
+## /api/hadith/chapters
+**Status:** ✅ Implemented (Hadith Browser)
+
+**Purpose:** Proxy to HadithAPI chapters endpoint to fetch chapters for a specific book
+
+**Method:** GET
+
+**Parameters:**
+- `bookSlug` (required): The slug of the hadith collection (e.g., 'sahih-bukhari')
+
+**Response Format:**
+```json
+{
+  "status": 200,
+  "message": "Chapters has been found.",
+  "chapters": [
+    {
+      "id": 1,
+      "chapterNumber": "1",
+      "chapterEnglish": "Revelation",
+      "chapterUrdu": "وحی کا بیان",
+      "chapterArabic": "كتاب بدء الوحى",
+      "bookSlug": "sahih-bukhari"
+    }
+  ],
+  "book": {
+    "id": 1,
+    "bookName": "Sahih Bukhari",
+    "writerName": "Imam Bukhari",
+    "writerDeath": "256 ھ",
+    "bookSlug": "sahih-bukhari"
+  }
+}
+```
+
+**Caching:** 24 hours (revalidate: 86400) - Chapters list is static
+
+**Error Handling:**
+- 400: Missing bookSlug parameter
+- 500: HadithAPI error or network failure
+
+**External API:**
+- Endpoint: `https://hadithapi.com/api/{bookSlug}/chapters?apiKey={HADITH_API_KEY}`
+
+---
+
+## /api/hadith/hadiths
+**Status:** ✅ Implemented (Hadith Browser)
+
+**Purpose:** Fetch hadiths for a specific chapter with optimized pagination. Since HadithAPI returns 1 hadith per page, this endpoint fetches multiple pages (default 5) and combines them for better UX.
+
+**Method:** GET
+
+**Parameters:**
+- `bookSlug` (required): The slug of the hadith collection (e.g., 'sahih-bukhari')
+- `chapterNumber` (required): The chapter number
+- `startPage` (optional): Starting page number (default: 1)
+
+**Response Format:**
+```json
+{
+  "hadiths": [
+    {
+      "id": 1,
+      "hadithNumber": "1",
+      "englishNarrator": "Narrated 'Umar bin Al-Khattab:",
+      "hadithEnglish": "I heard Allah's Messenger saying...",
+      "hadithUrdu": "...",
+      "urduNarrator": "...",
+      "hadithArabic": "...",
+      "headingEnglish": "The deeds are considered by the intentions",
+      "headingUrdu": "...",
+      "headingArabic": "...",
+      "chapterId": "1",
+      "bookSlug": "sahih-bukhari",
+      "volume": "1",
+      "status": "Sahih",
+      "book": { /* book metadata */ },
+      "chapter": { /* chapter metadata */ }
+    }
+  ],
+  "pagination": {
+    "currentPage": 1,
+    "lastPage": 51,
+    "perPage": 5,
+    "total": 51,
+    "from": 1,
+    "to": 5,
+    "hasMore": true
+  },
+  "book": { /* book metadata */ },
+  "chapter": { /* chapter metadata */ }
+}
+```
+
+**Optimization Strategy:**
+- HadithAPI returns 1 hadith per page by default
+- This endpoint fetches 5 pages in parallel and combines results
+- Reduces client-side API calls from 5 sequential to 1 combined request
+- Configurable via `HADITHS_PER_LOAD` constant (default: 5)
+
+**Caching:** 24 hours (revalidate: 86400) - Hadith content is static
+
+**Error Handling:**
+- 400: Missing bookSlug or chapterNumber parameters
+- 500: HadithAPI error or network failure
+
+**External API:**
+- Endpoint: `https://hadithapi.com/api/hadiths/?apiKey={HADITH_API_KEY}&book={bookSlug}&chapter={chapterNumber}&paginate={page}`
+
+---
+
 ## /api/mosques
 **Status:** ✅ Implemented (V1)
 

@@ -963,6 +963,199 @@ interface BookmarkData {
 
 ---
 
+## 5C. Hadith Browser (`/hadith`)
+
+### Functionality
+Complete hadith browsing experience allowing users to explore all major hadith collections, navigate by book and chapter, view hadiths with Arabic text and translations (English/Urdu), add favorites, and copy hadiths with proper attribution.
+
+### Implementation Status
+✅ **Fully Implemented (V1.2)** - November 2024
+
+### API & Data
+
+**HadithAPI:**
+- **Books List:** `GET /api/hadith/books` - Fetches all available hadith collections
+- **Chapters List:** `GET /api/hadith/chapters?bookSlug={slug}` - Fetches chapters for a specific book
+- **Hadiths List:** `GET /api/hadith/hadiths?bookSlug={slug}&chapterNumber={num}&startPage={page}` - Fetches hadiths with optimized pagination
+- **Caching:** 24-hour server-side cache for all endpoints
+- **Optimization:** Fetches 5 hadiths per request (HadithAPI returns 1/page, we combine 5 pages)
+
+**Available Collections (7 books):**
+1. Sahih Bukhari (`sahih-bukhari`) - Imam Bukhari (d. 256 ھ)
+2. Sahih Muslim (`sahih-muslim`) - Imam Muslim (d. 261 ھ)
+3. Jami' Al-Tirmidhi (`al-tirmidhi`) - Abu `Isa Muhammad at-Tirmidhi (d. 279)
+4. Sunan Abu Dawood (`abu-dawood`) - Imam Abu Dawud (d. 275)
+5. Sunan Ibn-e-Majah (`ibn-e-majah`) - Imam Muhammad bin Yazid Ibn Majah (d. 273)
+6. Sunan An-Nasa'i (`sunan-nasai`) - Imam Ahmad an-Nasa`i (d. 303)
+7. Mishkat Al-Masabih (`mishkat`) - Imam Khatib at-Tabrizi (d. 741)
+
+**Note:** Musnad Ahmad and Al-Silsila Sahiha are excluded because HadithAPI has chapter metadata but no actual hadith content (hadiths_count: 0). These collections are filtered out at the API level.
+
+**Database:**
+- Uses existing `favorites` table for hadith favorites (same as Quran favorites)
+- `item_type: 'hadith'`
+- Stores: hadith number, book, chapter, status, narrator, English/Urdu/Arabic text
+
+### UI & Navigation
+
+**Landing Page (`/hadith`):**
+- Search bar to filter collections
+- List of all 7 hadith collections with:
+  - Book name (e.g., "Sahih Bukhari")
+  - Author name and death year
+  - Arrow navigation icon
+- Click any book to view its chapters
+
+**Book Chapters Page (`/hadith/[bookSlug]`):**
+- Back button to hadith browser
+- Breadcrumb navigation
+- Search bar to filter chapters
+- List of all chapters with:
+  - Chapter number badge (circular)
+  - English chapter name
+  - Urdu chapter name (if available)
+  - Arabic chapter name (right-aligned)
+- Click any chapter to view its hadiths
+
+**Chapter Hadiths Page (`/hadith/[bookSlug]/[chapterNumber]`):**
+- Back button to chapters list
+- Breadcrumb navigation (Hadith Browser → Book → Chapter)
+- Header with book name and chapter number
+- **Language Selector:** Toggle between English and Urdu translations (no Arabic option - Arabic text always shown)
+- **Hadith count:** "Showing X of Y hadiths"
+- **Hadiths list:** Displays 5 hadiths initially
+- **Load More button:** Loads 5 more hadiths (shows remaining count)
+- **Return to Top button:** Appears after scrolling 300px
+
+**Hadith Card Display:**
+- **Header:**
+  - Hadith number badge
+  - Status badge (Sahih=green, Hasan=blue, Da'eef=amber)
+  - Favorite button (heart icon, filled when favorited)
+- **Arabic Text Section:**
+  - Label: "Arabic Text"
+  - Copy button for Arabic only
+  - Arabic text in large serif font, RTL
+- **Translation Section:**
+  - Label: "English Translation" or "Urdu Translation"
+  - Copy button for translation (includes full attribution)
+  - Narrator name (in selected language)
+  - Hadith text (in selected language)
+- **Footer (Source Attribution):**
+  - Book name and author
+  - Chapter name
+  - Volume number (if available)
+  - **Disclaimer:** "* Hadith numbering follows HadithAPI edition and may differ from other publications"
+
+### Hooks & State Management
+
+**Custom Hooks:**
+- `useHadithBrowser()` - Fetches all available hadith collections
+- `useHadithChapters({ bookSlug })` - Fetches chapters with search/filter
+- `useHadithsByChapter({ bookSlug, chapterNumber })` - Fetches hadiths with pagination and language management
+- `useHadithFavorites()` - Reuses existing favorites system
+
+**State Persistence:**
+- **Language preference:** Saved to profile (authenticated) + localStorage (guest)
+- **Favorites:** Saved to Supabase `favorites` table
+- **Pagination state:** Session-only (resets on page reload)
+
+### Components
+
+**Pages:**
+- `/hadith/page.tsx` - Landing page with book list
+- `/hadith/[bookSlug]/page.tsx` - Chapters list for a book
+- `/hadith/[bookSlug]/[chapterNumber]/page.tsx` - Hadiths list for a chapter
+
+**Components:**
+- `BookSelector` - Search and book list
+- `BookList` - Renders hadith collection cards
+- `ChapterSelector` - Search and chapter list
+- `ChapterList` - Renders chapter cards
+- `HadithList` - Main hadiths display with pagination
+- `HadithItem` - Individual hadith card (Arabic + translation)
+- `HadithLanguageSelector` - English/Urdu toggle (no Arabic)
+- `ReturnToTopButton` - Scroll to top button
+
+### Technical Details
+
+**API Routes:**
+- `/api/hadith/books/route.ts` - Proxies HadithAPI books endpoint
+- `/api/hadith/chapters/route.ts` - Proxies HadithAPI chapters endpoint
+- `/api/hadith/hadiths/route.ts` - Fetches and combines multiple pages
+
+**Type Definitions:**
+```typescript
+interface HadithBook {
+  id: number
+  bookName: string
+  writerName: string
+  writerDeath: string
+  bookSlug: string
+}
+
+interface HadithChapter {
+  id: number
+  chapterNumber: string
+  chapterEnglish: string
+  chapterUrdu: string
+  chapterArabic: string
+  bookSlug: string
+}
+
+interface HadithData {
+  id: number
+  hadithNumber: string
+  englishNarrator: string
+  hadithEnglish: string
+  hadithUrdu: string
+  urduNarrator: string
+  hadithArabic: string
+  status: 'Sahih' | 'Hasan' | "Da'eef"
+  book: HadithBook
+  chapter: HadithChapter
+  volume?: string
+}
+
+// Language preference: only 'english' | 'urdu' (Arabic text always displayed)
+type HadithLanguageId = 'english' | 'urdu'
+```
+
+**Navigation Menu:**
+- Added "Hadith Browser" menu item after "Quran Browser"
+- Icon: `BookOpenText` from lucide-react
+- Links to `/hadith`
+
+**Pagination Strategy:**
+- HadithAPI returns 1 hadith per page by default
+- Our API combines 5 pages into 1 response (reduces client requests)
+- "Load More" button fetches next 5 hadiths
+- Balances performance with user experience
+- Chapter with 50 hadiths = 10 API requests (vs 50 if done individually)
+
+**User Experience Design:**
+- **Arabic always visible:** Users see original Arabic text regardless of translation choice
+- **No "Arabic translation" option:** Prevents confusion of "translating Arabic to Arabic"
+- **Clear source attribution:** Every hadith shows book, author, chapter with disclaimer about numbering
+- **Status color coding:** Sahih (green), Hasan (blue), Da'eef (amber) for quick authenticity recognition
+- **Separate copy buttons:** Arabic and translation copied separately for flexibility
+- **Full attribution in copy:** Copied text includes narrator, hadith, source, chapter, number, and disclaimer
+
+### V1.2 Status
+✅ **Complete** (November 2024) - Full hadith browser with 9 collections, hierarchical navigation (Books → Chapters → Hadiths), bilingual support (English/Urdu), Arabic text display, grading badges, favorites integration, pagination, copy functionality, return-to-top button, and source attribution
+
+### Future Enhancements (V1.3+)
+- **V1.3:** Search within hadith text across collections
+- **V1.3:** Hadith by topic/theme navigation
+- **V1.3:** Cross-reference related hadiths
+- **V1.3:** Hadith explanation/commentary integration
+- **V1.3:** Bookmark system for hadiths (similar to Quran)
+- **V2.0:** Offline mode with downloaded hadiths
+- **V2.0:** Custom hadith collections/playlists
+- **V2.0:** Hadith memorization tools
+
+---
+
 ## 6. Charity & Zakat Tracker (`/charity`)
 
 ### Functionality

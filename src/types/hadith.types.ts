@@ -84,8 +84,8 @@ export interface DailyHadithResponse {
   volume?: string
 }
 
-// Language preference types
-export type HadithLanguageId = 'english' | 'urdu' | 'arabic'
+// Language preference types (English and Urdu only - Arabic text is always displayed)
+export type HadithLanguageId = 'english' | 'urdu'
 
 export interface HadithLanguage {
   id: HadithLanguageId
@@ -104,17 +104,19 @@ export const HADITH_LANGUAGES: HadithLanguage[] = [
     name: 'Urdu',
     displayName: 'Urdu Translation (اردو)',
   },
-  {
-    id: 'arabic',
-    name: 'Arabic',
-    displayName: 'Arabic Text (العربية)',
-  },
 ]
 
-// Book slugs for the two sahih collections
+// Book slugs for hadith collections available in HadithAPI
+// Includes the six major collections (Kutub al-Sittah) plus Mishkat
+// Note: Musnad Ahmad and Al-Silsila Sahiha are excluded as they have no hadith content in the API (hadiths_count: 0)
 export const HADITH_BOOKS = {
   SAHIH_BUKHARI: 'sahih-bukhari',
   SAHIH_MUSLIM: 'sahih-muslim',
+  AL_TIRMIDHI: 'al-tirmidhi',
+  ABU_DAWOOD: 'abu-dawood',
+  IBN_E_MAJAH: 'ibn-e-majah',
+  SUNAN_NASAI: 'sunan-nasai',
+  MISHKAT: 'mishkat',
 } as const
 
 export type HadithBookSlug = typeof HADITH_BOOKS[keyof typeof HADITH_BOOKS]
@@ -130,5 +132,38 @@ export interface HadithFavoriteData {
   hadithEnglish: string
   hadithUrdu: string
   hadithArabic: string
+}
+
+// Hadith Browser Types
+
+// Response from /api/hadith/books
+export interface HadithBooksResponse {
+  status: number
+  message: string
+  books: HadithBook[]
+}
+
+// Response from /api/hadith/chapters
+export interface HadithChaptersResponse {
+  status: number
+  message: string
+  chapters: HadithChapter[]
+  book: HadithBook
+}
+
+// Response from /api/hadith/hadiths (browser endpoint with pagination)
+export interface HadithBrowserResponse {
+  hadiths: HadithData[]
+  pagination: {
+    currentPage: number
+    lastPage: number
+    perPage: number
+    total: number
+    from: number
+    to: number
+    hasMore: boolean
+  }
+  book: HadithBook
+  chapter: HadithChapter
 }
 

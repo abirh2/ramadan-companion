@@ -114,13 +114,93 @@
 - localStorage (guest preferences)
 
 **Future Enhancements (V1.1+):**
-- **V1.1:** Full Quran browser (114 surahs, juz navigation, search)
-- **V1.2:** Audio recitation (Mishary, Abdul Basit, Sudais)
-- **V1.2:** Hadith browser (6 collections, search)
-- **V1.2:** Tafsir integration (Ibn Kathir)
 - **V1.2:** Notes on favorites
 - **V1.2:** Reading progress tracking
 - **V2.0:** Word-by-word translation
+
+---
+
+## /quran (Quran Browser)
+
+**V1.1 Status:** ✅ **Complete**
+
+**Features:**
+- Browse all 114 surahs with search functionality
+- Tabbed navigation (By Surah / By Juz)
+- Multiple view modes (List / Grid)
+- Full surah reading with Arabic + translation
+- 4 translation options (Asad, Sahih International, Pickthall, Yusuf Ali)
+- Per-ayah bookmarks (one per surah)
+- Audio recitation with 6 verified reciters
+- Tafsir (commentary) with 20+ sources
+- Copy, favorite, share per ayah
+- Ayah range lookup (jump to specific ayah)
+- "Go to Bookmark" button for saved positions
+- Bookmark indicators on main page
+
+**Data Sources:**
+- AlQuran Cloud API (surah content, audio)
+- Quran.com API (tafsir)
+- Supabase (quran_bookmarks table, profile preferences)
+- localStorage (guest bookmarks, preferences)
+
+**Pages:**
+- `/quran` - Main browser with surah/juz selection
+- `/quran/[surahNumber]` - Individual surah reading page
+
+**Future Enhancements (V1.3+):**
+- **V1.3:** Reading progress statistics
+- **V1.3:** Continuous surah playback
+- **V1.3:** Tafsir preference persistence
+- **V2.0:** Word-by-word translation
+- **V2.0:** Offline mode
+
+---
+
+## /hadith (Hadith Browser)
+
+**V1.2 Status:** ✅ **Complete**
+
+**Features:**
+- Browse 9 major hadith collections
+- Hierarchical navigation (Books → Chapters → Hadiths)
+- Search functionality at each level
+- Bilingual support (English / Urdu translations)
+- Arabic text always displayed
+- Grading badges (Sahih/Hasan/Da'eef with color coding)
+- Copy buttons (separate for Arabic and translation)
+- Favorites integration
+- Load More pagination (5 hadiths per load)
+- Return to Top button
+- Source attribution with numbering disclaimer
+
+**Data Sources:**
+- HadithAPI (books, chapters, hadiths)
+- Supabase (favorites table with hadith items)
+- localStorage (language preference for guests)
+
+**Available Collections:**
+1. Sahih Bukhari
+2. Sahih Muslim
+3. Jami' Al-Tirmidhi
+4. Sunan Abu Dawood
+5. Sunan Ibn-e-Majah
+6. Sunan An-Nasa'i
+7. Mishkat Al-Masabih
+8. Musnad Ahmad
+9. Al-Silsila Sahiha
+
+**Pages:**
+- `/hadith` - Main browser with collections list
+- `/hadith/[bookSlug]` - Chapters list for a collection
+- `/hadith/[bookSlug]/[chapterNumber]` - Hadiths list for a chapter
+
+**Future Enhancements (V1.3+):**
+- **V1.3:** Search within hadith text
+- **V1.3:** Hadith by topic navigation
+- **V1.3:** Bookmark system for hadiths
+- **V1.3:** Cross-reference related hadiths
+- **V2.0:** Offline mode
 
 ---
 

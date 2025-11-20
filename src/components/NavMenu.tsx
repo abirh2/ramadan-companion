@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Menu, BookOpen, Clock, Heart, DollarSign, MessageCircle, Sparkles, Compass } from 'lucide-react'
+import { Menu, BookOpen, BookOpenText, Clock, Heart, DollarSign, MessageCircle, Sparkles, Compass } from 'lucide-react'
 
 export function NavMenu() {
   return (
@@ -32,6 +32,13 @@ export function NavMenu() {
           <DropdownMenuItem className="cursor-pointer" role="menuitem">
             <BookOpen className="h-4 w-4 mr-2" aria-hidden="true" />
             Quran Browser
+          </DropdownMenuItem>
+        </Link>
+        
+        <Link href="/hadith">
+          <DropdownMenuItem className="cursor-pointer" role="menuitem">
+            <BookOpenText className="h-4 w-4 mr-2" aria-hidden="true" />
+            Hadith Browser
           </DropdownMenuItem>
         </Link>
         
