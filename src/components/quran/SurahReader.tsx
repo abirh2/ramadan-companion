@@ -8,8 +8,11 @@ import { Bookmark, ArrowUp } from 'lucide-react'
 import { SurahHeader } from './SurahHeader'
 import { AyahCard } from './AyahCard'
 import { TranslationSelector } from './TranslationSelector'
+import { ReciterSelector } from './ReciterSelector'
 import { AyahRangeLookup } from './AyahRangeLookup'
+import { DEFAULT_RECITER } from '@/lib/quranAudio'
 import type { SurahMetadata } from '@/lib/quranData'
+import type { QuranReciterId } from '@/types/quran.types'
 
 interface SurahReaderProps {
   surahNumber: number
@@ -22,6 +25,7 @@ export function SurahReader({ surahNumber, surahMetadata, initialAyah }: SurahRe
   const { getBookmark } = useQuranBookmarks()
   const ayahRefs = useRef<{ [key: number]: HTMLDivElement | null }>({})
   const [showScrollTop, setShowScrollTop] = useState(false)
+  const [reciter, setReciter] = useState<QuranReciterId>(DEFAULT_RECITER)
 
   // Get bookmark for current surah
   const bookmark = getBookmark(surahNumber)
@@ -100,6 +104,10 @@ export function SurahReader({ surahNumber, surahMetadata, initialAyah }: SurahRe
             currentTranslation={translation}
             onTranslationChange={setTranslation}
           />
+          <ReciterSelector 
+            currentReciter={reciter}
+            onReciterChange={setReciter}
+          />
           {bookmark && (
             <Button
               variant="outline"
@@ -131,6 +139,7 @@ export function SurahReader({ surahNumber, surahMetadata, initialAyah }: SurahRe
               ayahPair={ayahPair}
               surahNumber={surahNumber}
               surahName={surahMetadata.englishName}
+              reciter={reciter}
             />
           </div>
         ))}

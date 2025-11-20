@@ -162,3 +162,22 @@ export interface JuzData {
   endAyah: number
 }
 
+// Audio Recitation Types (V1.2)
+
+// Audio edition/reciter definition
+export interface QuranAudioEdition {
+  identifier: string // e.g., 'ar.alafasy'
+  name: string // Arabic name
+  englishName: string // e.g., 'Alafasy'
+  language: string // e.g., 'ar'
+}
+
+// Reciter preference type - only includes reciters with verified CDN audio files
+export type QuranReciterId = 
+  | 'ar.alafasy'            // Mishary Alafasy (default)
+  | 'ar.husary'             // Mahmoud Khalil Al-Hussary
+  | 'ar.husarymujawwad'     // Mahmoud Khalil Al-Hussary (Mujawwad style)
+  | 'ar.shaatree'           // Abu Bakr Ash-Shaatree
+  | 'ar.mahermuaiqly'       // Maher Al Muaiqly
+  | 'ar.minshawi'           // Muhammad Siddiq Al-Minshawi
+

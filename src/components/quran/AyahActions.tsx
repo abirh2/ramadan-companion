@@ -6,6 +6,8 @@ import { Copy, Heart, Share2, Bookmark, Check } from 'lucide-react'
 import { useQuranBrowserFavorites } from '@/hooks/useQuranBrowserFavorites'
 import { useQuranBookmarks } from '@/hooks/useQuranBookmarks'
 import { useAuth } from '@/hooks/useAuth'
+import { AyahAudioPlayer } from './AyahAudioPlayer'
+import type { QuranReciterId } from '@/types/quran.types'
 
 interface AyahActionsProps {
   surahNumber: number
@@ -14,6 +16,7 @@ interface AyahActionsProps {
   globalNumber: number
   arabicText: string
   translationText: string
+  reciter: QuranReciterId
 }
 
 export function AyahActions({
@@ -23,6 +26,7 @@ export function AyahActions({
   globalNumber,
   arabicText,
   translationText,
+  reciter,
 }: AyahActionsProps) {
   const { user } = useAuth()
   const { isFavorited, addFavorite, removeFavorite } = useQuranBrowserFavorites()
@@ -95,6 +99,11 @@ export function AyahActions({
 
   return (
     <div className="flex flex-wrap gap-2 border-t pt-4">
+      <AyahAudioPlayer 
+        globalAyahNumber={globalNumber}
+        reciter={reciter}
+      />
+      
       <Button variant="outline" size="sm" onClick={handleCopy}>
         {copied ? (
           <>

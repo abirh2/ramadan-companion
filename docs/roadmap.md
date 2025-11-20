@@ -58,7 +58,7 @@
 ### Content & Feature Expansion
 | Priority | Feature | Description | Dependencies |
 |----------|---------|-------------|--------------|
-| 🔥 High | Quran Audio Recitation | Multiple reciters (Mishary, Abdul Basit, Sudais) | EveryAyah.com API (free) |
+| 🔥 High | Quran Audio Recitation | ✅ Complete - Per-ayah playback, 6 reciters, session-only preference | AlQuran Cloud CDN |
 | 🔥 High | Hadith Browser | Browse 6 major collections, search by topic/narrator | HadithAPI extension |
 | 🔥 High | Tafsir Integration | Ibn Kathir commentary for Quran verses | Quran.com API or static JSON |
 | 🔥 High | Islamic Calendar | Full Hijri calendar with important dates (Eid, Laylat al-Qadr) | AlAdhan Calendar API |

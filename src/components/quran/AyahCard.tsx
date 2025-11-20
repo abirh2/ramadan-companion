@@ -2,15 +2,16 @@
 
 import { Card } from '@/components/ui/card'
 import { AyahActions } from './AyahActions'
-import type { AyahPair } from '@/types/quran.types'
+import type { AyahPair, QuranReciterId } from '@/types/quran.types'
 
 interface AyahCardProps {
   ayahPair: AyahPair
   surahNumber: number
   surahName: string
+  reciter: QuranReciterId
 }
 
-export function AyahCard({ ayahPair, surahNumber, surahName }: AyahCardProps) {
+export function AyahCard({ ayahPair, surahNumber, surahName, reciter }: AyahCardProps) {
   const { arabic, transliteration, translation, numberInSurah, globalNumber } = ayahPair
 
   return (
@@ -53,6 +54,7 @@ export function AyahCard({ ayahPair, surahNumber, surahName }: AyahCardProps) {
         globalNumber={globalNumber}
         arabicText={arabic.text}
         translationText={translation.text}
+        reciter={reciter}
       />
     </Card>
   )

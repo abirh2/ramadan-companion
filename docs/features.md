@@ -843,9 +843,62 @@ interface BookmarkData {
 
 **V1.1.1 Update (November 20, 2024):** Bookmark system redesigned for better UX - removed auto-scroll and auto-save, added per-ayah bookmark buttons, "Go to Bookmark" navigation button, and bookmark indicators on main Quran page
 
+### Audio Recitation (V1.2)
+
+**Status:** ✅ **Complete** (December 2024)
+
+**Functionality:**
+- **Per-ayah playback:** Each ayah card includes a play button for audio recitation
+- **Multiple reciters:** Dropdown selector to choose from 6 popular reciters
+- **Default reciter:** Mishary Alafasy (ar.alafasy)
+- **Audio source:** AlQuran Cloud API CDN (128kbps MP3)
+- **Playback controls:** Play/pause toggle, loading spinner, error handling
+- **Session-only preference:** Reciter selection persists for current session
+
+**Available Reciters (Verified CDN Availability):**
+1. Mishary Alafasy (`ar.alafasy`) - default
+2. Mahmoud Khalil Al-Hussary (`ar.husary`)
+3. Mahmoud Khalil Al-Hussary - Mujawwad (`ar.husarymujawwad`)
+4. Abu Bakr Ash-Shaatree (`ar.shaatree`)
+5. Maher Al Muaiqly (`ar.mahermuaiqly`)
+6. Muhammad Siddiq Al-Minshawi (`ar.minshawi`)
+
+**Note:** Only reciters with actual audio files available on the AlQuran Cloud CDN are included. The API lists 27 audio editions, but only 6 have complete audio file coverage.
+
+**Implementation:**
+- **Audio URLs:** Constructed client-side using global ayah number + reciter identifier
+- **CDN pattern:** `https://cdn.islamic.network/quran/audio/128/{reciter}/{ayahNumber}.mp3`
+- **No API proxy:** Direct CDN access for fast delivery and no rate limits
+- **Audio element:** HTML5 `<audio>` with lazy loading (`preload="none"`)
+- **Cleanup:** Audio resources properly released on component unmount
+
+**Components:**
+- `AyahAudioPlayer` - Audio player component with play/pause/loading states
+- `ReciterSelector` - Dropdown for reciter selection
+- `AyahCard` - Updated with audio player integration
+
+**User Flow:**
+1. Open any surah in Quran Browser (`/quran/[surahNumber]`)
+2. Select preferred reciter from dropdown (default: Alafasy)
+3. Click play button on any ayah to hear recitation
+4. Audio streams from CDN, pause/resume as needed
+5. Reciter selection persists for session duration
+
+**Technical Details:**
+- **Types:** `QuranReciterId`, `QuranAudioEdition` in `quran.types.ts`
+- **Utilities:** `getAyahAudioUrl()`, `AVAILABLE_RECITERS` in `quranAudio.ts`
+- **Accessibility:** ARIA labels on all buttons, keyboard navigation support
+- **Mobile:** Touch-friendly buttons, works on iOS Safari (audio policy compliant)
+
+**Future Enhancements (V1.3+):**
+- **V1.3:** Reciter preference persistence (profile + localStorage)
+- **V1.3:** Continuous surah playback with auto-advance
+- **V1.3:** Playback speed control (0.5x, 1x, 1.5x)
+- **V1.3:** Background playback using Service Worker
+- **V1.3:** Download audio for offline listening
+
 **Future Enhancements (V1.2+):**
 - **V1.2:** Reading progress statistics (total ayahs read, completion percentage)
-- **V1.2:** Quran audio recitation per ayah (play/pause controls)
 - **V1.2:** Tafsir (commentary) integration for each ayah
 - **V1.2:** Word-by-word translation view
 - **V1.2:** Night reading mode with adjusted colors
