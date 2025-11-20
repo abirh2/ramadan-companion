@@ -201,6 +201,120 @@
 
 ---
 
+## /api/quran/tafsirs
+**Status:** ✅ Implemented (V1.2)
+
+**Purpose:** Proxy to Quran.com API to fetch list of available tafsir (commentary) resources
+
+**Method:** GET
+
+**Parameters:** None
+
+**Response Format:**
+```json
+{
+  "tafsirs": [
+    {
+      "id": 169,
+      "name": "Ibn Kathir (Abridged)",
+      "author_name": "Hafiz Ibn Kathir",
+      "slug": "en-tafisr-ibn-kathir",
+      "language_name": "english",
+      "translated_name": {
+        "name": "Ibn Kathir (Abridged)",
+        "language_name": "english"
+      }
+    },
+    {
+      "id": 16,
+      "name": "Tafsir Muyassar",
+      "author_name": "المیسر",
+      "slug": "ar-tafsir-muyassar",
+      "language_name": "arabic",
+      "translated_name": {
+        "name": "Tafsir Muyassar",
+        "language_name": "english"
+      }
+    }
+    // ... 18 more tafsirs
+  ]
+}
+```
+
+**Available Languages:**
+- English (3 tafsirs): Ibn Kathir, Ma'arif al-Qur'an, Tazkirul Quran
+- Arabic (10 tafsirs): Tafsir Muyassar, Ibn Kathir, Al-Tabari, Al-Qurtubi, Al-Sa'di, etc.
+- Bengali (4 tafsirs): Tafsir Fathul Majid, Tafsir Ahsanul Bayaan, etc.
+- Urdu (3 tafsirs): Tafsir Ibn Kathir, Bayan ul Quran, etc.
+- Kurdish, Russian (1 each)
+
+**Caching:** 7 days (revalidate: 604800) - Tafsir list rarely changes
+
+**Error Handling:**
+- 500: Quran.com API error or network failure
+
+**External API:**
+- `https://api.quran.com/api/v4/resources/tafsirs`
+
+---
+
+## /api/quran/tafsirs/[id]/[surah]/[ayah]
+**Status:** ✅ Implemented (V1.2)
+
+**Purpose:** Proxy to Quran.com API to fetch tafsir (commentary) content for a specific ayah
+
+**Method:** GET
+
+**URL Parameters:**
+- `id` (required): Tafsir resource ID (e.g., 169 for Ibn Kathir)
+- `surah` (required): Surah number (1-114)
+- `ayah` (required): Ayah number within surah
+
+**Example:** `/api/quran/tafsirs/169/2/255` (Ibn Kathir for Ayat al-Kursi)
+
+**Response Format:**
+```json
+{
+  "tafsir": {
+    "verses": {
+      "2:255": {
+        "id": 262
+      }
+    },
+    "resource_id": 169,
+    "resource_name": "Ibn Kathir (Abridged)",
+    "language_id": 38,
+    "slug": "en-tafisr-ibn-kathir",
+    "translated_name": {
+      "name": "Ibn Kathir (Abridged)",
+      "language_name": "english"
+    },
+    "text": "<h2>The Virtue of Ayat Al-Kursi</h2><p>This is Ayat Al-Kursi and tremendous virtues...</p>"
+  }
+}
+```
+
+**Text Format:**
+- HTML formatted with semantic tags (`<h2>`, `<p>`, `<ul>`, etc.)
+- Contains scholarly commentary and explanations
+- May include references to hadiths and other scholars
+
+**Caching:** 7 days (revalidate: 604800) - Static scholarly content
+
+**Error Handling:**
+- 400: Invalid parameters (surah not 1-114, malformed IDs)
+- 404: Tafsir not available for this ayah (converted from 500)
+- 500: Quran.com API error or network failure
+
+**Special Handling:**
+- External API 500 errors converted to 404 (unavailable content)
+- Returns user-friendly message for missing tafsirs
+
+**External API:**
+- `https://api.quran.com/api/v4/tafsirs/{id}/by_ayah/{surah}:{ayah}`
+
+---
+
 ## /api/hadith
 **Status:** ✅ Implemented (V1)
 

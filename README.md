@@ -11,6 +11,8 @@ A modern, minimal web app built for Muslims to assist with daily worship and ref
 - ✅ **Prayer Notifications** - Browser notifications at exact prayer times with motivational hadith quotes and per-prayer control
 - ✅ **Ramadan Countdown** - Track days until Ramadan with Hijri calendar integration and iftar/suhoor timers
 - ✅ **Quran Browser** - Browse all 114 surahs with translations, Juz navigation, manual bookmarks with explicit controls, search, and favorites
+- ✅ **Quran Audio** - Per-ayah audio recitation with 6 verified reciters (Alafasy, Husary, Shaatree, etc.) with session-persistent selection
+- ✅ **Tafsir Integration** - Access 20+ scholarly commentaries in multiple languages (English, Arabic, Bengali, etc.) with session-persistent selection
 - ✅ **Daily Quran** - Weighted random ayah selection with 4 translations (Asad, Sahih International, Pickthall, Yusuf Ali)
 - ✅ **Daily Hadith** - Authentic hadith from Sahih Bukhari and Muslim with English/Urdu/Arabic text and grading
 - ✅ **Charity Tracker** - Full donation CRUD with monthly calendar/list views, line/bar/pie charts, and zakat calculator
@@ -97,17 +99,19 @@ See [docs/README.md](docs/README.md) for the complete documentation index.
 - **Authentication**: Supabase Auth (email/password + Google OAuth)
 - **Maps**: MapLibre GL + OpenStreetMap tiles
 - **Charts**: Recharts (line, bar, pie)
-- **APIs**: AlAdhan, AlQuran Cloud, HadithAPI, OpenStreetMap Overpass, Nominatim, Geoapify Places
+- **APIs**: AlAdhan, AlQuran Cloud, Quran.com, HadithAPI, OpenStreetMap Overpass, Nominatim, Geoapify Places
 - **Hosting**: Vercel (frontend) + Supabase (backend)
 
 ## What's Next (V1.2)
 
 We're planning the next version with exciting enhancements focused on rich Islamic content and performance optimization:
 
-### Planned for V1.2
-- 🎵 **Quran Audio Recitation** - Listen to Quran with multiple reciters (Mishary, Abdul Basit, Sudais)
+### Recently Completed (V1.2)
+- ✅ **Quran Audio Recitation** - Per-ayah playback with 6 verified reciters (Alafasy, Husary, Shaatree, Maher Al Muaiqly, Minshawi, Husary Mujawwad)
+- ✅ **Tafsir Integration** - 20+ scholarly commentaries including Ibn Kathir, Ma'arif al-Qur'an, Tafsir Muyassar, and more in English, Arabic, Bengali, Kurdish, Russian, and Urdu
+
+### Planned for V1.2+
 - 📚 **Hadith Browser** - Browse 6 major hadith collections with search by topic and narrator
-- 📖 **Tafsir Integration** - Ibn Kathir commentary for deeper understanding of Quran verses
 - 📅 **Islamic Calendar** - Full Hijri calendar with important dates (Eid, Laylat al-Qadr)
 - 🤲 **Expanded Dua Library** - 100+ duas with new categories (illness, travel, marriage, children)
 - ⚡ **Performance Optimization** - Image optimization, code splitting, and faster loading times

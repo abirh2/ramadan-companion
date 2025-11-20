@@ -60,7 +60,7 @@
 |----------|---------|-------------|--------------|
 | 🔥 High | Quran Audio Recitation | ✅ Complete - Per-ayah playback, 6 reciters, session-only preference | AlQuran Cloud CDN |
 | 🔥 High | Hadith Browser | Browse 6 major collections, search by topic/narrator | HadithAPI extension |
-| 🔥 High | Tafsir Integration | Ibn Kathir commentary for Quran verses | Quran.com API or static JSON |
+| 🔥 High | Tafsir Integration | ✅ Complete - 20+ tafsirs in multiple languages, session-persistent selection | Quran.com API |
 | 🔥 High | Islamic Calendar | Full Hijri calendar with important dates (Eid, Laylat al-Qadr) | AlAdhan Calendar API |
 | 🟡 Medium | Expanded Dhikr Tracking | Wird programs, Salawat, Istighfar counters | Supabase (wird_programs table) |
 | 🟡 Medium | Dua Audio | Audio pronunciations for popular duas | Hosted audio files |
@@ -80,7 +80,7 @@
 
 ### Dependencies
 - **EveryAyah.com:** Free MP3 audio files by reciter and ayah
-- **Quran.com API:** Tafsir data (Ibn Kathir)
+- **Quran.com API:** ✅ Tafsir data (20+ tafsirs including Ibn Kathir, Ma'arif al-Qur'an, etc.)
 - **AlAdhan Calendar API:** Hijri dates and Islamic events
 - **Audio Hosting:** Supabase Storage or external CDN
 
@@ -229,7 +229,7 @@
 ### Year 1 Goals (V1.0 → V1.3)
 - ✅ Launch core worship features (Prayer, Quran, Hadith, Charity, Zikr)
 - ✅ Establish user base with feedback system
-- 📋 Enhance with multimedia content (audio, tafsir, calendar)
+- 🔄 Enhance with multimedia content (✅ audio, ✅ tafsir, 📋 calendar)
 - 📋 Build community features (reviews, photos, events)
 - 📋 Support 3+ languages (English, Arabic, Urdu)
 
@@ -251,7 +251,7 @@
 ### Success Metrics
 - **V1 (Achieved):** 10 features, 10 pages, full auth, admin tools
 - **V1.1:** 100+ daily active users, <5 critical bugs, 80% feature satisfaction
-- **V1.2:** 500+ users, audio playback <1% error rate, tafsir on 50% of ayahs
+- **V1.2 (In Progress):** ✅ Audio recitation, ✅ Tafsir integration, 📋 500+ users, 📋 Calendar feature
 - **V1.3:** 1000+ users, 500+ reviews contributed, 3 languages live
 - **V2.0:** 5000+ users, 100+ daily posts, active community moderation
 
