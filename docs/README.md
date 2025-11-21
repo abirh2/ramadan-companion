@@ -1,14 +1,18 @@
 # Ramadan Companion App
 
-> **Version 1.2 Complete** (November 2024) | Live and deployed on Vercel
+> **Version 1.2 (In Progress)** | V1.1 Complete (November 2024) | Live and deployed on Vercel
 
 A modern, minimal web app built for Muslims to assist with daily worship and reflection—especially during Ramadan.
 
 ## Purpose
 Help Muslims structure their Ramadan days with accurate prayer times, reminders, charity tracking, and inspirational content—all in one simple, privacy-respecting app.
 
-## Current Status (V1.2)
-✅ Core features complete and deployed:
+## Current Status
+✅ **V1.1 Complete** + V1.2 features in progress:
+- **V1.2 Complete:** Quran Audio, Tafsir, Hadith Browser
+- **V1.2 In Progress:** Islamic Calendar, Expanded Dhikr, Dua Audio, Notes on Favorites
+
+**Deployed features:**
 - Prayer Times & Qibla with offline fallback
 - Prayer Notifications with hadith quotes
 - Prayer Tracking with historical analytics

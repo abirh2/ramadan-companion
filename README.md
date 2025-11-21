@@ -1,10 +1,10 @@
 # Ramadan Companion
 
-> **Version 1.2** | Built with Next.js 16, React 19, TypeScript, and Supabase
+> **Version 1.2 (In Progress)** | Built with Next.js 16, React 19, TypeScript, and Supabase
 
 A modern, minimal web app built for Muslims to assist with daily worship and reflection—especially during Ramadan. Comprehensive features for prayer times, Quran study, hadith reading, charity tracking, zikr counter, and finding nearby mosques and halal food.
 
-## Features (V1.2 Complete)
+## Features (V1.1 Complete + V1.2 Additions)
 
 ### Core Features
 - ✅ **Prayer Times & Qibla** - Accurate daily prayer times with 7 calculation methods, live countdown, Qibla compass, and offline fallback

@@ -1,4 +1,4 @@
-### Recently Completed (V1.2)
+### Recently Completed (V1.2 Features)
 | Feature | Completion Date | Description |
 |---------|----------------|-------------|
 | **Hadith Browser** | November 2024 | Complete hadith browsing experience with 7 major collections (Kutub al-Sittah + Mishkat), hierarchical navigation (book → chapter → hadiths), Arabic text + English/Urdu translations, grading system with detailed explanations (Sahih, Hasan, Da'eef), clickable grading badges, favorites integration, pagination with "Load More", copy functionality with proper attribution |
