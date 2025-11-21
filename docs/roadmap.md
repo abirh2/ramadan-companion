@@ -1,6 +1,7 @@
-### Recently Completed (V1.1)
+### Recently Completed (V1.2)
 | Feature | Completion Date | Description |
 |---------|----------------|-------------|
+| **Hadith Browser** | November 2024 | Complete hadith browsing experience with 7 major collections (Kutub al-Sittah + Mishkat), hierarchical navigation (book → chapter → hadiths), Arabic text + English/Urdu translations, grading system with detailed explanations (Sahih, Hasan, Da'eef), clickable grading badges, favorites integration, pagination with "Load More", copy functionality with proper attribution |
 | **Full Quran Browser** | November 2024 | Complete browsing experience with 114 surahs, Juz navigation, bookmarks (dual-storage), favorites integration, translation switching, auto-resume, ayah sharing, search, list/grid views |
 | **Prayer Tracking** | November 2024 | Daily prayer completion tracking with checkboxes, completion summary, historical analytics (7/30/90 days, all-time), line charts, pie charts, per-prayer breakdown, dual-storage for guests and authenticated users, auto-sync on sign-in |
 | **Prayer Time Notifications** | November 2024 | Browser notifications at exact prayer times with authentic hadith quotes, per-prayer toggle controls, automatic rescheduling, dual-storage pattern for guests and authenticated users, cross-device preference sync |
@@ -59,14 +60,14 @@
 | Priority | Feature | Description | Dependencies |
 |----------|---------|-------------|--------------|
 | 🔥 High | Quran Audio Recitation | ✅ Complete - Per-ayah playback, 6 reciters, session-only preference | AlQuran Cloud CDN |
-| 🔥 High | Hadith Browser | Browse 6 major collections, search by topic/narrator | HadithAPI extension |
+| 🔥 High | Hadith Browser | ✅ Complete - 7 collections (Kutub al-Sittah + Mishkat), book/chapter navigation, grading system with detailed explanations, Arabic text + English/Urdu translations, favorites, pagination | HadithAPI |
 | 🔥 High | Tafsir Integration | ✅ Complete - 20+ tafsirs in multiple languages, session-persistent selection | Quran.com API |
 | 🔥 High | Islamic Calendar | Full Hijri calendar with important dates (Eid, Laylat al-Qadr) | AlAdhan Calendar API |
 | 🟡 Medium | Expanded Dhikr Tracking | Wird programs, Salawat, Istighfar counters | Supabase (wird_programs table) |
 | 🟡 Medium | Dua Audio | Audio pronunciations for popular duas | Hosted audio files |
 | 🟡 Medium | Notes on Favorites | Personal reflections on saved content | Supabase (notes field) |
 | 🟡 Medium | Quran Progress Tracking | Track reading progress by juz/surah | Supabase (reading_progress table) |
-| 🟡 Medium | Hadith Search | Keyword search, filter by authenticity | Client-side filtering |
+| 🟡 Medium | Hadith Search | ✅ Complete (Basic) - Search by book name, author, chapter title across all collections | Client-side filtering |
 | 🟢 Low | Exact-Minute Notification Scheduling | Replace 5-minute polling with dynamic job scheduler for exact-minute prayer notifications | Trigger.dev or Vercel Pro (+5 min delay → exact minute) |
 | 🟢 Low | Social Sharing | WhatsApp/Twitter share integration | Native share API |
 
@@ -81,6 +82,7 @@
 ### Dependencies
 - **EveryAyah.com:** Free MP3 audio files by reciter and ayah
 - **Quran.com API:** ✅ Tafsir data (20+ tafsirs including Ibn Kathir, Ma'arif al-Qur'an, etc.)
+- **HadithAPI:** ✅ Hadith collections, books, chapters, and hadith content (7 collections with complete content)
 - **AlAdhan Calendar API:** Hijri dates and Islamic events
 - **Audio Hosting:** Supabase Storage or external CDN
 

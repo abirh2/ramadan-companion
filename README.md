@@ -1,10 +1,10 @@
 # Ramadan Companion
 
-> **Version 1.1** | Built with Next.js 16, React 19, TypeScript, and Supabase
+> **Version 1.2** | Built with Next.js 16, React 19, TypeScript, and Supabase
 
 A modern, minimal web app built for Muslims to assist with daily worship and reflection—especially during Ramadan. Comprehensive features for prayer times, Quran study, hadith reading, charity tracking, zikr counter, and finding nearby mosques and halal food.
 
-## Features (V1.1 Complete)
+## Features (V1.2 Complete)
 
 ### Core Features
 - ✅ **Prayer Times & Qibla** - Accurate daily prayer times with 7 calculation methods, live countdown, Qibla compass, and offline fallback
@@ -14,6 +14,7 @@ A modern, minimal web app built for Muslims to assist with daily worship and ref
 - ✅ **Quran Audio** - Per-ayah audio recitation with 6 verified reciters (Alafasy, Husary, Shaatree, etc.) with session-persistent selection
 - ✅ **Tafsir Integration** - Access 20+ scholarly commentaries in multiple languages (English, Arabic, Bengali, etc.) with session-persistent selection
 - ✅ **Daily Quran** - Weighted random ayah selection with 4 translations (Asad, Sahih International, Pickthall, Yusuf Ali)
+- ✅ **Hadith Browser** - Browse 7 major hadith collections (Kutub al-Sittah + Mishkat) with hierarchical navigation (book → chapter → hadiths), Arabic text + English/Urdu translations, grading system with detailed explanations (Sahih, Hasan, Da'eef), and favorites integration
 - ✅ **Daily Hadith** - Authentic hadith from Sahih Bukhari and Muslim with English/Urdu/Arabic text and grading
 - ✅ **Charity Tracker** - Full donation CRUD with monthly calendar/list views, line/bar/pie charts, and zakat calculator
 - ✅ **Zikr & Duas** - Counter with 5 phrases, goal tracking, Fajr auto-reset, audio/haptic feedback, and 20 categorized duas

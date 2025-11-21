@@ -162,12 +162,15 @@
 **V1.2 Status:** ✅ **Complete**
 
 **Features:**
-- Browse 9 major hadith collections
+- Browse 7 major hadith collections (Kutub al-Sittah + Mishkat)
 - Hierarchical navigation (Books → Chapters → Hadiths)
 - Search functionality at each level
 - Bilingual support (English / Urdu translations)
 - Arabic text always displayed
 - Grading badges (Sahih/Hasan/Da'eef with color coding)
+- **Clickable grading badges** open dialog with detailed explanations
+- **Info icon** near language selector for quick grading reference
+- **Chapter titles** in breadcrumb (not just "Chapter N")
 - Copy buttons (separate for Arabic and translation)
 - Favorites integration
 - Load More pagination (5 hadiths per load)
@@ -187,8 +190,8 @@
 5. Sunan Ibn-e-Majah
 6. Sunan An-Nasa'i
 7. Mishkat Al-Masabih
-8. Musnad Ahmad
-9. Al-Silsila Sahiha
+
+**Note:** Musnad Ahmad and Al-Silsila Sahiha are excluded because HadithAPI has chapter metadata but no actual hadith content (hadiths_count: 0). Collections are filtered at the API level to show only those with content.
 
 **Pages:**
 - `/hadith` - Main browser with collections list
