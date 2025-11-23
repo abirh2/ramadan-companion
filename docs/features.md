@@ -10,19 +10,20 @@ It provides enough detail for any developer or AI agent to implement the app end
 2. Dashboard
 3. Prayer Times & Qibla Finder
 4. Ramadan Countdown
-5. Quran & Hadith Reminders
-6. Charity & Zakat Tracker
-7. Zikr & Dua Tracker
-8. Mosque Finder
-9. Halal Food Finder
-10. Settings
-11. Common Design & Interaction Standards
-12. About & Acknowledgements
-13. User Feedback System
-14. Admin Dashboard
-15. PWA Installation
-16. Accessibility Features
-17. API Reference Links
+5. Islamic Calendar
+6. Quran & Hadith Reminders
+7. Charity & Zakat Tracker
+8. Zikr & Dua Tracker
+9. Mosque Finder
+10. Halal Food Finder
+11. Settings
+12. Common Design & Interaction Standards
+13. About & Acknowledgements
+14. User Feedback System
+15. Admin Dashboard
+16. PWA Installation
+17. Accessibility Features
+18. API Reference Links
 
 ---
 
@@ -492,11 +493,250 @@ Show countdown until Ramadan starts, and during Ramadan show iftar/suhoor timers
 **V1 Status:** ✅ **Complete** (November 2024) - Countdown display, Hijri offset setting, detailed timer format, browser timezone auto-detection, iftar/suhoor timers
 
 **Future Enhancements (V1.2+):**
-- **V1.2:** Full Hijri calendar view (month/year display)
-- **V1.2:** Important Islamic dates (Eid, Laylat al-Qadr, Ashura, Day of Arafah)
+- **V1.2:** ✅ Full Hijri calendar view (month/year display) - Implemented
+- **V1.2:** ✅ Important Islamic dates (Eid, Laylat al-Qadr, Ashura, Day of Arafah) - Implemented
 - **V1.2:** Historical event annotations
 - **V1.2:** Event reminders
 - **V2.0:** Community events calendar (local lectures, study circles)
+
+---
+
+## 4. Islamic Calendar (`/calendar`)
+
+### Functionality
+Full Islamic (Hijri) calendar with dual Gregorian/Islamic views, important date highlighting, and branch-based filtering (Sunni/Shia/Ibadi). Users can explore the Islamic calendar, learn about significant dates across Islamic traditions, and view date conversions between both calendar systems.
+
+### Implementation Status
+**V1.2 Status:** ✅ **Complete** (November 2024)
+
+### Features
+
+**Calendar Views:**
+- Toggle between Gregorian and Islamic calendar layouts
+- Month/year navigation (Previous/Next/Today buttons)
+- **Proper year display**: Shows Gregorian year in Gregorian view, Hijri year in Islamic view
+- Dual-date display: Each calendar cell shows both Gregorian and Hijri dates
+- Visual indicators: Today (accent border), Selected date (highlighted), Important dates (orange border)
+
+**Important Dates Database:**
+- **High Significance (14 dates):**
+  - Ramadan (entire month) - Holy month of fasting [All branches]
+  - Eid al-Fitr (1 Shawwal) - Festival of Breaking the Fast [All branches]
+  - Eid al-Adha (10 Dhul Hijjah) - Festival of Sacrifice [All branches]
+  - Laylat al-Qadr (27 Ramadan) - Night of Power [All branches]
+  - Day of Arafah (9 Dhul Hijjah) - Most blessed day for fasting [All branches]
+  - Ashura (10 Muharram) - Fasting (Sunni) / Mourning for Imam Husayn (Shia) [All branches]
+  - Last 10 Nights of Ramadan (21-29/30 Ramadan) [All branches]
+  - First 10 Days of Dhul Hijjah (1-10 Dhul Hijjah) [All branches]
+  - **Arbaeen (20 Safar)** - 40 days after Ashura, Imam Husayn commemoration [Shia]
+  - **Eid al-Ghadir (18 Dhul Hijjah)** - Ghadir Khumm declaration [Shia]
+
+- **Medium Significance (7 dates):**
+  - Islamic New Year (1 Muharram) [All branches]
+  - **Mawlid al-Nabi (12 Rabi al-Awwal)** - Birth of Prophet Muhammad ﷺ [Sunni, Shia] *[Controversial - some reject as bid'ah]*
+  - **Laylat al-Isra wal-Mi'raj (27 Rajab)** - Night Journey and Ascension [All branches] *[Controversial - specific observances debated]*
+  - **Laylat al-Bara'ah (15 Sha'ban)** - Night of Forgiveness [Sunni] *[Controversial - some consider weak]*
+  - Six Days of Shawwal (2-7 Shawwal) - Voluntary fasting [All branches]
+  - Days of Tashriq (11-13 Dhul Hijjah) - Days following Eid al-Adha [All branches]
+
+- **Low Significance (1 date):**
+  - Sacred Month (1 Dhul Qi'dah) - One of four sacred months [All branches]
+
+**Branch Filtering:**
+- Filter important dates by Islamic branches:
+  - **Sunni** - All Sunni madhabs (Hanafi, Shafi'i, Maliki, Hanbali, etc.)
+  - **Shia** - Twelver, Ismaili, Zaydi, and other Shia branches
+  - **Ibadi** - The dominant school in Oman
+- Sunni enabled by default; Shia and Ibadi disabled by default
+- **Controversial dates** marked with flag (e.g., Mawlid, Laylat al-Bara'ah)
+- Select All / None buttons for quick filtering
+- Real-time count of enabled filters (X of 3 selected)
+- Universal dates (observed by all branches) always visible regardless of filters
+
+**Date Details Sidebar:**
+- Tabbed interface:
+  - **Tab 1: Important Dates** - List of significant dates in current month with filters
+  - **Tab 2: Date Details** - Selected date info in both calendars
+- Click any date to view full details
+- Important date cards show: Icon, name (English + Arabic), description, significance level
+- Color-coded significance badges: Red (high), Blue (medium), Gray (low)
+
+**Icons for Important Dates:**
+- 🌙 Ramadan, Islamic New Year
+- 🕌 Eid al-Fitr, Eid al-Adha, Days of Tashriq, Mawlid al-Nabi
+- 🎊 Eid al-Ghadir (Shia)
+- ⭐ Laylat al-Qadr, Laylat al-Miraj
+- 📿 Ashura, First 10 Days, Six Days of Shawwal
+- 🌟 Laylat al-Bara'ah, Last 10 Nights
+- ⛰️ Day of Arafah
+- 🕊️ Sacred Months
+- 🕯️ Arbaeen (Shia)
+
+### Data Source
+
+**API Endpoints:**
+- `/api/calendar/gregorian-month` - Fetch Gregorian month with Hijri conversions
+  - Parameters: `month` (1-12), `year` (e.g., 2024)
+  - Returns: Array of 28-31 dates with both calendar systems
+  - Cache: 24 hours
+
+- `/api/calendar/hijri-month` - Fetch Hijri month with Gregorian conversions
+  - Parameters: `month` (1-12), `year` (e.g., 1446)
+  - Returns: Array of 29-30 dates with both calendar systems
+  - Cache: 24 hours
+
+- `/api/calendar/convert` - Individual date conversion
+  - Parameters: `date` (DD-MM-YYYY), `direction` (gToH or hToG)
+  - Returns: Single date with full metadata
+  - Cache: 24 hours
+
+**External API:**
+- [AlAdhan Calendar API](https://aladhan.com/islamic-calendar-api)
+  - `GET https://api.aladhan.com/v1/gToHCalendar/{month}/{year}` - Gregorian month
+  - `GET https://api.aladhan.com/v1/hToGCalendar/{month}/{year}` - Hijri month
+  - `GET https://api.aladhan.com/v1/gToH/{DD-MM-YYYY}` - Date conversion
+  - `GET https://api.aladhan.com/v1/hToG/{DD-MM-YYYY}` - Reverse conversion
+
+**Important Dates Storage:**
+- Hardcoded in `/src/lib/islamicDates.ts`
+- Contains full metadata: name (English + Arabic), Hijri date, significance level, branch (Sunni/Shia/Ibadi/All), controversial flag, color, icon, description
+- Helper functions: `getImportantDatesForMonth()`, `isImportantDate()`, `getImportantDatesForDay()`, `getDefaultSchoolFilter()`
+
+### UI Components
+
+**Dashboard Card:**
+- `CalendarCard.tsx` - Shows today's date in both calendars
+- Format: "Thursday, November 21, 2024 • 19 Jumada al-Ula 1446"
+- Links to `/calendar` page
+- Displays Arabic month name below Hijri date
+
+**Calendar Page:**
+- `CalendarControls.tsx` - Month/year navigation (displays correct year based on view) and view toggle
+- `GregorianCalendar.tsx` - 7-column grid (Sun-Sat) showing Gregorian dates with Hijri below
+- `IslamicCalendar.tsx` - 7-column grid (Sat-Fri) showing Hijri dates with Gregorian below
+- `CalendarSidebar.tsx` - Tabbed interface with important dates list and date details
+- `SchoolFilters.tsx` - Checkbox filters for Islamic branches (Sunni/Shia/Ibadi)
+- `ImportantDatesList.tsx` - Scrollable list of significant dates
+- `DateDetails.tsx` - Selected date information panel
+
+### Logic
+
+**Calendar Grid Layout:**
+- **Gregorian View:** Week starts Sunday, displays Gregorian date prominently with Hijri date below
+- **Islamic View:** Week starts Saturday (Islamic week convention), displays Hijri date prominently with Gregorian below
+- **Padding:** Empty cells added at start of month to align weekdays correctly
+- **Responsiveness:** Grid adapts to mobile (smaller cells, touch-friendly)
+
+**Date Selection:**
+- Click any date to view details in sidebar
+- Selected date highlighted with accent color
+- Sidebar switches to "Date Details" tab automatically
+- Displays both calendar dates, weekdays, and any important events
+
+**Branch Filter Logic:**
+- Each important date tagged with observing branches (Sunni, Shia, Ibadi, or All)
+- Dates marked "all" visible regardless of filters
+- Branch-specific dates only visible when that branch is enabled (e.g., Eid al-Ghadir only shows if Shia is enabled)
+- Controversial dates (Mawlid, Laylat al-Bara'ah) marked with flag in metadata
+- Filter changes immediately update calendar and sidebar list
+
+**State Management:**
+- Custom `useCalendar` hook manages all calendar state
+- **Separate state tracking**: Maintains independent Gregorian (month/year) and Hijri (month/year) state
+- **Proper year display**: Displays correct year based on active view (Gregorian year in Gregorian view, Hijri year in Islamic view)
+- View preference saved to localStorage
+- Branch filters saved to localStorage
+- Future: Sync to Supabase profile for authenticated users
+
+### Data Storage
+
+**localStorage:**
+- `calendar_view` - Selected view ('gregorian' or 'islamic')
+- `calendar_school_filters` - JSON object of enabled branches: `{sunni: true, shia: false, ibadi: false}`
+
+**Supabase Profile (future):**
+- Will sync calendar preferences across devices for authenticated users
+- Fields: `calendar_view`, `calendar_school_filters` (branch filters)
+
+### Accessibility
+
+**ARIA Labels:**
+- Calendar controls have descriptive labels
+- Date cells include full date in both calendars
+- Tab controls announce current tab
+- Checkboxes labeled with school names
+
+**Keyboard Navigation:**
+- Tab through calendar controls
+- Arrow keys for month navigation
+- Enter/Space to select dates
+- Focus indicators on all interactive elements
+
+**Screen Reader Support:**
+- Loading states announced
+- Error messages announced
+- Date selection changes announced
+- Filter count changes announced
+
+### Mobile Experience
+
+**Responsive Layout:**
+- Calendar controls stack vertically on small screens
+- Calendar grid maintains 7-column layout (smaller cells)
+- Sidebar moves below calendar on mobile
+- Touch-friendly tap targets (minimum 44x44px)
+- Scrollable important dates list
+
+**Performance:**
+- Calendar data cached for 24 hours
+- Only current month fetched (not entire year)
+- Images/icons are emojis (no external resources)
+- Sidebar tabs lazy load content
+
+### Testing
+
+**API Route Tests:**
+- `hijri-month.test.ts` - Parameter validation, error handling
+- `gregorian-month.test.ts` - Month range validation, response structure
+- `convert.test.ts` - Date format validation, direction parameter
+
+**Component Tests:**
+- `CalendarCard.test.tsx` - Loading states, date display, link functionality
+
+**Integration Testing:**
+- Calendar page renders correctly
+- View toggle works
+- Month navigation updates data
+- Date selection updates sidebar
+- School filters apply correctly
+
+### Performance Considerations
+
+**Caching Strategy:**
+- API responses cached for 24 hours (dates don't change)
+- Calendar hook memoizes expensive calculations
+- Important dates computed once per month
+- Sidebar list virtualized if more than 20 dates
+
+**Bundle Size:**
+- No external calendar libraries (custom implementation)
+- Icons are emojis (no icon library needed)
+- Minimal dependencies (uses existing shadcn/ui components)
+
+**V1.2 Status:** ✅ **Complete** (November 2024) - Dual calendar views with proper year display (Gregorian year in Gregorian view, Hijri year in Islamic view), independent month/year state tracking, month navigation, important dates across Islamic branches (Sunni, Shia, Ibadi) with icons and descriptions, branch-based filtering, controversial date marking, responsive design, full accessibility
+
+**Key Bug Fixes:**
+- Fixed year display discrepancy (was showing Gregorian year in Islamic view)
+- Simplified filtering from 10 schools to 3 branches (more accurate to actual differences)
+- Added separate state tracking for Gregorian and Hijri calendars
+
+**Future Enhancements (V1.3+):**
+- **V1.3:** Export calendar to iCal/Google Calendar format
+- **V1.3:** Set custom reminders for important dates
+- **V1.3:** Historical Islamic events annotations (battles, treaties, births/deaths of scholars)
+- **V1.3:** Hijri date widget (embed calendar on external sites)
+- **V2.0:** Community events calendar overlay (local mosque events, lectures, study circles)
+- **V2.0:** Personal event tracking (family celebrations, local gatherings)
 
 ---
 

@@ -1,5 +1,6 @@
 import { NextPrayerCard } from '@/components/dashboard/NextPrayerCard'
 import { RamadanCard } from '@/components/dashboard/RamadanCard'
+import { CalendarCard } from '@/components/dashboard/CalendarCard'
 import { QuranCard } from '@/components/dashboard/QuranCard'
 import { HadithCard } from '@/components/dashboard/HadithCard'
 import { CharityCard } from '@/components/dashboard/CharityCard'
@@ -21,6 +22,7 @@ export default function Home() {
         {/* Grid Section - Other Cards */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
           <NextPrayerCard />
+          <CalendarCard />
           <QuranCard />
           <HadithCard />
           <CharityCard />

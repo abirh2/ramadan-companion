@@ -838,3 +838,177 @@ This approach minimizes API calls while ensuring good coverage.
 **Notes:**
 - Used to populate currency selectors in donation form and zakat calculator
 - Supports ~30+ currencies (all Frankfurter currencies except ILS)
+
+---
+
+## /api/calendar/hijri-month
+**Status:** ✅ Implemented (V1.2)
+
+**Purpose:** Fetch full Hijri month with Gregorian date conversions
+
+**Method:** GET
+
+**Parameters:**
+- `month` (required): Hijri month number (1-12)
+- `year` (required): Hijri year (e.g., 1446)
+
+**Response Format:**
+```json
+{
+  "code": 200,
+  "status": "OK",
+  "data": [
+    {
+      "hijri": {
+        "day": 1,
+        "month": 9,
+        "year": 1446,
+        "monthName": "Ramaḍān",
+        "monthNameAr": "رَمَضَان",
+        "weekday": "Al Juma'a",
+        "weekdayAr": "الجمعة",
+        "date": "01-09-1446"
+      },
+      "gregorian": {
+        "day": 1,
+        "month": 3,
+        "year": 2025,
+        "monthName": "March",
+        "weekday": "Saturday",
+        "date": "01-03-2025"
+      }
+    }
+    // ... 28 or 29 more dates
+  ],
+  "meta": {
+    "hijriMonth": 9,
+    "hijriYear": 1446,
+    "daysInMonth": 29
+  }
+}
+```
+
+**Caching:** 24 hours (revalidate: 86400) - Hijri dates don't change
+
+**Error Handling:**
+- 400: Missing or invalid parameters (month must be 1-12)
+- 500: AlAdhan API error or network failure
+
+**External API:** `https://api.aladhan.com/v1/hToGCalendar/{month}/{year}`
+
+---
+
+## /api/calendar/gregorian-month
+**Status:** ✅ Implemented (V1.2)
+
+**Purpose:** Fetch full Gregorian month with Hijri date conversions
+
+**Method:** GET
+
+**Parameters:**
+- `month` (required): Gregorian month number (1-12)
+- `year` (required): Gregorian year (e.g., 2024)
+
+**Response Format:**
+```json
+{
+  "code": 200,
+  "status": "OK",
+  "data": [
+    {
+      "gregorian": {
+        "day": 1,
+        "month": 11,
+        "year": 2024,
+        "monthName": "November",
+        "weekday": "Friday",
+        "date": "01-11-2024"
+      },
+      "hijri": {
+        "day": 29,
+        "month": 4,
+        "year": 1446,
+        "monthName": "Rabīʿ al-thānī",
+        "monthNameAr": "رَبيع الثاني",
+        "weekday": "Al Juma'a",
+        "weekdayAr": "الجمعة",
+        "date": "29-04-1446"
+      }
+    }
+    // ... 29 or 30 more dates
+  ],
+  "meta": {
+    "gregorianMonth": 11,
+    "gregorianYear": 2024,
+    "daysInMonth": 30
+  }
+}
+```
+
+**Caching:** 24 hours (revalidate: 86400)
+
+**Error Handling:**
+- 400: Missing or invalid parameters (month must be 1-12)
+- 500: AlAdhan API error or network failure
+
+**External API:** `https://api.aladhan.com/v1/gToHCalendar/{month}/{year}`
+
+---
+
+## /api/calendar/convert
+**Status:** ✅ Implemented (V1.2)
+
+**Purpose:** Bidirectional date conversion between Gregorian and Hijri calendars
+
+**Method:** GET
+
+**Parameters:**
+- `date` (required): Date in DD-MM-YYYY format
+- `direction` (optional): 'gToH' (Gregorian to Hijri, default) or 'hToG' (Hijri to Gregorian)
+
+**Example:** `/api/calendar/convert?date=21-11-2024&direction=gToH`
+
+**Response Format:**
+```json
+{
+  "code": 200,
+  "status": "OK",
+  "data": {
+    "gregorian": {
+      "day": 21,
+      "month": 11,
+      "year": 2024,
+      "monthName": "November",
+      "weekday": "Thursday",
+      "date": "21-11-2024"
+    },
+    "hijri": {
+      "day": 19,
+      "month": 5,
+      "year": 1446,
+      "monthName": "Jumādá al-ūlá",
+      "monthNameAr": "جُمادى الأولى",
+      "weekday": "Al Khamis",
+      "weekdayAr": "الخميس",
+      "date": "19-05-1446"
+    }
+  },
+  "meta": {
+    "inputDate": "21-11-2024",
+    "direction": "gToH"
+  }
+}
+```
+
+**Caching:** 24 hours (revalidate: 86400)
+
+**Error Handling:**
+- 400: Missing date parameter or invalid format
+- 400: Invalid direction (must be 'gToH' or 'hToG')
+- 500: AlAdhan API error or network failure
+
+**External API:** 
+- `https://api.aladhan.com/v1/gToH/{DD-MM-YYYY}` (Gregorian to Hijri)
+- `https://api.aladhan.com/v1/hToG/{DD-MM-YYYY}` (Hijri to Gregorian)
+
+---

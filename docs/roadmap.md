@@ -62,7 +62,7 @@
 | 🔥 High | Quran Audio Recitation | ✅ Complete - Per-ayah playback, 6 reciters, session-only preference | AlQuran Cloud CDN |
 | 🔥 High | Hadith Browser | ✅ Complete - 7 collections (Kutub al-Sittah + Mishkat), book/chapter navigation, grading system with detailed explanations, Arabic text + English/Urdu translations, favorites, pagination | HadithAPI |
 | 🔥 High | Tafsir Integration | ✅ Complete - 20+ tafsirs in multiple languages, session-persistent selection | Quran.com API |
-| 🔥 High | Islamic Calendar | Full Hijri calendar with important dates (Eid, Laylat al-Qadr) | AlAdhan Calendar API |
+| 🔥 High | Islamic Calendar | ✅ Complete - Full Hijri calendar with important dates, dual-view toggle, school filtering | AlAdhan Calendar API |
 | 🟡 Medium | Expanded Dhikr Tracking | Wird programs, Salawat, Istighfar counters | Supabase (wird_programs table) |
 | 🟡 Medium | Dua Audio | Audio pronunciations for popular duas | Hosted audio files |
 | 🟡 Medium | Notes on Favorites | Personal reflections on saved content | Supabase (notes field) |

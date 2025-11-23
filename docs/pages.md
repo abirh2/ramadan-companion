@@ -431,9 +431,120 @@
 
 ---
 
+## /calendar
+
+**Purpose:** View and explore the Islamic (Hijri) calendar with important dates and school-based filtering
+
+**Status:** ✅ **Complete** (V1.2)
+
+### Layout
+
+**Desktop:**
+- Calendar grid (center, flex-1)
+- Right sidebar (320px width)
+- Responsive two-column layout
+
+**Mobile:**
+- Calendar grid (full width)
+- Sidebar below calendar
+- Stacked single-column layout
+
+### Components
+
+**Main Components:**
+- `CalendarControls` - Month/year navigation and view toggle
+- `GregorianCalendar` - 7-column grid (Sun-Sat) with Hijri dates in cells
+- `IslamicCalendar` - 7-column grid (Sat-Fri) with Gregorian dates in cells
+- `CalendarSidebar` - Tabbed interface with important dates and date details
+
+**Sidebar Tabs:**
+1. **Important Dates** - List of significant Islamic dates with school filters
+2. **Date Details** - Selected date info in both calendars
+
+### Features
+
+**Calendar Views:**
+- Toggle between Gregorian and Islamic calendar
+- Month/year navigation (Previous/Next/Today buttons)
+- Visual indicators for today, selected date, and important dates
+- Color-coded badges and icons for significant dates
+
+**Important Dates:**
+- High significance: Ramadan, Eid al-Fitr, Eid al-Adha, Laylat al-Qadr, Ashura
+- Medium significance: Islamic New Year, Mawlid, Laylat al-Miraj, Laylat al-Bara'ah
+- Low significance: Sacred months
+
+**School Filtering:**
+- Filter dates by Sunni schools: Hanafi, Shafi, Maliki, Hanbali
+- All schools selected by default
+- Select All / Deselect All buttons
+- Displays count of enabled filters
+
+**Interaction:**
+- Click any date to view details in sidebar
+- Important date cards are clickable
+- Keyboard navigation support
+- ARIA labels for accessibility
+
+### Data Storage
+
+**localStorage:**
+- `calendar_view` - Selected calendar view (gregorian/islamic)
+- `calendar_school_filters` - JSON object of enabled schools
+
+**Supabase Profile (future):**
+- Will sync preferences across devices for authenticated users
+
+### API Integration
+
+Uses three API endpoints:
+- `/api/calendar/gregorian-month` - Fetch Gregorian month with Hijri conversions
+- `/api/calendar/hijri-month` - Fetch Hijri month with Gregorian conversions
+- `/api/calendar/convert` - Individual date conversion
+
+### Visual Design
+
+**Color Coding:**
+- Today: Accent border with light background
+- Selected: Accent background with foreground text
+- Important dates: Orange border (unselected state)
+- Significance badges: Red (high), Blue (medium), Gray (low)
+
+**Icons:**
+- 🌙 Ramadan, Islamic New Year
+- 🕌 Eid al-Fitr, Eid al-Adha
+- ⭐ Laylat al-Qadr, Laylat al-Miraj
+- 📿 Ashura, first 10 days, six days of Shawwal
+- 🌟 Laylat al-Bara'ah, last 10 nights
+- ⛰️ Day of Arafah
+- 🕊️ Sacred months
+
+### Mobile Experience
+
+**Responsive Adjustments:**
+- Calendar controls stack vertically on small screens
+- Sidebar moves below calendar on mobile
+- Touch-friendly date cells with adequate spacing
+- Scrollable important dates list
+
+**Accessibility:**
+- Skip links for keyboard navigation
+- ARIA labels on all interactive elements
+- Screen reader announcements for date selection
+- Focus indicators on all controls
+
+### Future Enhancements
+
+- **V1.3:** Export calendar to iCal/Google Calendar
+- **V1.3:** Set reminders for important dates
+- **V2.0:** Community events calendar overlay
+- **V2.0:** Local mosque event integration
+
+---
+
 ## Summary
 
-**Total Pages:** 10 (all complete in V1.0)  
+**Total Pages:** 11 (10 from V1.0, +1 calendar from V1.2)  
 **Auth-Protected:** 3 (/profile, /charity, /admin)  
-**Public:** 7 (/, /times, /quran-hadith, /favorites, /zikr, /places/mosques, /places/food, /about)  
-**With Feedback Button:** All 10 pages
+**Public:** 8 (/, /times, /quran-hadith, /favorites, /zikr, /places/mosques, /places/food, /about, /calendar)  
+**With Feedback Button:** All 11 pages
