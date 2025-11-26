@@ -121,7 +121,7 @@ Display accurate prayer times and Qibla direction based on user location with ci
   2. localStorage `location_lat/lng/city` (if previously set)
   3. Browser Geolocation API (with user permission)
   4. Mecca default fallback (21.4225, 39.8262)
-- **Calculation method:** Supabase `profiles.calculation_method` → localStorage → default **Umm al-Qura (Method 4)**
+- **Calculation method:** Supabase `profiles.calculation_method` → localStorage → smart default based on location (ISNA for North America, Umm al-Qura for Middle East) → fallback **ISNA (Method 2)**
 - **Prayer Times Calculation (with automatic fallback):**
   - **Primary:** Next.js proxy `/api/prayertimes` → AlAdhan API  
     `GET https://api.aladhan.com/v1/timings/{DD-MM-YYYY}?latitude={lat}&longitude={lng}&method={method}&timezonestring={timezone}`
@@ -173,6 +173,40 @@ Display accurate prayer times and Qibla direction based on user location with ci
 5. **Data persistence:** Location and method saved to Supabase profile (if authenticated) + localStorage
 6. **Browser timezone:** Automatically uses `Intl.DateTimeFormat().resolvedOptions().timeZone`
 7. **Automatic fallback:** If AlAdhan API unavailable (network error, timeout, API error), automatically calculates prayer times locally using PrayTime library. Fallback is transparent - users see accurate prayer times regardless of connectivity.
+
+### Prayer Calculation Method - Smart Defaults (V1.1)
+
+**Default Behavior:**
+- **Primary Default:** ISNA ('2') for most users
+- **Location-Based Override:** Umm al-Qura ('4') for Middle Eastern countries (Saudi Arabia, UAE, Kuwait, Bahrain, Qatar, Oman)
+- **Timing:** Only applied on first visit when no saved preference exists
+- **User Control:** Once user manually selects a method, their choice is saved and always respected
+
+**User Priority Chain:**
+1. User profile (`calculation_method` field) - if authenticated
+2. localStorage (`calculation_method`) - if saved
+3. Smart default based on detected country
+4. Fallback: ISNA ('2')
+
+**Implementation:**
+- Location detection via browser geolocation + Nominatim reverse geocoding
+- Country extracted from location string (e.g., "Riyadh, Saudi Arabia")
+- Method mapping in `lib/calculationMethod.ts`
+- Smart default never auto-saves (user must manually select to persist)
+
+**When Smart Default Applies:**
+- ✅ First visit (no profile, no localStorage)
+- ✅ Guest user with no saved preference
+- ✅ New authenticated user before first manual selection
+- ✅ After clearing browser data (localStorage cleared)
+
+**When Smart Default Does NOT Apply:**
+- ❌ User has saved preference (profile or localStorage)
+- ❌ User changes location (preference persists)
+- ❌ After user manually selects ANY method (saves and never resets)
+
+**Rationale:**
+ISNA is widely applicable and provides reasonable prayer times globally. Middle Eastern countries have specific regional preferences (Umm al-Qura) that should be respected. The smart default serves the majority North American user base while accommodating regional differences.
 
 ### UI
 - **Dashboard Card:**

@@ -14,7 +14,7 @@ Store per-user preferences and settings.
 | location_lat | double precision | nullable | **Active (V1)** - Saved from browser geolocation or city search |
 | location_lng | double precision | nullable | **Active (V1)** - Saved from browser geolocation or city search |
 | location_city | text | nullable | **Active (V1)** - Display name for user's location |
-| calculation_method | text | e.g. '4' (Umm al-Qura) | **Active (V1)** - AlAdhan API method ID |
+| calculation_method | text | e.g. '2' (ISNA, default for North America), '4' (Umm al-Qura for Middle East) | **Active (V1)** - AlAdhan API method ID, auto-detected based on location on first visit |
 | madhab | text | 'hanafi' or 'standard' | **Active (V1)** - Affects Asr calculation (0=Standard, 1=Hanafi) |
 | hijri_offset_days | integer | default 0 | Planned |
 | language | text | e.g. 'en' | Planned |

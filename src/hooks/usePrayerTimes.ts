@@ -21,6 +21,7 @@ import {
   MECCA_COORDS,
 } from '@/lib/location'
 import { calculatePrayerTimesLocal, validatePrayerTimes } from '@/lib/prayerTimes'
+import { getDefaultCalculationMethodByCountry, extractCountryFromCity } from '@/lib/calculationMethod'
 
 // Prayer names in order (excluding Sunrise for next prayer calculation)
 const PRAYER_NAMES = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const
@@ -44,7 +45,7 @@ export function usePrayerTimes(): UsePrayerTimesResult {
     nextPrayer: null,
     qiblaDirection: null,
     location: null,
-    calculationMethod: '4', // Default: Umm al-Qura
+    calculationMethod: '2', // Default: ISNA (North America)
     madhab: '0', // Default: Standard (Shafi/Maliki/Hanbali)
     calculationSource: null,
     loading: true,
@@ -226,13 +227,17 @@ export function usePrayerTimes(): UsePrayerTimesResult {
       }
 
       // Get calculation method from profile or localStorage
-      let method: CalculationMethodId = '4'
+      let method: CalculationMethodId = '2' // New default: ISNA
       if (profile?.calculation_method) {
         method = profile.calculation_method as CalculationMethodId
       } else if (typeof window !== 'undefined') {
         const storedMethod = localStorage.getItem('calculation_method')
         if (storedMethod) {
           method = storedMethod as CalculationMethodId
+        } else {
+          // NO SAVED PREFERENCE → Apply smart default based on location
+          const country = extractCountryFromCity(location?.city || null)
+          method = getDefaultCalculationMethodByCountry(country)
         }
       }
 

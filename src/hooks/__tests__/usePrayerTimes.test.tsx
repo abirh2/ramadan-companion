@@ -184,11 +184,11 @@ describe('usePrayerTimes', () => {
 
     const initialMethod = result.current.calculationMethod
 
-    // Update calculation method
-    await result.current.updateCalculationMethod('2')
+    // Update calculation method to Umm al-Qura (different from default ISNA)
+    await result.current.updateCalculationMethod('4')
 
     await waitFor(() => {
-      expect(result.current.calculationMethod).toBe('2')
+      expect(result.current.calculationMethod).toBe('4')
     })
 
     expect(result.current.calculationMethod).not.toBe(initialMethod)

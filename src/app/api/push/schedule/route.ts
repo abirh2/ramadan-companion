@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
       const prayerTimes = calculatePrayerTimesLocal(
         profile.location_lat,
         profile.location_lng,
-        (profile.calculation_method || '4') as any,
+        (profile.calculation_method || '2') as any, // Fallback to ISNA
         (profile.madhab || '0') as any,
         userTimezone, // User's actual timezone from coordinates
         new Date() // date - today
