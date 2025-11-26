@@ -1,0 +1,75 @@
+{
+  "auth": {
+    "email": "your-email@example.com",
+    "password": "your-password"
+  },
+  "routes": [
+    "/",
+    "/times",
+    "/charity",
+    "/quran-hadith",
+    "/zikr",
+    "/calendar",
+    "/quran",
+    "/hadith",
+    "/places/mosques",
+    "/places/food",
+    "/favorites",
+    "/profile"
+  ],
+  "components": [
+    {
+      "name": "ramadan-card",
+      "selector": "div[role='article']:has(> div > div > .lucide-moon)",
+      "authRequired": false
+    },
+    {
+      "name": "next-prayer-card",
+      "selector": "a[href='/times'] > div[role='article']",
+      "authRequired": false
+    },
+    {
+      "name": "quran-card",
+      "selector": "a[href='/quran-hadith'] > div[role='article']:has(.lucide-book-open)",
+      "authRequired": false
+    },
+    {
+      "name": "hadith-card",
+      "selector": "a[href='/quran-hadith'] > div[role='article']:has(.lucide-scroll-text)",
+      "authRequired": false
+    },
+    {
+      "name": "charity-card",
+      "selector": "a[href='/charity'] > div[role='article']",
+      "authRequired": true
+    },
+    {
+      "name": "zikr-card",
+      "selector": "a[href='/zikr'] > div[role='article']",
+      "authRequired": false
+    },
+    {
+      "name": "places-card",
+      "selector": "div[role='article']:has(.lucide-map-pin)",
+      "authRequired": false
+    },
+    {
+      "name": "admin-card",
+      "selector": "a[href='/admin'] > div[role='article']",
+      "authRequired": true
+    }
+  ],
+  "viewport": {
+    "width": 1200,
+    "height": 630
+  },
+  "mobileViewport": {
+    "width": 390,
+    "height": 844
+  },
+  "captureMobile": true,
+  "outputDir": "public/social-previews",
+  "serverPort": 3000,
+  "waitForFonts": 2000
+}
+
