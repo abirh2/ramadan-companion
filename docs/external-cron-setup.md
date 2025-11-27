@@ -22,7 +22,7 @@ Due to Vercel Hobby plan limitations (daily cron jobs only), we use an external 
 
 2. **Create Cron Job:**
    - Dashboard → "Create cronjob"
-   - **Title:** `Ramadan Companion - Prayer Notifications`
+   - **Title:** `Deen Companion - Prayer Notifications`
    - **URL:** `https://your-app.vercel.app/api/push/schedule`
    - **Schedule:** Every 5 minutes
      - Pattern: `*/5 * * * *`
@@ -111,7 +111,7 @@ jobs:
 
 **Active Service:** TBD (user must configure)
 
-**Endpoint:** `https://ramadan-companion.vercel.app/api/push/schedule`
+**Endpoint:** `https://deen-companion.vercel.app/api/push/schedule`
 
 **Schedule:** Every 5 minutes (`*/5 * * * *`)
 

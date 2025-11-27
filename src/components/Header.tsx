@@ -10,9 +10,9 @@ export function Header() {
         <Link 
           href="/" 
           className="text-xl font-semibold hover:opacity-80 transition-opacity"
-          aria-label="Ramadan Companion - Go to homepage"
+          aria-label="Deen Companion - Go to homepage"
         >
-          Ramadan Companion
+          Deen Companion
         </Link>
         <nav aria-label="Main navigation" className="flex items-center gap-2">
           <ThemeToggle />

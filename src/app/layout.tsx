@@ -18,13 +18,13 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Ramadan Companion",
-  description: "A modern, minimal web app to assist with daily worship and reflection during Ramadan.",
+  title: "Deen Companion",
+  description: "A modern, minimal web app to assist with daily Islamic worship and reflection.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Ramadan",
+    title: "Deen",
   },
   icons: {
     icon: [

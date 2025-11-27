@@ -1,4 +1,4 @@
-# Ramadan Companion App
+# Deen Companion App
 
 > **Version 1.2 (In Progress)** | V1.1 Complete (November 2024) | Live and deployed on Vercel
 

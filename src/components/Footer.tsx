@@ -21,7 +21,7 @@ export function Footer() {
             </Link>
           </div>
           <p className="text-xs text-muted-foreground/70">
-            © {new Date().getFullYear()} Ramadan Companion
+            © {new Date().getFullYear()} Deen Companion
           </p>
         </div>
       </div>

@@ -1,8 +1,10 @@
-# Ramadan Companion
+# Deen Companion
 
 > **Version 1.2 (In Progress)** | Built with Next.js 16, React 19, TypeScript, and Supabase
+>
+> *Formerly known as "Ramadan Companion" - renamed to better reflect year-round Islamic worship support*
 
-A modern, minimal web app built for Muslims to assist with daily worship and reflection—especially during Ramadan. Comprehensive features for prayer times, Quran study, hadith reading, charity tracking, zikr counter, and finding nearby mosques and halal food.
+A modern, minimal web app built for Muslims to assist with daily worship and reflection throughout the year. Comprehensive features for prayer times, Quran study, hadith reading, charity tracking, zikr counter, and finding nearby mosques and halal food.
 
 ## Features (V1.1 Complete + V1.2 Additions)
 

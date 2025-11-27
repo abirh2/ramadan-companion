@@ -1,6 +1,6 @@
 {
-  "name": "Ramadan Companion",
-  "short_name": "Ramadan",
+  "name": "Deen Companion",
+  "short_name": "Deen",
   "description": "Islamic companion for prayer times, Quran, Hadith, and charity tracking",
   "start_url": "/",
   "display": "standalone",

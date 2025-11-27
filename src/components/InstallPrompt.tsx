@@ -225,7 +225,7 @@ export function InstallPrompt() {
       <div className="fixed bottom-0 left-0 right-0 bg-primary text-primary-foreground p-3 flex items-center justify-between shadow-lg z-50">
         <div className="flex items-center gap-2">
           <Info className="h-5 w-5" />
-          <p className="text-sm">Install Ramadan Companion: Tap Share (⬆︎) → "Add to Home Screen"</p>
+          <p className="text-sm">Install Deen Companion: Tap Share (⬆︎) → "Add to Home Screen"</p>
         </div>
         <div className="flex gap-2">
           <Button variant="ghost" size="sm" onClick={handleDismiss} className="text-primary-foreground hover:bg-primary/80">
@@ -283,7 +283,7 @@ export function InstallPrompt() {
               <div className="flex-shrink-0">
                 <img 
                   src="/icon-192.png" 
-                  alt="Ramadan Companion" 
+                  alt="Deen Companion" 
                   className="w-12 h-12 rounded-lg"
                 />
               </div>
@@ -291,7 +291,7 @@ export function InstallPrompt() {
               {/* Message */}
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-sm sm:text-base">
-                  Install Ramadan Companion
+                  Install Deen Companion
                 </h3>
                 <p className="text-xs sm:text-sm text-muted-foreground">
                   Add to home screen for offline access and faster loading

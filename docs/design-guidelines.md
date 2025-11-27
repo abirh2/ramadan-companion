@@ -1,6 +1,6 @@
 # Design Guidelines
 
-This document defines the visual and interaction system for the Ramadan Companion app.  
+This document defines the visual and interaction system for the Deen Companion app.  
 It is meant to be concrete enough that any developer or designer can implement consistent UI and UX without guessing.
 
 ---
@@ -36,7 +36,7 @@ It is meant to be concrete enough that any developer or designer can implement c
   - Mobile: single-column layout for cards.
   - Desktop: 2-column grid for dashboard cards.
 - Page structure:
-  - **Global header** (sticky): "Ramadan Companion" title + ThemeToggle + NavMenu + AuthButton
+  - **Global header** (sticky): "Deen Companion" title + ThemeToggle + NavMenu + AuthButton
   - **Page content area**: Back button + page title + content
   - Footer is optional and minimal (version, small credits).
 
@@ -361,7 +361,7 @@ The arrangement on the dashboard should reflect this order.
 
 ## 9. Accessibility
 
-The Ramadan Companion app follows WCAG 2.1 Level AA standards to ensure accessibility for all users, including those using assistive technologies.
+The Deen Companion app follows WCAG 2.1 Level AA standards to ensure accessibility for all users, including those using assistive technologies.
 
 ### 9.1 Visual Accessibility
 

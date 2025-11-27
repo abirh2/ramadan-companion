@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-Currently supported versions of Ramadan Companion:
+Currently supported versions of Deen Companion:
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -10,11 +10,11 @@ Currently supported versions of Ramadan Companion:
 
 ## Reporting a Vulnerability
 
-We take the security of Ramadan Companion seriously. If you discover a security vulnerability, please report it responsibly.
+We take the security of Deen Companion seriously. If you discover a security vulnerability, please report it responsibly.
 
 ### How to Report
 
-1. **Email**: Send details to abirh@alumni.upenn.edu with subject line "Security Vulnerability - Ramadan Companion"
+1. **Email**: Send details to abirh@alumni.upenn.edu with subject line "Security Vulnerability - Deen Companion"
 2. **Include**:
    - Description of the vulnerability
    - Steps to reproduce
@@ -61,5 +61,5 @@ We believe in responsible disclosure and will work with security researchers to:
 4. Credit the researcher (with permission)
 5. Publish a security advisory if appropriate
 
-Thank you for helping keep Ramadan Companion secure!
+Thank you for helping keep Deen Companion secure!
 

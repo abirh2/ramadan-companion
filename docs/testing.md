@@ -1,4 +1,4 @@
-# Testing Guide - Ramadan Companion
+# Testing Guide - Deen Companion
 
 ## Overview
 

@@ -1,4 +1,4 @@
-# Deployment Guide - Ramadan Companion
+# Deployment Guide - Deen Companion
 
 ## Deploying to Vercel (Recommended)
 
@@ -26,7 +26,7 @@ git push origin main
 
 1. Go to [vercel.com](https://vercel.com) and sign in
 2. Click "Add New Project"
-3. Import your GitHub repository: `ramadan-companion`
+3. Import your GitHub repository: `deen-companion`
 4. Vercel will auto-detect it's a Next.js project
 
 #### 3. Configure Environment Variables
@@ -59,7 +59,7 @@ Vercel should auto-detect these, but verify:
 
 1. Click "Deploy"
 2. Wait for the build to complete (usually 2-3 minutes)
-3. Vercel will provide you with a production URL (e.g., `ramadan-companion.vercel.app`)
+3. Vercel will provide you with a production URL (e.g., `deen-companion.vercel.app`)
 
 #### 6. Configure Supabase Redirect URLs
 

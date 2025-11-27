@@ -8,7 +8,7 @@ import type { PrayerName } from '@/types/notification.types'
 
 // Configure web-push
 webpush.setVapidDetails(
-  process.env.VAPID_MAILTO || 'mailto:admin@ramadan-companion.app',
+  process.env.VAPID_MAILTO || 'mailto:admin@deen-companion.app',
   process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
   process.env.VAPID_PRIVATE_KEY!
 )

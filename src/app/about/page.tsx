@@ -58,7 +58,7 @@ function AboutContent() {
           Back to Home
         </Button>
         <h1 className="text-3xl font-bold">About</h1>
-        <p className="text-muted-foreground mt-2">Learn more about Ramadan Companion and its creator</p>
+        <p className="text-muted-foreground mt-2">Learn more about Deen Companion and its creator</p>
       </div>
 
       {/* Content */}
@@ -130,7 +130,7 @@ function AboutContent() {
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     I'm a software developer passionate about building meaningful technology that serves the Muslim community. 
                     As a practicing Muslim, I understand the challenges of maintaining daily worship routines in our modern, 
-                    fast-paced world. Ramadan Companion is my contribution to making Islamic practice more accessible and organized.
+                    fast-paced world. Deen Companion is my contribution to making Islamic practice more accessible and organized.
                   </p>
                 </div>
 
@@ -194,7 +194,7 @@ function AboutContent() {
           <TabsContent value="app" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>About Ramadan Companion</CardTitle>
+                <CardTitle>About Deen Companion</CardTitle>
                 <CardDescription>
                   A modern, minimal web app to assist with daily worship and reflection
                 </CardDescription>
@@ -203,8 +203,8 @@ function AboutContent() {
                 <div>
                   <h3 className="font-semibold mb-2">Mission</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Ramadan Companion is designed to help Muslims maintain their daily worship routines, especially during 
-                    the blessed month of Ramadan. Our goal is to provide accurate, accessible tools for prayer times, 
+                    Deen Companion (formerly Ramadan Companion) is designed to help Muslims maintain their daily worship routines 
+                    throughout the year. Our goal is to provide accurate, accessible tools for prayer times, 
                     Quranic reflection, charitable giving, and spiritual growth—all while respecting your privacy and data.
                   </p>
                 </div>
@@ -306,7 +306,7 @@ function AboutContent() {
               <CardHeader>
                 <CardTitle>Install as App</CardTitle>
                 <CardDescription>
-                  Install Ramadan Companion on your device for a native app experience
+                  Install Deen Companion on your device for a native app experience
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -386,7 +386,7 @@ function AboutContent() {
                     <li>Access it from your taskbar, dock, or applications folder</li>
                   </ol>
                   <p className="text-xs text-muted-foreground mt-3">
-                    Alternative: Click the three-dot menu → "Install Ramadan Companion" or "Create shortcut"
+                    Alternative: Click the three-dot menu → "Install Deen Companion" or "Create shortcut"
                   </p>
                 </div>
 
@@ -410,7 +410,7 @@ function AboutContent() {
                 <div>
                   <h3 className="font-semibold mb-2">After Installation</h3>
                   <p className="text-sm text-muted-foreground">
-                    Once installed, you can launch Ramadan Companion directly from your home screen or app drawer. 
+                    Once installed, you can launch Deen Companion directly from your home screen or app drawer. 
                     The app will remember your preferences, work offline, and provide a seamless experience across all your devices.
                   </p>
                 </div>

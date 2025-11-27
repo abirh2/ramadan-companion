@@ -1,4 +1,4 @@
--- Ramadan Companion - Database Setup and RLS Policies
+-- Deen Companion - Database Setup and RLS Policies
 -- Run this SQL in your Supabase SQL Editor
 
 -- ============================================

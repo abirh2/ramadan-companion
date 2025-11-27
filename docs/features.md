@@ -1,4 +1,4 @@
-# Feature Specification – Ramadan Companion App
+# Feature Specification – Deen Companion App
 
 This document defines the functionality, design, and API usage for all core and secondary features.  
 It provides enough detail for any developer or AI agent to implement the app end-to-end following our V1 goals.
@@ -2729,7 +2729,7 @@ USING (EXISTS (SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profile
 ## 15. PWA Installation
 
 ### Purpose
-Enable users to install Ramadan Companion as a progressive web app on their devices for native app experience with offline support.
+Enable users to install Deen Companion as a progressive web app on their devices for native app experience with offline support.
 
 ### Implementation Status
 ✅ **Fully Implemented (V1.1)** - November 2024
@@ -2755,8 +2755,8 @@ Enable users to install Ramadan Companion as a progressive web app on their devi
 **Web App Manifest (`/public/manifest.json`):**
 ```json
 {
-  "name": "Ramadan Companion",
-  "short_name": "Ramadan",
+  "name": "Deen Companion",
+  "short_name": "Deen",
   "display": "standalone",
   "background_color": "#f5f3f0",
   "theme_color": "#0f3d3e",
@@ -2925,7 +2925,7 @@ Enable users to install Ramadan Companion as a progressive web app on their devi
 ## 16. Accessibility Features
 
 ### Overview
-The Ramadan Companion app is built with comprehensive accessibility features to ensure all users, including those using assistive technologies, can fully access and use the application.
+The Deen Companion app is built with comprehensive accessibility features to ensure all users, including those using assistive technologies, can fully access and use the application.
 
 ### WCAG 2.1 AA Compliance
 The app follows Web Content Accessibility Guidelines (WCAG) 2.1 Level AA standards for:

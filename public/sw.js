@@ -1,4 +1,4 @@
-// Service Worker for Ramadan Companion PWA
+// Service Worker for Deen Companion PWA (formerly Ramadan Companion)
 // Version 1.0 - Basic caching + foundation for future notifications
 
 const CACHE_VERSION = 'v1';

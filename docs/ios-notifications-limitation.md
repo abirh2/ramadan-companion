@@ -216,7 +216,7 @@ import webpush from 'web-push'
 
 // Set VAPID keys
 webpush.setVAPIDDetails(
-  'mailto:admin@ramadan-companion.app',
+  'mailto:admin@deen-companion.app',
   process.env.VAPID_PUBLIC_KEY,
   process.env.VAPID_PRIVATE_KEY
 )
