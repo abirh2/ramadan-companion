@@ -44,3 +44,17 @@ next-env.d.ts
 # screenshot automation
 scripts/screenshot-config.json
 public/social-previews/
+
+# Capacitor native projects
+/ios/App/build
+/ios/App/Pods
+/ios/App/Podfile.lock
+/android/app/build
+/android/build
+/android/.gradle
+/android/local.properties
+
+# Capacitor generated files (keep these in git for now)
+# Uncomment later if you want to exclude them:
+# /ios
+# /android

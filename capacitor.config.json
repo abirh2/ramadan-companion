@@ -1,0 +1,21 @@
+{
+  "$schema": "https://capacitorjs.com/docs/cli/configuration",
+  "appId": "com.deencompanion.app",
+  "appName": "Deen Companion",
+  "webDir": "public",
+  "server": {
+    "url": "https://deen-companion.vercel.app",
+    "androidScheme": "https",
+    "iosScheme": "capacitor",
+    "cleartext": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#0f3d3e",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false
+    }
+  }
+}
+
