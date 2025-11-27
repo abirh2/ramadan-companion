@@ -1,6 +1,15 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* iOS Safe Area Support for Capacitor/Native Apps */
+/* These values are 0 on regular browsers, only apply on iOS/Android native */
+:root {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

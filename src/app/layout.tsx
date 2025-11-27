@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Manrope } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -17,6 +17,14 @@ const manrope = Manrope({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover", // Required for safe area insets on iOS
+  themeColor: "#0f3d3e",
+};
+
 export const metadata: Metadata = {
   title: "Deen Companion",
   description: "A modern, minimal web app to assist with daily Islamic worship and reflection.",
@@ -33,7 +41,6 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-touch-icon.png",
   },
-  themeColor: "#0f3d3e",
 };
 
 export default function RootLayout({
