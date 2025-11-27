@@ -4,7 +4,7 @@
   "appName": "Deen Companion",
   "webDir": "public",
   "server": {
-    "url": "https://deen-companion.vercel.app",
+    "url": "https://ramadan-companion.vercel.app",
     "androidScheme": "https",
     "iosScheme": "capacitor",
     "cleartext": false
