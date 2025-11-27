@@ -1,11 +1,12 @@
 'use client'
 
+import Link from 'next/link'
 import { useCalendar } from '@/hooks/useCalendar'
 import { CalendarControls } from '@/components/calendar/CalendarControls'
 import { GregorianCalendar } from '@/components/calendar/GregorianCalendar'
 import { IslamicCalendar } from '@/components/calendar/IslamicCalendar'
 import { CalendarSidebar } from '@/components/calendar/CalendarSidebar'
-import { Loader2, Calendar as CalendarIcon } from 'lucide-react'
+import { Loader2, Calendar as CalendarIcon, ArrowLeft } from 'lucide-react'
 import { FeedbackButton } from '@/components/FeedbackButton'
 
 export default function CalendarPage() {
@@ -37,6 +38,14 @@ export default function CalendarPage() {
     <div className="mx-auto max-w-7xl px-4 py-6">
       {/* Header */}
       <div className="mb-6">
+        <Link 
+          href="/" 
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-3"
+          aria-label="Navigate back to homepage"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          <span className="text-sm">Back to Home</span>
+        </Link>
         <div className="flex items-center gap-2 mb-2">
           <CalendarIcon className="h-6 w-6 text-accent" aria-hidden="true" />
           <h1 className="text-2xl font-bold">Islamic Calendar</h1>

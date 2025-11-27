@@ -1,6 +1,8 @@
 import type { LocationData, GeocodingResult } from '@/types/ramadan.types'
 import type { Profile } from '@/types/auth.types'
 import { createClient } from '@/lib/supabase/client'
+import { Capacitor } from '@capacitor/core'
+import { Geolocation } from '@capacitor/geolocation'
 
 // Default fallback location - Mecca, Saudi Arabia
 export const MECCA_COORDS: LocationData = {
@@ -10,9 +12,68 @@ export const MECCA_COORDS: LocationData = {
   type: 'default',
 }
 
-// Request geolocation from browser
+/**
+ * Request geolocation using platform-appropriate API
+ * - Native apps: Uses Capacitor Geolocation plugin with explicit permission flow
+ * - Browser/PWA: Uses navigator.geolocation API
+ */
 export async function requestGeolocation(): Promise<LocationData | null> {
-  if (!navigator.geolocation) {
+  if (Capacitor.isNativePlatform()) {
+    return requestGeolocationNative()
+  } else {
+    return requestGeolocationBrowser()
+  }
+}
+
+/**
+ * Native geolocation using Capacitor plugin
+ * Handles explicit permission request flow required by mobile platforms
+ */
+async function requestGeolocationNative(): Promise<LocationData | null> {
+  try {
+    // Check current permission status
+    const permission = await Geolocation.checkPermissions()
+    
+    // Request permission if not already granted
+    if (permission.location !== 'granted') {
+      const requestResult = await Geolocation.requestPermissions()
+      if (requestResult.location !== 'granted') {
+        console.error('Geolocation permission denied')
+        return null
+      }
+    }
+
+    // Get current position
+    const position = await Geolocation.getCurrentPosition({
+      timeout: 10000,
+      maximumAge: 300000, // Cache for 5 minutes
+      enableHighAccuracy: true,
+    })
+
+    const lat = position.coords.latitude
+    const lng = position.coords.longitude
+
+    // Try to reverse geocode to get city name
+    const city = await reverseGeocode(lat, lng)
+
+    return {
+      lat,
+      lng,
+      city: city || `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+      type: 'detected',
+    }
+  } catch (error) {
+    console.error('Geolocation error:', error)
+    return null
+  }
+}
+
+/**
+ * Browser geolocation using navigator.geolocation API
+ * Used for PWA and web browser contexts
+ */
+async function requestGeolocationBrowser(): Promise<LocationData | null> {
+  if (typeof navigator === 'undefined' || !navigator.geolocation) {
     console.error('Geolocation is not supported by this browser')
     return null
   }

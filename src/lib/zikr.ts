@@ -1,4 +1,6 @@
 import type { ZikrPhrase, ZikrState, ZikrFeedbackPreferences } from '@/types/zikr.types'
+import { Capacitor } from '@capacitor/core'
+import { Haptics, ImpactStyle } from '@capacitor/haptics'
 
 /**
  * Standard zikr phrases with default targets
@@ -247,15 +249,24 @@ export function playClickSound(): void {
 /**
  * Trigger haptic vibration
  */
-export function triggerHapticFeedback(): void {
-  if (typeof window === 'undefined' || !('navigator' in window) || !navigator.vibrate) {
-    return
-  }
-
+/**
+ * Trigger haptic vibration using platform-appropriate API
+ * - Native apps: Uses Capacitor Haptics plugin for native Taptic Engine/vibration
+ * - Browser/PWA: Uses navigator.vibrate API
+ */
+export async function triggerHapticFeedback(): Promise<void> {
   try {
-    navigator.vibrate(10) // 10ms pulse
+    if (Capacitor.isNativePlatform()) {
+      // Native: Use Capacitor Haptics plugin for better tactile feedback
+      await Haptics.impact({ style: ImpactStyle.Light })
+    } else {
+      // Browser: Use Web Vibration API
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(10) // 10ms pulse
+      }
+    }
   } catch (error) {
-    // Silently fail - haptic feedback is optional
+    // Silently fail - haptic feedback is optional enhancement
     console.debug('Haptic feedback failed:', error)
   }
 }

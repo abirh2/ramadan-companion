@@ -563,14 +563,50 @@ npm update @types/node @types/react
 
 ---
 
+## Implementation Notes (November 27, 2024)
+
+### Platform-Aware Abstraction Pattern
+
+Instead of directly replacing browser APIs with Capacitor plugins (which would break the PWA), we implemented a **platform-aware abstraction** pattern:
+
+```typescript
+import { Capacitor } from '@capacitor/core';
+
+export async function requestGeolocation(): Promise<LocationData | null> {
+  if (Capacitor.isNativePlatform()) {
+    return requestGeolocationNative();  // Use Capacitor plugin
+  } else {
+    return requestGeolocationBrowser(); // Use navigator.geolocation
+  }
+}
+```
+
+**Benefits:**
+- PWA continues to work unchanged in browser
+- Native apps use Capacitor plugins for better integration
+- Same function signatures - consumers don't need changes
+- Tests default to browser mode (mock returns `isNativePlatform: false`)
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `src/lib/location.ts` | Platform-aware `requestGeolocation()` |
+| `src/lib/orientation.ts` | Platform-aware `startOrientationTracking()` |
+| `src/lib/zikr.ts` | Platform-aware `triggerHapticFeedback()` |
+| `jest.setup.js` | Capacitor plugin mocks |
+| `ios/App/App/Info.plist` | `NSLocationWhenInUseUsageDescription` |
+| `android/app/src/main/AndroidManifest.xml` | Location permissions |
+
+---
+
 ## Next Steps
 
-✅ **Phase 2 Complete!** You now have:
-- All browser APIs replaced with Capacitor plugins
-- Geolocation working natively
-- Compass using device sensors
-- Haptic feedback working
-- All features tested on devices
+**Phase 2 Complete!** You now have:
+- All browser APIs enhanced with Capacitor plugin alternatives
+- Platform detection at runtime (native vs browser)
+- PWA functionality preserved
+- Native features ready for device testing in Phase 5
 
 → **Continue to [Phase 3: Native Push Notifications](./phase-3-push-notifications.md)**
 
@@ -590,13 +626,15 @@ npm uninstall @capacitor/geolocation @capacitor/motion @capacitor/haptics \
 git checkout src/lib/location.ts
 git checkout src/lib/orientation.ts
 git checkout src/lib/zikr.ts
-git checkout src/hooks/useZikr.ts # if modified
+git checkout jest.setup.js
+git checkout ios/App/App/Info.plist
+git checkout android/app/src/main/AndroidManifest.xml
 ```
 
 ---
 
-**Phase 2 Status:** [ ] Complete  
-**Time Spent:** ___ hours  
-**Issues Encountered:** None / [Describe]  
-**Ready for Phase 3:** Yes / No
+**Phase 2 Status:** [x] Complete  
+**Time Spent:** ~1 hour  
+**Issues Encountered:** Transient Turbopack cache issue (resolved with clean reinstall)  
+**Ready for Phase 3:** Yes
 

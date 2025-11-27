@@ -1,5 +1,9 @@
 // Device orientation utilities for dynamic Qibla compass
 // Handles mobile detection, permission requests, and orientation tracking
+// Platform-aware: Uses Capacitor Motion plugin on native, browser API on web
+
+import { Capacitor } from '@capacitor/core'
+import { Motion, type RotationRate } from '@capacitor/motion'
 
 export type OrientationPermission = 'granted' | 'denied' | 'prompt' | 'not-required'
 
@@ -145,12 +149,75 @@ export function isLowAccuracy(accuracy: number | null): boolean {
 }
 
 /**
- * Start tracking device orientation
- * Returns cleanup function to stop tracking
+ * Start tracking device orientation using platform-appropriate API
+ * - Native apps: Uses Capacitor Motion plugin
+ * - Browser/PWA: Uses DeviceOrientationEvent
  * @param callback - Function called with each orientation update
  * @returns cleanup function to stop tracking
  */
 export function startOrientationTracking(callback: OrientationCallback): () => void {
+  if (Capacitor.isNativePlatform()) {
+    return startOrientationTrackingNative(callback)
+  } else {
+    return startOrientationTrackingBrowser(callback)
+  }
+}
+
+/**
+ * Native orientation tracking using Capacitor Motion plugin
+ */
+function startOrientationTrackingNative(callback: OrientationCallback): () => void {
+  let isActive = true
+  let listenerHandle: { remove: () => Promise<void> } | null = null
+
+  const initializeTracking = async () => {
+    try {
+      // Start listening to device orientation with Motion plugin
+      listenerHandle = await Motion.addListener('orientation', (event) => {
+        if (!isActive) return
+
+        // Motion plugin provides alpha (0-360, clockwise from north on Android)
+        // Note: On iOS native, alpha may be relative to initial orientation
+        // The browser fallback (used in WKWebView) handles iOS webkitCompassHeading
+        const alpha = event.alpha !== null ? event.alpha : 0
+
+        const heading: DeviceHeading = {
+          alpha: normalizeHeading(alpha),
+          accuracy: null, // Motion API doesn't provide accuracy
+          timestamp: Date.now(),
+        }
+
+        callback(heading)
+      })
+
+      console.log('[Orientation] Native tracking started successfully')
+    } catch (error) {
+      console.error('[Orientation] Failed to start native tracking:', error)
+      // Fall back to browser implementation
+      console.log('[Orientation] Falling back to browser API')
+      const browserCleanup = startOrientationTrackingBrowser(callback)
+      listenerHandle = { remove: async () => browserCleanup() }
+    }
+  }
+
+  // Initialize tracking
+  initializeTracking()
+
+  // Return cleanup function
+  return () => {
+    isActive = false
+    if (listenerHandle) {
+      listenerHandle.remove()
+      listenerHandle = null
+    }
+  }
+}
+
+/**
+ * Browser orientation tracking using DeviceOrientationEvent
+ * Used for PWA/web browser contexts and as fallback for native
+ */
+function startOrientationTrackingBrowser(callback: OrientationCallback): () => void {
   if (!hasOrientationSupport()) {
     console.warn('[Orientation] DeviceOrientation API not supported')
     return () => {}
