@@ -126,18 +126,20 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
   // Loading state
   if (loading) {
     return (
-      <Card className="rounded-2xl shadow-sm">
+      <Card className="rounded-3xl shadow-lg bg-slate-900 text-white border-slate-800">
         <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <Compass className="h-4 w-4 text-muted-foreground" />
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+          <div>
+            <CardTitle className="text-lg font-bold text-white">
               Qibla Direction
             </CardTitle>
+            <p className="text-xs text-white/60 mt-0.5">
+              Loading...
+            </p>
           </div>
         </CardHeader>
         <CardContent className="py-8">
           <div className="flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <Loader2 className="h-8 w-8 animate-spin text-white/60" />
           </div>
         </CardContent>
       </Card>
@@ -147,19 +149,21 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
   // Error state
   if (error || !qiblaDirection) {
     return (
-      <Card className="rounded-2xl shadow-sm">
+      <Card className="rounded-3xl shadow-lg bg-slate-900 text-white border-slate-800">
         <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <Compass className="h-4 w-4 text-muted-foreground" />
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+          <div>
+            <CardTitle className="text-lg font-bold text-white">
               Qibla Direction
             </CardTitle>
+            <p className="text-xs text-white/60 mt-0.5">
+              Unable to load
+            </p>
           </div>
         </CardHeader>
         <CardContent className="py-8">
           <div className="flex flex-col items-center justify-center gap-2">
-            <Compass className="h-12 w-12 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground text-center">
+            <Compass className="h-12 w-12 text-white/40" />
+            <p className="text-sm text-white/60 text-center">
               {error || 'Unable to determine direction'}
             </p>
           </div>
@@ -178,51 +182,30 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
   const showLowAccuracy = accuracy !== null && isLowAccuracy(accuracy)
 
   return (
-    <Card className="rounded-2xl shadow-sm">
-      <CardHeader className="pb-3">
+    <Card className="rounded-3xl shadow-lg bg-slate-900 text-white border-slate-800 relative overflow-hidden">
+      {/* Background glow effect */}
+      <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full blur-3xl" />
+      
+      <CardHeader className="pb-3 relative z-10">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Compass className="h-4 w-4 text-muted-foreground" />
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+          <div>
+            <CardTitle className="text-lg font-bold text-white">
               Qibla Direction
             </CardTitle>
+            <p className="text-xs text-white/60 mt-0.5">
+              Facing Kaaba: {bearing.toFixed(1)}° {compassDirection}
+            </p>
           </div>
-          {canUseDynamicCompass && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleToggleMode}
-              onKeyDown={handleKeyDown}
-              disabled={isEnabling}
-              className="h-7 text-xs"
-              aria-label={mode === 'dynamic' ? 'Switch to static compass mode' : 'Switch to dynamic compass mode'}
-              title={mode === 'dynamic' ? 'Switch to static mode' : 'Switch to dynamic mode'}
-            >
-              {isEnabling ? (
-                <>
-                  <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
-                  <span className="sr-only">Loading...</span>
-                </>
-              ) : mode === 'dynamic' ? (
-                <>
-                  <Compass className="h-3 w-3 mr-1" aria-hidden="true" />
-                  Static
-                </>
-              ) : (
-                <>
-                  <Navigation className="h-3 w-3 mr-1" aria-hidden="true" />
-                  Dynamic
-                </>
-              )}
-            </Button>
-          )}
+          <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
+            <Compass className="h-6 w-6 text-white" />
+          </div>
         </div>
       </CardHeader>
-      <CardContent className="flex flex-col items-center py-6">
+      <CardContent className="flex flex-col items-center py-6 relative z-10">
         {/* Permission Denied Message */}
         {canUseDynamicCompass && permission === 'denied' && mode === 'static' && (
-          <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-lg">
-            <p className="text-xs text-amber-800 dark:text-amber-200 text-center">
+          <div className="mb-4 p-3 bg-white/10 border border-white/20 rounded-lg">
+            <p className="text-xs text-white/80 text-center">
               Device orientation permission denied. Using static compass.
             </p>
           </div>
@@ -230,9 +213,9 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
 
         {/* Low Accuracy Warning */}
         {mode === 'dynamic' && showLowAccuracy && (
-          <div className="mb-4 flex items-center gap-2 p-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-lg">
-            <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-            <p className="text-xs text-amber-800 dark:text-amber-200">
+          <div className="mb-4 flex items-center gap-2 p-2 bg-white/10 border border-white/20 rounded-lg">
+            <AlertTriangle className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+            <p className="text-xs text-white/80">
               Low compass accuracy ({accuracy?.toFixed(0)}°). Calibrate by moving phone in figure-8 motion.
             </p>
           </div>
@@ -241,13 +224,13 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
         {/* Mode Indicator */}
         {mode === 'dynamic' && (
           <div className="mb-3 space-y-2">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground" role="status" aria-live="polite">
-              <div className={`w-2 h-2 rounded-full ${aligned ? 'bg-green-500 animate-pulse' : 'bg-blue-500'}`} aria-hidden="true" />
+            <div className="flex items-center gap-2 text-xs text-white/60" role="status" aria-live="polite">
+              <div className={`w-2 h-2 rounded-full ${aligned ? 'bg-green-400 animate-pulse' : 'bg-blue-400'}`} aria-hidden="true" />
               <span>{aligned ? 'Aligned with Qibla' : 'Tracking device orientation'}</span>
             </div>
-            <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg" role="note">
+            <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg" role="note">
               <span className="text-base" aria-hidden="true">📱</span>
-              <span className="text-xs font-medium text-blue-800 dark:text-blue-200">
+              <span className="text-xs font-medium text-white/80">
                 Hold phone flat for best results
               </span>
             </div>
@@ -268,8 +251,8 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
               r="95"
               fill="none"
               stroke="currentColor"
-              strokeWidth="2"
-              className="text-border"
+              strokeWidth="12"
+              className="text-white/10"
             />
 
             {/* Inner circle */}
@@ -280,49 +263,27 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
               fill="none"
               stroke="currentColor"
               strokeWidth="1"
-              className="text-border opacity-30"
+              className="text-white/20"
             />
 
-            {/* Cardinal directions markers */}
-            {/* N */}
+            {/* Crosshair lines */}
             <line
               x1="100"
-              y1="10"
+              y1="15"
               x2="100"
-              y2="25"
+              y2="185"
               stroke="currentColor"
-              strokeWidth="2"
-              className="text-foreground"
+              strokeWidth="1"
+              className="text-white/10"
             />
-            {/* E */}
             <line
-              x1="190"
+              x1="15"
               y1="100"
-              x2="175"
+              x2="185"
               y2="100"
               stroke="currentColor"
-              strokeWidth="2"
-              className="text-muted-foreground"
-            />
-            {/* S */}
-            <line
-              x1="100"
-              y1="190"
-              x2="100"
-              y2="175"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="text-muted-foreground"
-            />
-            {/* W */}
-            <line
-              x1="10"
-              y1="100"
-              x2="25"
-              y2="100"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="text-muted-foreground"
+              strokeWidth="1"
+              className="text-white/10"
             />
 
             {/* Qibla Arrow - rotated to bearing angle */}
@@ -332,50 +293,53 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
                 transition: mode === 'dynamic' ? 'transform 0.3s ease-out' : 'none',
               }}
             >
-              {/* Arrow shaft */}
+              {/* Arrow shaft - gradient */}
+              <defs>
+                <linearGradient id="arrowGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor={aligned ? '#10b981' : '#3b82f6'} />
+                  <stop offset="100%" stopColor="white" stopOpacity="0" />
+                </linearGradient>
+              </defs>
               <line
                 x1="100"
                 y1="100"
                 x2="100"
                 y2="35"
-                stroke="currentColor"
-                strokeWidth="3"
-                className={aligned ? 'text-green-500' : 'text-primary'}
+                stroke="url(#arrowGradient)"
+                strokeWidth="4"
               />
-              {/* Arrow head */}
-              <polygon
-                points="100,25 90,45 110,45"
-                fill="currentColor"
-                className={aligned ? 'text-green-500' : 'text-primary'}
+              {/* Arrow head with Kaaba emoji */}
+              <circle 
+                cx="100" 
+                cy="30" 
+                r="12" 
+                fill={aligned ? '#10b981' : '#3b82f6'}
               />
               {/* Arrow tail (small circle) */}
               <circle 
                 cx="100" 
                 cy="100" 
                 r="5" 
-                fill="currentColor" 
-                className={aligned ? 'text-green-500' : 'text-primary'}
+                fill="white"
               />
             </g>
           </svg>
 
+          {/* Kaaba emoji at arrow tip - positioned absolutely */}
+          <div 
+            className="absolute text-xl transition-transform duration-300"
+            style={{
+              top: '50%',
+              left: '50%',
+              transform: `translate(-50%, -50%) rotate(${rotation}deg) translateY(-70px)`,
+            }}
+          >
+            🕋
+          </div>
+
           {/* Direction labels - different for static vs dynamic mode */}
           {mode === 'static' ? (
-            <>
-              {/* Static mode: Show cardinal directions (N, E, S, W) */}
-              <div className="absolute top-1 left-1/2 -translate-x-1/2 text-xs font-semibold text-foreground">
-                N
-              </div>
-              <div className="absolute right-1 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground">
-                E
-              </div>
-              <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-xs font-medium text-muted-foreground">
-                S
-              </div>
-              <div className="absolute left-1 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground">
-                W
-              </div>
-            </>
+            <></>
           ) : (
             <>
               {/* Dynamic mode: Show Qibla icon at top (target to align with) */}
@@ -386,13 +350,31 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
           )}
         </div>
 
-        {/* Bearing Information */}
-        <div className="mt-4 text-center space-y-1">
-          <p className="text-2xl font-bold text-foreground" aria-live="polite" aria-atomic="true">
-            {bearing.toFixed(1)}° {compassDirection}
-          </p>
-          <p className="text-xs text-muted-foreground">Direction to Mecca</p>
-        </div>
+        {/* Toggle Mode Button */}
+        {canUseDynamicCompass && (
+          <Button
+            onClick={handleToggleMode}
+            onKeyDown={handleKeyDown}
+            disabled={isEnabling}
+            variant="ghost"
+            className="w-full mt-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-sm font-bold transition-all backdrop-blur-sm"
+            aria-label={mode === 'dynamic' ? 'Switch to static compass mode' : 'Switch to dynamic compass mode'}
+          >
+            {isEnabling ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ENABLING...
+              </>
+            ) : mode === 'dynamic' ? (
+              'CALIBRATE COMPASS'
+            ) : (
+              <>
+                <Navigation className="mr-2 h-4 w-4" />
+                ENABLE DYNAMIC COMPASS
+              </>
+            )}
+          </Button>
+        )}
       </CardContent>
     </Card>
   )

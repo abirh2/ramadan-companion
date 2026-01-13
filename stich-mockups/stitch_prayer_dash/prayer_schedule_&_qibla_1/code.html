@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Enhanced Prayer Schedule &amp; Tracking</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Amiri:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#111827",
+                        "navy-ios": "#001B3D",
+                        "background-light": "#F9F9F9",
+                        "background-dark": "#0F172A",
+                        accent: "#D97706",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        arabic: ["Amiri", "serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "16px",
+                    },
+                },
+            },
+        };
+    </script>
+<style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        .active-prayer {
+            box-shadow: 0 4px 25px -4px rgba(0, 27, 61, 0.15);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .graph-bar {
+            transition: height 0.6s ease-out;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display transition-colors duration-300 min-h-screen pb-32">
+<header class="sticky top-0 z-50 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md px-6 py-4 flex items-center justify-between border-b border-slate-200/50 dark:border-slate-800/50">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 bg-navy-ios dark:bg-blue-600 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-xl filled-icon">auto_awesome</span>
+</div>
+<h1 class="text-xl font-bold tracking-tight text-navy-ios dark:text-white">Prayer Companion</h1>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-symbols-outlined block dark:hidden">light_mode</span>
+<span class="material-symbols-outlined hidden dark:block text-yellow-400">dark_mode</span>
+</button>
+<button class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-navy-ios dark:text-white">tune</span>
+</button>
+</div>
+</header>
+<main class="max-w-md mx-auto p-5 space-y-6">
+<div class="space-y-4">
+<div class="flex p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-2xl">
+<button class="flex-1 py-2 text-sm font-semibold rounded-xl bg-white dark:bg-slate-700 shadow-sm text-navy-ios dark:text-white transition-all">Schedule</button>
+<button class="flex-1 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 rounded-xl hover:text-navy-ios dark:hover:text-white transition-all">Tracking</button>
+</div>
+<div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-5 rounded-3xl">
+<div class="flex items-center justify-between mb-4">
+<div>
+<h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Weekly Stats</h3>
+<p class="text-2xl font-bold text-navy-ios dark:text-white">84% <span class="text-xs font-normal text-green-500">+4% from last week</span></p>
+</div>
+<div class="w-12 h-12 rounded-full border-4 border-slate-100 dark:border-slate-800 border-t-navy-ios dark:border-t-blue-500 flex items-center justify-center">
+<span class="text-[10px] font-bold">84%</span>
+</div>
+</div>
+<div class="flex items-end justify-between h-16 gap-1 px-1">
+<div class="w-full bg-slate-100 dark:bg-slate-800 rounded-t-lg h-12 relative overflow-hidden"><div class="absolute bottom-0 w-full bg-navy-ios/20 dark:bg-blue-500/30 h-10"></div></div>
+<div class="w-full bg-slate-100 dark:bg-slate-800 rounded-t-lg h-14 relative overflow-hidden"><div class="absolute bottom-0 w-full bg-navy-ios/20 dark:bg-blue-500/30 h-12"></div></div>
+<div class="w-full bg-slate-100 dark:bg-slate-800 rounded-t-lg h-16 relative overflow-hidden"><div class="absolute bottom-0 w-full bg-navy-ios dark:bg-blue-500 h-full"></div></div>
+<div class="w-full bg-slate-100 dark:bg-slate-800 rounded-t-lg h-10 relative overflow-hidden"><div class="absolute bottom-0 w-full bg-navy-ios/20 dark:bg-blue-500/30 h-6"></div></div>
+<div class="w-full bg-slate-100 dark:bg-slate-800 rounded-t-lg h-12 relative overflow-hidden"><div class="absolute bottom-0 w-full bg-navy-ios/20 dark:bg-blue-500/30 h-9"></div></div>
+<div class="w-full bg-slate-100 dark:bg-slate-800 rounded-t-lg h-14 relative overflow-hidden"><div class="absolute bottom-0 w-full bg-navy-ios/20 dark:bg-blue-500/30 h-11"></div></div>
+<div class="w-full bg-slate-100 dark:bg-slate-800 rounded-t-lg h-16 relative overflow-hidden"><div class="absolute bottom-0 w-full bg-navy-ios/40 dark:bg-blue-500/50 h-8"></div></div>
+</div>
+<div class="flex justify-between mt-2 text-[10px] font-medium text-slate-400 px-1 uppercase">
+<span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+</div>
+</div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h2 class="text-2xl font-bold text-navy-ios dark:text-white">Tuesday, Jan 13</h2>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="text-slate-400 font-medium">24 Rajab 1447</span>
+<span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+<button class="flex items-center text-blue-600 dark:text-blue-400 text-sm font-medium">
+                    London, UK <span class="material-symbols-outlined text-sm ml-0.5">expand_more</span>
+</button>
+</div>
+</div>
+<div class="text-right">
+<p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Next Prayer</p>
+<div class="bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full">
+<p class="text-sm font-bold text-blue-700 dark:text-blue-400">Dhuhr 12:14</p>
+</div>
+</div>
+</div>
+<section class="space-y-3">
+<div class="group flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[24px] shadow-sm">
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full border-2 border-slate-100 dark:border-slate-700 hover:border-navy-ios dark:hover:border-blue-400 transition-all text-slate-300">
+<span class="material-symbols-outlined text-2xl">check_circle</span>
+</button>
+<div>
+<p class="font-bold text-navy-ios dark:text-white">Fajr</p>
+<div class="flex items-center gap-1.5">
+<span class="text-xs text-slate-400">05:42 AM</span>
+<span class="material-symbols-outlined text-xs text-slate-300">notifications</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-[10px] text-slate-400 uppercase font-bold tracking-tight">Imsak 05:32</span>
+<button class="p-2 text-slate-300 hover:text-navy-ios dark:hover:text-white">
+<span class="material-symbols-outlined">notifications_active</span>
+</button>
+</div>
+</div>
+<div class="flex items-center justify-between px-6 py-2 opacity-60">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-400">wb_sunny</span>
+</div>
+<p class="text-sm font-medium text-slate-400">Sunrise</p>
+</div>
+<p class="text-sm font-bold text-slate-400">07:02 AM</p>
+</div>
+<div class="active-prayer relative flex items-center justify-between p-4 bg-navy-ios dark:bg-blue-900 border-none rounded-[24px] overflow-hidden">
+<div class="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-blue-400/20 blur-3xl rounded-full"></div>
+<div class="flex items-center gap-4 relative z-10">
+<button class="w-10 h-10 flex items-center justify-center rounded-full border-2 border-white/20 text-white/40">
+<span class="material-symbols-outlined text-2xl">check_circle</span>
+</button>
+<div>
+<div class="flex items-center gap-2">
+<p class="font-bold text-white">Dhuhr</p>
+<span class="px-1.5 py-0.5 rounded bg-blue-500 text-[9px] text-white font-black uppercase tracking-widest">Now</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs text-white/70">12:14 PM</span>
+<span class="material-symbols-outlined text-xs text-white/40 filled-icon">notifications_active</span>
+</div>
+</div>
+</div>
+<div class="text-right relative z-10">
+<button class="p-2 text-white/40 hover:text-white">
+<span class="material-symbols-outlined filled-icon text-blue-400">notifications_active</span>
+</button>
+</div>
+</div>
+<div class="group flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[24px] shadow-sm">
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 text-white border-none transition-all">
+<span class="material-symbols-outlined text-2xl filled-icon">check_circle</span>
+</button>
+<div>
+<p class="font-bold text-navy-ios dark:text-white">Asr</p>
+<div class="flex items-center gap-1.5">
+<span class="text-xs text-slate-400">03:28 PM</span>
+</div>
+</div>
+</div>
+<button class="p-2 text-slate-300">
+<span class="material-symbols-outlined">notifications_off</span>
+</button>
+</div>
+<div class="group flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[24px] shadow-sm">
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full border-2 border-slate-100 dark:border-slate-700 text-slate-300">
+<span class="material-symbols-outlined text-2xl">check_circle</span>
+</button>
+<div>
+<p class="font-bold text-navy-ios dark:text-white">Maghrib</p>
+<div class="flex items-center gap-1.5">
+<span class="text-xs text-slate-400">05:42 PM</span>
+</div>
+</div>
+</div>
+<button class="p-2 text-navy-ios dark:text-blue-400">
+<span class="material-symbols-outlined filled-icon">notifications_active</span>
+</button>
+</div>
+<div class="group flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[24px] shadow-sm">
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full border-2 border-slate-100 dark:border-slate-700 text-slate-300">
+<span class="material-symbols-outlined text-2xl">check_circle</span>
+</button>
+<div>
+<p class="font-bold text-navy-ios dark:text-white">Isha</p>
+<div class="flex items-center gap-1.5">
+<span class="text-xs text-slate-400">07:12 PM</span>
+</div>
+</div>
+</div>
+<button class="p-2 text-slate-300">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</section>
+<div class="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-5 rounded-[28px] space-y-4">
+<div class="flex items-center justify-between">
+<h3 class="text-sm font-bold text-navy-ios dark:text-white">Preferences</h3>
+<button class="text-xs font-bold text-blue-600 dark:text-blue-400">EDIT ALL</button>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="p-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Method</p>
+<div class="flex items-center justify-between">
+<p class="text-sm font-bold text-navy-ios dark:text-white leading-tight">MWL (Europe)</p>
+<span class="material-symbols-outlined text-lg text-slate-300">settings_applications</span>
+</div>
+</div>
+<div class="p-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Madhab</p>
+<div class="flex items-center justify-between">
+<p class="text-sm font-bold text-navy-ios dark:text-white leading-tight">Shafi'i (Std)</p>
+<span class="material-symbols-outlined text-lg text-slate-300">account_balance</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/40 flex items-center justify-center">
+<span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-sm filled-icon">location_on</span>
+</div>
+<div>
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Location</p>
+<p class="text-sm font-bold text-navy-ios dark:text-white">Automatic Detection</p>
+</div>
+</div>
+<div class="w-10 h-5 bg-blue-600 rounded-full relative">
+<div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="relative overflow-hidden bg-navy-ios text-white p-6 rounded-[32px] shadow-lg">
+<div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
+<div class="flex items-center justify-between relative z-10 mb-6">
+<div>
+<h3 class="text-lg font-bold">Qibla Direction</h3>
+<p class="text-xs text-white/60">Facing Kaaba: 118.4° SE</p>
+</div>
+<div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined filled-icon">explore</span>
+</div>
+</div>
+<div class="flex justify-center py-4 relative">
+<div class="w-48 h-48 border-[12px] border-white/10 rounded-full flex items-center justify-center relative">
+<div class="absolute w-1 h-full bg-white/10 left-1/2 -translate-x-1/2"></div>
+<div class="absolute h-1 w-full bg-white/10 top-1/2 -translate-y-1/2"></div>
+<div class="relative w-40 h-40 rounded-full border border-white/20 flex items-center justify-center">
+<div class="absolute top-2 font-black text-[10px] text-white/40 tracking-widest">N</div>
+<div class="absolute bottom-2 font-black text-[10px] text-white/40 tracking-widest">S</div>
+<div class="absolute left-2 font-black text-[10px] text-white/40 tracking-widest">W</div>
+<div class="absolute right-2 font-black text-[10px] text-white/40 tracking-widest">E</div>
+<div class="w-1 h-32 bg-gradient-to-b from-blue-400 via-white to-transparent rounded-full rotate-[118deg] relative">
+<div class="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-blue-400 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/50">
+<span class="material-symbols-outlined text-[10px] filled-icon text-white">near_me</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full mt-6 py-3 bg-white/10 hover:bg-white/20 rounded-2xl text-sm font-bold transition-all backdrop-blur-sm">
+            CALIBRATE COMPASS
+        </button>
+</div>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 px-8 py-3 flex justify-between items-center z-50">
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-bold">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-navy-ios dark:text-blue-400">
+<span class="material-symbols-outlined filled-icon">schedule</span>
+<span class="text-[10px] font-bold">Prayers</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined">explore</span>
+<span class="text-[10px] font-bold">Qibla</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-[10px] font-bold">Stats</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-bold">Settings</span>
+</button>
+</nav>
+
+</body></html>
