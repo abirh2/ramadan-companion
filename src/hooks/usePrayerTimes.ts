@@ -417,14 +417,73 @@ export function usePrayerTimes(): UsePrayerTimesResult {
   // Update location function
   const updateLocation = useCallback(
     async (lat: number, lng: number, city: string, type: LocationData['type']) => {
-      await saveLocationToStorage(lat, lng, city, type)
+      // Update location state immediately
+      const newLocation: LocationData = { lat, lng, city, type }
       setState((prev) => ({
         ...prev,
-        location: { lat, lng, city, type },
+        location: newLocation,
+        loading: true,
       }))
-      await refetch()
+
+      // Save to storage
+      await saveLocationToStorage(lat, lng, city, type)
+
+      // Fetch prayer times with new location directly (don't rely on refetch reading from storage)
+      try {
+        const method = state.calculationMethod
+        const madhab = state.madhab
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+
+        // Fetch prayer times for new location
+        const prayerTimesResponse = await fetch(
+          `/api/prayertimes?latitude=${lat}&longitude=${lng}&method=${method}&school=${madhab}&timezone=${encodeURIComponent(timezone)}`,
+          { signal: AbortSignal.timeout(10000) }
+        )
+
+        if (!prayerTimesResponse.ok) {
+          throw new Error(`API returned ${prayerTimesResponse.status}`)
+        }
+
+        const prayerTimesData: PrayerTimesApiResponse = await prayerTimesResponse.json()
+        const prayerTimes = prayerTimesData.data.timings
+
+        // Fetch Qibla for new location
+        let qiblaData: QiblaData | null = null
+        try {
+          const qiblaResponse = await fetch(
+            `/api/qibla?latitude=${lat}&longitude=${lng}`,
+            { signal: AbortSignal.timeout(10000) }
+          )
+          if (qiblaResponse.ok) {
+            const qibla: QiblaApiResponse = await qiblaResponse.json()
+            qiblaData = qibla.data
+          }
+        } catch (qiblaError) {
+          console.warn('Failed to fetch Qibla direction:', qiblaError)
+        }
+
+        // Calculate next prayer
+        const nextPrayer = calculateNextPrayer(prayerTimes, null)
+
+        setState((prev) => ({
+          ...prev,
+          prayerTimes,
+          nextPrayer,
+          qiblaDirection: qiblaData,
+          location: newLocation,
+          loading: false,
+          error: null,
+        }))
+      } catch (error) {
+        console.error('Error fetching prayer times for new location:', error)
+        setState((prev) => ({
+          ...prev,
+          loading: false,
+          error: error instanceof Error ? error.message : 'Failed to load prayer times',
+        }))
+      }
     },
-    [refetch]
+    [state.calculationMethod, state.madhab, calculateNextPrayer]
   )
 
   // Update calculation method function

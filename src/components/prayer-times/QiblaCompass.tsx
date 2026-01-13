@@ -251,8 +251,8 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
               r="95"
               fill="none"
               stroke="currentColor"
-              strokeWidth="12"
-              className="text-white/10"
+              strokeWidth="2"
+              className="text-white/30"
             />
 
             {/* Inner circle */}
@@ -266,24 +266,46 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
               className="text-white/20"
             />
 
-            {/* Crosshair lines */}
+            {/* Cardinal directions markers */}
+            {/* N */}
             <line
               x1="100"
-              y1="15"
+              y1="10"
               x2="100"
-              y2="185"
+              y2="25"
               stroke="currentColor"
-              strokeWidth="1"
-              className="text-white/10"
+              strokeWidth="2"
+              className="text-white"
             />
+            {/* E */}
             <line
-              x1="15"
+              x1="190"
               y1="100"
-              x2="185"
+              x2="175"
               y2="100"
               stroke="currentColor"
-              strokeWidth="1"
-              className="text-white/10"
+              strokeWidth="2"
+              className="text-white/60"
+            />
+            {/* S */}
+            <line
+              x1="100"
+              y1="190"
+              x2="100"
+              y2="175"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="text-white/60"
+            />
+            {/* W */}
+            <line
+              x1="10"
+              y1="100"
+              x2="25"
+              y2="100"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="text-white/60"
             />
 
             {/* Qibla Arrow - rotated to bearing angle */}
@@ -293,53 +315,50 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
                 transition: mode === 'dynamic' ? 'transform 0.3s ease-out' : 'none',
               }}
             >
-              {/* Arrow shaft - gradient */}
-              <defs>
-                <linearGradient id="arrowGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor={aligned ? '#10b981' : '#3b82f6'} />
-                  <stop offset="100%" stopColor="white" stopOpacity="0" />
-                </linearGradient>
-              </defs>
+              {/* Arrow shaft */}
               <line
                 x1="100"
                 y1="100"
                 x2="100"
                 y2="35"
-                stroke="url(#arrowGradient)"
-                strokeWidth="4"
+                stroke="currentColor"
+                strokeWidth="3"
+                className={aligned ? 'text-green-400' : 'text-blue-400'}
               />
-              {/* Arrow head with Kaaba emoji */}
-              <circle 
-                cx="100" 
-                cy="30" 
-                r="12" 
-                fill={aligned ? '#10b981' : '#3b82f6'}
+              {/* Arrow head */}
+              <polygon
+                points="100,25 90,45 110,45"
+                fill="currentColor"
+                className={aligned ? 'text-green-400' : 'text-blue-400'}
               />
               {/* Arrow tail (small circle) */}
               <circle 
                 cx="100" 
                 cy="100" 
                 r="5" 
-                fill="white"
+                fill="currentColor" 
+                className={aligned ? 'text-green-400' : 'text-blue-400'}
               />
             </g>
           </svg>
 
-          {/* Kaaba emoji at arrow tip - positioned absolutely */}
-          <div 
-            className="absolute text-xl transition-transform duration-300"
-            style={{
-              top: '50%',
-              left: '50%',
-              transform: `translate(-50%, -50%) rotate(${rotation}deg) translateY(-70px)`,
-            }}
-          >
-            🕋
-          </div>
-
           {/* Direction labels - different for static vs dynamic mode */}
           {mode === 'static' ? (
-            <></>
+            <>
+              {/* Static mode: Show cardinal directions (N, E, S, W) */}
+              <div className="absolute top-1 left-1/2 -translate-x-1/2 text-xs font-semibold text-white">
+                N
+              </div>
+              <div className="absolute right-1 top-1/2 -translate-y-1/2 text-xs font-medium text-white/60">
+                E
+              </div>
+              <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-xs font-medium text-white/60">
+                S
+              </div>
+              <div className="absolute left-1 top-1/2 -translate-y-1/2 text-xs font-medium text-white/60">
+                W
+              </div>
+            </>
           ) : (
             <>
               {/* Dynamic mode: Show Qibla icon at top (target to align with) */}
@@ -348,6 +367,14 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
               </div>
             </>
           )}
+        </div>
+
+        {/* Bearing Information */}
+        <div className="mt-4 text-center space-y-1">
+          <p className="text-2xl font-bold text-white" aria-live="polite" aria-atomic="true">
+            {bearing.toFixed(1)}° {compassDirection}
+          </p>
+          <p className="text-xs text-white/60">Direction to Mecca</p>
         </div>
 
         {/* Toggle Mode Button */}

@@ -11,7 +11,6 @@ import { useAuth } from '@/hooks/useAuth'
 import { QiblaCompass } from '@/components/prayer-times/QiblaCompass'
 import { PrayerCheckbox, PrayerCompletionSummary } from '@/components/prayer-times/PrayerCheckboxes'
 import { PrayerStatistics } from '@/components/prayer-times/PrayerStatistics'
-import { NotificationSettings } from '@/components/prayer-times/NotificationSettings'
 import { DateSelectorModal } from '@/components/prayer-times/DateSelectorModal'
 import { CompactPreferencesCard } from '@/components/prayer-times/CompactPreferencesCard'
 import { PreferencesDetailModal } from '@/components/prayer-times/PreferencesDetailModal'
@@ -450,6 +449,12 @@ export default function TimesPage() {
 
             {/* Right Column - Sidebar */}
             <aside className="space-y-6" aria-label="Qibla compass and settings">
+              {/* Qibla Compass */}
+              <section id="qibla" aria-labelledby="qibla-title">
+                <h2 id="qibla-title" className="sr-only">Qibla Compass</h2>
+                <QiblaCompass qiblaDirection={qiblaDirection} loading={false} error={null} />
+              </section>
+
               {/* Compact Preferences Card */}
               <section aria-labelledby="preferences-title">
                 <h2 id="preferences-title" className="sr-only">Prayer Preferences</h2>
@@ -459,18 +464,6 @@ export default function TimesPage() {
                   location={location}
                   onEditClick={() => setPrefsModalOpen(true)}
                 />
-              </section>
-
-              {/* Qibla Compass */}
-              <section id="qibla" aria-labelledby="qibla-title">
-                <h2 id="qibla-title" className="sr-only">Qibla Compass</h2>
-                <QiblaCompass qiblaDirection={qiblaDirection} loading={false} error={null} />
-              </section>
-
-              {/* Notification Settings */}
-              <section aria-labelledby="notification-settings-title">
-                <h2 id="notification-settings-title" className="sr-only">Notification Settings</h2>
-                <NotificationSettings />
               </section>
             </aside>
           </div>
