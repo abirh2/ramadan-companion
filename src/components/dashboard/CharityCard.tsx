@@ -28,16 +28,16 @@ export function CharityCard() {
       description="Sign in to track your sadaqah and zakat donations"
     >
       <Link href="/charity" className="block" aria-label={cardAriaLabel}>
-        <Card className="rounded-2xl shadow-sm hover:shadow-md transition-shadow cursor-pointer" role="article">
+        <Card className="rounded-3xl shadow-sm hover:shadow-md transition-shadow cursor-pointer" role="article">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <Heart className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
                 Charity Tracker
               </CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
             {loading && (
               <div className="flex items-center justify-center py-4" role="status">
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
@@ -60,17 +60,17 @@ export function CharityCard() {
 
             {!loading && !error && (
               <>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs text-muted-foreground" id="ramadan-total-label">This Ramadan</p>
-                    <p className="text-xl font-semibold" aria-labelledby="ramadan-total-label">{formatCurrency(summary.ramadanTotal)}</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1" id="ramadan-total-label">This Ramadan</p>
+                    <p className="text-2xl font-bold" aria-labelledby="ramadan-total-label">{formatCurrency(summary.ramadanTotal)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground" id="alltime-total-label">All Time</p>
-                    <p className="text-xl font-semibold" aria-labelledby="alltime-total-label">{formatCurrency(summary.allTimeTotal)}</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1" id="alltime-total-label">All Time</p>
+                    <p className="text-2xl font-bold" aria-labelledby="alltime-total-label">{formatCurrency(summary.allTimeTotal)}</p>
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground pt-2 border-t border-muted">
                   {summary.totalCount === 0
                     ? 'Track your sadaqah and zakat donations'
                     : `${summary.totalCount} ${summary.totalCount === 1 ? 'donation' : 'donations'} recorded`}

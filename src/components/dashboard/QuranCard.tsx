@@ -44,20 +44,20 @@ export function QuranCard() {
   }
 
   const cardAriaLabel = !loading && !error && surah 
-    ? `Quran of the Day. Surah ${surah.englishName}, verse ${numberInSurah}. ${translation?.text}. Click to view more.`
+    ? `Verse of the Day. Surah ${surah.englishName}, verse ${numberInSurah}. ${translation?.text}. Click to view more.`
     : loading 
-    ? 'Loading Quran of the Day'
-    : 'Quran of the Day card'
+    ? 'Loading Verse of the Day'
+    : 'Verse of the Day card'
 
   return (
     <>
       <Link href="/quran-hadith" className="block" aria-label={cardAriaLabel}>
-        <Card className="rounded-2xl shadow-sm transition-all hover:shadow-md hover:scale-[1.01] cursor-pointer" role="article">
+        <Card className="rounded-3xl shadow-sm transition-all hover:shadow-md hover:scale-[1.01] cursor-pointer" role="article">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <BookOpen className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+                <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
                   Quran of the Day
                 </CardTitle>
               </div>
@@ -80,7 +80,7 @@ export function QuranCard() {
               </Button>
             </div>
           </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4">
           {loading && (
             <div className="flex items-center justify-center py-8" role="status">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
@@ -96,22 +96,24 @@ export function QuranCard() {
 
           {!loading && !error && arabic && translation && surah && (
             <>
-              <div className="space-y-2">
+              <div className="py-4 text-center space-y-4">
                 <p 
-                  className="text-lg leading-relaxed text-right font-serif" 
+                  className="text-2xl leading-relaxed text-right font-serif" 
                   dir="rtl"
                   lang="ar"
                   aria-label={`Arabic text: ${arabic.text}`}
                 >
                   {arabic.text}
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground leading-relaxed italic">
                   {translation.text}
                 </p>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Surah {surah.englishName} ({surah.number}:{numberInSurah})
-              </p>
+              <div className="pt-4 border-t border-muted">
+                <p className="text-xs text-muted-foreground font-semibold uppercase tracking-widest">
+                  Surah {surah.englishName} ({surah.number}:{numberInSurah})
+                </p>
+              </div>
             </>
           )}
         </CardContent>

@@ -32,16 +32,16 @@ export function AdminCard() {
 
   return (
     <Link href="/admin" className="block">
-      <Card className="cursor-pointer rounded-2xl shadow-sm transition-shadow hover:shadow-md">
+      <Card className="cursor-pointer rounded-3xl shadow-sm transition-shadow hover:shadow-md">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <Shield className="h-4 w-4 text-primary" />
-            <CardTitle className="text-sm font-medium text-primary">
+            <CardTitle className="text-sm font-medium uppercase tracking-wider text-primary">
               Admin Dashboard
             </CardTitle>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4">
           {loading && (
             <div className="flex items-center justify-center py-4">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />

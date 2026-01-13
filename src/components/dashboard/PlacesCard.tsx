@@ -15,23 +15,23 @@ export function PlacesCard() {
   const { nearestFood, loading: foodLoading, error: foodError, distanceUnit: foodDistanceUnit } = useHalalFood()
 
   return (
-    <Card className="rounded-2xl shadow-sm" role="article" aria-label="Nearby Places: Mosques and Halal Food">
+    <Card className="rounded-3xl shadow-sm" role="article" aria-label="Nearby Places: Mosques and Halal Food">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
           <MapPin className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-          <CardTitle className="text-sm font-medium text-muted-foreground">
+          <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
             Nearby Places
           </CardTitle>
         </div>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="mosques" className="w-full">
-          <TabsList className="grid w-full grid-cols-2" aria-label="Nearby places tabs">
-            <TabsTrigger value="mosques">Mosques</TabsTrigger>
-            <TabsTrigger value="halal-food">Halal Food</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 p-1 bg-muted/50 rounded-2xl gap-1" aria-label="Nearby places tabs">
+            <TabsTrigger value="mosques" className="rounded-xl data-[state=active]:bg-card data-[state=active]:shadow-sm">Mosques</TabsTrigger>
+            <TabsTrigger value="halal-food" className="rounded-xl data-[state=active]:bg-card data-[state=active]:shadow-sm">Halal Food</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="mosques" className="mt-4 space-y-3" role="tabpanel">
+          <TabsContent value="mosques" className="mt-6 space-y-3" role="tabpanel">
             {mosquesLoading ? (
               <div className="flex items-center justify-center py-6" role="status">
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
@@ -95,7 +95,7 @@ export function PlacesCard() {
             )}
           </TabsContent>
           
-          <TabsContent value="halal-food" className="mt-4 space-y-3" role="tabpanel">
+          <TabsContent value="halal-food" className="mt-6 space-y-3" role="tabpanel">
             {foodLoading ? (
               <div className="flex items-center justify-center py-6" role="status">
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />

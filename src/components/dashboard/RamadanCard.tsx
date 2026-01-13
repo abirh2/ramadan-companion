@@ -10,16 +10,16 @@ export function RamadanCard() {
   // Loading state
   if (countdown.loading) {
     return (
-      <Card className="rounded-2xl shadow-md border-accent/30" role="article" aria-busy="true" aria-label="Loading Ramadan countdown">
+      <Card className="rounded-3xl shadow-md border-accent/30" role="article" aria-busy="true" aria-label="Loading Ramadan countdown">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-2">
-            <Moon className="h-5 w-5 text-accent" aria-hidden="true" />
-            <CardTitle className="text-base font-medium text-muted-foreground">
+            <Moon className="h-4 w-4 text-accent" aria-hidden="true" />
+            <CardTitle className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
               Ramadan {countdown.ramadanYear}
             </CardTitle>
           </div>
         </CardHeader>
-        <CardContent className="space-y-2 py-8">
+        <CardContent className="space-y-4 py-8">
           <div className="flex items-center justify-center" role="status">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-hidden="true" />
             <span className="sr-only">Loading Ramadan countdown...</span>
@@ -32,16 +32,16 @@ export function RamadanCard() {
   // Error state
   if (countdown.error) {
     return (
-      <Card className="rounded-2xl shadow-md border-accent/30" role="article" aria-live="polite" aria-label="Error loading Ramadan countdown">
+      <Card className="rounded-3xl shadow-md border-accent/30" role="article" aria-live="polite" aria-label="Error loading Ramadan countdown">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-2">
-            <Moon className="h-5 w-5 text-accent" aria-hidden="true" />
-            <CardTitle className="text-base font-medium text-muted-foreground">
+            <Moon className="h-4 w-4 text-accent" aria-hidden="true" />
+            <CardTitle className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
               Ramadan {countdown.ramadanYear}
             </CardTitle>
           </div>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-4">
           <p className="text-2xl font-semibold text-muted-foreground">Unable to load</p>
           <p className="text-sm text-muted-foreground">
             Check your connection and try refreshing
@@ -67,25 +67,30 @@ export function RamadanCard() {
     const cardAriaLabel = `Ramadan ${countdown.ramadanYear} countdown. Starts in ${countdown.timeUntilEvent}. Expected start date: ${formatDate(countdown.ramadanStartDate)}`
     
     return (
-      <Card className="rounded-2xl shadow-md border-accent/30" role="article" aria-label={cardAriaLabel}>
-        <CardHeader className="pb-4">
+      <Card className="rounded-3xl shadow-lg bg-primary text-primary-foreground border-0 relative overflow-hidden" role="article" aria-label={cardAriaLabel}>
+        {/* Decorative crescent moon overlay */}
+        <div className="absolute top-0 right-0 p-4 opacity-10" aria-hidden="true">
+          <Moon className="h-16 w-16" />
+        </div>
+        
+        <CardHeader className="pb-4 relative z-10">
           <div className="flex items-center gap-2">
-            <Moon className="h-5 w-5 text-accent" aria-hidden="true" />
-            <CardTitle className="text-base font-medium text-muted-foreground">
+            <Moon className="h-4 w-4" aria-hidden="true" />
+            <CardTitle className="text-xs font-semibold uppercase tracking-widest opacity-80">
               Ramadan {countdown.ramadanYear}
             </CardTitle>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4 relative z-10">
           <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
+            <p className="text-xs uppercase tracking-wider mb-2 opacity-70">
               Starts in
             </p>
-            <p className="text-3xl md:text-4xl font-bold text-foreground tabular-nums tracking-tight" aria-live="polite" aria-atomic="true">
+            <p className="text-3xl md:text-4xl font-bold tabular-nums tracking-tight" aria-live="polite" aria-atomic="true">
               {countdown.timeUntilEvent}
             </p>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs opacity-60">
             Expected: {formatDate(countdown.ramadanStartDate)} • Adjust in Settings
           </p>
         </CardContent>
@@ -100,22 +105,27 @@ export function RamadanCard() {
       : `Ramadan Mubarak. Day ${countdown.currentRamadanDay} of 30`
     
     return (
-      <Card className="rounded-2xl shadow-md border-accent/30" role="article" aria-label={cardAriaLabel}>
-        <CardHeader className="pb-4">
+      <Card className="rounded-3xl shadow-lg bg-primary text-primary-foreground border-0 relative overflow-hidden" role="article" aria-label={cardAriaLabel}>
+        {/* Decorative crescent moon overlay */}
+        <div className="absolute top-0 right-0 p-4 opacity-10" aria-hidden="true">
+          <Moon className="h-16 w-16" />
+        </div>
+        
+        <CardHeader className="pb-4 relative z-10">
           <div className="flex items-center gap-2">
-            <Moon className="h-5 w-5 text-accent" aria-hidden="true" />
-            <CardTitle className="text-base font-medium text-muted-foreground">
+            <Moon className="h-4 w-4" aria-hidden="true" />
+            <CardTitle className="text-xs font-semibold uppercase tracking-widest opacity-80">
               Ramadan {countdown.ramadanYear} • Day {countdown.currentRamadanDay}
             </CardTitle>
           </div>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-4 relative z-10">
           {countdown.nextEvent && countdown.timeUntilEvent ? (
             <>
-              <p className="text-4xl font-bold text-foreground tabular-nums" aria-live="polite" aria-atomic="true">
+              <p className="text-4xl font-bold tabular-nums" aria-live="polite" aria-atomic="true">
                 {countdown.timeUntilEvent}
               </p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm opacity-70">
                 {countdown.nextEvent === 'iftar' 
                   ? 'Until Iftar (Maghrib)' 
                   : 'Until Suhoor ends (Fajr)'}
@@ -123,10 +133,10 @@ export function RamadanCard() {
             </>
           ) : (
             <>
-              <p className="text-4xl font-bold text-foreground">
+              <p className="text-4xl font-bold">
                 Ramadan Mubarak
               </p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm opacity-70">
                 Day {countdown.currentRamadanDay} of 30
               </p>
             </>
@@ -138,16 +148,16 @@ export function RamadanCard() {
 
   // Fallback
   return (
-    <Card className="rounded-2xl shadow-md border-accent/30" role="article" aria-label={`Ramadan ${countdown.ramadanYear}. Preparing countdown data.`}>
-      <CardHeader className="pb-4">
-        <div className="flex items-center gap-2">
-          <Moon className="h-5 w-5 text-accent" aria-hidden="true" />
-          <CardTitle className="text-base font-medium text-muted-foreground">
-            Ramadan {countdown.ramadanYear}
-          </CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-2">
+      <Card className="rounded-3xl shadow-md border-accent/30" role="article" aria-label={`Ramadan ${countdown.ramadanYear}. Preparing countdown data.`}>
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-2">
+            <Moon className="h-4 w-4 text-accent" aria-hidden="true" />
+            <CardTitle className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
+              Ramadan {countdown.ramadanYear}
+            </CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
         <p className="text-4xl font-bold text-foreground">Ramadan</p>
         <p className="text-sm text-muted-foreground">
           Preparing countdown data...

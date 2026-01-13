@@ -51,11 +51,11 @@ export function CalendarCard() {
   if (loading) {
     return (
       <Link href="/calendar" className="block" aria-label="Loading calendar data">
-        <Card className="rounded-2xl shadow-sm transition-shadow hover:shadow-md" role="article" aria-busy="true">
+        <Card className="rounded-3xl shadow-sm transition-shadow hover:shadow-md" role="article" aria-busy="true">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <CalendarIcon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
                 Islamic Calendar
               </CardTitle>
             </div>
@@ -75,11 +75,11 @@ export function CalendarCard() {
   if (error || !todayData) {
     return (
       <Link href="/calendar" className="block" aria-label="Unable to load calendar. Tap to view calendar.">
-        <Card className="rounded-2xl shadow-sm transition-shadow hover:shadow-md" role="article" aria-live="polite">
+        <Card className="rounded-3xl shadow-sm transition-shadow hover:shadow-md" role="article" aria-live="polite">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <CalendarIcon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
                 Islamic Calendar
               </CardTitle>
             </div>
@@ -98,25 +98,25 @@ export function CalendarCard() {
 
   return (
     <Link href="/calendar" className="block" aria-label={cardAriaLabel}>
-      <Card className="rounded-2xl shadow-sm cursor-pointer transition-shadow hover:shadow-md" role="article">
+      <Card className="rounded-3xl shadow-sm cursor-pointer transition-shadow hover:shadow-md" role="article">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <CalendarIcon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
               Islamic Calendar
             </CardTitle>
           </div>
         </CardHeader>
-        <CardContent className="space-y-2">
-          <div>
-            <p className="text-sm font-medium text-foreground">
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">
               {formatGregorianDate(todayData.gregorian)}
             </p>
-            <p className="text-2xl font-semibold text-foreground mt-1">
+            <p className="text-3xl font-bold text-foreground tracking-tight">
               {formatHijriDate(todayData.hijri)}
             </p>
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-base text-right font-serif text-muted-foreground" dir="rtl" lang="ar">
             {todayData.hijri.monthNameAr}
           </p>
         </CardContent>

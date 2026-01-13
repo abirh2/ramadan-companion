@@ -105,12 +105,12 @@ export function HadithCard() {
   return (
     <>
       <Link href="/quran-hadith" className="block" aria-label={cardAriaLabel}>
-        <Card className="rounded-2xl shadow-sm transition-all hover:shadow-md hover:scale-[1.01] cursor-pointer" role="article">
+        <Card className="rounded-3xl shadow-sm transition-all hover:shadow-md hover:scale-[1.01] cursor-pointer" role="article">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <ScrollText className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+                <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
                   Hadith of the Day
                 </CardTitle>
               </div>
@@ -130,7 +130,7 @@ export function HadithCard() {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
             {loading && (
               <div className="flex items-center justify-center py-8" role="status">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
@@ -147,27 +147,25 @@ export function HadithCard() {
             {!loading && !error && hadithArabic && (
               <>
                 {/* Arabic Text */}
-                <div className="space-y-2">
-                  <p className="text-base leading-relaxed text-right font-serif" dir="rtl" lang="ar" aria-label={`Arabic text: ${hadithArabic}`}>
+                <div className="py-4 text-center space-y-4">
+                  <p className="text-xl leading-relaxed text-right font-serif" dir="rtl" lang="ar" aria-label={`Arabic text: ${hadithArabic}`}>
                     {hadithArabic}
                   </p>
-                </div>
-
-                {/* Selected Language Translation */}
-                <div className="border-t pt-2">
-                  <p className="text-sm text-muted-foreground leading-relaxed">
+                  
+                  {/* Selected Language Translation */}
+                  <p className="text-sm text-muted-foreground leading-relaxed italic">
                     {getSelectedText()}
                   </p>
                 </div>
 
                 {/* Narrator and Reference */}
-                <div className="space-y-1">
+                <div className="space-y-2 pt-4 border-t border-muted">
                   {narrator && (
                     <p className="text-xs text-muted-foreground italic">{narrator}</p>
                   )}
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground font-semibold">
                         {book} {hadithNumber}
                       </p>
                       {chapter && (
