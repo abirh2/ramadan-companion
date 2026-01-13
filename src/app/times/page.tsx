@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Clock, Sunrise, Loader2, Calendar } from 'lucide-react'
+import { ArrowLeft, Check, Clock, Sunrise, Loader2, Calendar } from 'lucide-react'
 import { usePrayerTimes } from '@/hooks/usePrayerTimes'
 import { usePrayerTracking } from '@/hooks/usePrayerTracking'
 import { useAuth } from '@/hooks/useAuth'
@@ -276,9 +276,13 @@ export default function TimesPage() {
                           {todayCompletion && (
                             <button
                               onClick={() => togglePrayer(prayer.name as PrayerName)}
-                              className="w-10 h-10 flex items-center justify-center rounded-full border-2 border-white/20 text-white/40 hover:border-white/40 transition-all"
+                              className={`w-10 h-10 flex items-center justify-center rounded-full transition-all ${
+                                isPrayerCompleted
+                                  ? 'bg-green-500 text-white border-none'
+                                  : 'border-2 border-white/20 text-white/40 hover:border-white/40'
+                              }`}
                             >
-                              <Clock className="h-6 w-6" />
+                              {isPrayerCompleted && <Check className="h-6 w-6" />}
                             </button>
                           )}
                           <div>
@@ -294,11 +298,6 @@ export default function TimesPage() {
                               </span>
                             </div>
                           </div>
-                        </div>
-                        <div className="text-right relative z-10">
-                          <button className="p-2 text-white/40 hover:text-white">
-                            <Clock className="h-5 w-5" />
-                          </button>
                         </div>
                       </div>
                     )
@@ -321,7 +320,7 @@ export default function TimesPage() {
                                   : 'border-2 border-muted text-muted-foreground hover:border-primary'
                               }`}
                             >
-                              <Clock className="h-6 w-6" />
+                              {isPrayerCompleted && <Check className="h-6 w-6" />}
                             </button>
                           )}
                           <div>
@@ -352,9 +351,6 @@ export default function TimesPage() {
                               {timeUntil}
                             </span>
                           )}
-                          <button className="p-2 text-muted-foreground hover:text-foreground">
-                            <Clock className="h-5 w-5" />
-                          </button>
                         </div>
                       </div>
                     )
@@ -396,7 +392,7 @@ export default function TimesPage() {
                                 : 'border-2 border-muted text-muted-foreground hover:border-primary'
                             }`}
                           >
-                            <Clock className="h-6 w-6" />
+                            {isPrayerCompleted && <Check className="h-6 w-6" />}
                           </button>
                         )}
                         <div>
@@ -427,9 +423,6 @@ export default function TimesPage() {
                             Passed
                           </span>
                         )}
-                        <button className="p-2 text-muted-foreground hover:text-foreground">
-                          <Clock className="h-5 w-5" />
-                        </button>
                       </div>
                     </div>
                   )

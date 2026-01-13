@@ -393,7 +393,7 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
                 ENABLING...
               </>
             ) : mode === 'dynamic' ? (
-              'CALIBRATE COMPASS'
+              'SWITCH TO STATIC MODE'
             ) : (
               <>
                 <Navigation className="mr-2 h-4 w-4" />
