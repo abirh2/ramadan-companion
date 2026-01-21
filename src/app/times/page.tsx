@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { QiblaCompass } from '@/components/prayer-times/QiblaCompass'
 import { PrayerCheckbox, PrayerCompletionSummary } from '@/components/prayer-times/PrayerCheckboxes'
 import { PrayerStatistics } from '@/components/prayer-times/PrayerStatistics'
+import { NotificationSettings } from '@/components/prayer-times/NotificationSettings'
 import { DateSelectorModal } from '@/components/prayer-times/DateSelectorModal'
 import { CompactPreferencesCard } from '@/components/prayer-times/CompactPreferencesCard'
 import { PreferencesDetailModal } from '@/components/prayer-times/PreferencesDetailModal'
@@ -457,6 +458,12 @@ export default function TimesPage() {
                   location={location}
                   onEditClick={() => setPrefsModalOpen(true)}
                 />
+              </section>
+
+              {/* Notification Settings */}
+              <section aria-labelledby="notification-settings-title">
+                <h2 id="notification-settings-title" className="sr-only">Notification Settings</h2>
+                <NotificationSettings />
               </section>
             </aside>
           </div>
