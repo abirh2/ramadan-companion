@@ -7,7 +7,8 @@
 ### Recent Fixes (February 2026)
 
 - **InstallPrompt:** Hidden in native Capacitor app (iOS/Android) - no more "Download on iOS" banner when running in TestFlight/Play
-- **Notifications:** Location sync to profile when enabling notifications so cron job has coordinates
+- **Notifications (Native):** Native app now uses `@capacitor/local-notifications` for prayer times instead of cron/Web Push. Schedules locally on device; no server, Firebase, or cron needed. PWA/browser still uses Web Push + cron.
+- **Notifications (PWA):** Location sync to profile when enabling notifications so cron job has coordinates
 - **Splash screen:** iOS and Android now show app icon on theme background (#0f3d3e) instead of generic placeholder
 - **App icon:** Android mipmap icons updated to match iOS (icon-512.png, theme background)
 - **Qibla finder:** Native app uses Capacitor Motion directly; skip iOS DeviceOrientationEvent.requestPermission in native context; NSMotionUsageDescription added to Info.plist
@@ -45,7 +46,7 @@
 - Build scripts added to `package.json`
 
 **Phase 2: Plugin Migration** - COMPLETE
-- Plugins installed: `@capacitor/geolocation`, `@capacitor/motion`, `@capacitor/haptics`, `@capacitor/splash-screen`, `@capacitor/status-bar`, `@capacitor/keyboard`, `@capacitor/preferences`
+- Plugins installed: `@capacitor/geolocation`, `@capacitor/motion`, `@capacitor/haptics`, `@capacitor/splash-screen`, `@capacitor/status-bar`, `@capacitor/keyboard`, `@capacitor/preferences`, `@capacitor/local-notifications`
 - Platform-aware abstractions implemented (supports both PWA and native)
 - Jest mocks configured for all plugins
 - Native permissions configured
@@ -54,7 +55,10 @@
 
 | File | Changes |
 |------|---------|
-| `capacitor.config.json` | Main Capacitor configuration |
+| `capacitor.config.json` | Main Capacitor configuration, LocalNotifications plugin |
+| `src/lib/localNotifications.ts` | Local prayer notification scheduling (native only) |
+| `src/lib/notifications.ts` | Permission handling (LocalNotifications on native) |
+| `src/hooks/useNotifications.ts` | Native: local scheduling; PWA: Web Push + cron |
 | `src/lib/location.ts` | Platform-aware geolocation |
 | `src/lib/orientation.ts` | Platform-aware device motion |
 | `src/lib/zikr.ts` | Platform-aware haptics |
@@ -63,6 +67,8 @@
 | `android/app/src/main/AndroidManifest.xml` | Location permissions |
 
 ### Architecture Decision
+
+**Native Prayer Notifications (Local):** Native apps use `@capacitor/local-notifications` for prayer times. No server, Firebase, or cron required. Schedules on device using `calculatePrayerTimesLocal()` and user location. Reschedules on app launch and when preferences change. Phase 3 (FCM) is optional for future push use cases (announcements, etc.).
 
 **Hybrid Approach** (not static export):
 - Next.js runs on Vercel with all API routes intact

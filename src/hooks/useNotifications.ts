@@ -10,6 +10,7 @@ import type {
 import {
   isNotificationSupported,
   getNotificationPermission,
+  getNativeNotificationPermission,
   requestNotificationPermission,
   getNotificationPreferences,
   saveNotificationPreferences,
@@ -20,8 +21,14 @@ import {
   storeFCMToken,
   clearStoredFCMToken,
 } from '@/lib/notifications'
+import {
+  schedulePrayerNotifications,
+  cancelPrayerNotifications,
+  rescheduleIfEnabled,
+} from '@/lib/localNotifications'
 import { getUserLocation, saveLocationToStorage } from '@/lib/location'
 import { Capacitor } from '@capacitor/core'
+import type { CalculationMethodId, MadhabId } from '@/types/ramadan.types'
 
 /**
  * Hook for managing prayer time notification preferences and permissions
@@ -55,14 +62,17 @@ export function useNotifications(): UseNotificationsResult {
   const isFetchingRef = useRef(false)
 
   // Load preferences on mount and when profile changes
-  const loadPreferences = useCallback(() => {
+  const loadPreferences = useCallback(async () => {
     if (isFetchingRef.current) return
 
     isFetchingRef.current = true
 
     try {
       const isSupported = isNotificationSupported()
-      const permission = getNotificationPermission()
+      let permission = getNotificationPermission()
+      if (Capacitor.isNativePlatform()) {
+        permission = await getNativeNotificationPermission()
+      }
       const preferences = getNotificationPreferences(profile)
 
       setState({
@@ -72,6 +82,13 @@ export function useNotifications(): UseNotificationsResult {
         loading: false,
         error: null,
       })
+
+      if (Capacitor.isNativePlatform() && preferences.enabled && permission === 'granted') {
+        const location = getUserLocation(profile)
+        const method = (profile?.calculation_method || localStorage.getItem('calculation_method') || '2') as CalculationMethodId
+        const madhab = (profile?.madhab === 'hanafi' ? '1' : profile?.madhab || localStorage.getItem('madhab') || '0') as MadhabId
+        await rescheduleIfEnabled(preferences, location || { lat: 21.4225, lng: 39.8262, city: 'Mecca', type: 'default' }, method, madhab)
+      }
     } catch (error) {
       console.error('[useNotifications] Failed to load preferences:', error)
       setState((prev) => ({
@@ -96,36 +113,12 @@ export function useNotifications(): UseNotificationsResult {
       const granted = await requestNotificationPermission()
 
       if (granted) {
-        // Sync location to profile so cron job can calculate prayer times (backend requires profile location)
         const location = getUserLocation(profile)
         if (location && profile?.id && (!profile.location_lat || !profile.location_lng)) {
           try {
             await saveLocationToStorage(location.lat, location.lng, location.city, location.type)
           } catch (e) {
             console.warn('[useNotifications] Failed to sync location to profile:', e)
-          }
-        }
-
-        const subscription = await subscribeToPush()
-
-        if (subscription) {
-          try {
-            const body =
-              'fcmToken' in subscription
-                ? { fcmToken: subscription.fcmToken }
-                : subscription
-
-            if ('fcmToken' in subscription) {
-              storeFCMToken(subscription.fcmToken)
-            }
-
-            await fetch('/api/push/subscribe', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(body),
-            })
-          } catch (error) {
-            console.error('[useNotifications] Failed to save subscription:', error)
           }
         }
 
@@ -142,6 +135,28 @@ export function useNotifications(): UseNotificationsResult {
 
         await saveNotificationPreferences(newPreferences, profile)
 
+        if (Capacitor.isNativePlatform()) {
+          const loc = getUserLocation(profile) || { lat: 21.4225, lng: 39.8262, city: 'Mecca', type: 'default' as const }
+          const method = ((profile?.calculation_method as CalculationMethodId) || (typeof window !== 'undefined' ? localStorage.getItem('calculation_method') : null) || '2') as CalculationMethodId
+          const madhab = (profile?.madhab === 'hanafi' ? '1' : (typeof window !== 'undefined' ? localStorage.getItem('madhab') : null) || '0') as MadhabId
+          await schedulePrayerNotifications(newPreferences, loc, method, madhab)
+        } else {
+          const subscription = await subscribeToPush()
+          if (subscription) {
+            try {
+              const body = 'fcmToken' in subscription ? { fcmToken: subscription.fcmToken } : subscription
+              if ('fcmToken' in subscription) storeFCMToken(subscription.fcmToken)
+              await fetch('/api/push/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+              })
+            } catch (e) {
+              console.error('[useNotifications] Failed to save subscription:', e)
+            }
+          }
+        }
+
         setState((prev) => ({
           ...prev,
           permission: 'granted',
@@ -151,9 +166,12 @@ export function useNotifications(): UseNotificationsResult {
 
         return true
       } else {
+        const perm = Capacitor.isNativePlatform()
+          ? await getNativeNotificationPermission()
+          : getNotificationPermission()
         setState((prev) => ({
           ...prev,
-          permission: getNotificationPermission(),
+          permission: perm,
           loading: false,
         }))
 
@@ -183,6 +201,13 @@ export function useNotifications(): UseNotificationsResult {
         }
 
         await saveNotificationPreferences(newPreferences, profile)
+
+        if (Capacitor.isNativePlatform() && newPreferences.enabled) {
+          const loc = getUserLocation(profile) || { lat: 21.4225, lng: 39.8262, city: 'Mecca', type: 'default' as const }
+          const method = ((profile?.calculation_method as CalculationMethodId) || (typeof window !== 'undefined' ? localStorage.getItem('calculation_method') : null) || '2') as CalculationMethodId
+          const madhab = (profile?.madhab === 'hanafi' ? '1' : (typeof window !== 'undefined' ? localStorage.getItem('madhab') : null) || '0') as MadhabId
+          await schedulePrayerNotifications(newPreferences, loc, method, madhab)
+        }
 
         setState((prev) => ({
           ...prev,
@@ -215,6 +240,13 @@ export function useNotifications(): UseNotificationsResult {
 
       await saveNotificationPreferences(newPreferences, profile)
 
+      if (Capacitor.isNativePlatform()) {
+        const loc = getUserLocation(profile) || { lat: 21.4225, lng: 39.8262, city: 'Mecca', type: 'default' as const }
+        const method = ((profile?.calculation_method as CalculationMethodId) || (typeof window !== 'undefined' ? localStorage.getItem('calculation_method') : null) || '2') as CalculationMethodId
+        const madhab = (profile?.madhab === 'hanafi' ? '1' : (typeof window !== 'undefined' ? localStorage.getItem('madhab') : null) || '0') as MadhabId
+        await schedulePrayerNotifications(newPreferences, loc, method, madhab)
+      }
+
       setState((prev) => ({
         ...prev,
         preferences: newPreferences,
@@ -232,16 +264,7 @@ export function useNotifications(): UseNotificationsResult {
   const disableAll = useCallback(async (): Promise<void> => {
     try {
       if (Capacitor.isNativePlatform()) {
-        const fcmToken = getStoredFCMToken()
-        if (fcmToken) {
-          await fetch('/api/push/unsubscribe', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fcmToken }),
-          })
-          clearStoredFCMToken()
-        }
-        await unsubscribeFromPush()
+        await cancelPrayerNotifications()
       } else {
         const registration = await navigator.serviceWorker.ready
         const subscription = await registration.pushManager.getSubscription()

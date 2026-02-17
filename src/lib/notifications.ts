@@ -92,6 +92,23 @@ export function getNotificationPermission(): NotificationPermission | null {
 }
 
 /**
+ * Get native local notification permission (async)
+ * Used for native app to check/sync permission state
+ */
+export async function getNativeNotificationPermission(): Promise<NotificationPermission> {
+  if (!Capacitor.isNativePlatform()) return 'default'
+  try {
+    const { LocalNotifications } = await import('@capacitor/local-notifications')
+    const { display } = await LocalNotifications.checkPermissions()
+    if (display === 'granted') return 'granted'
+    if (display === 'denied') return 'denied'
+    return 'default'
+  } catch {
+    return 'default'
+  }
+}
+
+/**
  * Request notification permission from the user
  * Platform-aware: Capacitor on native, Notification API on browser
  * @returns Promise<boolean> - true if granted, false otherwise
@@ -111,9 +128,9 @@ export async function requestNotificationPermission(): Promise<boolean> {
 
   try {
     if (Capacitor.isNativePlatform()) {
-      const { PushNotifications } = await import('@capacitor/push-notifications')
-      const { receive } = await PushNotifications.requestPermissions()
-      return receive === 'granted'
+      const { LocalNotifications } = await import('@capacitor/local-notifications')
+      const { display } = await LocalNotifications.requestPermissions()
+      return display === 'granted'
     }
 
     const permission = await Notification.requestPermission()

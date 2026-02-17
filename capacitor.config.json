@@ -15,6 +15,9 @@
       "backgroundColor": "#0f3d3e",
       "androidScaleType": "CENTER_CROP",
       "showSpinner": false
+    },
+    "LocalNotifications": {
+      "iconColor": "#0f3d3e"
     }
   }
 }

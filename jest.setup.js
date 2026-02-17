@@ -60,6 +60,16 @@ jest.mock('@capacitor/push-notifications', () => ({
   },
 }))
 
+// Mock Capacitor Local Notifications plugin
+jest.mock('@capacitor/local-notifications', () => ({
+  LocalNotifications: {
+    requestPermissions: jest.fn().mockResolvedValue({ display: 'granted' }),
+    checkPermissions: jest.fn().mockResolvedValue({ display: 'granted' }),
+    schedule: jest.fn().mockResolvedValue({ notifications: [] }),
+    cancel: jest.fn().mockResolvedValue(undefined),
+  },
+}))
+
 // Mock Capacitor Haptics plugin
 jest.mock('@capacitor/haptics', () => ({
   Haptics: {
