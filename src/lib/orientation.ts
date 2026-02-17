@@ -51,15 +51,19 @@ export function hasOrientationSupport(): boolean {
 
 /**
  * Check if iOS 13+ permission request is needed
- * iOS 13+ requires explicit permission for DeviceOrientationEvent in browser
- * Native Capacitor app uses Motion plugin which handles permissions natively
+ * iOS 13+ requires explicit permission for DeviceOrientationEvent via requestPermission().
+ * This applies to BOTH Safari (browser/PWA) AND WKWebView (native Capacitor iOS app).
+ * The WKUIDelegate implemented by Capacitor surfaces the system permission dialog.
+ * Android native and desktop do not require this permission.
  * @returns true if permission request is required
  */
 export function needsOrientationPermission(): boolean {
-  if (Capacitor.isNativePlatform()) return false
+  // Android native: isIOS() returns false → no permission needed
+  // Desktop browsers: isIOS() returns false → no permission needed
+  // iOS Safari + iOS WKWebView (native): isIOS() returns true (userAgent includes iPhone/iPad)
   if (!isIOS()) return false
 
-  // iOS 13+ browser has requestPermission method
+  // iOS 13+ has requestPermission method on DeviceOrientationEvent
   return typeof (DeviceOrientationEvent as any).requestPermission === 'function'
 }
 

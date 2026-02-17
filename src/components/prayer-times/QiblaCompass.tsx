@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Compass, Loader2, Navigation, AlertTriangle } from 'lucide-react'
 import type { QiblaData, CompassMode } from '@/types/ramadan.types'
-import { Capacitor } from '@capacitor/core'
 import {
   isMobileDevice,
   hasOrientationSupport,
@@ -43,22 +42,11 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
     setIsEnabling(true)
 
     try {
-      // On native apps, compass heading in WKWebView requires location authorization.
-      // Request location permission first so deviceorientation events include
-      // calibrated webkitCompassHeading (iOS) or magnetic-north alpha (Android).
-      if (Capacitor.isNativePlatform()) {
-        try {
-          const { Geolocation } = await import('@capacitor/geolocation')
-          const locPerm = await Geolocation.requestPermissions()
-          if (locPerm.location === 'denied') {
-            console.warn('[QiblaCompass] Location permission denied - compass may not work')
-          }
-        } catch (e) {
-          console.warn('[QiblaCompass] Location permission request failed:', e)
-        }
-        setPermission('not-required')
-      } else if (needsOrientationPermission()) {
-        // iOS 13+ Safari requires explicit DeviceOrientationEvent permission
+      // iOS 13+ (both Safari and WKWebView/native) requires explicit permission for
+      // DeviceOrientationEvent. needsOrientationPermission() checks for this correctly
+      // on all platforms — native iOS WKWebView behaves identically to Safari here.
+      // Android and desktop never require this permission.
+      if (needsOrientationPermission()) {
         const permissionStatus = await requestOrientationPermission()
         setPermission(permissionStatus)
 
