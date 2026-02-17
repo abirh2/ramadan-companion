@@ -1,9 +1,6 @@
 issues to fix
 
-1 - notifications were turned on in testflight app download (i even was asked for permissions), but did not send me prayer notifications. might be weird conflicts with it not recognizing app enivronemnt vs web environment.
-2 - i sometimes see the "download on ios" banner at the bottom when i open the app. i think the app assumes im on browser when im not. this should not show up in the app version. 
-3 - the splash screen when i open the testflight app looks like the generic placeholder, instead of showing my icon. can this be fixed? 
-4 - you only updated the app icon for ios. make sure to update for android also. 
-5 - qibla finder does not work on the testflight app. it doesn't even ask for location/orientation perms. we must fix this for android and apple. 
-6 - on the website, the ramadan counter will soon need upating. ramadan starts in a few hours, so after the countdown is done, the ramadan card will need to show countdown to sehri/suhoor time being over or countdown to iftar time, along with the current day of ramadan. keep aesthetic of current card
-7 - ensure that location perms are being used properly in the app, and they are consistent with different cards that need it. i saw the mosque/halal food finder took a bit to get location, but this could be slow updating rather than permissions failing. 
+1 - qibla locater is still broken and doesn't ask for permissions at all. when clicking enable dynamic, the arrow doesn;t move at all even when the phone is moved. (seen on ios, but could affect android). not sure why this isnt working when it worked fine on web version. do i need to update something on apple connect?
+2 - in REMAINING-WORK.md, we need to complete android configuration (#### Android Native Configuration), so complete everything we need to do before i push to play store (like app assets). 
+3 - double check app notifications for prayers are working. im still not seeing them on my end. ensure it works for android and iphone. if there is a way for me to test it without wiating for prayer time, provide it for me.
+ 

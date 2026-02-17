@@ -153,18 +153,19 @@ export function isLowAccuracy(accuracy: number | null): boolean {
 }
 
 /**
- * Start tracking device orientation using platform-appropriate API
- * - Native apps: Uses Capacitor Motion plugin
- * - Browser/PWA: Uses DeviceOrientationEvent
+ * Start tracking device orientation using browser DeviceOrientationEvent
+ * 
+ * IMPORTANT: We always use the browser API (DeviceOrientationEvent) for compass heading,
+ * even on native Capacitor apps. The Capacitor Motion plugin provides raw gyroscope data
+ * whose alpha value is relative to page-load orientation (not magnetic north). The browser
+ * deviceorientation event is available inside WKWebView/WebView and correctly provides
+ * webkitCompassHeading (iOS) or magnetic-north-calibrated alpha (Android).
+ * 
  * @param callback - Function called with each orientation update
  * @returns cleanup function to stop tracking
  */
 export function startOrientationTracking(callback: OrientationCallback): () => void {
-  if (Capacitor.isNativePlatform()) {
-    return startOrientationTrackingNative(callback)
-  } else {
-    return startOrientationTrackingBrowser(callback)
-  }
+  return startOrientationTrackingBrowser(callback)
 }
 
 /**

@@ -142,6 +142,42 @@ export async function cancelPrayerNotifications(): Promise<void> {
 }
 
 /**
+ * Send a test notification immediately (fires 3 seconds from now)
+ * Used for verifying notification permissions and delivery on device.
+ */
+export async function sendTestNotification(): Promise<boolean> {
+  if (!Capacitor.isNativePlatform()) return false
+
+  try {
+    const { LocalNotifications } = await import('@capacitor/local-notifications')
+
+    const permission = await LocalNotifications.requestPermissions()
+    if (permission.display !== 'granted') {
+      console.warn('[LocalNotifications] Permission not granted for test')
+      return false
+    }
+
+    const testDate = new Date(Date.now() + 3000)
+    await LocalNotifications.schedule({
+      notifications: [
+        {
+          id: 99,
+          title: 'Deen Companion - Test Notification',
+          body: 'Prayer notifications are working. You will receive reminders at each prayer time.',
+          schedule: { at: testDate, allowWhileIdle: true },
+          extra: { prayer: 'test', url: '/times' },
+        },
+      ],
+    })
+    console.log('[LocalNotifications] Test notification scheduled for', testDate.toLocaleTimeString())
+    return true
+  } catch (error) {
+    console.error('[LocalNotifications] Test notification failed:', error)
+    return false
+  }
+}
+
+/**
  * Reschedule if notifications are enabled - call on app launch
  */
 export async function rescheduleIfEnabled(

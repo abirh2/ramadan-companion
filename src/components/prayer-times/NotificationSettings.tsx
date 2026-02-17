@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Bell, BellOff, Check, AlertCircle, Smartphone, LogIn } from 'lucide-react'
 import Link from 'next/link'
 import { Card } from '@/components/ui/card'
@@ -9,6 +10,7 @@ import { useNotifications } from '@/hooks/useNotifications'
 import { useAuth } from '@/hooks/useAuth'
 import { Capacitor } from '@capacitor/core'
 import { isIOS, getIOSBrowser } from '@/lib/notifications'
+import { sendTestNotification } from '@/lib/localNotifications'
 import type { PrayerName } from '@/types/notification.types'
 
 const PRAYER_INFO: Record<
@@ -38,6 +40,7 @@ const PRAYER_INFO: Record<
  */
 export function NotificationSettings() {
   const { user } = useAuth()
+  const [testStatus, setTestStatus] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle')
   const {
     isSupported,
     permission,
@@ -91,8 +94,8 @@ export function NotificationSettings() {
     )
   }
 
-  // Not logged in - require authentication for Web Push
-  if (!user) {
+  // Not logged in - require authentication for Web Push (not needed for native local notifications)
+  if (!user && !Capacitor.isNativePlatform()) {
     return (
       <Card className="p-6">
         <div className="flex items-start gap-3">
@@ -241,6 +244,31 @@ export function NotificationSettings() {
                 </div>
               )
             })}
+          </div>
+        )}
+
+        {/* Test Notification Button - native only */}
+        {Capacitor.isNativePlatform() && preferences.enabled && (
+          <div className="pt-2 border-t">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              disabled={testStatus === 'sending'}
+              onClick={async () => {
+                setTestStatus('sending')
+                const ok = await sendTestNotification()
+                setTestStatus(ok ? 'sent' : 'failed')
+                if (ok) {
+                  setTimeout(() => setTestStatus('idle'), 5000)
+                }
+              }}
+            >
+              {testStatus === 'sending' ? 'Sending...' :
+               testStatus === 'sent' ? 'Test sent -- check in 3 seconds' :
+               testStatus === 'failed' ? 'Failed -- check permissions' :
+               'Send Test Notification'}
+            </Button>
           </div>
         )}
 

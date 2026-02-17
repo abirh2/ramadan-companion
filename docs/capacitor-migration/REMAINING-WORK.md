@@ -485,6 +485,100 @@ See [phase-6-testflight.md](./phase-6-testflight.md) for complete instructions.
 
 ---
 
+## Android Native Configuration
+
+This section documents all Android-specific configuration required before publishing to Google Play. Most items are already complete.
+
+### Completed Configuration
+
+| Item | Status | Location |
+|------|--------|----------|
+| App ID | Done | `com.deencompanion.app` in `build.gradle` |
+| App name | Done | "Deen Companion" in `strings.xml` |
+| Launcher icons (all densities) | Done | `mipmap-*/ic_launcher*.png` + adaptive XML |
+| Splash screen (portrait + landscape) | Done | `drawable-*/splash.png` + `splash.xml` |
+| Theme colors | Done | `values/colors.xml` (Primary, PrimaryDark, Accent) |
+| Splash background color | Done | `values/ic_launcher_background.xml` (#0f3d3e) |
+| INTERNET permission | Done | `AndroidManifest.xml` |
+| Fine + Coarse location | Done | `AndroidManifest.xml` |
+| SCHEDULE_EXACT_ALARM | Done | `AndroidManifest.xml` (for local notifications) |
+| POST_NOTIFICATIONS | Done | `AndroidManifest.xml` (required Android 13+) |
+| Google Services config | Done | `app/google-services.json` present |
+| Capacitor plugins synced | Done | 8 plugins registered |
+
+### Signing Configuration (Required Before Release)
+
+1. **Generate a release keystore** (if not already done):
+
+```bash
+mkdir -p android/keys
+
+keytool -genkey -v \
+  -keystore android/keys/deen-companion-release.keystore \
+  -alias deen-companion \
+  -keyalg RSA \
+  -keysize 2048 \
+  -validity 10000
+```
+
+2. **Add keystore to .gitignore** (already done if `android/keys/` is listed).
+
+3. **Configure signing in `android/app/build.gradle`:**
+
+Add a `signingConfigs` block and reference it in `buildTypes.release`:
+
+```gradle
+android {
+    signingConfigs {
+        release {
+            storeFile file("../keys/deen-companion-release.keystore")
+            storePassword System.getenv("KEYSTORE_PASSWORD") ?: ""
+            keyAlias "deen-companion"
+            keyPassword System.getenv("KEY_PASSWORD") ?: ""
+        }
+    }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+```
+
+### Google Play Store Assets
+
+| Asset | Size | Format | Notes |
+|-------|------|--------|-------|
+| Hi-res icon | 512x512 | PNG (alpha OK) | Use existing `icon-512.png` |
+| Feature graphic | 1024x500 | JPG or PNG | Branded banner shown at top of listing |
+| Phone screenshots | 1080x1920+ | PNG or JPG | Min 2, max 8 (take from device) |
+| 7" tablet screenshots | 1200x1920 | PNG or JPG | Optional but recommended |
+| 10" tablet screenshots | 1920x1200 | PNG or JPG | Optional |
+
+**Generating feature graphic:**
+Use any image editor. Suggested content: app icon centered on #0f3d3e background with "Deen Companion" text. 1024x500 px.
+
+**Taking screenshots:**
+1. Build and run on emulator or device: `nvm use 22 && npx cap run android`
+2. Navigate to each key screen (prayer times, Quran, Qibla, notifications)
+3. Capture screenshots via Android Studio or `adb exec-out screencap -p > screen.png`
+4. Crop status bar if desired
+
+### Play Console Content Setup
+
+Complete these sections in Google Play Console before publishing:
+
+1. **App access:** No restrictions (fully accessible)
+2. **Ads declaration:** No ads
+3. **Content rating:** Complete IARC questionnaire (Reference: Religion/Spirituality, no violence/gambling)
+4. **Target audience:** 13+ (general audience)
+5. **Data safety:** Declare location usage (prayer times, Qibla), no data shared with third parties
+6. **Privacy policy URL:** Required -- host at `https://ramadan-companion.vercel.app/privacy` or external URL
+
+---
+
 ## Phase 7: Google Play (Android)
 
 **Estimated Duration:** 1-2 days  

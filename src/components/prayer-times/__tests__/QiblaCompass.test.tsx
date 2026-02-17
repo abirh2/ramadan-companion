@@ -49,7 +49,8 @@ describe('QiblaCompass', () => {
     render(<QiblaCompass qiblaDirection={mockQiblaDirection} loading={false} error={null} />)
 
     expect(screen.getByText('Qibla Direction')).toBeInTheDocument()
-    expect(screen.getByText(/58\.5° NE/i)).toBeInTheDocument()
+    // Bearing appears in both header and main display; use getAllByText
+    expect(screen.getAllByText(/58\.5° NE/i).length).toBeGreaterThanOrEqual(1)
     expect(screen.getByText(/Direction to Mecca/i)).toBeInTheDocument()
   })
 
@@ -280,7 +281,7 @@ describe('QiblaCompass', () => {
 
       // Static mode: shows cardinal directions and bearing
       expect(screen.getByText('N')).toBeInTheDocument()
-      expect(screen.getByText(/58\.5° NE/i)).toBeInTheDocument()
+      expect(screen.getAllByText(/58\.5° NE/i).length).toBeGreaterThanOrEqual(1)
       expect(screen.getByText(/Direction to Mecca/i)).toBeInTheDocument()
       expect(screen.queryByText('🕋')).not.toBeInTheDocument()
 
@@ -296,7 +297,7 @@ describe('QiblaCompass', () => {
         expect(screen.queryByText('W')).not.toBeInTheDocument()
         
         // Still shows bearing info in dynamic mode
-        expect(screen.getByText(/58\.5° NE/i)).toBeInTheDocument()
+        expect(screen.getAllByText(/58\.5° NE/i).length).toBeGreaterThanOrEqual(1)
         expect(screen.getByText(/Direction to Mecca/i)).toBeInTheDocument()
         
         // Shows hold phone flat reminder
