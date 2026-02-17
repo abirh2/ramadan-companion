@@ -263,7 +263,7 @@ export function PrayerStatistics({
                         border: '1px solid hsl(var(--border))',
                         borderRadius: '8px',
                       }}
-                      formatter={(value: number) => [`${value}/5`, 'Prayers Completed']}
+                      formatter={(value: number | undefined) => [`${value?.toFixed(0) ?? 0}/5`, 'Prayers Completed']}
                       labelFormatter={(label) => {
                         const date = new Date(label)
                         return date.toLocaleDateString()

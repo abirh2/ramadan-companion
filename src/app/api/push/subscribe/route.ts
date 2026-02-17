@@ -11,33 +11,53 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Parse subscription
     const body = await request.json()
-    const { endpoint, keys } = body
+    const { endpoint, keys, fcmToken } = body
 
+    const userAgent = request.headers.get('user-agent') || null
+
+    // FCM token (native app)
+    if (fcmToken && typeof fcmToken === 'string') {
+      const { error: dbError } = await supabase
+        .from('push_subscriptions')
+        .upsert(
+          {
+            user_id: user.id,
+            fcm_token: fcmToken,
+            endpoint: `fcm:${fcmToken}`,
+            p256dh: 'fcm',
+            auth: 'fcm',
+            user_agent: userAgent,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'user_id,endpoint' }
+        )
+
+      if (dbError) throw dbError
+      return NextResponse.json({ success: true })
+    }
+
+    // Web Push subscription (PWA/browser)
     if (!endpoint || !keys?.p256dh || !keys?.auth) {
       return NextResponse.json(
-        { error: 'Invalid subscription format' },
+        { error: 'Invalid subscription format: provide endpoint+keys or fcmToken' },
         { status: 400 }
       )
     }
 
-    // Get user agent
-    const userAgent = request.headers.get('user-agent') || null
-
-    // Upsert subscription (update if endpoint exists)
     const { error: dbError } = await supabase
       .from('push_subscriptions')
-      .upsert({
-        user_id: user.id,
-        endpoint,
-        p256dh: keys.p256dh,
-        auth: keys.auth,
-        user_agent: userAgent,
-        updated_at: new Date().toISOString(),
-      }, {
-        onConflict: 'user_id,endpoint'
-      })
+      .upsert(
+        {
+          user_id: user.id,
+          endpoint,
+          p256dh: keys.p256dh,
+          auth: keys.auth,
+          user_agent: userAgent,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id,endpoint' }
+      )
 
     if (dbError) throw dbError
 

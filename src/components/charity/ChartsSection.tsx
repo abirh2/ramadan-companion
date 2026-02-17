@@ -74,7 +74,7 @@ export function ChartsSection({ donations, preferredCurrency }: ChartsSectionPro
                   border: '1px solid hsl(var(--border))',
                   borderRadius: '8px',
                 }}
-                formatter={(value: number) => [formatCurrency(value, preferredCurrency), 'Amount']}
+                formatter={(value: number | undefined) => [formatCurrency(value ?? 0, preferredCurrency), 'Amount']}
               />
               <Legend />
               <Line
@@ -117,7 +117,7 @@ export function ChartsSection({ donations, preferredCurrency }: ChartsSectionPro
                     border: '1px solid hsl(var(--border))',
                     borderRadius: '8px',
                   }}
-                  formatter={(value: number) => [`$${value.toFixed(2)}`, 'Amount']}
+                  formatter={(value: number | undefined) => [`$${value?.toFixed(2) ?? 0}`, 'Amount']}
                 />
                 <Bar dataKey="amount" fill="hsl(var(--primary))" name="Monthly Total" radius={[8, 8, 0, 0]} />
               </BarChart>
@@ -153,7 +153,7 @@ export function ChartsSection({ donations, preferredCurrency }: ChartsSectionPro
                     border: '1px solid hsl(var(--border))',
                     borderRadius: '8px',
                   }}
-                  formatter={(value: number) => `$${value.toFixed(2)}`}
+                  formatter={(value: number | undefined) => `$${value?.toFixed(2) ?? 0}`}
                 />
                 <Legend />
               </PieChart>

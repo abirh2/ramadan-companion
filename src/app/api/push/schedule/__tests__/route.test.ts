@@ -10,6 +10,14 @@ import * as timezoneModule from '@/lib/timezone'
 // Mock dependencies
 jest.mock('@/lib/supabase/server')
 jest.mock('web-push')
+jest.mock('firebase-admin', () => ({
+  apps: [],
+  credential: { cert: jest.fn() },
+  initializeApp: jest.fn(),
+  messaging: jest.fn(() => ({
+    send: jest.fn().mockResolvedValue({}),
+  })),
+}))
 jest.mock('@/lib/prayerQuotes')
 jest.mock('@/lib/timezone')
 

@@ -1,17 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import webpush from 'web-push'
+import * as admin from 'firebase-admin'
 import { getRandomPrayerQuote } from '@/lib/prayerQuotes'
 import { calculatePrayerTimesLocal } from '@/lib/prayerTimes'
 import { getTimezoneFromCoordinates } from '@/lib/timezone'
 import type { PrayerName } from '@/types/notification.types'
 
-// Configure web-push
-webpush.setVapidDetails(
-  process.env.VAPID_MAILTO || 'mailto:admin@deen-companion.app',
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-)
+// Configure web-push (for PWA/browser subscriptions)
+if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(
+    process.env.VAPID_MAILTO || 'mailto:admin@deen-companion.app',
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  )
+}
+
+// Initialize Firebase Admin SDK (for native FCM subscriptions)
+if (
+  process.env.FIREBASE_PROJECT_ID &&
+  process.env.FIREBASE_CLIENT_EMAIL &&
+  process.env.FIREBASE_PRIVATE_KEY &&
+  !admin.apps.length
+) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    }),
+  })
+}
 
 /**
  * Parse prayer time string (HH:MM) to minutes since midnight
@@ -158,34 +177,74 @@ export async function POST(request: NextRequest) {
         }
 
         const quote = getRandomPrayerQuote(prayerName)
-        
-        const payload = JSON.stringify({
-          title: `Time for ${prayerName} - ${format12Hour(prayerTime)}`,
-          body: `${quote.text} - ${quote.source}`,
-          icon: '/icon-192.png',
-          badge: '/icon-192-maskable.png',
-          tag: `prayer-${prayerName.toLowerCase()}-${Date.now()}`,
-          data: { url: '/times', prayer: prayerName },
-        })
+        const title = `Time for ${prayerName} - ${format12Hour(prayerTime)}`
+        const body = `${quote.text} - ${quote.source}`
 
-        // Send to all user's subscriptions
+        // Send to all user's subscriptions (Web Push for browser, FCM for native)
         for (const sub of subscriptions) {
           try {
-            await webpush.sendNotification(
-              {
-                endpoint: sub.endpoint,
-                keys: {
-                  p256dh: sub.p256dh,
-                  auth: sub.auth,
+            if (sub.fcm_token) {
+              // Native app: send via Firebase Cloud Messaging
+              if (!admin.apps.length) {
+                results.failed++
+                continue
+              }
+              await admin.messaging().send({
+                token: sub.fcm_token,
+                notification: { title, body },
+                data: {
+                  url: '/times',
+                  prayer: prayerName,
+                  prayerTime: prayerTime,
                 },
-              },
-              payload
-            )
+                android: {
+                  priority: 'high' as const,
+                  notification: {
+                    icon: 'ic_notification',
+                    color: '#0f3d3e',
+                    sound: 'default',
+                  },
+                },
+                apns: {
+                  payload: {
+                    aps: {
+                      sound: 'default',
+                      badge: 1,
+                      'content-available': 1,
+                    },
+                  },
+                },
+              })
+            } else {
+              // PWA/browser: send via Web Push API
+              const payload = JSON.stringify({
+                title,
+                body,
+                icon: '/icon-192.png',
+                badge: '/icon-192-maskable.png',
+                tag: `prayer-${prayerName.toLowerCase()}-${Date.now()}`,
+                data: { url: '/times', prayer: prayerName },
+              })
+              await webpush.sendNotification(
+                {
+                  endpoint: sub.endpoint,
+                  keys: {
+                    p256dh: sub.p256dh,
+                    auth: sub.auth,
+                  },
+                },
+                payload
+              )
+            }
             results.success++
           } catch (error: any) {
             // Handle subscription errors
-            if (error.statusCode === 410 || error.statusCode === 404) {
-              // Subscription expired - delete it
+            const isExpired =
+              sub.fcm_token
+                ? error.code === 'messaging/registration-token-not-registered' ||
+                  error.code === 'messaging/invalid-registration-token'
+                : error.statusCode === 410 || error.statusCode === 404
+            if (isExpired) {
               await supabase
                 .from('push_subscriptions')
                 .delete()

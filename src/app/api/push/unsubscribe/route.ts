@@ -10,13 +10,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { endpoint } = await request.json()
+    const body = await request.json()
+    const { endpoint, fcmToken } = body
 
-    if (!endpoint) {
-      return NextResponse.json({ error: 'Endpoint required' }, { status: 400 })
+    if (fcmToken && typeof fcmToken === 'string') {
+      const { error: dbError } = await supabase
+        .from('push_subscriptions')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('fcm_token', fcmToken)
+
+      if (dbError) throw dbError
+      return NextResponse.json({ success: true })
     }
 
-    // Delete subscription
+    if (!endpoint) {
+      return NextResponse.json(
+        { error: 'Endpoint or fcmToken required' },
+        { status: 400 }
+      )
+    }
+
     const { error: dbError } = await supabase
       .from('push_subscriptions')
       .delete()

@@ -1,5 +1,6 @@
 // Notification utilities for prayer time reminders
 // Handles permission requests, scheduling, storage, and browser API interactions
+// Platform-aware: Web Push API for PWA/browser, Capacitor FCM for native apps
 
 import type {
   NotificationPreferences,
@@ -7,7 +8,7 @@ import type {
   ScheduledNotification,
   PushSubscription,
 } from '@/types/notification.types'
-import { getRandomPrayerQuote } from './prayerQuotes'
+import { Capacitor } from '@capacitor/core'
 
 // LocalStorage keys
 const STORAGE_KEYS = {
@@ -57,24 +58,24 @@ export function getIOSBrowser(): string {
 }
 
 /**
- * Check if notifications are supported by the browser
- * IMPORTANT: On iOS, only Safari supports Web Push notifications
- * iOS Chrome/Firefox/Edge use WebKit and do NOT support notifications
+ * Check if notifications are supported
+ * - Native: Capacitor PushNotifications (FCM)
+ * - Browser: Web Push API (iOS Safari only; other iOS browsers unsupported)
  * @returns true if notifications are supported
  */
 export function isNotificationSupported(): boolean {
   if (typeof window === 'undefined') return false
-  
-  // Check basic API support
+
+  if (Capacitor.isNativePlatform()) {
+    return true
+  }
+
   const hasAPI = 'Notification' in window && 'serviceWorker' in navigator
-  
-  // On iOS, only Safari supports notifications
-  // All other iOS browsers (Chrome, Firefox, Edge) use WebKit without notification support
   if (isIOS()) {
     const browser = getIOSBrowser()
     return hasAPI && browser === 'safari'
   }
-  
+
   return hasAPI
 }
 
@@ -84,20 +85,23 @@ export function isNotificationSupported(): boolean {
  */
 export function getNotificationPermission(): NotificationPermission | null {
   if (!isNotificationSupported()) return null
+  if (Capacitor.isNativePlatform()) {
+    return 'default'
+  }
   return Notification.permission
 }
 
 /**
  * Request notification permission from the user
+ * Platform-aware: Capacitor on native, Notification API on browser
  * @returns Promise<boolean> - true if granted, false otherwise
  */
 export async function requestNotificationPermission(): Promise<boolean> {
   if (!isNotificationSupported()) {
-    console.warn('[Notifications] Not supported in this browser')
+    console.warn('[Notifications] Not supported')
     return false
   }
 
-  // Mark that we've requested permission
   if (typeof window !== 'undefined') {
     localStorage.setItem(
       STORAGE_KEYS.PERMISSION_REQUESTED,
@@ -106,8 +110,13 @@ export async function requestNotificationPermission(): Promise<boolean> {
   }
 
   try {
+    if (Capacitor.isNativePlatform()) {
+      const { PushNotifications } = await import('@capacitor/push-notifications')
+      const { receive } = await PushNotifications.requestPermissions()
+      return receive === 'granted'
+    }
+
     const permission = await Notification.requestPermission()
-    console.log('[Notifications] Permission result:', permission)
     return permission === 'granted'
   } catch (error) {
     console.error('[Notifications] Permission request failed:', error)
@@ -190,61 +199,111 @@ export async function saveNotificationPreferences(
   }
 }
 
+/** Result of native FCM subscription */
+export interface FCMSubscription {
+  fcmToken: string
+}
+
+/** Union type for push subscription (Web Push or FCM) */
+export type PushSubscriptionResult = PushSubscription | FCMSubscription
+
 /**
- * Subscribe to push notifications using Web Push API
- * Returns subscription object or null if failed
+ * Subscribe to push notifications
+ * - Native: Capacitor PushNotifications (FCM)
+ * - Browser: Web Push API
+ * @returns PushSubscription (browser) or FCMSubscription (native), or null if failed
  */
-export async function subscribeToPush(): Promise<PushSubscription | null> {
+export async function subscribeToPush(): Promise<PushSubscriptionResult | null> {
   if (!isNotificationSupported()) return null
-  if (Notification.permission !== 'granted') return null
 
   try {
-    const registration = await navigator.serviceWorker.ready
-
-    // Check if already subscribed
-    let subscription = await registration.pushManager.getSubscription()
-
-    if (!subscription) {
-      // Get VAPID public key from env
-      const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-      if (!vapidPublicKey) {
-        throw new Error('VAPID public key not configured')
-      }
-
-      // Subscribe with VAPID key
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
-      })
+    if (Capacitor.isNativePlatform()) {
+      return subscribeToPushNative()
     }
-
-    // Convert to our format
-    const keys = subscription.toJSON().keys
-    if (!keys?.p256dh || !keys?.auth) {
-      throw new Error('Invalid subscription keys')
-    }
-
-    return {
-      endpoint: subscription.endpoint,
-      keys: {
-        p256dh: keys.p256dh,
-        auth: keys.auth,
-      },
-    }
+    return subscribeToPushBrowser()
   } catch (error) {
     console.error('[Notifications] Push subscription failed:', error)
     return null
   }
 }
 
+/** Native FCM subscription via Capacitor */
+async function subscribeToPushNative(): Promise<FCMSubscription | null> {
+  const { PushNotifications } = await import('@capacitor/push-notifications')
+
+  const permission = await PushNotifications.requestPermissions()
+  if (permission.receive !== 'granted') return null
+
+  await PushNotifications.register()
+
+  return new Promise((resolve) => {
+    const timeout = setTimeout(() => {
+      PushNotifications.removeAllListeners()
+      resolve(null)
+    }, 10000)
+
+    PushNotifications.addListener(
+      'registration',
+      (token: { value: string }) => {
+        clearTimeout(timeout)
+        PushNotifications.removeAllListeners()
+        resolve({ fcmToken: token.value })
+      }
+    )
+
+    PushNotifications.addListener(
+      'registrationError',
+      (err: { error: string }) => {
+        clearTimeout(timeout)
+        PushNotifications.removeAllListeners()
+        console.error('[Notifications] FCM registration error:', err.error)
+        resolve(null)
+      }
+    )
+  })
+}
+
+/** Browser Web Push subscription */
+async function subscribeToPushBrowser(): Promise<PushSubscription | null> {
+  if (Notification.permission !== 'granted') return null
+
+  const registration = await navigator.serviceWorker.ready
+  let subscription = await registration.pushManager.getSubscription()
+
+  if (!subscription) {
+    const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+    if (!vapidPublicKey) throw new Error('VAPID public key not configured')
+
+    subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+    })
+  }
+
+  const keys = subscription.toJSON().keys
+  if (!keys?.p256dh || !keys?.auth) throw new Error('Invalid subscription keys')
+
+  return {
+    endpoint: subscription.endpoint,
+    keys: { p256dh: keys.p256dh, auth: keys.auth },
+  }
+}
+
 /**
  * Unsubscribe from push notifications
+ * - Native: Removes listeners; backend deletion via fcmToken
+ * - Browser: Unsubscribes from pushManager
  */
 export async function unsubscribeFromPush(): Promise<boolean> {
   try {
+    if (Capacitor.isNativePlatform()) {
+      const { PushNotifications } = await import('@capacitor/push-notifications')
+      await PushNotifications.removeAllListeners()
+      return true
+    }
+
     const registration = await navigator.serviceWorker.ready
     const subscription = await registration.pushManager.getSubscription()
-
     if (subscription) {
       await subscription.unsubscribe()
       return true
@@ -253,6 +312,29 @@ export async function unsubscribeFromPush(): Promise<boolean> {
   } catch (error) {
     console.error('[Notifications] Unsubscribe failed:', error)
     return false
+  }
+}
+
+/**
+ * Get stored FCM token for unsubscribe (native only)
+ * Capacitor plugin does not expose token after registration; we store it when subscribing
+ */
+const FCM_TOKEN_STORAGE_KEY = 'notification_fcm_token'
+
+export function getStoredFCMToken(): string | null {
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem(FCM_TOKEN_STORAGE_KEY)
+}
+
+export function storeFCMToken(token: string): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(FCM_TOKEN_STORAGE_KEY, token)
+  }
+}
+
+export function clearStoredFCMToken(): void {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(FCM_TOKEN_STORAGE_KEY)
   }
 }
 

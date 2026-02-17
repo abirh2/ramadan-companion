@@ -50,6 +50,16 @@ jest.mock('@capacitor/motion', () => ({
   },
 }))
 
+// Mock Capacitor Push Notifications plugin
+jest.mock('@capacitor/push-notifications', () => ({
+  PushNotifications: {
+    requestPermissions: jest.fn().mockResolvedValue({ receive: 'granted' }),
+    register: jest.fn().mockResolvedValue(undefined),
+    addListener: jest.fn(),
+    removeAllListeners: jest.fn().mockResolvedValue(undefined),
+  },
+}))
+
 // Mock Capacitor Haptics plugin
 jest.mock('@capacitor/haptics', () => ({
   Haptics: {

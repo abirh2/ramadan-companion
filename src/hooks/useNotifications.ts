@@ -16,7 +16,11 @@ import {
   DEFAULT_NOTIFICATION_PREFERENCES,
   subscribeToPush,
   unsubscribeFromPush,
+  getStoredFCMToken,
+  storeFCMToken,
+  clearStoredFCMToken,
 } from '@/lib/notifications'
+import { Capacitor } from '@capacitor/core'
 
 /**
  * Hook for managing prayer time notification preferences and permissions
@@ -91,23 +95,29 @@ export function useNotifications(): UseNotificationsResult {
       const granted = await requestNotificationPermission()
 
       if (granted) {
-        // Subscribe to push notifications
         const subscription = await subscribeToPush()
-        
+
         if (subscription) {
-          // Save subscription to backend
           try {
+            const body =
+              'fcmToken' in subscription
+                ? { fcmToken: subscription.fcmToken }
+                : subscription
+
+            if ('fcmToken' in subscription) {
+              storeFCMToken(subscription.fcmToken)
+            }
+
             await fetch('/api/push/subscribe', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(subscription),
+              body: JSON.stringify(body),
             })
           } catch (error) {
             console.error('[useNotifications] Failed to save subscription:', error)
           }
         }
 
-        // Automatically enable notifications with all prayers on
         const newPreferences: NotificationPreferences = {
           enabled: true,
           prayers: {
@@ -210,23 +220,31 @@ export function useNotifications(): UseNotificationsResult {
   // Disable all notifications
   const disableAll = useCallback(async (): Promise<void> => {
     try {
-      // Get subscription BEFORE unsubscribing (so we can delete from backend)
-      const registration = await navigator.serviceWorker.ready
-      const subscription = await registration.pushManager.getSubscription()
-      
-      // Unsubscribe from push (browser-side)
-      if (subscription) {
-        await subscription.unsubscribe()
-        
-        // Remove from backend database
-        await fetch('/api/push/unsubscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ endpoint: subscription.endpoint }),
-        })
+      if (Capacitor.isNativePlatform()) {
+        const fcmToken = getStoredFCMToken()
+        if (fcmToken) {
+          await fetch('/api/push/unsubscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fcmToken }),
+          })
+          clearStoredFCMToken()
+        }
+        await unsubscribeFromPush()
+      } else {
+        const registration = await navigator.serviceWorker.ready
+        const subscription = await registration.pushManager.getSubscription()
+
+        if (subscription) {
+          await subscription.unsubscribe()
+          await fetch('/api/push/unsubscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ endpoint: subscription.endpoint }),
+          })
+        }
       }
 
-      // Update preferences
       const newPreferences: NotificationPreferences = {
         ...state.preferences,
         enabled: false,
