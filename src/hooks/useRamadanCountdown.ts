@@ -69,22 +69,13 @@ export function useRamadanCountdown(): RamadanCountdown {
             const diff = ramadanStartTime - now.getTime()
             
             if (diff <= 0) {
-              // Ramadan has started - stop updating and just show we're in Ramadan
+              // Ramadan has started - transition to during-Ramadan state with iftar/suhoor countdown
               if (intervalRef.current) {
                 clearInterval(intervalRef.current)
                 intervalRef.current = null
               }
-              setState({
-                isRamadan: false,
-                daysUntilRamadan: 0,
-                currentRamadanDay: null,
-                nextEvent: null,
-                timeUntilEvent: '0d 0h 0m 0s',
-                ramadanYear: hijriData.ramadanHijriYear || hijriData.currentHijri.year,
-                ramadanStartDate: hijriData.ramadanStart,
-                loading: false,
-                error: null,
-              })
+              // Refetch to get during-Ramadan state (currentRamadanDay, prayer times for countdown)
+              fetchRamadanData()
               return
             }
             

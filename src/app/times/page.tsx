@@ -446,7 +446,11 @@ export default function TimesPage() {
               {/* Qibla Compass */}
               <section id="qibla" aria-labelledby="qibla-title">
                 <h2 id="qibla-title" className="sr-only">Qibla Compass</h2>
-                <QiblaCompass qiblaDirection={qiblaDirection} loading={false} error={null} />
+                <QiblaCompass
+                qiblaDirection={qiblaDirection}
+                loading={loading}
+                error={!qiblaDirection && location ? 'Unable to determine direction' : error}
+              />
               </section>
 
               {/* Compact Preferences Card */}

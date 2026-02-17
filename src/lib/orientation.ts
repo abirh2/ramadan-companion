@@ -20,10 +20,12 @@ let activeListener: ((event: DeviceOrientationEvent) => void) | null = null
 
 /**
  * Detect if device is mobile (iOS or Android)
+ * Native Capacitor app is always treated as mobile for compass features
  * @returns true if running on mobile device
  */
 export function isMobileDevice(): boolean {
   if (typeof window === 'undefined') return false
+  if (Capacitor.isNativePlatform()) return true
   const ua = navigator.userAgent
   return /Android|iPhone|iPad|iPod/.test(ua)
 }
@@ -49,13 +51,15 @@ export function hasOrientationSupport(): boolean {
 
 /**
  * Check if iOS 13+ permission request is needed
- * iOS 13+ requires explicit permission for DeviceOrientationEvent
+ * iOS 13+ requires explicit permission for DeviceOrientationEvent in browser
+ * Native Capacitor app uses Motion plugin which handles permissions natively
  * @returns true if permission request is required
  */
 export function needsOrientationPermission(): boolean {
+  if (Capacitor.isNativePlatform()) return false
   if (!isIOS()) return false
-  
-  // iOS 13+ has requestPermission method
+
+  // iOS 13+ browser has requestPermission method
   return typeof (DeviceOrientationEvent as any).requestPermission === 'function'
 }
 

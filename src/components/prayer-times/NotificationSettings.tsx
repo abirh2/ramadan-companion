@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useAuth } from '@/hooks/useAuth'
+import { Capacitor } from '@capacitor/core'
 import { isIOS, getIOSBrowser } from '@/lib/notifications'
 import type { PrayerName } from '@/types/notification.types'
 
@@ -243,8 +244,8 @@ export function NotificationSettings() {
           </div>
         )}
 
-        {/* iOS PWA reminder */}
-        {isIOS() && preferences.enabled && (
+        {/* iOS PWA reminder - only for browser, not native app */}
+        {isIOS() && !Capacitor.isNativePlatform() && preferences.enabled && (
           <div className="flex items-start gap-2 text-xs text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/20 p-3 rounded-md border border-blue-200 dark:border-blue-900">
             <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
             <div className="space-y-1">

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#FFFFFF</color>
+    <color name="ic_launcher_background">#0f3d3e</color>
+    <!-- Splash screen background - matches app theme -->
+    <color name="splash_background">#0f3d3e</color>
 </resources>

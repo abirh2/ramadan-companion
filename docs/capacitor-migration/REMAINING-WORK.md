@@ -1,8 +1,18 @@
 # Capacitor Migration - Remaining Work
 
-**Last Updated:** January 2026  
+**Last Updated:** February 2026  
 **Current Status:** Phase 2 Complete (29% overall)  
 **Next Phase:** Phase 3 - Native Push Notifications
+
+### Recent Fixes (February 2026)
+
+- **InstallPrompt:** Hidden in native Capacitor app (iOS/Android) - no more "Download on iOS" banner when running in TestFlight/Play
+- **Notifications:** Location sync to profile when enabling notifications so cron job has coordinates
+- **Splash screen:** iOS and Android now show app icon on theme background (#0f3d3e) instead of generic placeholder
+- **App icon:** Android mipmap icons updated to match iOS (icon-512.png, theme background)
+- **Qibla finder:** Native app uses Capacitor Motion directly; skip iOS DeviceOrientationEvent.requestPermission in native context; NSMotionUsageDescription added to Info.plist
+- **Ramadan card:** Fixed transition when countdown hits zero - now correctly refetches and shows during-Ramadan state (iftar/suhoor countdown)
+- **Location:** All features (prayer times, mosque finder, halal food, Qibla) use consistent `requestGeolocation()` from `location.ts`
 
 ---
 

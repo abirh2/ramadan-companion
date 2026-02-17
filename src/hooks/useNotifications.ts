@@ -20,6 +20,7 @@ import {
   storeFCMToken,
   clearStoredFCMToken,
 } from '@/lib/notifications'
+import { getUserLocation, saveLocationToStorage } from '@/lib/location'
 import { Capacitor } from '@capacitor/core'
 
 /**
@@ -95,6 +96,16 @@ export function useNotifications(): UseNotificationsResult {
       const granted = await requestNotificationPermission()
 
       if (granted) {
+        // Sync location to profile so cron job can calculate prayer times (backend requires profile location)
+        const location = getUserLocation(profile)
+        if (location && profile?.id && (!profile.location_lat || !profile.location_lng)) {
+          try {
+            await saveLocationToStorage(location.lat, location.lng, location.city, location.type)
+          } catch (e) {
+            console.warn('[useNotifications] Failed to sync location to profile:', e)
+          }
+        }
+
         const subscription = await subscribeToPush()
 
         if (subscription) {

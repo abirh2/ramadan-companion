@@ -24,6 +24,8 @@
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We need your location to calculate accurate prayer times for your area.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>We need motion access for the Qibla compass to point toward Mecca as you move.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

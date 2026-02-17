@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Capacitor } from '@capacitor/core'
 import { X, Download, Info, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -83,6 +84,11 @@ export function InstallPrompt() {
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
+    // Never show install prompt in native Capacitor app (iOS/Android)
+    if (Capacitor.isNativePlatform()) {
+      return
+    }
+
     // Check if already installed
     const isInstalled = window.matchMedia('(display-mode: standalone)').matches ||
                        (window.navigator as any).standalone === true
