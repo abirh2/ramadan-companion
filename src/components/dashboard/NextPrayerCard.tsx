@@ -112,7 +112,7 @@ export function NextPrayerCard() {
             <div className="grid grid-cols-5 gap-2 pt-2">
               {prayerNames.map((name) => {
                 const isNext = nextPrayer?.name === name && !nextPrayer?.isTomorrow
-                const time = prayerTimes[name]
+                const time = formatTime(prayerTimes[name])
                 
                 return (
                   <div
@@ -135,7 +135,7 @@ export function NextPrayerCard() {
                         isNext ? 'text-primary' : 'text-foreground'
                       }`}
                     >
-                      {time.split(':').slice(0, 2).join(':')}
+                      {time}
                     </span>
                   </div>
                 )
