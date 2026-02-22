@@ -21,6 +21,7 @@ export function useRamadanCountdown(): RamadanCountdown {
   const isFetchingRef = useRef(false)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const mountedRef = useRef(true)
+  const lastFetchDateRef = useRef<string | null>(null)
 
   useEffect(() => {
     mountedRef.current = true
@@ -121,8 +122,19 @@ export function useRamadanCountdown(): RamadanCountdown {
           // During Ramadan, fetch prayer times for iftar/suhoor countdowns
           await fetchPrayerTimesAndUpdate(hijriData)
 
-          // Update every second during Ramadan
+          // Update every second during Ramadan; re-fetch everything when calendar date changes
           intervalRef.current = setInterval(() => {
+            const today = new Date().toDateString()
+            if (lastFetchDateRef.current && lastFetchDateRef.current !== today) {
+              // New calendar day — re-fetch prayer times and Hijri data for accuracy
+              if (intervalRef.current) {
+                clearInterval(intervalRef.current)
+                intervalRef.current = null
+              }
+              isFetchingRef.current = false
+              fetchRamadanData()
+              return
+            }
             updateCountdown(hijriData)
           }, 1000)
         }
@@ -171,6 +183,7 @@ export function useRamadanCountdown(): RamadanCountdown {
         // Store prayer times for countdown calculation
         localStorage.setItem('prayer_times_maghrib', timings.Maghrib)
         localStorage.setItem('prayer_times_fajr', timings.Fajr)
+        lastFetchDateRef.current = new Date().toDateString()
 
         updateCountdown(hijriData)
       } catch (error) {
@@ -205,35 +218,25 @@ export function useRamadanCountdown(): RamadanCountdown {
       const [maghribHours, maghribMinutes] = maghribTime.split(':').map(Number)
       const [fajrHours, fajrMinutes] = fajrTime.split(':').map(Number)
 
-      // Create Date objects for today's prayer times
+      // Compute the next future occurrence of Maghrib (roll to tomorrow if already passed)
       const maghrib = new Date(now)
       maghrib.setHours(maghribHours, maghribMinutes, 0, 0)
+      if (maghrib <= now) {
+        maghrib.setDate(maghrib.getDate() + 1)
+      }
 
+      // Compute the next future occurrence of Fajr (roll to tomorrow if already passed)
       const fajr = new Date(now)
       fajr.setHours(fajrHours, fajrMinutes, 0, 0)
-
-      // Tomorrow's Fajr if today's Fajr has passed
-      if (fajr < now) {
+      if (fajr <= now) {
         fajr.setDate(fajr.getDate() + 1)
       }
 
-      // Determine next event
-      let nextEvent: 'iftar' | 'suhoor'
-      let nextEventTime: Date
-
-      if (now < maghrib) {
-        // Next event is iftar (Maghrib)
-        nextEvent = 'iftar'
-        nextEventTime = maghrib
-      } else {
-        // Next event is suhoor end (Fajr)
-        nextEvent = 'suhoor'
-        nextEventTime = fajr
-        // If after Maghrib, suhoor is tomorrow
-        if (nextEventTime < now) {
-          nextEventTime.setDate(nextEventTime.getDate() + 1)
-        }
-      }
+      // Whichever future occurrence comes first determines the active window:
+      //   Fajr before Maghrib → nighttime (after Maghrib or after midnight, before Fajr) → suhoor ending at Fajr
+      //   Maghrib before Fajr → daytime (after Fajr, before Maghrib) → iftar at Maghrib
+      const nextEvent: 'iftar' | 'suhoor' = fajr < maghrib ? 'suhoor' : 'iftar'
+      const nextEventTime: Date = fajr < maghrib ? fajr : maghrib
 
       // Calculate time remaining
       const diff = nextEventTime.getTime() - now.getTime()
