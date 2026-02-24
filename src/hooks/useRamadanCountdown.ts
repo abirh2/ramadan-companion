@@ -159,16 +159,19 @@ export function useRamadanCountdown(): RamadanCountdown {
         // Get location from profile or localStorage (default to Mecca)
         const lat = profile?.location_lat || localStorage.getItem('location_lat') || '21.4225'
         const lng = profile?.location_lng || localStorage.getItem('location_lng') || '39.8262'
-        
+
+        // Use the user's configured calculation method — same priority chain as usePrayerTimes
+        const method = profile?.calculation_method || localStorage.getItem('calculation_method') || '2'
+
         // Always use browser's timezone (auto-detected)
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
         const today = new Date()
         const timestamp = Math.floor(today.getTime() / 1000)
 
-        // Fetch prayer times from AlAdhan API with browser timezone
+        // Fetch prayer times from AlAdhan API using the user's method
         const prayerResponse = await fetch(
-          `https://api.aladhan.com/v1/timings/${timestamp}?latitude=${lat}&longitude=${lng}&method=4&timezonestring=${encodeURIComponent(timezone)}`
+          `https://api.aladhan.com/v1/timings/${timestamp}?latitude=${lat}&longitude=${lng}&method=${method}&timezonestring=${encodeURIComponent(timezone)}`
         )
 
         if (!prayerResponse.ok) {

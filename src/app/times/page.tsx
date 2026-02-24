@@ -48,6 +48,18 @@ export default function TimesPage() {
   const [dateModalOpen, setDateModalOpen] = useState(false)
   const [prefsModalOpen, setPrefsModalOpen] = useState(false)
 
+  // Scroll to qibla section when navigating from the menu (#qibla hash)
+  useEffect(() => {
+    if (loading) return
+    if (typeof window === 'undefined') return
+    if (window.location.hash !== '#qibla') return
+    // Small delay lets the layout settle after data loads
+    const timer = setTimeout(() => {
+      document.getElementById('qibla')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 150)
+    return () => clearTimeout(timer)
+  }, [loading])
+
   // Hijri date state
   const [hijriDate, setHijriDate] = useState<string>('')
 

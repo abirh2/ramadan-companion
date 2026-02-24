@@ -1,6 +1,8 @@
 /**
  * Local notification scheduling for native apps (iOS/Android)
- * Schedules prayer time notifications at exact times - no server/cron required
+ * Schedules prayer time notifications for the next 7 days — no server/cron required.
+ * Scheduling multiple days ahead ensures notifications fire even when the user
+ * doesn't open the app for several days (the primary iOS reliability issue).
  */
 
 import { Capacitor } from '@capacitor/core'
@@ -13,6 +15,8 @@ import type {
 import type { LocationData } from '@/types/ramadan.types'
 import type { CalculationMethodId, MadhabId } from '@/types/ramadan.types'
 
+// Prayer base IDs (1–5). Final ID = (dayOffset + 1) * 10 + basePrayerId
+// Day 0: Fajr=11 … Isha=15 | Day 1: Fajr=21 … | Day 6: Fajr=71 … Isha=75
 const PRAYER_IDS: Record<PrayerName, number> = {
   Fajr: 1,
   Dhuhr: 2,
@@ -20,6 +24,8 @@ const PRAYER_IDS: Record<PrayerName, number> = {
   Maghrib: 4,
   Isha: 5,
 }
+
+const DAYS_AHEAD = 6 // Schedule today + next 6 days = 7 days total
 
 function format12Hour(time24: string): string {
   const [hours, minutes] = time24.split(':').map(Number)
@@ -29,17 +35,37 @@ function format12Hour(time24: string): string {
 }
 
 /**
- * Parse "HH:MM" to Date for today in local timezone
+ * Build a Date for a given "HH:MM" time string on a specific calendar date.
  */
-function timeToDateToday(timeStr: string): Date {
+function timeToDate(timeStr: string, baseDate: Date): Date {
   const [hours, minutes] = timeStr.split(':').map(Number)
-  const date = new Date()
+  const date = new Date(baseDate)
   date.setHours(hours, minutes, 0, 0)
   return date
 }
 
 /**
- * Schedule local prayer notifications for today
+ * Cancel ALL currently-pending prayer notifications.
+ * Uses getPending() so it handles any ID scheme, including leftovers from
+ * the old single-day scheme.
+ */
+export async function cancelPrayerNotifications(): Promise<void> {
+  if (!Capacitor.isNativePlatform()) return
+
+  try {
+    const { LocalNotifications } = await import('@capacitor/local-notifications')
+    const { notifications: pending } = await LocalNotifications.getPending()
+    if (pending.length > 0) {
+      await LocalNotifications.cancel({ notifications: pending })
+    }
+    console.log(`[LocalNotifications] Cancelled ${pending.length} notifications`)
+  } catch (error) {
+    console.error('[LocalNotifications] Failed to cancel:', error)
+  }
+}
+
+/**
+ * Schedule local prayer notifications for the next 7 days.
  * Only runs on native platform.
  */
 export async function schedulePrayerNotifications(
@@ -59,18 +85,13 @@ export async function schedulePrayerNotifications(
       return
     }
 
+    // Cancel stale notifications before rescheduling
     await cancelPrayerNotifications()
 
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-    const today = new Date()
-    const prayerTimes = calculatePrayerTimesLocal(
-      location.lat,
-      location.lng,
-      calculationMethod,
-      madhab,
-      timezone,
-      today
-    )
+    const now = Date.now()
+    const minutesBefore = preferences.minutesBefore ?? 0
+    const prayerNames: PrayerName[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
 
     const notifications: Array<{
       id: number
@@ -80,31 +101,48 @@ export async function schedulePrayerNotifications(
       extra?: Record<string, string>
     }> = []
 
-    const now = Date.now()
-    const prayerNames: PrayerName[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
+    for (let dayOffset = 0; dayOffset <= DAYS_AHEAD; dayOffset++) {
+      const targetDate = new Date()
+      targetDate.setDate(targetDate.getDate() + dayOffset)
 
-    for (const prayerName of prayerNames) {
-      if (!preferences.prayers?.[prayerName]) continue
+      const prayerTimes = calculatePrayerTimesLocal(
+        location.lat,
+        location.lng,
+        calculationMethod,
+        madhab,
+        timezone,
+        targetDate
+      )
 
-      const timeStr = prayerTimes[prayerName]
-      const scheduledDate = timeToDateToday(timeStr)
+      for (const prayerName of prayerNames) {
+        if (!preferences.prayers?.[prayerName]) continue
 
-      if (scheduledDate.getTime() <= now) continue
+        const timeStr = prayerTimes[prayerName]
+        const prayerDate = timeToDate(timeStr, targetDate)
 
-      const quote = getRandomPrayerQuote(prayerName)
-      const title = `Time for ${prayerName} - ${format12Hour(timeStr)}`
-      const body = `${quote.text} - ${quote.source}`
+        // Apply advance reminder offset
+        const scheduledDate = new Date(prayerDate.getTime() - minutesBefore * 60 * 1000)
 
-      notifications.push({
-        id: PRAYER_IDS[prayerName],
-        title,
-        body,
-        schedule: {
-          at: scheduledDate,
-          allowWhileIdle: true,
-        },
-        extra: { prayer: prayerName, url: '/times' },
-      })
+        if (scheduledDate.getTime() <= now) continue
+
+        const quote = getRandomPrayerQuote(prayerName)
+        const displayTime = format12Hour(timeStr)
+        const title = minutesBefore > 0
+          ? `${prayerName} in ${minutesBefore} minutes — ${displayTime}`
+          : `Time for ${prayerName} — ${displayTime}`
+        const body = `${quote.text} — ${quote.source}`
+
+        // Unique ID: (dayOffset + 1) * 10 + basePrayerId
+        const id = (dayOffset + 1) * 10 + PRAYER_IDS[prayerName]
+
+        notifications.push({
+          id,
+          title,
+          body,
+          schedule: { at: scheduledDate, allowWhileIdle: true },
+          extra: { prayer: prayerName, url: '/times' },
+        })
+      }
     }
 
     if (notifications.length > 0) {
@@ -117,7 +155,7 @@ export async function schedulePrayerNotifications(
           extra: n.extra,
         })),
       })
-      console.log(`[LocalNotifications] Scheduled ${notifications.length} prayer notifications`)
+      console.log(`[LocalNotifications] Scheduled ${notifications.length} notifications across ${DAYS_AHEAD + 1} days`)
     }
   } catch (error) {
     console.error('[LocalNotifications] Failed to schedule:', error)
@@ -125,24 +163,7 @@ export async function schedulePrayerNotifications(
 }
 
 /**
- * Cancel all scheduled prayer notifications
- */
-export async function cancelPrayerNotifications(): Promise<void> {
-  if (!Capacitor.isNativePlatform()) return
-
-  try {
-    const { LocalNotifications } = await import('@capacitor/local-notifications')
-    await LocalNotifications.cancel({
-      notifications: Object.values(PRAYER_IDS).map((id) => ({ id })),
-    })
-    console.log('[LocalNotifications] Cancelled prayer notifications')
-  } catch (error) {
-    console.error('[LocalNotifications] Failed to cancel:', error)
-  }
-}
-
-/**
- * Send a test notification immediately (fires 3 seconds from now)
+ * Send a test notification immediately (fires 3 seconds from now).
  * Used for verifying notification permissions and delivery on device.
  */
 export async function sendTestNotification(): Promise<boolean> {
@@ -162,7 +183,7 @@ export async function sendTestNotification(): Promise<boolean> {
       notifications: [
         {
           id: 99,
-          title: 'Deen Companion - Test Notification',
+          title: 'Deen Companion — Test Notification',
           body: 'Prayer notifications are working. You will receive reminders at each prayer time.',
           schedule: { at: testDate, allowWhileIdle: true },
           extra: { prayer: 'test', url: '/times' },
@@ -178,7 +199,7 @@ export async function sendTestNotification(): Promise<boolean> {
 }
 
 /**
- * Reschedule if notifications are enabled - call on app launch
+ * Reschedule if notifications are enabled — call on app launch.
  */
 export async function rescheduleIfEnabled(
   preferences: NotificationPreferences,

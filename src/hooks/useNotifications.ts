@@ -123,6 +123,7 @@ export function useNotifications(): UseNotificationsResult {
         }
 
         const newPreferences: NotificationPreferences = {
+          ...state.preferences,
           enabled: true,
           prayers: {
             Fajr: true,
@@ -224,10 +225,11 @@ export function useNotifications(): UseNotificationsResult {
     [state.preferences, profile]
   )
 
-  // Enable all notifications
+  // Enable all notifications (preserves minutesBefore)
   const enableAll = useCallback(async (): Promise<void> => {
     try {
       const newPreferences: NotificationPreferences = {
+        ...state.preferences,
         enabled: true,
         prayers: {
           Fajr: true,
@@ -258,7 +260,37 @@ export function useNotifications(): UseNotificationsResult {
         error: error instanceof Error ? error.message : 'Failed to enable all',
       }))
     }
-  }, [profile])
+  }, [state.preferences, profile])
+
+  // Update advance reminder offset and reschedule
+  const setMinutesBefore = useCallback(async (minutes: 0 | 5 | 10): Promise<void> => {
+    try {
+      const newPreferences: NotificationPreferences = {
+        ...state.preferences,
+        minutesBefore: minutes,
+      }
+
+      await saveNotificationPreferences(newPreferences, profile)
+
+      if (Capacitor.isNativePlatform() && newPreferences.enabled) {
+        const loc = getUserLocation(profile) || { lat: 21.4225, lng: 39.8262, city: 'Mecca', type: 'default' as const }
+        const method = ((profile?.calculation_method as CalculationMethodId) || (typeof window !== 'undefined' ? localStorage.getItem('calculation_method') : null) || '2') as CalculationMethodId
+        const madhab = (profile?.madhab === 'hanafi' ? '1' : (typeof window !== 'undefined' ? localStorage.getItem('madhab') : null) || '0') as MadhabId
+        await schedulePrayerNotifications(newPreferences, loc, method, madhab)
+      }
+
+      setState((prev) => ({
+        ...prev,
+        preferences: newPreferences,
+      }))
+    } catch (error) {
+      console.error('[useNotifications] Failed to update minutesBefore:', error)
+      setState((prev) => ({
+        ...prev,
+        error: error instanceof Error ? error.message : 'Failed to update reminder timing',
+      }))
+    }
+  }, [state.preferences, profile])
 
   // Disable all notifications
   const disableAll = useCallback(async (): Promise<void> => {
@@ -315,6 +347,7 @@ export function useNotifications(): UseNotificationsResult {
     togglePrayer,
     enableAll,
     disableAll,
+    setMinutesBefore,
     refetch,
   }
 }

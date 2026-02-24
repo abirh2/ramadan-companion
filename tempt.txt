@@ -1,6 +1,8 @@
 issues to fix
 
-1 - qibla locater is still broken and doesn't ask for permissions at all. when clicking enable dynamic, the arrow doesn;t move at all even when the phone is moved. (seen on ios, but could affect android). not sure why this isnt working when it worked fine on web version. do i need to update something on apple connect?
-2 - in REMAINING-WORK.md, we need to complete android configuration (#### Android Native Configuration), so complete everything we need to do before i push to play store (like app assets). 
-3 - double check app notifications for prayers are working. im still not seeing them on my end. ensure it works for android and iphone. if there is a way for me to test it without wiating for prayer time, provide it for me.
- 
+1 - quality of life suggestion: Some apps like Muslim Pro lets you set a reminder notification PRIOR to a prayer (ex. I want to be reminded 10 minute before Asr). in the prayer notification section, add an optio to select if you want to be reminded 5/10 mins before the prayer.
+2 - A few people, including me, have noticed notifications not being sent on the iphone app/capacitor version after working fine for a few days. a user said "I’ve had notifications turned on but did not receive any notifications for Fajr or Dhur today. It worked perfectly yesterday". look into what could be the cause of this issue, and ensure notifications work well
+3 - Timer up top says time until suhoor ends being fajr, but the countdowns are different. I think the timer is a countdown to imsak, but im not sure. we should fix/clarify this. i recommend timer until imsak. 
+4 - the splash screen on capacitor app for iphone has my logo/icon on top of a green background. however, it is a sharp square, which can look harsh. can we round the corners of the icon on the splash screen?
+5 - clicking the qibla finder from the menu brings the user to the prayers page, but they don't know to scroll down to find the qibla finder. add an auto scroll so it will scroll down when a user clicks it on the menu.
+6 - add a button to go back to the dashboard/home page in the hamburger menu. 

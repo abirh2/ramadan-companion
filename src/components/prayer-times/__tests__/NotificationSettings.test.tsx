@@ -14,6 +14,7 @@ describe('NotificationSettings', () => {
   const mockTogglePrayer = jest.fn()
   const mockEnableAll = jest.fn()
   const mockDisableAll = jest.fn()
+  const mockSetMinutesBefore = jest.fn()
   const mockRefetch = jest.fn()
 
   beforeEach(() => {
@@ -32,6 +33,7 @@ describe('NotificationSettings', () => {
           Maghrib: true,
           Isha: true,
         },
+        minutesBefore: 0,
       },
       loading: false,
       error: null,
@@ -39,6 +41,7 @@ describe('NotificationSettings', () => {
       togglePrayer: mockTogglePrayer,
       enableAll: mockEnableAll,
       disableAll: mockDisableAll,
+      setMinutesBefore: mockSetMinutesBefore,
       refetch: mockRefetch,
     })
   })
@@ -101,6 +104,7 @@ describe('NotificationSettings', () => {
             Maghrib: true,
             Isha: true,
           },
+          minutesBefore: 0,
         },
       })
 
@@ -155,6 +159,7 @@ describe('NotificationSettings', () => {
             Maghrib: true,
             Isha: false,
           },
+          minutesBefore: 0,
         },
       })
 
@@ -164,7 +169,7 @@ describe('NotificationSettings', () => {
     })
 
     it('should call enableAll when master toggle is turned on', async () => {
-      mockEnableAll.mockResolvedValue()
+      mockEnableAll.mockResolvedValue(undefined)
 
       mockUseNotifications.mockReturnValue({
         ...mockUseNotifications(),
@@ -178,6 +183,7 @@ describe('NotificationSettings', () => {
             Maghrib: true,
             Isha: true,
           },
+          minutesBefore: 0,
         },
       })
 
@@ -192,7 +198,7 @@ describe('NotificationSettings', () => {
     })
 
     it('should call disableAll when master toggle is turned off', async () => {
-      mockDisableAll.mockResolvedValue()
+      mockDisableAll.mockResolvedValue(undefined)
 
       mockUseNotifications.mockReturnValue({
         ...mockUseNotifications(),
@@ -206,6 +212,7 @@ describe('NotificationSettings', () => {
             Maghrib: true,
             Isha: true,
           },
+          minutesBefore: 0,
         },
       })
 
@@ -234,6 +241,7 @@ describe('NotificationSettings', () => {
             Maghrib: true,
             Isha: false,
           },
+          minutesBefore: 0,
         },
       })
     })
@@ -247,7 +255,7 @@ describe('NotificationSettings', () => {
     })
 
     it('should call togglePrayer when individual prayer toggle is clicked', async () => {
-      mockTogglePrayer.mockResolvedValue()
+      mockTogglePrayer.mockResolvedValue(undefined)
 
       renderWithAuth(<NotificationSettings />)
 
@@ -287,6 +295,7 @@ describe('NotificationSettings', () => {
             Maghrib: true,
             Isha: true,
           },
+          minutesBefore: 0,
         },
         loading: false,
         error: 'Failed to save preferences',
@@ -294,6 +303,7 @@ describe('NotificationSettings', () => {
         togglePrayer: mockTogglePrayer,
         enableAll: mockEnableAll,
         disableAll: mockDisableAll,
+        setMinutesBefore: mockSetMinutesBefore,
         refetch: mockRefetch,
       })
 
@@ -317,6 +327,7 @@ describe('NotificationSettings', () => {
             Maghrib: true,
             Isha: true,
           },
+          minutesBefore: 0,
         },
       })
 

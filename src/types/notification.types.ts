@@ -13,6 +13,7 @@ export interface PrayerNotificationPreferences {
 export interface NotificationPreferences {
   enabled: boolean
   prayers: PrayerNotificationPreferences
+  minutesBefore: 0 | 5 | 10
 }
 
 export interface PrayerQuote {
@@ -58,6 +59,7 @@ export interface UseNotificationsResult {
   togglePrayer: (prayer: PrayerName) => Promise<void>
   enableAll: () => Promise<void>
   disableAll: () => Promise<void>
+  setMinutesBefore: (minutes: 0 | 5 | 10) => Promise<void>
   refetch: () => Promise<void>
 }
 

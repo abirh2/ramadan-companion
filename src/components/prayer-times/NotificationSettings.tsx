@@ -51,6 +51,7 @@ export function NotificationSettings() {
     togglePrayer,
     enableAll,
     disableAll,
+    setMinutesBefore,
   } = useNotifications()
 
   // Browser not supported
@@ -208,6 +209,29 @@ export function NotificationSettings() {
             Get notified at exact prayer times with reminders from authentic
             hadith
           </p>
+        )}
+
+        {/* Advance reminder selector — native only */}
+        {preferences.enabled && Capacitor.isNativePlatform() && (
+          <div className="space-y-2 pt-1">
+            <p className="text-xs font-medium text-foreground">Remind me</p>
+            <div className="flex gap-2">
+              {([0, 5, 10] as const).map((mins) => (
+                <button
+                  key={mins}
+                  onClick={() => setMinutesBefore(mins)}
+                  disabled={loading}
+                  className={`flex-1 rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors ${
+                    preferences.minutesBefore === mins
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border bg-background text-muted-foreground hover:border-primary/50'
+                  }`}
+                >
+                  {mins === 0 ? 'At prayer time' : `${mins} min before`}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
 
         {/* Individual prayer toggles */}

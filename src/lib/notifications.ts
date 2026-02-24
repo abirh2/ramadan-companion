@@ -26,6 +26,7 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
     Maghrib: true,
     Isha: true,
   },
+  minutesBefore: 0,
 }
 
 // Note: Notification scheduling now handled by backend cron job + Web Push API
@@ -150,9 +151,16 @@ export async function requestNotificationPermission(): Promise<boolean> {
 export function getNotificationPreferences(
   profile?: { notification_preferences?: NotificationPreferences } | null
 ): NotificationPreferences {
+  // Ensures backward-compat with stored prefs that predate minutesBefore field
+  const withDefaults = (prefs: Partial<NotificationPreferences>): NotificationPreferences => ({
+    ...DEFAULT_NOTIFICATION_PREFERENCES,
+    ...prefs,
+    prayers: { ...DEFAULT_NOTIFICATION_PREFERENCES.prayers, ...prefs.prayers },
+  })
+
   // 1. Try profile first (authenticated users)
   if (profile?.notification_preferences) {
-    return profile.notification_preferences
+    return withDefaults(profile.notification_preferences)
   }
 
   // 2. Try localStorage (guest users + fallback)
@@ -160,8 +168,7 @@ export function getNotificationPreferences(
     try {
       const stored = localStorage.getItem(STORAGE_KEYS.PREFERENCES)
       if (stored) {
-        const parsed = JSON.parse(stored) as NotificationPreferences
-        return parsed
+        return withDefaults(JSON.parse(stored) as Partial<NotificationPreferences>)
       }
     } catch (error) {
       console.error('[Notifications] Failed to load from localStorage:', error)
