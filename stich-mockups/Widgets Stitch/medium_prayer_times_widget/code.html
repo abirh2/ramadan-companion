@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Deen Companion Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+            extend: {
+                colors: {
+                "primary": "#13ec5b",
+                "background-light": "#f6f8f6",
+                "background-dark": "#102216",
+                "sage": {
+                    50: '#f4f7f5',
+                    100: '#e3ebe5',
+                    200: '#c5d8cb',
+                    300: '#9ebca8',
+                    400: '#759d81',
+                    500: '#548161',
+                    600: '#41664d',
+                    700: '#35523e',
+                    800: '#2c4133',
+                    900: '#25362b',
+                }
+                },
+                fontFamily: {
+                "display": ["Inter", "sans-serif"]
+                },
+                borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+                boxShadow: {
+                    'ios': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03), 0 10px 15px -3px rgba(0, 0, 0, 0.05)',
+                    'ios-lg': '0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02)',
+                }
+            },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display min-h-screen flex items-center justify-center p-4">
+<!-- iOS Home Screen Simulation Container -->
+<div class="relative w-full max-w-sm h-[800px] bg-slate-50 dark:bg-slate-900 rounded-[3rem] border-8 border-slate-900 shadow-2xl overflow-hidden flex flex-col items-center pt-12 pb-8 px-6 bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&amp;w=2564&amp;auto=format&amp;fit=crop')] bg-cover bg-center" data-alt="Abstract soft green gradient wallpaper">
+<!-- Status Bar -->
+<div class="absolute top-0 w-full h-12 flex justify-between items-center px-8 z-10 text-white">
+<span class="text-sm font-semibold">9:41</span>
+<div class="flex gap-1.5 items-center">
+<span class="material-symbols-outlined text-[18px]">signal_cellular_alt</span>
+<span class="material-symbols-outlined text-[18px]">wifi</span>
+<span class="material-symbols-outlined text-[18px] rotate-180">battery_full</span>
+</div>
+</div>
+<!-- Widget Container -->
+<div class="w-full mt-4">
+<!-- Medium Widget Implementation -->
+<div class="w-full aspect-[2/1] bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-3xl shadow-ios p-4 flex gap-4 overflow-hidden relative group">
+<!-- Left Side: Hero / Countdown -->
+<div class="flex flex-col justify-between w-[40%] h-full relative z-10">
+<div>
+<div class="flex items-center gap-1 mb-1 opacity-70">
+<span class="material-symbols-outlined text-sm text-sage-600 dark:text-sage-300">location_on</span>
+<span class="text-xs font-medium text-slate-500 dark:text-slate-400">Mecca</span>
+</div>
+<h2 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Asr</h2>
+<p class="text-xs font-medium text-primary mt-1">Starts in 2h 14m</p>
+</div>
+<div class="mt-auto">
+<div class="w-10 h-10 rounded-full bg-sage-100 dark:bg-sage-800 flex items-center justify-center mb-1">
+<span class="material-symbols-outlined text-sage-600 dark:text-sage-300">mosque</span>
+</div>
+</div>
+</div>
+<!-- Vertical Divider -->
+<div class="w-px bg-slate-200 dark:bg-slate-700 h-full my-auto"></div>
+<!-- Right Side: Prayer List -->
+<div class="flex-1 flex flex-col justify-between h-full py-0.5">
+<!-- Row Item: Fajr -->
+<div class="flex justify-between items-center text-xs">
+<span class="text-slate-500 dark:text-slate-400 font-medium w-16">Fajr</span>
+<span class="text-slate-900 dark:text-slate-200 font-semibold">05:12</span>
+</div>
+<!-- Row Item: Sunrise (Subtle) -->
+<div class="flex justify-between items-center text-xs opacity-60">
+<span class="text-slate-500 dark:text-slate-400 font-medium w-16">Sunrise</span>
+<span class="text-slate-900 dark:text-slate-200 font-semibold">06:45</span>
+</div>
+<!-- Row Item: Dhuhr -->
+<div class="flex justify-between items-center text-xs">
+<span class="text-slate-500 dark:text-slate-400 font-medium w-16">Dhuhr</span>
+<span class="text-slate-900 dark:text-slate-200 font-semibold">12:30</span>
+</div>
+<!-- Row Item: Asr (Highlighted) -->
+<div class="flex justify-between items-center text-xs bg-primary/10 -mx-2 px-2 py-0.5 rounded-md">
+<span class="text-primary font-bold w-16">Asr</span>
+<span class="text-primary font-bold">03:45</span>
+<div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse ml-1 shadow-[0_0_8px_rgba(19,236,91,0.6)]"></div>
+</div>
+<!-- Row Item: Maghrib -->
+<div class="flex justify-between items-center text-xs">
+<span class="text-slate-500 dark:text-slate-400 font-medium w-16">Maghrib</span>
+<span class="text-slate-900 dark:text-slate-200 font-semibold">06:15</span>
+</div>
+<!-- Row Item: Isha -->
+<div class="flex justify-between items-center text-xs">
+<span class="text-slate-500 dark:text-slate-400 font-medium w-16">Isha</span>
+<span class="text-slate-900 dark:text-slate-200 font-semibold">07:45</span>
+</div>
+</div>
+<!-- Background decoration for the widget -->
+<div class="absolute -bottom-10 -left-10 w-32 h-32 bg-gradient-to-tr from-sage-200/20 to-transparent rounded-full blur-2xl dark:from-sage-900/40 pointer-events-none"></div>
+</div>
+<!-- App Icon Label below widget (iOS style) -->
+<p class="text-center text-white/90 text-[11px] font-medium mt-2 drop-shadow-md">Deen Companion</p>
+</div>
+<!-- Simulated App Grid (Icons) -->
+<div class="grid grid-cols-4 gap-x-6 gap-y-8 w-full mt-10 px-2">
+<!-- App Icon 1 -->
+<div class="flex flex-col items-center gap-1.5">
+<div class="w-[60px] h-[60px] bg-slate-100/20 backdrop-blur-lg rounded-[14px] flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-white text-3xl">menu_book</span>
+</div>
+<span class="text-[11px] text-white font-medium drop-shadow-sm">Quran</span>
+</div>
+<!-- App Icon 2 -->
+<div class="flex flex-col items-center gap-1.5">
+<div class="w-[60px] h-[60px] bg-slate-100/20 backdrop-blur-lg rounded-[14px] flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-white text-3xl">explore</span>
+</div>
+<span class="text-[11px] text-white font-medium drop-shadow-sm">Qibla</span>
+</div>
+<!-- App Icon 3 -->
+<div class="flex flex-col items-center gap-1.5">
+<div class="w-[60px] h-[60px] bg-slate-100/20 backdrop-blur-lg rounded-[14px] flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-white text-3xl">calendar_month</span>
+</div>
+<span class="text-[11px] text-white font-medium drop-shadow-sm">Hijri</span>
+</div>
+<!-- App Icon 4 -->
+<div class="flex flex-col items-center gap-1.5">
+<div class="w-[60px] h-[60px] bg-slate-100/20 backdrop-blur-lg rounded-[14px] flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-white text-3xl">settings</span>
+</div>
+<span class="text-[11px] text-white font-medium drop-shadow-sm">Settings</span>
+</div>
+<!-- App Icon 5 -->
+<div class="flex flex-col items-center gap-1.5">
+<div class="w-[60px] h-[60px] bg-slate-100/20 backdrop-blur-lg rounded-[14px] flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-white text-3xl">volunteer_activism</span>
+</div>
+<span class="text-[11px] text-white font-medium drop-shadow-sm">Tasbih</span>
+</div>
+</div>
+<!-- Dock -->
+<div class="mt-auto w-full mb-2">
+<div class="w-full h-24 bg-white/20 backdrop-blur-xl rounded-[32px] flex items-center justify-evenly p-4">
+<div class="w-[54px] h-[54px] bg-primary rounded-[13px] flex items-center justify-center shadow-lg bg-gradient-to-b from-primary to-green-600">
+<span class="material-symbols-outlined text-white text-3xl">call</span>
+</div>
+<div class="w-[54px] h-[54px] bg-white rounded-[13px] flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-slate-800 text-3xl">chat_bubble</span>
+</div>
+<div class="w-[54px] h-[54px] bg-white rounded-[13px] flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-slate-800 text-3xl">mail</span>
+</div>
+<div class="w-[54px] h-[54px] bg-white rounded-[13px] flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-slate-800 text-3xl">music_note</span>
+</div>
+</div>
+</div>
+<!-- Home Bar -->
+<div class="absolute bottom-2 w-32 h-1.5 bg-white rounded-full left-1/2 transform -translate-x-1/2 opacity-80"></div>
+</div>
+</body></html>

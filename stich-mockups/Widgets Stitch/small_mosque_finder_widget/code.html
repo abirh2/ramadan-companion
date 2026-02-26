@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Small Mosque Finder Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                        "widget-bg": "#ffffff",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1.25rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'ios': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+                        'ios-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* iOS-like smoothness */
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Simulated map pattern */
+        .map-pattern {
+            background-image: 
+                radial-gradient(#e5e7eb 1px, transparent 1px), 
+                radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            opacity: 0.4;
+        }
+        .dark .map-pattern {
+            background-image: 
+                radial-gradient(#1f2937 1px, transparent 1px), 
+                radial-gradient(#1f2937 1px, transparent 1px);
+            opacity: 0.2;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex min-h-screen w-full flex-col items-center justify-center bg-background-light dark:bg-background-dark font-display p-8 gap-12">
+<!-- Design Context: iOS Home Screen Simulation -->
+<div class="relative w-full max-w-[390px] mx-auto flex flex-col gap-6">
+<!-- Header for context -->
+<div class="text-center mb-4">
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-semibold">Deen Companion</h2>
+<p class="text-slate-500 dark:text-slate-400 text-sm">iOS Home Screen Widgets</p>
+</div>
+<!-- Row of Small Widgets -->
+<div class="flex flex-row justify-center gap-6">
+<!-- Widget 1: Nearest Mosque (The Requested Design) -->
+<!-- Using a 158x158px approximate size for Small iOS Widget -->
+<div class="relative w-[160px] h-[160px] rounded-2xl overflow-hidden shadow-ios bg-white dark:bg-[#1C1C1E] flex flex-col group cursor-pointer transition-transform active:scale-95">
+<!-- Map Background Layer -->
+<div class="absolute inset-0 z-0">
+<div class="absolute inset-0 bg-cover bg-center opacity-30 dark:opacity-20 grayscale" data-alt="Abstract minimalist map texture of London streets" data-location="London" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDiMNc1o6kbq54oVK8nqWWvMe1e1IcnPs8idxnpp_oXSHzIs0eHDLuEc42KLY6IU2p898ltkNReoGldae_5OCQf_GcZlWTlAXxcPBgurNHclMttN04aetL0VhNM-e5Qs8uO4E6GuRDDlxT2YuuA2Si0cttT7luupFiFUe4RPGHFgcwMhtjT_p6w1pTHSyrHld4vrgr3L8Uh3Sk58PaUczhm6k4JFIHMjwdr2YvOl1TXiGVVfhXZi_-JRiV2RfZQdIMjV7SMgjXhYaI");'>
+</div>
+<!-- Gradient overlay for text readability -->
+<div class="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent dark:from-[#1C1C1E] dark:via-[#1C1C1E]/80 dark:to-transparent"></div>
+</div>
+<!-- Content Layer -->
+<div class="relative z-10 flex flex-col justify-between h-full p-4">
+<!-- Icon Header -->
+<div class="flex items-start justify-between">
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined text-[20px]">mosque</span>
+</div>
+<div class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/10 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">near_me</span>
+</div>
+</div>
+<!-- Info Footer -->
+<div class="flex flex-col gap-0.5">
+<span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Nearest</span>
+<h3 class="text-slate-900 dark:text-slate-100 font-bold text-sm leading-tight line-clamp-2">
+                            East London Mosque
+                        </h3>
+<p class="text-primary font-semibold text-xs mt-0.5">0.8 mi</p>
+</div>
+</div>
+</div>
+<!-- Widget 2: Prayer Times (Contextual companion) -->
+<div class="relative w-[160px] h-[160px] rounded-2xl overflow-hidden shadow-ios bg-gradient-to-br from-primary to-[#0eb344] flex flex-col justify-between p-4 group cursor-pointer transition-transform active:scale-95">
+<div class="flex justify-between items-start">
+<div class="flex flex-col text-white">
+<span class="text-[10px] font-medium opacity-80 uppercase tracking-wide">Next Prayer</span>
+<span class="text-lg font-bold">Asr</span>
+</div>
+<span class="material-symbols-outlined text-white/40">schedule</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-4xl font-bold text-white tracking-tight">16:42</span>
+<span class="text-xs font-medium text-white/80">-0h 24m</span>
+</div>
+</div>
+</div>
+<!-- Medium Widget Variation (Alternative View) -->
+<div class="mt-4 flex justify-center">
+<div class="relative w-[344px] h-[160px] rounded-2xl overflow-hidden shadow-ios bg-white dark:bg-[#1C1C1E] flex flex-row group cursor-pointer transition-transform active:scale-95">
+<!-- Left: Map Area -->
+<div class="w-[140px] relative h-full bg-slate-100 dark:bg-slate-800">
+<div class="absolute inset-0 bg-cover bg-center grayscale opacity-60 dark:opacity-40" data-alt="Minimalist street map view focused on mosque location" data-location="London" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDiMNc1o6kbq54oVK8nqWWvMe1e1IcnPs8idxnpp_oXSHzIs0eHDLuEc42KLY6IU2p898ltkNReoGldae_5OCQf_GcZlWTlAXxcPBgurNHclMttN04aetL0VhNM-e5Qs8uO4E6GuRDDlxT2YuuA2Si0cttT7luupFiFUe4RPGHFgcwMhtjT_p6w1pTHSyrHld4vrgr3L8Uh3Sk58PaUczhm6k4JFIHMjwdr2YvOl1TXiGVVfhXZi_-JRiV2RfZQdIMjV7SMgjXhYaI");'>
+</div>
+<!-- Pin Marker -->
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg transform -translate-y-2">
+<span class="material-symbols-outlined text-white text-lg">mosque</span>
+</div>
+<!-- Pin point -->
+<div class="absolute w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-primary transform translate-y-[14px]"></div>
+</div>
+</div>
+<!-- Right: Details Area -->
+<div class="flex-1 p-5 flex flex-col justify-between">
+<div>
+<div class="flex items-center gap-1.5 mb-1">
+<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+<span class="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Open Now</span>
+</div>
+<h3 class="text-slate-900 dark:text-slate-100 font-bold text-lg leading-tight">East London Mosque</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Whitechapel Rd, London</p>
+</div>
+<div class="flex items-center justify-between mt-2">
+<div class="flex flex-col">
+<span class="text-xs text-slate-400 dark:text-slate-500">Distance</span>
+<span class="text-sm font-semibold text-slate-900 dark:text-slate-100">0.8 miles</span>
+</div>
+<button class="flex items-center justify-center w-10 h-10 bg-primary/10 hover:bg-primary/20 rounded-full text-primary transition-colors">
+<span class="material-symbols-outlined text-[22px] fill">directions</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Standalone Card Component (Original Request Refined for Mobile UI) -->
+<!-- This represents what clicking the widget might open -->
+<div class="w-full max-w-[390px] rounded-3xl bg-white dark:bg-[#1C1C1E] shadow-xl overflow-hidden border border-slate-100 dark:border-slate-800 mt-8">
+<div class="relative h-[240px]">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Exterior view of East London Mosque building" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCbteHW6XuduzXqD6oa30g_T3DKQna49Mixg83f7UpZp1iLN58IxtPqB9Rwcsbht1qjoPWpnYpQbKQAtBbHHgONqciFVa4UeWWaB52Vv5eJdWRKJTC_HTwz0VS2s8yD64KihlVWNsRwptP5QPMAapZbUiGvIxqctv29198D-RC_dsxBaTRlh_J5iJUGD6ahP7u7mYLF9ekV7ROjqAtTHa1DUS1uGKwq4pVv5ARDtmst9oc31IdzHhzDnVkJEqRUIi5X37v_wrglcro");'>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+<div class="absolute top-4 left-4 right-4 flex justify-between items-center">
+<button class="w-8 h-8 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/40 transition">
+<span class="material-symbols-outlined text-sm">arrow_back_ios_new</span>
+</button>
+<div class="flex gap-2">
+<button class="w-8 h-8 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/40 transition">
+<span class="material-symbols-outlined text-lg">share</span>
+</button>
+<button class="w-8 h-8 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/40 transition">
+<span class="material-symbols-outlined text-lg">favorite</span>
+</button>
+</div>
+</div>
+<div class="absolute bottom-0 left-0 right-0 p-5">
+<h2 class="text-white text-2xl font-bold leading-tight mb-1">East London Mosque</h2>
+<div class="flex items-center text-white/90 text-sm font-medium">
+<span class="material-symbols-outlined text-sm mr-1">location_on</span>
+                    0.8 miles away
+                </div>
+</div>
+</div>
+<div class="p-5 flex gap-3">
+<button class="flex-1 h-12 bg-primary hover:bg-green-400 text-slate-900 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-lg">directions</span>
+                Get Directions
+             </button>
+<button class="flex-1 h-12 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-lg">call</span>
+                Call
+             </button>
+</div>
+</div>
+</body></html>

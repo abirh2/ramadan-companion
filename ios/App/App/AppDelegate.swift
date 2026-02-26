@@ -37,6 +37,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "widget_zikr_count",
         "widget_zikr_target",
         "widget_zikr_update",
+        // Hijri Date widget
+        "widget_hijri_day",
+        "widget_hijri_month_name",
+        "widget_hijri_year",
+        "widget_hijri_gregorian_date",
+        "widget_hijri_weekday",
+        "widget_hijri_update",
+        // Charity widget
+        "widget_charity_monthly",
+        "widget_charity_yearly",
+        "widget_charity_currency",
+        "widget_charity_update",
+        // Qibla widget
+        "widget_qibla_direction",
+        "widget_qibla_compass",
+        "widget_qibla_city",
+        "widget_qibla_update",
+        // Mosque widget
+        "widget_mosque_name",
+        "widget_mosque_distance",
+        "widget_mosque_address",
+        "widget_mosque_update",
     ]
 
     private static let preferencesPrefix = "CapacitorStorage."

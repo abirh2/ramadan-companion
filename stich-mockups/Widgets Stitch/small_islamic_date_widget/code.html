@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Deen Companion - Small Islamic Date Widget</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#13ec5b",
+              "background-light": "#f6f8f6",
+              "background-dark": "#102216",
+            },
+            fontFamily: {
+              "display": ["Inter", "system-ui", "-apple-system", "sans-serif"],
+              "serif": ["New York", "Charter", "Bitstream Charter", "Sitka Text", "Cambria", "serif"] 
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1.25rem", "3xl": "1.5rem", "full": "9999px"},
+            boxShadow: {
+              "ios": "0 2px 10px rgba(0,0,0,0.05)",
+              "ios-dark": "0 2px 10px rgba(0,0,0,0.2)"
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        /* iOS-like smoothness */
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .widget-gradient {
+            background: linear-gradient(135deg, #f6f8f6 0%, #e7f3eb 100%);
+        }
+        .dark .widget-gradient {
+            background: linear-gradient(135deg, #102216 0%, #0a160e 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen flex items-center justify-center font-display p-6">
+<!-- Widget Container -->
+<!-- Size simulates a small iOS widget (approx 155x155pt or roughly 170x170px for display) -->
+<div class="relative w-[160px] h-[160px] sm:w-[170px] sm:h-[170px] rounded-3xl widget-gradient shadow-ios dark:shadow-ios-dark flex flex-col justify-between p-4 border border-white/50 dark:border-white/5 overflow-hidden group">
+<!-- Header / Top Section -->
+<div class="flex items-start justify-between">
+<!-- App Icon / Brand Indicator (Optional but common in iOS widgets) -->
+<div class="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-[14px]">calendar_month</span>
+</div>
+<!-- Jummah Tag -->
+<div class="flex items-center justify-center px-2 py-0.5 rounded-full bg-primary/10 dark:bg-primary/20 backdrop-blur-sm">
+<span class="text-primary text-[10px] font-semibold tracking-wide uppercase">Jummah</span>
+</div>
+</div>
+<!-- Main Content: Date -->
+<div class="flex flex-col gap-1 z-10">
+<!-- Hijri Date: Refined Serif Font -->
+<h1 class="font-serif text-slate-900 dark:text-slate-100 text-3xl sm:text-[34px] font-medium leading-tight tracking-tight -ml-0.5">
+                14<br/>Ramadan
+            </h1>
+<!-- Gregorian Date: San Francisco / Sans Serif -->
+<div class="flex flex-col">
+<p class="text-slate-500 dark:text-slate-400 text-xs font-medium leading-normal">
+                    March 24
+                </p>
+<p class="text-slate-400 dark:text-slate-500 text-[10px] font-medium">
+                    1445 AH
+                </p>
+</div>
+</div>
+<!-- Decorative Background Element (Subtle) -->
+<div class="absolute -bottom-6 -right-6 w-24 h-24 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
+</div>
+</body></html>

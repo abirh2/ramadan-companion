@@ -26,7 +26,6 @@ struct PrayerProvider: TimelineProvider {
         let time = SharedDefaults.prayerTime.isEmpty ? "Open app" : SharedDefaults.prayerTime
         let targetStr = SharedDefaults.prayerTargetTime
 
-        // Parse ISO 8601 target date for countdown computation
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
 
@@ -66,7 +65,6 @@ struct PrayerProvider: TimelineProvider {
             entries.append(PrayerEntry(date: now, prayerName: name, prayerTime: time, countdown: "now"))
         }
 
-        // Reload after prayer time so the app can push the next prayer
         let reloadDate = targetDate.addingTimeInterval(60)
         completion(Timeline(entries: entries, policy: .after(reloadDate)))
     }
@@ -78,45 +76,39 @@ struct PrayerProvider: TimelineProvider {
     }
 }
 
-// MARK: - Theme Color
-
-private let tealAccent = Color(red: 0.06, green: 0.24, blue: 0.24)
-
 // MARK: - Small Widget View
 
 struct PrayerSmallView: View {
     let entry: PrayerEntry
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 4) {
-                Image(systemName: "moon.stars.fill")
-                    .font(.caption2)
-                    .foregroundStyle(tealAccent)
-                Text("Next Prayer")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
+            WidgetHeader(icon: "moon.stars.fill", title: "Next Prayer")
 
-            Spacer(minLength: 4)
+            Spacer(minLength: 6)
 
             Text(entry.prayerName)
                 .font(.title2.bold())
-                .foregroundStyle(.primary)
+                .foregroundStyle(WidgetTheme.primaryText(for: colorScheme))
                 .minimumScaleFactor(0.7)
                 .lineLimit(1)
 
             Text(entry.prayerTime)
                 .font(.subheadline.weight(.medium))
-                .foregroundStyle(.primary)
+                .foregroundStyle(WidgetTheme.primaryText(for: colorScheme))
 
-            Spacer(minLength: 4)
+            Spacer(minLength: 6)
 
-            Label(entry.countdown, systemImage: "clock")
-                .font(.caption2.weight(.medium))
-                .foregroundStyle(tealAccent)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+            HStack(spacing: 4) {
+                Image(systemName: "clock")
+                    .font(.system(size: 10, weight: .semibold))
+                Text(entry.countdown)
+                    .font(.caption2.weight(.bold))
+            }
+            .foregroundStyle(WidgetTheme.accent(for: colorScheme))
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
         }
         .padding(14)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
@@ -127,28 +119,22 @@ struct PrayerSmallView: View {
 
 struct PrayerMediumView: View {
     let entry: PrayerEntry
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         HStack(alignment: .center, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 4) {
-                Image(systemName: "moon.stars.fill")
-                    .font(.caption)
-                    .foregroundStyle(tealAccent)
-                Text("Next Prayer")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                }
+                WidgetHeader(icon: "moon.stars.fill", title: "Next Prayer")
 
                 Text(entry.prayerName)
                     .font(.largeTitle.bold())
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(WidgetTheme.primaryText(for: colorScheme))
                     .minimumScaleFactor(0.6)
                     .lineLimit(1)
 
                 Text(entry.prayerTime)
                     .font(.title3.weight(.medium))
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(WidgetTheme.primaryText(for: colorScheme))
             }
 
             Spacer()
@@ -156,11 +142,11 @@ struct PrayerMediumView: View {
             VStack(alignment: .trailing, spacing: 6) {
                 Image(systemName: "clock.fill")
                     .font(.title2)
-                    .foregroundStyle(tealAccent)
+                    .foregroundStyle(WidgetTheme.accent(for: colorScheme))
 
                 Text(entry.countdown)
-                    .font(.headline.weight(.semibold))
-                    .foregroundStyle(tealAccent)
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(WidgetTheme.accent(for: colorScheme))
                     .multilineTextAlignment(.trailing)
                     .lineLimit(2)
                     .minimumScaleFactor(0.7)
@@ -168,6 +154,53 @@ struct PrayerMediumView: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+// MARK: - Lock Screen Views
+
+@available(iOS 16.0, *)
+struct PrayerAccessoryRectangularView: View {
+    let entry: PrayerEntry
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(entry.prayerName)
+                .font(.headline.bold())
+                .widgetAccentable()
+            Text(entry.prayerTime)
+                .font(.subheadline)
+            Text(entry.countdown)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+@available(iOS 16.0, *)
+struct PrayerAccessoryCircularView: View {
+    let entry: PrayerEntry
+
+    var body: some View {
+        VStack(spacing: 1) {
+            Image(systemName: "moon.stars.fill")
+                .font(.system(size: 12))
+                .widgetAccentable()
+            Text(entry.countdown)
+                .font(.system(size: 12, weight: .bold).monospacedDigit())
+                .minimumScaleFactor(0.6)
+                .lineLimit(1)
+        }
+    }
+}
+
+@available(iOS 16.0, *)
+struct PrayerAccessoryInlineView: View {
+    let entry: PrayerEntry
+
+    var body: some View {
+        Label("\(entry.prayerName) \(entry.prayerTime)", systemImage: "moon.stars.fill")
     }
 }
 
@@ -183,40 +216,48 @@ struct PrayerWidgetEntryView: View {
             PrayerSmallView(entry: entry)
         case .systemMedium:
             PrayerMediumView(entry: entry)
+        case .accessoryRectangular:
+            if #available(iOS 16.0, *) {
+                PrayerAccessoryRectangularView(entry: entry)
+            }
+        case .accessoryCircular:
+            if #available(iOS 16.0, *) {
+                PrayerAccessoryCircularView(entry: entry)
+            }
+        case .accessoryInline:
+            if #available(iOS 16.0, *) {
+                PrayerAccessoryInlineView(entry: entry)
+            }
         default:
             PrayerSmallView(entry: entry)
         }
     }
 }
 
-// MARK: - Widget Configurations
+// MARK: - Widget Configuration
 
 struct PrayerWidget: Widget {
     let kind = "PrayerWidget"
 
+    private var supportedFamilies: [WidgetFamily] {
+        var families: [WidgetFamily] = [.systemSmall, .systemMedium]
+        if #available(iOS 16.0, *) {
+            families.append(contentsOf: [.accessoryRectangular, .accessoryCircular, .accessoryInline])
+        }
+        return families
+    }
+
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: PrayerProvider()) { entry in
             PrayerWidgetEntryView(entry: entry)
-                .containerBackground(.ultraThinMaterial, for: .widget)
+                .containerBackground(for: .widget) {
+                    ThemedWidgetBackground()
+                }
         }
         .configurationDisplayName("Next Prayer")
         .description("Next prayer and live countdown at a glance.")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies(supportedFamilies)
         .contentMarginsDisabled()
-    }
-}
-
-struct PrayerWidgetClear: Widget {
-    let kind = "PrayerWidgetClear"
-
-    var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: PrayerProvider()) { entry in
-            PrayerWidgetEntryView(entry: entry)
-                .containerBackground(.clear, for: .widget)
-        }
-        .configurationDisplayName("Next Prayer - Clear")
-        .description("Next prayer with transparent background.")
-        .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
 

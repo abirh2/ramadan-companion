@@ -68,6 +68,54 @@ export interface ZikrWidgetData {
   updatedAt: string
 }
 
+export interface HijriWidgetData {
+  /** Day of the Hijri month, e.g. "14" */
+  day: string
+  /** Hijri month name, e.g. "Ramadan" */
+  monthName: string
+  /** Hijri year, e.g. "1447" */
+  year: string
+  /** Gregorian date for context, e.g. "Feb 26" */
+  gregorianDate: string
+  /** Day of the week, e.g. "Friday" */
+  weekday: string
+  /** ISO timestamp of last update */
+  updatedAt: string
+}
+
+export interface CharityWidgetData {
+  /** Formatted monthly total, e.g. "$45.00" */
+  monthly: string
+  /** Formatted yearly total, e.g. "$540.00" */
+  yearly: string
+  /** Currency symbol, e.g. "$" */
+  currency: string
+  /** ISO timestamp of last update */
+  updatedAt: string
+}
+
+export interface QiblaWidgetData {
+  /** Bearing in degrees, e.g. "58.5" */
+  direction: string
+  /** Cardinal direction, e.g. "NE" */
+  compass: string
+  /** User's city name, e.g. "New York" */
+  city: string
+  /** ISO timestamp of last update */
+  updatedAt: string
+}
+
+export interface MosqueWidgetData {
+  /** Name of the nearest mosque */
+  name: string
+  /** Formatted distance, e.g. "0.8 mi" */
+  distance: string
+  /** Address string */
+  address: string
+  /** ISO timestamp of last update */
+  updatedAt: string
+}
+
 // --------------------------------------------------------------------------
 // Internal helpers
 // --------------------------------------------------------------------------
@@ -206,5 +254,75 @@ export async function readWidgetZikrCount(): Promise<number | null> {
   } catch (err) {
     console.warn('[widgetBridge] readWidgetZikrCount failed:', err)
     return null
+  }
+}
+
+/**
+ * Write Hijri (Islamic) date widget data.
+ */
+export async function updateHijriWidget(data: HijriWidgetData): Promise<void> {
+  if (!isNative()) return
+  try {
+    await setAll({
+      widget_hijri_day: data.day,
+      widget_hijri_month_name: data.monthName,
+      widget_hijri_year: data.year,
+      widget_hijri_gregorian_date: data.gregorianDate,
+      widget_hijri_weekday: data.weekday,
+      widget_hijri_update: data.updatedAt,
+    })
+  } catch (err) {
+    console.warn('[widgetBridge] updateHijriWidget failed:', err)
+  }
+}
+
+/**
+ * Write charity/donation tracker widget data.
+ */
+export async function updateCharityWidget(data: CharityWidgetData): Promise<void> {
+  if (!isNative()) return
+  try {
+    await setAll({
+      widget_charity_monthly: data.monthly,
+      widget_charity_yearly: data.yearly,
+      widget_charity_currency: data.currency,
+      widget_charity_update: data.updatedAt,
+    })
+  } catch (err) {
+    console.warn('[widgetBridge] updateCharityWidget failed:', err)
+  }
+}
+
+/**
+ * Write Qibla direction widget data.
+ */
+export async function updateQiblaWidget(data: QiblaWidgetData): Promise<void> {
+  if (!isNative()) return
+  try {
+    await setAll({
+      widget_qibla_direction: data.direction,
+      widget_qibla_compass: data.compass,
+      widget_qibla_city: data.city,
+      widget_qibla_update: data.updatedAt,
+    })
+  } catch (err) {
+    console.warn('[widgetBridge] updateQiblaWidget failed:', err)
+  }
+}
+
+/**
+ * Write nearest mosque widget data.
+ */
+export async function updateMosqueWidget(data: MosqueWidgetData): Promise<void> {
+  if (!isNative()) return
+  try {
+    await setAll({
+      widget_mosque_name: data.name,
+      widget_mosque_distance: data.distance,
+      widget_mosque_address: data.address,
+      widget_mosque_update: data.updatedAt,
+    })
+  } catch (err) {
+    console.warn('[widgetBridge] updateMosqueWidget failed:', err)
   }
 }

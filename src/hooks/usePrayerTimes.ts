@@ -22,7 +22,7 @@ import {
 } from '@/lib/location'
 import { calculatePrayerTimesLocal, validatePrayerTimes } from '@/lib/prayerTimes'
 import { getDefaultCalculationMethodByCountry, extractCountryFromCity } from '@/lib/calculationMethod'
-import { updatePrayerWidget, updateAllPrayersWidget, to12Hour } from '@/lib/widgetBridge'
+import { updatePrayerWidget, updateAllPrayersWidget, updateQiblaWidget, to12Hour } from '@/lib/widgetBridge'
 
 // Prayer names in order (excluding Sunrise for next prayer calculation)
 const PRAYER_NAMES = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const
@@ -382,6 +382,17 @@ export function usePrayerTimes(): UsePrayerTimesResult {
         }).catch(() => {/* non-critical */})
       }
 
+      if (qiblaData && location) {
+        // compassDirection is added by our API route but not typed on QiblaData
+        const compassDir = (qiblaData as unknown as { compassDirection?: string }).compassDirection || ''
+        updateQiblaWidget({
+          direction: String(Math.round(qiblaData.direction)),
+          compass: compassDir,
+          city: location.city || '',
+          updatedAt: new Date().toISOString(),
+        }).catch(() => {/* non-critical */})
+      }
+
       // Note: Notifications now handled by backend cron + Web Push API
 
       // Start countdown interval
@@ -530,6 +541,16 @@ export function usePrayerTimes(): UsePrayerTimesResult {
           loading: false,
           error: null,
         }))
+
+        if (qiblaData) {
+          const compassDir = (qiblaData as unknown as { compassDirection?: string }).compassDirection || ''
+          updateQiblaWidget({
+            direction: String(Math.round(qiblaData.direction)),
+            compass: compassDir,
+            city: newLocation.city || '',
+            updatedAt: new Date().toISOString(),
+          }).catch(() => {/* non-critical */})
+        }
       } catch (error) {
         console.error('Error fetching prayer times for new location:', error)
         setState((prev) => ({

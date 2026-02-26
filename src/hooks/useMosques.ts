@@ -5,6 +5,7 @@ import type { MosqueData, DistanceUnit } from '@/types/places.types'
 import type { LocationData } from '@/types/ramadan.types'
 import { getUserLocation, saveLocationToStorage } from '@/lib/location'
 import { getDistanceUnit, milesToMeters } from '@/lib/places'
+import { updateMosqueWidget } from '@/lib/widgetBridge'
 import { useAuth } from './useAuth'
 
 interface UseMosquesResult {
@@ -133,6 +134,24 @@ export function useMosques(): UseMosquesResult {
   }, [profile, searchRadiusMiles, searchMosques])
 
   const nearestMosque = mosques.length > 0 ? mosques[0] : null
+
+  // Push nearest mosque to native widget
+  useEffect(() => {
+    if (nearestMosque) {
+      const distFormatted = distanceUnit === 'km'
+        ? `${(nearestMosque.distanceKm).toFixed(1)} km`
+        : `${(nearestMosque.distanceKm * 0.621371).toFixed(1)} mi`
+      const addr = nearestMosque.address
+        ? [nearestMosque.address.street, nearestMosque.address.city].filter(Boolean).join(', ')
+        : ''
+      updateMosqueWidget({
+        name: nearestMosque.name || 'Unnamed Mosque',
+        distance: distFormatted,
+        address: addr,
+        updatedAt: new Date().toISOString(),
+      }).catch(() => {/* non-critical */})
+    }
+  }, [nearestMosque, distanceUnit])
 
   return {
     mosques,

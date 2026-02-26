@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Deen Companion - Medium Hadith Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1.25rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'ios': '0 4px 24px -1px rgba(0, 0, 0, 0.08), 0 2px 8px -1px rgba(0, 0, 0, 0.04)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* iOS Widget dimensions simulation */
+        .widget-medium {
+            width: 338px;
+            height: 158px;
+        }
+        
+        /* Smooth text rendering for that premium feel */
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen flex items-center justify-center font-display p-6">
+<!-- Wrapper for presentation context -->
+<div class="flex flex-col items-center gap-12">
+<!-- Light Mode Widget -->
+<div class="flex flex-col items-center gap-4">
+<h2 class="text-sm font-medium text-slate-500 uppercase tracking-wider">Light Mode</h2>
+<!-- Widget Container -->
+<div class="widget-medium relative overflow-hidden bg-background-light rounded-3xl shadow-ios flex flex-col p-4 group cursor-pointer transition-transform active:scale-95 border border-white/50">
+<!-- Background Pattern (Subtle) -->
+<div class="absolute inset-0 opacity-30 pointer-events-none" style="background: radial-gradient(circle at top right, #13ec5b15 0%, transparent 40%);"></div>
+<!-- Header Row -->
+<div class="flex items-center justify-between mb-2 z-10">
+<div class="flex items-center gap-1.5 text-primary">
+<span class="material-symbols-outlined text-[18px]">format_quote</span>
+<span class="text-[11px] font-semibold uppercase tracking-wide text-primary/80">Hadith of the Day</span>
+</div>
+<!-- Pill Label -->
+<div class="bg-primary/10 px-2 py-0.5 rounded-full flex items-center">
+<span class="text-[10px] font-semibold text-green-700">Sahih</span>
+</div>
+</div>
+<!-- Content -->
+<div class="flex-1 flex flex-col justify-between z-10">
+<p class="text-slate-800 text-[15px] leading-snug font-medium line-clamp-3">
+                        "Faith consists of more than sixty branches. And Haya (modesty) is a part of faith."
+                    </p>
+<div class="flex flex-col mt-2">
+<p class="text-slate-900 text-xs font-bold">Narrated by Abu Huraira</p>
+<p class="text-slate-500 text-[10px] font-medium">Sahih Bukhari</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Dark Mode Widget -->
+<div class="flex flex-col items-center gap-4">
+<h2 class="text-sm font-medium text-slate-500 uppercase tracking-wider">Dark Mode</h2>
+<!-- Widget Container -->
+<div class="widget-medium relative overflow-hidden bg-background-dark rounded-3xl shadow-ios flex flex-col p-4 group cursor-pointer transition-transform active:scale-95 border border-white/5">
+<!-- Background Pattern (Subtle) -->
+<div class="absolute inset-0 opacity-20 pointer-events-none" style="background: radial-gradient(circle at top right, #13ec5b 0%, transparent 50%);"></div>
+<!-- Header Row -->
+<div class="flex items-center justify-between mb-2 z-10">
+<div class="flex items-center gap-1.5 text-primary">
+<span class="material-symbols-outlined text-[18px]">format_quote</span>
+<span class="text-[11px] font-semibold uppercase tracking-wide text-primary">Hadith of the Day</span>
+</div>
+<!-- Pill Label -->
+<div class="bg-primary/20 px-2 py-0.5 rounded-full flex items-center border border-primary/10">
+<span class="text-[10px] font-semibold text-primary">Sahih</span>
+</div>
+</div>
+<!-- Content -->
+<div class="flex-1 flex flex-col justify-between z-10">
+<p class="text-slate-100 text-[15px] leading-snug font-medium line-clamp-3">
+                        "The strong man is not the one who can overpower others. Rather, the strong man is the one who controls himself when he is angry."
+                    </p>
+<div class="flex flex-col mt-2">
+<p class="text-white text-xs font-bold">Narrated by Abu Huraira</p>
+<p class="text-slate-400 text-[10px] font-medium">Sahih Bukhari</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Image Background Variant -->
+<div class="flex flex-col items-center gap-4">
+<h2 class="text-sm font-medium text-slate-500 uppercase tracking-wider">Variant: Image Background</h2>
+<!-- Widget Container -->
+<div class="widget-medium relative overflow-hidden rounded-3xl shadow-ios flex flex-col p-4 group cursor-pointer transition-transform active:scale-95">
+<!-- Background Image -->
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Peaceful nature landscape with soft green tones" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAs3DpNzQr33_h4USYK7F8X9RXmKWG2i5R-DNHDwccszDdbX96xf1S4eFzQuEAxRiR1MpgjZ407ibeYGRLLTEA4dN-OwZaZeE-YWfp_IHRa0C8yiw-bYBHhcfK_4aTd47Su2gVupyo9QshsQW6b-QKaRJIOwoWMNChPCOMfRDAA-U7K-eRttOsKqwv9GXIUuJv74JD_Aior3Oj8k_-BdLvdCoIp-kZ_LpqdAlr2wCoBPkiEwxg-ntux3iFy7Os6XbvEYjkkmStSTGI");'></div>
+<!-- Overlay Gradient -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/30"></div>
+<!-- Header Row -->
+<div class="flex items-center justify-between mb-2 z-10">
+<div class="flex items-center gap-1.5 text-white">
+<span class="material-symbols-outlined text-[18px]">light_mode</span>
+<span class="text-[11px] font-semibold uppercase tracking-wide opacity-90">Hadith of the Day</span>
+</div>
+<!-- Pill Label -->
+<div class="bg-white/20 backdrop-blur-md px-2 py-0.5 rounded-full flex items-center border border-white/10">
+<span class="text-[10px] font-semibold text-white">Sahih</span>
+</div>
+</div>
+<!-- Content -->
+<div class="flex-1 flex flex-col justify-between z-10">
+<p class="text-white text-[15px] leading-snug font-medium line-clamp-3 drop-shadow-sm">
+                        "He who does not show mercy to others will not be shown mercy."
+                    </p>
+<div class="flex flex-col mt-2">
+<p class="text-white text-xs font-bold">Narrated by Jarir bin Abdullah</p>
+<p class="text-white/70 text-[10px] font-medium">Sahih Bukhari</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>

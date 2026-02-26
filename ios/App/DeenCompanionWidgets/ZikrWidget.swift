@@ -16,7 +16,7 @@ struct ZikrEntry: TimelineEntry {
 
 struct ZikrProvider: TimelineProvider {
     func placeholder(in context: Context) -> ZikrEntry {
-        ZikrEntry(date: Date(), arabic: "سُبْحَانَ ٱللَّٰهِ", transliteration: "SubhanAllah", count: 12, target: 33)
+        ZikrEntry(date: Date(), arabic: "\u{0633}\u{064F}\u{0628}\u{0652}\u{062D}\u{064E}\u{0627}\u{0646}\u{064E} \u{0671}\u{0644}\u{0644}\u{0651}\u{064E}\u{0670}\u{0647}\u{0650}", transliteration: "SubhanAllah", count: 12, target: 33)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (ZikrEntry) -> Void) {
@@ -40,33 +40,31 @@ struct ZikrProvider: TimelineProvider {
     }
 }
 
-// MARK: - Theme Color
-
-private let tealAccent = Color(red: 0.06, green: 0.24, blue: 0.24)
-
 // MARK: - Progress Ring
 
 private struct ProgressRing: View {
     let progress: Double
     let lineWidth: CGFloat
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         ZStack {
             Circle()
-                .stroke(tealAccent.opacity(0.12), lineWidth: lineWidth)
+                .stroke(WidgetTheme.accent(for: colorScheme).opacity(0.12), lineWidth: lineWidth)
             Circle()
                 .trim(from: 0, to: min(progress, 1.0))
-                .stroke(tealAccent, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                .stroke(WidgetTheme.accent(for: colorScheme), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 .rotationEffect(.degrees(-90))
                 .animation(.easeOut(duration: 0.3), value: progress)
         }
     }
 }
 
-// MARK: - Shared Content Views (used by both interactive and fallback)
+// MARK: - Shared Content Views
 
 private struct ZikrSmallContent: View {
     let entry: ZikrEntry
+    @Environment(\.colorScheme) var colorScheme
 
     var progress: Double {
         entry.target > 0 ? min(Double(entry.count) / Double(entry.target), 1.0) : 0
@@ -82,19 +80,19 @@ private struct ZikrSmallContent: View {
             VStack(spacing: 2) {
                 Text(entry.arabic)
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(isComplete ? tealAccent : Color.primary)
+                    .foregroundStyle(isComplete ? WidgetTheme.accent(for: colorScheme) : WidgetTheme.primaryText(for: colorScheme))
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
                     .minimumScaleFactor(0.6)
 
                 Text("\(entry.count)")
                     .font(.title2.bold().monospacedDigit())
-                    .foregroundStyle(isComplete ? tealAccent : Color.primary)
+                    .foregroundStyle(isComplete ? WidgetTheme.accent(for: colorScheme) : WidgetTheme.primaryText(for: colorScheme))
 
                 if entry.target > 0 {
                     Text("/ \(entry.target)")
                         .font(.caption2)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(WidgetTheme.secondaryText(for: colorScheme))
                 }
             }
         }
@@ -104,6 +102,7 @@ private struct ZikrSmallContent: View {
 
 private struct ZikrMediumContent: View {
     let entry: ZikrEntry
+    @Environment(\.colorScheme) var colorScheme
 
     var progress: Double {
         entry.target > 0 ? min(Double(entry.count) / Double(entry.target), 1.0) : 0
@@ -116,41 +115,34 @@ private struct ZikrMediumContent: View {
             ZStack {
                 ProgressRing(progress: progress, lineWidth: 8)
                 VStack(spacing: 0) {
-                Text("\(entry.count)")
-                    .font(.title.bold().monospacedDigit())
-                    .foregroundStyle(isComplete ? tealAccent : Color.primary)
+                    Text("\(entry.count)")
+                        .font(.title.bold().monospacedDigit())
+                        .foregroundStyle(isComplete ? WidgetTheme.accent(for: colorScheme) : WidgetTheme.primaryText(for: colorScheme))
                     if entry.target > 0 {
                         Text("/ \(entry.target)")
                             .font(.caption2)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(WidgetTheme.secondaryText(for: colorScheme))
                     }
                 }
             }
             .frame(width: 80, height: 80)
 
             VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 4) {
-                    Image(systemName: "hand.raised.fill")
-                        .font(.caption2)
-                        .foregroundStyle(tealAccent)
-                    Text("Tasbeeh")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
+                WidgetHeader(icon: "hand.raised.fill", title: "Tasbeeh")
 
                 Text(entry.arabic)
                     .font(.system(size: 18, weight: .medium))
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(WidgetTheme.primaryText(for: colorScheme))
                     .lineLimit(2)
 
                 Text(entry.transliteration)
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(WidgetTheme.secondaryText(for: colorScheme))
 
                 if isComplete {
                     Label("Complete", systemImage: "checkmark.circle.fill")
                         .font(.caption.weight(.medium))
-                        .foregroundStyle(tealAccent)
+                        .foregroundStyle(WidgetTheme.accent(for: colorScheme))
                 }
             }
 
@@ -206,6 +198,37 @@ struct ZikrMediumFallbackView: View {
     }
 }
 
+// MARK: - Lock Screen Views
+
+@available(iOS 16.0, *)
+struct ZikrAccessoryCircularView: View {
+    let entry: ZikrEntry
+
+    var progress: Double {
+        entry.target > 0 ? min(Double(entry.count) / Double(entry.target), 1.0) : 0
+    }
+
+    var body: some View {
+        ZStack {
+            if entry.target > 0 {
+                Gauge(value: progress) {
+                    EmptyView()
+                }
+                .gaugeStyle(.accessoryCircularCapacity)
+            }
+            VStack(spacing: 0) {
+                Text("\(entry.count)")
+                    .font(.system(size: 16, weight: .bold).monospacedDigit())
+                if entry.target > 0 {
+                    Text("/\(entry.target)")
+                        .font(.system(size: 8))
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+}
+
 // MARK: - Entry View
 
 struct ZikrWidgetEntryView: View {
@@ -226,6 +249,10 @@ struct ZikrWidgetEntryView: View {
             } else {
                 ZikrMediumFallbackView(entry: entry)
             }
+        case .accessoryCircular:
+            if #available(iOS 16.0, *) {
+                ZikrAccessoryCircularView(entry: entry)
+            }
         default:
             if #available(iOS 17.0, *) {
                 ZikrSmallInteractiveView(entry: entry)
@@ -236,34 +263,30 @@ struct ZikrWidgetEntryView: View {
     }
 }
 
-// MARK: - Widget Configurations
+// MARK: - Widget Configuration
 
 struct ZikrWidget: Widget {
     let kind = "ZikrWidget"
 
+    private var supportedFamilies: [WidgetFamily] {
+        var families: [WidgetFamily] = [.systemSmall, .systemMedium]
+        if #available(iOS 16.0, *) {
+            families.append(.accessoryCircular)
+        }
+        return families
+    }
+
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: ZikrProvider()) { entry in
             ZikrWidgetEntryView(entry: entry)
-                .containerBackground(.ultraThinMaterial, for: .widget)
+                .containerBackground(for: .widget) {
+                    ThemedWidgetBackground()
+                }
         }
         .configurationDisplayName("Zikr Counter")
         .description("Count your daily zikr. Tap to increment (iOS 17+).")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies(supportedFamilies)
         .contentMarginsDisabled()
-    }
-}
-
-struct ZikrWidgetClear: Widget {
-    let kind = "ZikrWidgetClear"
-
-    var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: ZikrProvider()) { entry in
-            ZikrWidgetEntryView(entry: entry)
-                .containerBackground(.clear, for: .widget)
-        }
-        .configurationDisplayName("Zikr Counter - Clear")
-        .description("Zikr counter with transparent background.")
-        .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
 
@@ -272,11 +295,11 @@ struct ZikrWidgetClear: Widget {
 #Preview(as: .systemSmall) {
     ZikrWidget()
 } timeline: {
-    ZikrEntry(date: .now, arabic: "سُبْحَانَ ٱللَّٰهِ", transliteration: "SubhanAllah", count: 21, target: 33)
+    ZikrEntry(date: .now, arabic: "\u{0633}\u{064F}\u{0628}\u{0652}\u{062D}\u{064E}\u{0627}\u{0646}\u{064E} \u{0671}\u{0644}\u{0644}\u{0651}\u{064E}\u{0670}\u{0647}\u{0650}", transliteration: "SubhanAllah", count: 21, target: 33)
 }
 
 #Preview(as: .systemMedium) {
     ZikrWidget()
 } timeline: {
-    ZikrEntry(date: .now, arabic: "ٱلْحَمْدُ لِلَّٰهِ", transliteration: "Alhamdulillah", count: 33, target: 33)
+    ZikrEntry(date: .now, arabic: "\u{0671}\u{0644}\u{0652}\u{062D}\u{064E}\u{0645}\u{0652}\u{062F}\u{064F} \u{0644}\u{0650}\u{0644}\u{0651}\u{064E}\u{0670}\u{0647}\u{0650}", transliteration: "Alhamdulillah", count: 33, target: 33)
 }

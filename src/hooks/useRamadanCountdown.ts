@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '@/hooks/useAuth'
+import { updateHijriWidget } from '@/lib/widgetBridge'
 import type { RamadanCountdown, HijriApiResponse, PrayerTime } from '@/types/ramadan.types'
 
 export function useRamadanCountdown(): RamadanCountdown {
@@ -55,6 +56,20 @@ export function useRamadanCountdown(): RamadanCountdown {
         if (!mountedRef.current) {
           isFetchingRef.current = false
           return
+        }
+
+        // Push Hijri date to native widget
+        if (hijriData.currentHijri) {
+          const now = new Date()
+          const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+          updateHijriWidget({
+            day: String(hijriData.currentHijri.day),
+            monthName: hijriData.currentHijri.monthName || '',
+            year: String(hijriData.currentHijri.year),
+            gregorianDate: now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            weekday: weekdays[now.getDay()],
+            updatedAt: now.toISOString(),
+          }).catch(() => {/* non-critical */})
         }
 
         // If not in Ramadan, show detailed countdown

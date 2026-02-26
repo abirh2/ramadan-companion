@@ -47,39 +47,36 @@ struct AllPrayersProvider: TimelineProvider {
     }
 }
 
-// MARK: - Theme Color
-
-private let tealAccent = Color(red: 0.06, green: 0.24, blue: 0.24)
-
-// MARK: - Prayer Column (mirrors the 5-column grid in NextPrayerCard)
+// MARK: - Prayer Column
 
 private struct PrayerColumn: View {
     let name: String
     let time: String
     let isNext: Bool
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         VStack(spacing: 5) {
             Text(name.uppercased())
                 .font(.system(size: 9, weight: .bold))
-                .foregroundStyle(isNext ? tealAccent : Color.secondary)
+                .foregroundStyle(isNext ? WidgetTheme.accent(for: colorScheme) : WidgetTheme.secondaryText(for: colorScheme))
                 .minimumScaleFactor(0.7)
                 .lineLimit(1)
 
             Text(time)
                 .font(.system(size: 11, weight: .semibold).monospacedDigit())
-                .foregroundStyle(isNext ? tealAccent : Color.primary)
+                .foregroundStyle(isNext ? WidgetTheme.accent(for: colorScheme) : WidgetTheme.primaryText(for: colorScheme))
                 .minimumScaleFactor(0.7)
                 .lineLimit(1)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(isNext ? tealAccent.opacity(0.12) : Color.primary.opacity(0.05))
+                .fill(isNext ? WidgetTheme.highlightFill(for: colorScheme) : WidgetTheme.cardFill(for: colorScheme))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .stroke(isNext ? tealAccent.opacity(0.25) : Color.clear, lineWidth: 0.5)
+                .stroke(isNext ? WidgetTheme.accent(for: colorScheme).opacity(0.3) : Color.clear, lineWidth: 0.5)
         )
     }
 }
@@ -88,6 +85,7 @@ private struct PrayerColumn: View {
 
 struct AllPrayersMediumView: View {
     let entry: AllPrayersEntry
+    @Environment(\.colorScheme) var colorScheme
 
     private var prayers: [(name: String, time: String)] {
         [
@@ -101,17 +99,8 @@ struct AllPrayersMediumView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Header
-            HStack(spacing: 4) {
-                Image(systemName: "sun.and.horizon.fill")
-                    .font(.caption2)
-                    .foregroundStyle(tealAccent)
-                Text("Daily Prayers")
-                    .font(.caption2.weight(.medium))
-                    .foregroundStyle(.secondary)
-            }
+            WidgetHeader(icon: "sun.and.horizon.fill", title: "Daily Prayers")
 
-            // 5-column prayer grid — fills remaining vertical space
             HStack(spacing: 5) {
                 ForEach(prayers, id: \.name) { prayer in
                     PrayerColumn(
@@ -139,7 +128,7 @@ struct AllPrayersWidgetEntryView: View {
     }
 }
 
-// MARK: - Widget Configurations
+// MARK: - Widget Configuration
 
 struct AllPrayersWidget: Widget {
     let kind = "AllPrayersWidget"
@@ -147,27 +136,14 @@ struct AllPrayersWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: AllPrayersProvider()) { entry in
             AllPrayersWidgetEntryView(entry: entry)
-                .containerBackground(.ultraThinMaterial, for: .widget)
+                .containerBackground(for: .widget) {
+                    ThemedWidgetBackground()
+                }
         }
         .configurationDisplayName("Daily Prayers")
         .description("All five prayer times for today.")
         .supportedFamilies([.systemMedium])
         .contentMarginsDisabled()
-    }
-}
-
-struct AllPrayersWidgetClear: Widget {
-    let kind = "AllPrayersWidgetClear"
-
-    var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: AllPrayersProvider()) { entry in
-            AllPrayersWidgetEntryView(entry: entry)
-                .containerBackground(.clear, for: .widget)
-        }
-        .configurationDisplayName("Daily Prayers - Clear")
-        .description("All five prayer times with transparent background.")
-        .supportedFamilies([.systemMedium])
-        // No contentMarginsDisabled — system margins preserved for clear background widgets
     }
 }
 

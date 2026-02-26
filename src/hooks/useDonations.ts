@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { getDonations } from '@/lib/donations'
 import { convertAmount, formatCurrency, getPreferredCurrency, getViewMode } from '@/lib/currency'
+import { updateCharityWidget } from '@/lib/widgetBridge'
 import type { Donation, DonationSummary, DonationFilters, DonationWithConversion, CurrencyViewMode } from '@/types/donation.types'
 import type { CurrencyCode } from '@/types/currency.types'
 
@@ -198,6 +199,27 @@ export function useDonations(filters?: DonationFilters): UseDonationsResult {
       summary.ramadanTotal += amount
     }
   })
+
+  // Push charity data to native widget when summary changes
+  useEffect(() => {
+    if (summary.totalCount > 0) {
+      const currencySymbol = preferredCurrency === 'GBP' ? '\u00A3' : preferredCurrency === 'EUR' ? '\u20AC' : '$'
+      const monthlyTotal = displayDonations
+        .filter((d) => {
+          const date = new Date(d.date)
+          const now = new Date()
+          return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()
+        })
+        .reduce((sum, d) => sum + Number(d.convertedAmount), 0)
+
+      updateCharityWidget({
+        monthly: `${currencySymbol}${monthlyTotal.toFixed(2)}`,
+        yearly: `${currencySymbol}${summary.yearlyTotal.toFixed(2)}`,
+        currency: currencySymbol,
+        updatedAt: new Date().toISOString(),
+      }).catch(() => {/* non-critical */})
+    }
+  }, [summary.totalCount, summary.yearlyTotal, preferredCurrency, displayDonations])
 
   // Initial fetch
   useEffect(() => {

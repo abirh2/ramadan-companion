@@ -18,7 +18,7 @@ struct VerseProvider: TimelineProvider {
         VerseEntry(
             date: Date(),
             type: "quran",
-            arabic: "بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",
+            arabic: "\u{0628}\u{0650}\u{0633}\u{0652}\u{0645}\u{0650} \u{0671}\u{0644}\u{0644}\u{0651}\u{064E}\u{0670}\u{0647}\u{0650} \u{0671}\u{0644}\u{0631}\u{0651}\u{064E}\u{062D}\u{0652}\u{0645}\u{064E}\u{0670}\u{0646}\u{0650} \u{0671}\u{0644}\u{0631}\u{0651}\u{064E}\u{062D}\u{0650}\u{064A}\u{0645}\u{0650}",
             translation: "In the name of Allah, the Most Gracious, the Most Merciful.",
             source: "Surah Al-Fatiha 1:1"
         )
@@ -44,7 +44,7 @@ struct VerseProvider: TimelineProvider {
             return VerseEntry(
                 date: Date(),
                 type: "quran",
-                arabic: "بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",
+                arabic: "\u{0628}\u{0650}\u{0633}\u{0652}\u{0645}\u{0650} \u{0671}\u{0644}\u{0644}\u{0651}\u{064E}\u{0670}\u{0647}\u{0650} \u{0671}\u{0644}\u{0631}\u{0651}\u{064E}\u{062D}\u{0652}\u{0645}\u{064E}\u{0670}\u{0646}\u{0650} \u{0671}\u{0644}\u{0631}\u{0651}\u{064E}\u{062D}\u{0650}\u{064A}\u{0645}\u{0650}",
                 translation: "Open the app to load today's verse.",
                 source: ""
             )
@@ -53,60 +53,53 @@ struct VerseProvider: TimelineProvider {
     }
 }
 
-// MARK: - Theme Color
-
-private let tealAccent = Color(red: 0.06, green: 0.24, blue: 0.24)
-
-// MARK: - Shared Verse Header
-
-private struct VerseTypeLabel: View {
-    let type: String
-
-    var icon: String { type == "hadith" ? "text.quote" : "book.closed.fill" }
-    var label: String { type == "hadith" ? "Hadith of the Day" : "Verse of the Day" }
-
-    var body: some View {
-        HStack(spacing: 4) {
-            Image(systemName: icon)
-                .font(.caption2)
-                .foregroundStyle(tealAccent)
-            Text(label)
-                .font(.caption2.weight(.medium))
-                .foregroundStyle(.secondary)
-        }
-    }
-}
-
 // MARK: - Medium Widget View
 
 struct VerseMediumView: View {
     let entry: VerseEntry
+    @Environment(\.colorScheme) var colorScheme
+
+    var icon: String { entry.type == "hadith" ? "text.quote" : "book.closed.fill" }
+    var label: String { entry.type == "hadith" ? "Hadith of the Day" : "Ayah of the Day" }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            VerseTypeLabel(type: entry.type)
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                WidgetHeader(icon: icon, title: label)
+                Spacer()
+                if entry.type == "quran" {
+                    Image(systemName: "play.circle.fill")
+                        .font(.system(size: 18))
+                        .foregroundStyle(WidgetTheme.accent(for: colorScheme).opacity(0.6))
+                }
+            }
 
             Text(entry.arabic)
-                .font(.system(size: 16, weight: .medium, design: .default))
+                .font(.system(size: 15, weight: .medium))
                 .environment(\.layoutDirection, .rightToLeft)
                 .multilineTextAlignment(.trailing)
-                .lineLimit(3)
+                .lineLimit(2)
                 .frame(maxWidth: .infinity, alignment: .trailing)
-                .foregroundStyle(.primary)
+                .foregroundStyle(WidgetTheme.primaryText(for: colorScheme))
 
             Text(entry.translation)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(.system(size: 12))
+                .foregroundStyle(WidgetTheme.secondaryText(for: colorScheme))
                 .lineLimit(2)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             Spacer(minLength: 0)
 
             if !entry.source.isEmpty {
-                Text(entry.source)
-                    .font(.caption2)
-                    .foregroundStyle(tealAccent.opacity(0.8))
-                    .lineLimit(1)
+                HStack {
+                    Text(entry.source)
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(WidgetTheme.accent(for: colorScheme).opacity(0.8))
+                    Spacer()
+                    Image(systemName: "book.closed")
+                        .font(.system(size: 10))
+                        .foregroundStyle(WidgetTheme.secondaryText(for: colorScheme).opacity(0.5))
+                }
             }
         }
         .padding(14)
@@ -118,26 +111,31 @@ struct VerseMediumView: View {
 
 struct VerseLargeView: View {
     let entry: VerseEntry
+    @Environment(\.colorScheme) var colorScheme
+
+    var icon: String { entry.type == "hadith" ? "text.quote" : "book.closed.fill" }
+    var label: String { entry.type == "hadith" ? "Hadith of the Day" : "Ayah of the Day" }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            VerseTypeLabel(type: entry.type)
+            WidgetHeader(icon: icon, title: label)
 
-            Divider()
-                .background(tealAccent.opacity(0.2))
+            Rectangle()
+                .fill(WidgetTheme.accent(for: colorScheme).opacity(0.2))
+                .frame(height: 1)
 
             Text(entry.arabic)
-                .font(.system(size: 20, weight: .medium, design: .default))
+                .font(.system(size: 20, weight: .medium))
                 .environment(\.layoutDirection, .rightToLeft)
                 .multilineTextAlignment(.trailing)
                 .frame(maxWidth: .infinity, alignment: .trailing)
-                .foregroundStyle(.primary)
+                .foregroundStyle(WidgetTheme.primaryText(for: colorScheme))
                 .lineSpacing(6)
                 .lineLimit(6)
 
             Text(entry.translation)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(WidgetTheme.secondaryText(for: colorScheme))
                 .lineSpacing(4)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .lineLimit(5)
@@ -145,13 +143,13 @@ struct VerseLargeView: View {
             Spacer()
 
             if !entry.source.isEmpty {
-                HStack {
-                    Image(systemName: entry.type == "hadith" ? "text.quote" : "book.closed")
+                HStack(spacing: 4) {
+                    Image(systemName: icon)
                         .font(.caption2)
                     Text(entry.source)
                         .font(.caption)
                 }
-                .foregroundStyle(tealAccent)
+                .foregroundStyle(WidgetTheme.accent(for: colorScheme))
             }
         }
         .padding(16)
@@ -185,7 +183,7 @@ struct VerseWidgetEntryView: View {
     }
 }
 
-// MARK: - Widget Configurations
+// MARK: - Widget Configuration
 
 struct VerseWidget: Widget {
     let kind = "VerseWidget"
@@ -193,26 +191,14 @@ struct VerseWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: VerseProvider()) { entry in
             VerseWidgetEntryView(entry: entry)
-                .containerBackground(.ultraThinMaterial, for: .widget)
+                .containerBackground(for: .widget) {
+                    ThemedWidgetBackground()
+                }
         }
-        .configurationDisplayName("Verse of the Day")
+        .configurationDisplayName("Ayah of the Day")
         .description("Daily Quran verse or Hadith with Arabic text and translation.")
         .supportedFamilies([.systemMedium, .systemLarge])
         .contentMarginsDisabled()
-    }
-}
-
-struct VerseWidgetClear: Widget {
-    let kind = "VerseWidgetClear"
-
-    var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: VerseProvider()) { entry in
-            VerseWidgetEntryView(entry: entry)
-                .containerBackground(.clear, for: .widget)
-        }
-        .configurationDisplayName("Verse of the Day - Clear")
-        .description("Daily verse with transparent background.")
-        .supportedFamilies([.systemMedium, .systemLarge])
     }
 }
 
@@ -224,7 +210,7 @@ struct VerseWidgetClear: Widget {
     VerseEntry(
         date: .now,
         type: "quran",
-        arabic: "إِنَّمَا يَخْشَى ٱللَّٰهَ مِنْ عِبَادِهِ ٱلْعُلَمَٰٓؤُا۟",
+        arabic: "\u{0625}\u{0650}\u{0646}\u{0651}\u{064E}\u{0645}\u{064E}\u{0627} \u{064A}\u{064E}\u{062E}\u{0652}\u{0634}\u{064E}\u{0649} \u{0671}\u{0644}\u{0644}\u{0651}\u{064E}\u{0670}\u{0647}\u{064E} \u{0645}\u{0650}\u{0646}\u{0652} \u{0639}\u{0650}\u{0628}\u{064E}\u{0627}\u{062F}\u{0650}\u{0647}\u{0650} \u{0671}\u{0644}\u{0652}\u{0639}\u{064F}\u{0644}\u{064E}\u{0645}\u{064E}\u{0670}\u{0653}\u{0624}\u{064F}\u{0627}\u{06DF}",
         translation: "Only those fear Allah, from among His servants, who have knowledge.",
         source: "Surah Fatir 35:28"
     )
@@ -236,7 +222,7 @@ struct VerseWidgetClear: Widget {
     VerseEntry(
         date: .now,
         type: "hadith",
-        arabic: "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ",
+        arabic: "\u{0625}\u{0650}\u{0646}\u{0651}\u{064E}\u{0645}\u{064E}\u{0627} \u{0627}\u{0644}\u{0623}\u{064E}\u{0639}\u{0652}\u{0645}\u{064E}\u{0627}\u{0644}\u{064F} \u{0628}\u{0650}\u{0627}\u{0644}\u{0646}\u{0651}\u{0650}\u{064A}\u{0651}\u{064E}\u{0627}\u{062A}\u{0650}",
         translation: "Actions are judged by their intentions.",
         source: "Sahih al-Bukhari #1"
     )

@@ -4,16 +4,20 @@ import SwiftUI
 @main
 struct DeenCompanionWidgetsBundle: WidgetBundle {
     var body: some Widget {
-        // Material background (default)
+        // Prayer widgets
         PrayerWidget()
         AllPrayersWidget()
+        PrayerListWidget()
+
+        // Content widgets
         VerseWidget()
+        HadithWidget()
         ZikrWidget()
 
-        // Transparent background variants
-        PrayerWidgetClear()
-        AllPrayersWidgetClear()
-        VerseWidgetClear()
-        ZikrWidgetClear()
+        // Info widgets
+        HijriDateWidget()
+        CharityWidget()
+        QiblaWidget()
+        MosqueWidget()
     }
 }

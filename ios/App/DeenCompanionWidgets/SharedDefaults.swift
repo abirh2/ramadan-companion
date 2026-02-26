@@ -47,4 +47,30 @@ enum SharedDefaults {
     static func setZikrCount(_ count: Int) {
         store?.set(String(count), forKey: "widget_zikr_count")
     }
+
+    // MARK: - Hijri Date Widget
+
+    static var hijriDay: String { store?.string(forKey: "widget_hijri_day") ?? "" }
+    static var hijriMonthName: String { store?.string(forKey: "widget_hijri_month_name") ?? "" }
+    static var hijriYear: String { store?.string(forKey: "widget_hijri_year") ?? "" }
+    static var hijriGregorianDate: String { store?.string(forKey: "widget_hijri_gregorian_date") ?? "" }
+    static var hijriWeekday: String { store?.string(forKey: "widget_hijri_weekday") ?? "" }
+
+    // MARK: - Charity Widget
+
+    static var charityMonthly: String { store?.string(forKey: "widget_charity_monthly") ?? "" }
+    static var charityYearly: String { store?.string(forKey: "widget_charity_yearly") ?? "" }
+    static var charityCurrency: String { store?.string(forKey: "widget_charity_currency") ?? "$" }
+
+    // MARK: - Qibla Widget
+
+    static var qiblaDirection: String { store?.string(forKey: "widget_qibla_direction") ?? "" }
+    static var qiblaCompass: String { store?.string(forKey: "widget_qibla_compass") ?? "" }
+    static var qiblaCity: String { store?.string(forKey: "widget_qibla_city") ?? "" }
+
+    // MARK: - Mosque Widget
+
+    static var mosqueName: String { store?.string(forKey: "widget_mosque_name") ?? "" }
+    static var mosqueDistance: String { store?.string(forKey: "widget_mosque_distance") ?? "" }
+    static var mosqueAddress: String { store?.string(forKey: "widget_mosque_address") ?? "" }
 }
