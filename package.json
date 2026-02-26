@@ -17,7 +17,7 @@
     "test:coverage": "jest --coverage",
     "capture:social": "tsx scripts/capture-pages.ts",
     "cap:sync": "npx cap sync",
-    "cap:sync:ios": "npx cap sync ios",
+    "cap:sync:ios": "npx cap sync ios && node scripts/patch-ios-config.js",
     "cap:sync:android": "npx cap sync android",
     "cap:open:ios": "npx cap open ios",
     "cap:open:android": "npx cap open android",
