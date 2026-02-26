@@ -10,11 +10,21 @@ enum SharedDefaults {
         UserDefaults(suiteName: suiteName)
     }
 
-    // MARK: - Prayer Widget
+    // MARK: - Next Prayer Widget
 
     static var prayerName: String { store?.string(forKey: "widget_prayer_name") ?? "" }
     static var prayerTime: String { store?.string(forKey: "widget_prayer_time") ?? "" }
-    static var prayerCountdown: String { store?.string(forKey: "widget_prayer_countdown") ?? "" }
+    /// ISO 8601 date string of next prayer occurrence (widget computes countdown from this)
+    static var prayerTargetTime: String { store?.string(forKey: "widget_prayer_target_time") ?? "" }
+
+    // MARK: - All Prayers Widget
+
+    static var allPrayersFajr: String { store?.string(forKey: "widget_all_prayers_fajr") ?? "" }
+    static var allPrayersDhuhr: String { store?.string(forKey: "widget_all_prayers_dhuhr") ?? "" }
+    static var allPrayersAsr: String { store?.string(forKey: "widget_all_prayers_asr") ?? "" }
+    static var allPrayersMaghrib: String { store?.string(forKey: "widget_all_prayers_maghrib") ?? "" }
+    static var allPrayersIsha: String { store?.string(forKey: "widget_all_prayers_isha") ?? "" }
+    static var allPrayersNext: String { store?.string(forKey: "widget_all_prayers_next") ?? "" }
 
     // MARK: - Verse Widget
 
@@ -34,7 +44,6 @@ enum SharedDefaults {
         Int(store?.string(forKey: "widget_zikr_target") ?? "33") ?? 33
     }
 
-    /// Write incremented zikr count back to shared storage (used by ZikrIntent on iOS 17+)
     static func setZikrCount(_ count: Int) {
         store?.set(String(count), forKey: "widget_zikr_count")
     }

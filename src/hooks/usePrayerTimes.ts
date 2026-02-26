@@ -22,7 +22,7 @@ import {
 } from '@/lib/location'
 import { calculatePrayerTimesLocal, validatePrayerTimes } from '@/lib/prayerTimes'
 import { getDefaultCalculationMethodByCountry, extractCountryFromCity } from '@/lib/calculationMethod'
-import { updatePrayerWidget } from '@/lib/widgetBridge'
+import { updatePrayerWidget, updateAllPrayersWidget, to12Hour } from '@/lib/widgetBridge'
 
 // Prayer names in order (excluding Sunrise for next prayer calculation)
 const PRAYER_NAMES = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const
@@ -354,13 +354,31 @@ export function usePrayerTimes(): UsePrayerTimesResult {
         error: null,
       })
 
-      // Push current prayer info to native widgets
-      if (nextPrayer) {
+      // Push prayer data to native widgets (once per fetch, not every second)
+      if (nextPrayer && prayerTimes) {
+        const now = new Date()
+        const [th, tm] = nextPrayer.time.split(':').map(Number)
+        const targetDate = new Date(now)
+        targetDate.setHours(th, tm, 0, 0)
+        if (nextPrayer.isTomorrow) {
+          targetDate.setDate(targetDate.getDate() + 1)
+        }
+
         updatePrayerWidget({
           name: nextPrayer.name,
-          time: nextPrayer.time,
-          countdown: nextPrayer.countdown,
-          updatedAt: new Date().toISOString(),
+          time: to12Hour(nextPrayer.time),
+          targetTime: targetDate.toISOString(),
+          updatedAt: now.toISOString(),
+        }).catch(() => {/* non-critical */})
+
+        updateAllPrayersWidget({
+          fajr: to12Hour(prayerTimes.Fajr),
+          dhuhr: to12Hour(prayerTimes.Dhuhr),
+          asr: to12Hour(prayerTimes.Asr),
+          maghrib: to12Hour(prayerTimes.Maghrib),
+          isha: to12Hour(prayerTimes.Isha),
+          nextPrayer: nextPrayer.name,
+          updatedAt: now.toISOString(),
         }).catch(() => {/* non-critical */})
       }
 
@@ -384,21 +402,38 @@ export function usePrayerTimes(): UsePrayerTimesResult {
         
         const updatedNextPrayer = calculateNextPrayer(prayerTimes!, tomorrowTimes)
         
-        // Track prayer changes (notifications now handled by backend)
         const currentPrayerName = updatedNextPrayer?.name || null
-        lastPrayerNameRef.current = currentPrayerName
         
-        setState((prev) => ({ ...prev, nextPrayer: updatedNextPrayer }))
+        // Push widget data only on prayer transitions (not every second)
+        if (currentPrayerName !== lastPrayerNameRef.current && updatedNextPrayer && prayerTimes) {
+          const now = new Date()
+          const [th, tm] = updatedNextPrayer.time.split(':').map(Number)
+          const targetDate = new Date(now)
+          targetDate.setHours(th, tm, 0, 0)
+          if (updatedNextPrayer.isTomorrow) {
+            targetDate.setDate(targetDate.getDate() + 1)
+          }
 
-        // Keep widget countdown in sync (fire-and-forget, non-critical)
-        if (updatedNextPrayer) {
           updatePrayerWidget({
             name: updatedNextPrayer.name,
-            time: updatedNextPrayer.time,
-            countdown: updatedNextPrayer.countdown,
-            updatedAt: new Date().toISOString(),
+            time: to12Hour(updatedNextPrayer.time),
+            targetTime: targetDate.toISOString(),
+            updatedAt: now.toISOString(),
+          }).catch(() => {/* non-critical */})
+
+          updateAllPrayersWidget({
+            fajr: to12Hour(prayerTimes.Fajr),
+            dhuhr: to12Hour(prayerTimes.Dhuhr),
+            asr: to12Hour(prayerTimes.Asr),
+            maghrib: to12Hour(prayerTimes.Maghrib),
+            isha: to12Hour(prayerTimes.Isha),
+            nextPrayer: updatedNextPrayer.name,
+            updatedAt: now.toISOString(),
           }).catch(() => {/* non-critical */})
         }
+
+        lastPrayerNameRef.current = currentPrayerName
+        setState((prev) => ({ ...prev, nextPrayer: updatedNextPrayer }))
       }, 1000)
     } catch (error) {
       console.error('Error fetching prayer times:', error)

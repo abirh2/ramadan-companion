@@ -11,15 +11,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // (with "CapacitorStorage." prefix). These are mirrored to the App Group
     // suite so the widget extension can read them.
     private static let widgetKeys = [
+        // Next Prayer widget
         "widget_prayer_name",
         "widget_prayer_time",
+        "widget_prayer_target_time",
         "widget_prayer_countdown",
         "widget_prayer_update",
+        // All Prayers widget
+        "widget_all_prayers_fajr",
+        "widget_all_prayers_dhuhr",
+        "widget_all_prayers_asr",
+        "widget_all_prayers_maghrib",
+        "widget_all_prayers_isha",
+        "widget_all_prayers_next",
+        "widget_all_prayers_update",
+        // Verse widget
         "widget_verse_type",
         "widget_verse_arabic",
         "widget_verse_translation",
         "widget_verse_source",
         "widget_verse_update",
+        // Zikr widget
         "widget_zikr_arabic",
         "widget_zikr_transliteration",
         "widget_zikr_count",

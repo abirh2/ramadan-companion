@@ -22,19 +22,65 @@ struct PrayerProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<PrayerEntry>) -> Void) {
-        let entry = currentEntry()
-        // Refresh every minute so the countdown stays reasonably current.
-        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 1, to: Date()) ?? Date()
-        completion(Timeline(entries: [entry], policy: .after(nextUpdate)))
+        let name = SharedDefaults.prayerName.isEmpty ? "---" : SharedDefaults.prayerName
+        let time = SharedDefaults.prayerTime.isEmpty ? "Open app" : SharedDefaults.prayerTime
+        let targetStr = SharedDefaults.prayerTargetTime
+
+        // Parse ISO 8601 target date for countdown computation
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+
+        guard !targetStr.isEmpty, let targetDate = formatter.date(from: targetStr) else {
+            let entry = currentEntry()
+            let next = Calendar.current.date(byAdding: .minute, value: 1, to: Date()) ?? Date()
+            completion(Timeline(entries: [entry], policy: .after(next)))
+            return
+        }
+
+        let now = Date()
+        var entries: [PrayerEntry] = []
+        let maxEntries = 300
+
+        for i in 0..<maxEntries {
+            guard let entryDate = Calendar.current.date(byAdding: .minute, value: i, to: now) else { break }
+            if entryDate >= targetDate { break }
+
+            let diff = Int(targetDate.timeIntervalSince(entryDate))
+            guard diff > 0 else { break }
+
+            let hours = diff / 3600
+            let minutes = (diff % 3600) / 60
+            let countdown: String
+            if hours > 0 {
+                countdown = "\(hours)h \(minutes)m"
+            } else if minutes > 0 {
+                countdown = "\(minutes)m"
+            } else {
+                countdown = "<1m"
+            }
+
+            entries.append(PrayerEntry(date: entryDate, prayerName: name, prayerTime: time, countdown: countdown))
+        }
+
+        if entries.isEmpty {
+            entries.append(PrayerEntry(date: now, prayerName: name, prayerTime: time, countdown: "now"))
+        }
+
+        // Reload after prayer time so the app can push the next prayer
+        let reloadDate = targetDate.addingTimeInterval(60)
+        completion(Timeline(entries: entries, policy: .after(reloadDate)))
     }
 
     private func currentEntry() -> PrayerEntry {
-        let name = SharedDefaults.prayerName.isEmpty ? "—" : SharedDefaults.prayerName
+        let name = SharedDefaults.prayerName.isEmpty ? "---" : SharedDefaults.prayerName
         let time = SharedDefaults.prayerTime.isEmpty ? "Open app" : SharedDefaults.prayerTime
-        let countdown = SharedDefaults.prayerCountdown.isEmpty ? "—" : SharedDefaults.prayerCountdown
-        return PrayerEntry(date: Date(), prayerName: name, prayerTime: time, countdown: countdown)
+        return PrayerEntry(date: Date(), prayerName: name, prayerTime: time, countdown: "---")
     }
 }
+
+// MARK: - Accent Color
+
+private let accentColor = Color(red: 0.06, green: 0.24, blue: 0.24)
 
 // MARK: - Small Widget View
 
@@ -46,7 +92,7 @@ struct PrayerSmallView: View {
             HStack(spacing: 4) {
                 Image(systemName: "moon.stars.fill")
                     .font(.caption2)
-                    .foregroundStyle(Color(red: 0.06, green: 0.24, blue: 0.24))
+                    .foregroundStyle(accentColor)
                 Text("Next Prayer")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
@@ -68,7 +114,7 @@ struct PrayerSmallView: View {
 
             Label(entry.countdown, systemImage: "clock")
                 .font(.caption2.weight(.medium))
-                .foregroundStyle(Color(red: 0.06, green: 0.24, blue: 0.24))
+                .foregroundStyle(accentColor)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
@@ -88,7 +134,7 @@ struct PrayerMediumView: View {
                 HStack(spacing: 4) {
                     Image(systemName: "moon.stars.fill")
                         .font(.caption)
-                        .foregroundStyle(Color(red: 0.06, green: 0.24, blue: 0.24))
+                        .foregroundStyle(accentColor)
                     Text("Next Prayer")
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -110,11 +156,11 @@ struct PrayerMediumView: View {
             VStack(alignment: .trailing, spacing: 6) {
                 Image(systemName: "clock.fill")
                     .font(.title2)
-                    .foregroundStyle(Color(red: 0.06, green: 0.24, blue: 0.24))
+                    .foregroundStyle(accentColor)
 
                 Text(entry.countdown)
                     .font(.headline.weight(.semibold))
-                    .foregroundStyle(Color(red: 0.06, green: 0.24, blue: 0.24))
+                    .foregroundStyle(accentColor)
                     .multilineTextAlignment(.trailing)
                     .lineLimit(2)
                     .minimumScaleFactor(0.7)
@@ -143,7 +189,7 @@ struct PrayerWidgetEntryView: View {
     }
 }
 
-// MARK: - Widget Configuration
+// MARK: - Widget Configurations
 
 struct PrayerWidget: Widget {
     let kind = "PrayerWidget"
@@ -153,14 +199,29 @@ struct PrayerWidget: Widget {
             PrayerWidgetEntryView(entry: entry)
                 .containerBackground(.ultraThinMaterial, for: .widget)
         }
-        .configurationDisplayName("Prayer Times")
-        .description("See the next prayer and countdown at a glance.")
+        .configurationDisplayName("Next Prayer")
+        .description("Next prayer and live countdown at a glance.")
         .supportedFamilies([.systemSmall, .systemMedium])
         .contentMarginsDisabled()
     }
 }
 
-// MARK: - Preview
+struct PrayerWidgetClear: Widget {
+    let kind = "PrayerWidgetClear"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: PrayerProvider()) { entry in
+            PrayerWidgetEntryView(entry: entry)
+                .containerBackground(.clear, for: .widget)
+        }
+        .configurationDisplayName("Next Prayer - Clear")
+        .description("Next prayer with transparent background.")
+        .supportedFamilies([.systemSmall, .systemMedium])
+        .contentMarginsDisabled()
+    }
+}
+
+// MARK: - Previews
 
 #Preview(as: .systemSmall) {
     PrayerWidget()
@@ -171,5 +232,5 @@ struct PrayerWidget: Widget {
 #Preview(as: .systemMedium) {
     PrayerWidget()
 } timeline: {
-    PrayerEntry(date: .now, prayerName: "Dhuhr", prayerTime: "1:05 PM", countdown: "45m 10s")
+    PrayerEntry(date: .now, prayerName: "Dhuhr", prayerTime: "1:05 PM", countdown: "45m")
 }

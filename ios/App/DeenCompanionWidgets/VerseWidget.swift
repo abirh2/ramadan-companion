@@ -5,7 +5,6 @@ import SwiftUI
 
 struct VerseEntry: TimelineEntry {
     let date: Date
-    /// "quran" or "hadith" — determines deep-link and icon
     let type: String
     let arabic: String
     let translation: String
@@ -31,7 +30,6 @@ struct VerseProvider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<VerseEntry>) -> Void) {
         let entry = currentEntry()
-        // Refresh once per hour; the app updates storage when it fetches daily content.
         let nextUpdate = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date()
         completion(Timeline(entries: [entry], policy: .after(nextUpdate)))
     }
@@ -55,6 +53,10 @@ struct VerseProvider: TimelineProvider {
     }
 }
 
+// MARK: - Accent Color
+
+private let accentColor = Color(red: 0.06, green: 0.24, blue: 0.24)
+
 // MARK: - Shared Verse Header
 
 private struct VerseTypeLabel: View {
@@ -67,7 +69,7 @@ private struct VerseTypeLabel: View {
         HStack(spacing: 4) {
             Image(systemName: icon)
                 .font(.caption2)
-                .foregroundStyle(Color(red: 0.06, green: 0.24, blue: 0.24))
+                .foregroundStyle(accentColor)
             Text(label)
                 .font(.caption2.weight(.medium))
                 .foregroundStyle(.secondary)
@@ -75,7 +77,7 @@ private struct VerseTypeLabel: View {
     }
 }
 
-// MARK: - Medium Widget View (Arabic + truncated translation)
+// MARK: - Medium Widget View
 
 struct VerseMediumView: View {
     let entry: VerseEntry
@@ -84,7 +86,6 @@ struct VerseMediumView: View {
         VStack(alignment: .leading, spacing: 8) {
             VerseTypeLabel(type: entry.type)
 
-            // Arabic text — always RTL, larger, prominent
             Text(entry.arabic)
                 .font(.system(size: 16, weight: .medium, design: .default))
                 .environment(\.layoutDirection, .rightToLeft)
@@ -93,7 +94,6 @@ struct VerseMediumView: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .foregroundStyle(.primary)
 
-            // English translation — smaller, secondary
             Text(entry.translation)
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -105,7 +105,7 @@ struct VerseMediumView: View {
             if !entry.source.isEmpty {
                 Text(entry.source)
                     .font(.caption2)
-                    .foregroundStyle(Color(red: 0.06, green: 0.24, blue: 0.24).opacity(0.8))
+                    .foregroundStyle(accentColor.opacity(0.8))
                     .lineLimit(1)
             }
         }
@@ -114,7 +114,7 @@ struct VerseMediumView: View {
     }
 }
 
-// MARK: - Large Widget View (Full content)
+// MARK: - Large Widget View
 
 struct VerseLargeView: View {
     let entry: VerseEntry
@@ -124,9 +124,8 @@ struct VerseLargeView: View {
             VerseTypeLabel(type: entry.type)
 
             Divider()
-                .background(Color(red: 0.06, green: 0.24, blue: 0.24).opacity(0.2))
+                .background(accentColor.opacity(0.2))
 
-            // Arabic text — full, RTL
             Text(entry.arabic)
                 .font(.system(size: 20, weight: .medium, design: .default))
                 .environment(\.layoutDirection, .rightToLeft)
@@ -134,13 +133,14 @@ struct VerseLargeView: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .foregroundStyle(.primary)
                 .lineSpacing(6)
+                .lineLimit(6)
 
-            // English translation — full text
             Text(entry.translation)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .lineSpacing(4)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .lineLimit(5)
 
             Spacer()
 
@@ -151,7 +151,7 @@ struct VerseLargeView: View {
                     Text(entry.source)
                         .font(.caption)
                 }
-                .foregroundStyle(Color(red: 0.06, green: 0.24, blue: 0.24))
+                .foregroundStyle(accentColor)
             }
         }
         .padding(16)
@@ -165,7 +165,6 @@ struct VerseWidgetEntryView: View {
     let entry: VerseEntry
     @Environment(\.widgetFamily) var family
 
-    // Deep-link URL to open the correct section in the app
     var deepLinkURL: URL {
         let path = entry.type == "hadith" ? "/hadith" : "/quran"
         return URL(string: "deencompanion://\(path)") ?? URL(string: "https://ramadan-companion.vercel.app")!
@@ -186,7 +185,7 @@ struct VerseWidgetEntryView: View {
     }
 }
 
-// MARK: - Widget Configuration
+// MARK: - Widget Configurations
 
 struct VerseWidget: Widget {
     let kind = "VerseWidget"
@@ -198,6 +197,21 @@ struct VerseWidget: Widget {
         }
         .configurationDisplayName("Verse of the Day")
         .description("Daily Quran verse or Hadith with Arabic text and translation.")
+        .supportedFamilies([.systemMedium, .systemLarge])
+        .contentMarginsDisabled()
+    }
+}
+
+struct VerseWidgetClear: Widget {
+    let kind = "VerseWidgetClear"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: VerseProvider()) { entry in
+            VerseWidgetEntryView(entry: entry)
+                .containerBackground(.clear, for: .widget)
+        }
+        .configurationDisplayName("Verse of the Day - Clear")
+        .description("Daily verse with transparent background.")
         .supportedFamilies([.systemMedium, .systemLarge])
         .contentMarginsDisabled()
     }

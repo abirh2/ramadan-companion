@@ -1,13 +1,13 @@
 /**
- * Widget Bridge — writes data to shared native storage so home screen widgets
+ * Widget Bridge -- writes data to shared native storage so home screen widgets
  * can read it without requiring the app to be open.
  *
- * On iOS  → @capacitor/preferences writes to UserDefaults.standard with a
+ * On iOS  -> @capacitor/preferences writes to UserDefaults.standard with a
  *           "CapacitorStorage." key prefix. AppDelegate observes these writes
  *           and mirrors the values to the App Group UserDefaults suite
  *           (group.com.deencompanion.app) which the widget extension reads.
  *
- * On Android → @capacitor/preferences writes to SharedPreferences file
+ * On Android -> @capacitor/preferences writes to SharedPreferences file
  *              "CapacitorStorage" which the widget BroadcastReceivers read directly.
  *
  * All write functions are no-ops when running in a browser (Capacitor not present).
@@ -22,16 +22,28 @@ import { Capacitor } from '@capacitor/core'
 export interface PrayerWidgetData {
   /** e.g. "Fajr", "Dhuhr" */
   name: string
-  /** Human-readable time, e.g. "5:30 AM" */
+  /** Human-readable time in 12hr format, e.g. "5:30 AM" */
   time: string
-  /** Countdown string, e.g. "2h 15m" */
-  countdown: string
+  /** ISO date string of when the next prayer occurs (widget computes countdown) */
+  targetTime: string
+  /** ISO timestamp of last update */
+  updatedAt: string
+}
+
+export interface AllPrayersWidgetData {
+  fajr: string
+  dhuhr: string
+  asr: string
+  maghrib: string
+  isha: string
+  /** Name of the next upcoming prayer, used for highlighting */
+  nextPrayer: string
   /** ISO timestamp of last update */
   updatedAt: string
 }
 
 export interface VerseWidgetData {
-  /** Source type — determines which deep-link the widget opens */
+  /** Source type -- determines which deep-link the widget opens */
   type: 'quran' | 'hadith'
   /** Arabic text (RTL) */
   arabic: string
@@ -60,15 +72,10 @@ export interface ZikrWidgetData {
 // Internal helpers
 // --------------------------------------------------------------------------
 
-/** Returns true only inside a Capacitor native context */
 function isNative(): boolean {
   return Capacitor.isNativePlatform()
 }
 
-/**
- * Lazily import and call Preferences.set so the Preferences plugin is never
- * imported on the web (where it would log harmless but noisy warnings).
- */
 async function set(key: string, value: string): Promise<void> {
   const { Preferences } = await import('@capacitor/preferences')
   await Preferences.set({ key, value })
@@ -78,21 +85,49 @@ async function setAll(pairs: Record<string, string>): Promise<void> {
   await Promise.all(Object.entries(pairs).map(([key, value]) => set(key, value)))
 }
 
+/** Convert "HH:MM" (24hr) to "H:MM AM/PM" (12hr) */
+export function to12Hour(time24: string): string {
+  const parts = time24.split(':')
+  const h = parseInt(parts[0], 10)
+  const m = parts[1]?.padStart(2, '0') ?? '00'
+  const period = h >= 12 ? 'PM' : 'AM'
+  const hour12 = h === 0 ? 12 : h > 12 ? h - 12 : h
+  return `${hour12}:${m} ${period}`
+}
+
+const WIDGET_ARABIC_MAX = 300
+const WIDGET_TRANSLATION_MAX = 250
+
+function truncateForWidget(text: string, maxLength: number): string {
+  if (!text || text.length <= maxLength) return text
+  return text.substring(0, maxLength - 1).trimEnd() + '\u2026'
+}
+
 // --------------------------------------------------------------------------
 // Public API
 // --------------------------------------------------------------------------
 
 /**
- * Write prayer times widget data to native shared storage.
- * Called by usePrayerTimes after a successful fetch and on every countdown tick.
+ * Write next-prayer widget data. Called once per prayer transition (not every second).
+ * The widget generates its own countdown timeline entries from targetTime.
  */
 export async function updatePrayerWidget(data: PrayerWidgetData): Promise<void> {
   if (!isNative()) return
   try {
+    // Compute a static countdown string for Android backward compatibility
+    const diff = new Date(data.targetTime).getTime() - Date.now()
+    let countdown = '---'
+    if (diff > 0) {
+      const h = Math.floor(diff / 3_600_000)
+      const m = Math.floor((diff % 3_600_000) / 60_000)
+      countdown = h > 0 ? `${h}h ${m}m` : `${m}m`
+    }
+
     await setAll({
       widget_prayer_name: data.name,
       widget_prayer_time: data.time,
-      widget_prayer_countdown: data.countdown,
+      widget_prayer_target_time: data.targetTime,
+      widget_prayer_countdown: countdown,
       widget_prayer_update: data.updatedAt,
     })
   } catch (err) {
@@ -101,17 +136,36 @@ export async function updatePrayerWidget(data: PrayerWidgetData): Promise<void> 
 }
 
 /**
- * Write Quran-verse or Hadith widget data to native shared storage.
- * Called by useQuranOfTheDay and useHadithOfTheDay after a successful fetch.
- * The `type` field tells the widget which deep-link to open on tap.
+ * Write all five daily prayer times for the All Prayers widget.
+ * Times should already be in 12hr format.
+ */
+export async function updateAllPrayersWidget(data: AllPrayersWidgetData): Promise<void> {
+  if (!isNative()) return
+  try {
+    await setAll({
+      widget_all_prayers_fajr: data.fajr,
+      widget_all_prayers_dhuhr: data.dhuhr,
+      widget_all_prayers_asr: data.asr,
+      widget_all_prayers_maghrib: data.maghrib,
+      widget_all_prayers_isha: data.isha,
+      widget_all_prayers_next: data.nextPrayer,
+      widget_all_prayers_update: data.updatedAt,
+    })
+  } catch (err) {
+    console.warn('[widgetBridge] updateAllPrayersWidget failed:', err)
+  }
+}
+
+/**
+ * Write Quran-verse or Hadith widget data. Content is truncated to fit widgets.
  */
 export async function updateVerseWidget(data: VerseWidgetData): Promise<void> {
   if (!isNative()) return
   try {
     await setAll({
       widget_verse_type: data.type,
-      widget_verse_arabic: data.arabic,
-      widget_verse_translation: data.translation,
+      widget_verse_arabic: truncateForWidget(data.arabic, WIDGET_ARABIC_MAX),
+      widget_verse_translation: truncateForWidget(data.translation, WIDGET_TRANSLATION_MAX),
       widget_verse_source: data.source,
       widget_verse_update: data.updatedAt,
     })
@@ -121,8 +175,7 @@ export async function updateVerseWidget(data: VerseWidgetData): Promise<void> {
 }
 
 /**
- * Write zikr counter widget data to native shared storage.
- * Called by useZikr on every increment, reset, and phrase change.
+ * Write zikr counter widget data.
  */
 export async function updateZikrWidget(data: ZikrWidgetData): Promise<void> {
   if (!isNative()) return
@@ -140,11 +193,7 @@ export async function updateZikrWidget(data: ZikrWidgetData): Promise<void> {
 }
 
 /**
- * Read the zikr count that was stored by an iOS 17+ in-widget increment.
- * Returns null if not on a native platform or if no widget data exists.
- *
- * Used by useZikr on app foreground to reconcile counts:
- * the app takes whichever count is higher to avoid losing taps made in the widget.
+ * Read the zikr count stored by an iOS 17+ in-widget increment.
  */
 export async function readWidgetZikrCount(): Promise<number | null> {
   if (!isNative()) return null
