@@ -22,6 +22,7 @@ import {
 } from '@/lib/location'
 import { calculatePrayerTimesLocal, validatePrayerTimes } from '@/lib/prayerTimes'
 import { getDefaultCalculationMethodByCountry, extractCountryFromCity } from '@/lib/calculationMethod'
+import { updatePrayerWidget } from '@/lib/widgetBridge'
 
 // Prayer names in order (excluding Sunrise for next prayer calculation)
 const PRAYER_NAMES = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const
@@ -353,6 +354,16 @@ export function usePrayerTimes(): UsePrayerTimesResult {
         error: null,
       })
 
+      // Push current prayer info to native widgets
+      if (nextPrayer) {
+        updatePrayerWidget({
+          name: nextPrayer.name,
+          time: nextPrayer.time,
+          countdown: nextPrayer.countdown,
+          updatedAt: new Date().toISOString(),
+        }).catch(() => {/* non-critical */})
+      }
+
       // Note: Notifications now handled by backend cron + Web Push API
 
       // Start countdown interval
@@ -378,6 +389,16 @@ export function usePrayerTimes(): UsePrayerTimesResult {
         lastPrayerNameRef.current = currentPrayerName
         
         setState((prev) => ({ ...prev, nextPrayer: updatedNextPrayer }))
+
+        // Keep widget countdown in sync (fire-and-forget, non-critical)
+        if (updatedNextPrayer) {
+          updatePrayerWidget({
+            name: updatedNextPrayer.name,
+            time: updatedNextPrayer.time,
+            countdown: updatedNextPrayer.countdown,
+            updatedAt: new Date().toISOString(),
+          }).catch(() => {/* non-critical */})
+        }
       }, 1000)
     } catch (error) {
       console.error('Error fetching prayer times:', error)

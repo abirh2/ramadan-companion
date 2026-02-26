@@ -13,6 +13,7 @@ import {
   saveFeedbackPreferences,
 } from '@/lib/zikr'
 import type { ZikrState, ZikrPhrase, ZikrFeedbackPreferences } from '@/types/zikr.types'
+import { updateZikrWidget, readWidgetZikrCount } from '@/lib/widgetBridge'
 
 interface UseZikrResult {
   // State
@@ -87,6 +88,40 @@ export function useZikr(): UseZikrResult {
       saveZikrState(state)
     }
   }, [state, loading])
+
+  // Sync to native widget whenever state changes (after initial load)
+  useEffect(() => {
+    if (loading) return
+    const phrase = getZikrPhraseById(state.phraseId) || STANDARD_PHRASES[0]
+    updateZikrWidget({
+      arabic: phrase.arabic,
+      transliteration: phrase.transliteration,
+      count: state.count,
+      target: state.target ?? 0,
+      updatedAt: new Date().toISOString(),
+    }).catch(() => {/* non-critical */})
+  }, [state, loading])
+
+  // On app foreground, reconcile counts with iOS 17+ in-widget increments.
+  // The widget may have incremented the count while the app was closed.
+  // Take whichever count is higher to prevent data loss.
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState !== 'visible') return
+      const widgetCount = await readWidgetZikrCount()
+      if (widgetCount === null) return
+      setState((prev) => {
+        if (widgetCount > prev.count) {
+          const reconciled = { ...prev, count: widgetCount }
+          saveZikrState(reconciled)
+          return reconciled
+        }
+        return prev
+      })
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [])
 
   // Increment counter
   const increment = useCallback(() => {

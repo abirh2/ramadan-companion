@@ -18,6 +18,9 @@
     },
     "LocalNotifications": {
       "iconColor": "#0f3d3e"
+    },
+    "Preferences": {
+      "group": "group.com.deencompanion.app"
     }
   }
 }

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_prayer_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/widget_background"
+    android:gravity="start">
+
+    <!-- Header row: icon + label -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🌙"
+            android:textSize="10sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="  Next Prayer"
+            android:textSize="11sp"
+            android:textColor="#888888"
+            android:letterSpacing="0.05" />
+    </LinearLayout>
+
+    <!-- Prayer name -->
+    <TextView
+        android:id="@+id/widget_prayer_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Fajr"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:textColor="#0f3d3e"
+        android:layout_marginTop="4dp" />
+
+    <!-- Prayer time -->
+    <TextView
+        android:id="@+id/widget_prayer_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="5:30 AM"
+        android:textSize="16sp"
+        android:textColor="#1a1a1a"
+        android:layout_marginTop="2dp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Countdown -->
+    <TextView
+        android:id="@+id/widget_prayer_countdown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2h 15m"
+        android:textSize="12sp"
+        android:textColor="#0f3d3e"
+        android:textStyle="bold"
+        android:drawableLeft="@android:drawable/ic_menu_recent_history"
+        android:drawablePadding="4dp"
+        android:gravity="center_vertical" />
+
+</LinearLayout>

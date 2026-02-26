@@ -8,6 +8,7 @@ import type {
   QuranSurah,
   QuranTranslationId 
 } from '@/types/quran.types'
+import { updateVerseWidget } from '@/lib/widgetBridge'
 
 const DEFAULT_TRANSLATION: QuranTranslationId = 'en.asad'
 const TRANSLATION_STORAGE_KEY = 'quran_translation'
@@ -94,6 +95,17 @@ export function useQuranOfTheDay(): UseQuranOfTheDayResult {
           loading: false,
           error: null,
         })
+
+        // Push to native widget (fire-and-forget)
+        const surahName = data.surah?.englishName ?? 'Quran'
+        const ayahRef = data.numberInSurah ? `${surahName} ${data.surah?.number ?? ''}:${data.numberInSurah}` : surahName
+        updateVerseWidget({
+          type: 'quran',
+          arabic: data.arabic?.text ?? '',
+          translation: data.translation?.text ?? '',
+          source: ayahRef,
+          updatedAt: new Date().toISOString(),
+        }).catch(() => {/* non-critical */})
       }
     } catch (error) {
       console.error('Error fetching daily ayah:', error)

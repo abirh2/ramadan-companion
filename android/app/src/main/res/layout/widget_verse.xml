@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_verse_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/widget_background">
+
+    <!-- Label row -->
+    <TextView
+        android:id="@+id/widget_verse_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Verse of the Day"
+        android:textSize="11sp"
+        android:textColor="#888888"
+        android:letterSpacing="0.05" />
+
+    <!-- Arabic text (RTL) -->
+    <TextView
+        android:id="@+id/widget_verse_arabic"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#1a1a1a"
+        android:textAlignment="viewEnd"
+        android:layoutDirection="rtl"
+        android:maxLines="3"
+        android:ellipsize="end"
+        android:lineSpacingExtra="4dp"
+        android:layout_marginTop="8dp" />
+
+    <!-- English translation -->
+    <TextView
+        android:id="@+id/widget_verse_translation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="In the name of Allah, the Most Gracious, the Most Merciful."
+        android:textSize="12sp"
+        android:textColor="#444444"
+        android:maxLines="3"
+        android:ellipsize="end"
+        android:lineSpacingExtra="2dp"
+        android:layout_marginTop="6dp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Source attribution -->
+    <TextView
+        android:id="@+id/widget_verse_source"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Surah Al-Fatiha 1:1"
+        android:textSize="10sp"
+        android:textColor="#0f3d3e"
+        android:textStyle="italic" />
+
+</LinearLayout>

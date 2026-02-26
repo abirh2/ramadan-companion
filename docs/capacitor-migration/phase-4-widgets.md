@@ -1,6 +1,6 @@
 # Phase 4: Native Widgets Implementation
 
-**Duration:** 3-4 days  
+**Duration:** 3–4 days  
 **Complexity:** Medium-High  
 **Prerequisites:** Phase 3 complete (or Phase 2 minimum)
 
@@ -8,692 +8,246 @@
 
 ## Overview
 
-This phase implements home screen widgets displaying prayer times. Users can see next prayer information without opening the app.
+This phase implements three home screen widgets:
 
-**What You'll Create:**
-1. iOS widget (Swift/WidgetKit) - Small and Medium sizes
-2. Android widget (Kotlin) - 2x2 and 4x2 sizes
-3. Widget data bridge (TypeScript)
-4. Integration with prayer times hook
+| Widget | Sizes (iOS) | Sizes (Android) | Deep-link |
+|---|---|---|---|
+| Prayer Times | Small, Medium | 2×2 | `/times` |
+| Verse of the Day | Medium, Large | 3×2 | `/quran` or `/hadith` |
+| Zikr Counter | Small, Medium | 2×2 | `/zikr` |
 
-**Widget Features:**
-- Shows next prayer name
-- Shows next prayer time (12-hour format)
-- Shows countdown/time remaining
-- Tapping widget opens app to `/times` page
-- Updates automatically when prayer times change
+**Styling:** Apple glassmorphic — `.ultraThinMaterial` in SwiftUI, translucent frosted drawable on Android. Teal `#0f3d3e` accent. Minimal typography.
+
+**Interactive zikr:** iOS 17+ supports an in-widget `Button` that increments the count without opening the app. iOS 15/16 and Android (all versions) open the app on tap.
 
 ---
 
-## Architecture Overview
+## Architecture
 
 ```
-React App (usePrayerTimes hook)
+React App (hooks)
     ↓
-Widget Bridge (widgetBridge.ts)
+src/lib/widgetBridge.ts   ← writes all widget data to shared storage
     ↓
-Capacitor Preferences Plugin
+@capacitor/preferences    ← already installed
     ↓
-Native Storage (UserDefaults/SharedPreferences)
+iOS: UserDefaults (App Group: group.com.deencompanion.app)
+Android: SharedPreferences ("CapacitorStorage")
     ↓
-Native Widgets (Swift/Kotlin)
+ios/App/DeenCompanionWidgets/   ← single WidgetBundle with 3 widget types
+android/app/.../widgets/        ← 3 AppWidgetProvider classes
 ```
 
-**Data Flow:**
-1. App calculates prayer times
-2. Bridge writes to shared storage (Preferences plugin)
-3. Widget reads from shared storage
-4. Widget displays information
-5. Updates every 1-5 minutes
+### Shared storage keys
+
+**Prayer widget**
+- `widget_prayer_name` — e.g. "Fajr"
+- `widget_prayer_time` — e.g. "5:30 AM"
+- `widget_prayer_countdown` — e.g. "2h 15m"
+- `widget_prayer_update` — ISO timestamp
+
+**Verse widget**
+- `widget_verse_type` — `"quran"` or `"hadith"`
+- `widget_verse_arabic` — Arabic text
+- `widget_verse_translation` — English text
+- `widget_verse_source` — e.g. "Surah Al-Fatiha 1:1"
+- `widget_verse_update` — ISO timestamp
+
+**Zikr widget**
+- `widget_zikr_arabic` — Arabic phrase
+- `widget_zikr_transliteration` — e.g. "SubhanAllah"
+- `widget_zikr_count` — current count (string)
+- `widget_zikr_target` — target count (string, "0" = no target)
+- `widget_zikr_update` — ISO timestamp
 
 ---
 
-## Step 1: Create Widget Data Bridge
+## Files Created / Modified
 
-### 1.1 Install Preferences Plugin
+### TypeScript
 
-Already installed in Phase 2, but verify:
+| File | Change |
+|---|---|
+| `src/lib/widgetBridge.ts` | **New** — unified bridge; exports `updatePrayerWidget`, `updateVerseWidget`, `updateZikrWidget`, `readWidgetZikrCount` |
+| `capacitor.config.json` | Added `Preferences.group` for iOS App Group |
+| `src/hooks/usePrayerTimes.ts` | Calls `updatePrayerWidget` after fetch + in countdown interval |
+| `src/hooks/useQuranOfTheDay.ts` | Calls `updateVerseWidget` after fetch |
+| `src/hooks/useHadithOfTheDay.ts` | Calls `updateVerseWidget` after fetch |
+| `src/hooks/useZikr.ts` | Calls `updateZikrWidget` on state change; reconciles in-widget increments on foreground |
+
+### iOS Swift
+
+| File | Purpose |
+|---|---|
+| `ios/App/DeenCompanionWidgets/DeenCompanionWidgetsBundle.swift` | `@main` WidgetBundle entry point |
+| `ios/App/DeenCompanionWidgets/SharedDefaults.swift` | Typed accessors for the shared UserDefaults suite |
+| `ios/App/DeenCompanionWidgets/PrayerWidget.swift` | Prayer Times widget (Small + Medium) |
+| `ios/App/DeenCompanionWidgets/VerseWidget.swift` | Verse of the Day widget (Medium + Large) |
+| `ios/App/DeenCompanionWidgets/ZikrWidget.swift` | Zikr Counter widget (Small + Medium) |
+| `ios/App/DeenCompanionWidgets/ZikrIntent.swift` | `@available(iOS 17.0, *)` AppIntent for in-widget increment |
+
+### Android Kotlin + Resources
+
+| File | Purpose |
+|---|---|
+| `android/.../widgets/WidgetPrefs.kt` | Shared helper for reading/writing CapacitorStorage SharedPreferences |
+| `android/.../widgets/PrayerTimesWidget.kt` | Prayer Times AppWidgetProvider |
+| `android/.../widgets/VerseWidget.kt` | Verse of the Day AppWidgetProvider |
+| `android/.../widgets/ZikrWidget.kt` | Zikr Counter AppWidgetProvider |
+| `android/.../widgets/ZikrIncrementReceiver.kt` | BroadcastReceiver for "+ Count" button tap |
+| `res/layout/widget_prayer.xml` | Prayer widget layout |
+| `res/layout/widget_verse.xml` | Verse widget layout (RTL Arabic) |
+| `res/layout/widget_zikr.xml` | Zikr widget layout with button |
+| `res/xml/widget_prayer_info.xml` | Prayer widget metadata |
+| `res/xml/widget_verse_info.xml` | Verse widget metadata |
+| `res/xml/widget_zikr_info.xml` | Zikr widget metadata |
+| `res/drawable/widget_background.xml` | Frosted glass drawable (shared) |
+| `AndroidManifest.xml` | Registers all 3 widgets + ZikrIncrementReceiver |
+
+---
+
+## Step 1: Verify TypeScript Build
 
 ```bash
-npm list @capacitor/preferences
-```
-
-If not installed:
-
-```bash
-npm install @capacitor/preferences
+nvm use 22 && npm run build
 npx cap sync
 ```
 
-### 1.2 Create `src/lib/widgetBridge.ts`
-
-**New File:** `src/lib/widgetBridge.ts`
-
-```typescript
-import { Preferences } from '@capacitor/preferences';
-
-export interface WidgetData {
-  nextPrayer: string;       // e.g., "Fajr", "Dhuhr"
-  nextPrayerTime: string;   // e.g., "5:30 AM"
-  timeRemaining: string;    // e.g., "2h 15m" or "Now"
-  lastUpdate: string;       // ISO timestamp
-}
-
-/**
- * Update widget data for native widgets to consume
- * Writes to Capacitor Preferences, which maps to:
- * - iOS: UserDefaults (App Group shared storage)
- * - Android: SharedPreferences
- */
-export async function updateWidgetData(data: WidgetData): Promise<void> {
-  try {
-    // Store each field separately for native widget access
-    await Promise.all([
-      Preferences.set({ key: 'widget_nextPrayer', value: data.nextPrayer }),
-      Preferences.set({ key: 'widget_nextPrayerTime', value: data.nextPrayerTime }),
-      Preferences.set({ key: 'widget_timeRemaining', value: data.timeRemaining }),
-      Preferences.set({ key: 'widget_lastUpdate', value: data.lastUpdate }),
-    ]);
-
-    console.log('[Widget] Data updated:', data);
-  } catch (error) {
-    console.error('[Widget] Failed to update data:', error);
-  }
-}
-
-/**
- * Read widget data (for debugging)
- */
-export async function getWidgetData(): Promise<WidgetData | null> {
-  try {
-    const [nextPrayer, nextPrayerTime, timeRemaining, lastUpdate] = await Promise.all([
-      Preferences.get({ key: 'widget_nextPrayer' }),
-      Preferences.get({ key: 'widget_nextPrayerTime' }),
-      Preferences.get({ key: 'widget_timeRemaining' }),
-      Preferences.get({ key: 'widget_lastUpdate' }),
-    ]);
-
-    if (!nextPrayer.value) return null;
-
-    return {
-      nextPrayer: nextPrayer.value,
-      nextPrayerTime: nextPrayerTime.value || '',
-      timeRemaining: timeRemaining.value || '',
-      lastUpdate: lastUpdate.value || '',
-    };
-  } catch (error) {
-    console.error('[Widget] Failed to read data:', error);
-    return null;
-  }
-}
-```
-
-### 1.3 Integrate with Prayer Times Hook
-
-**File:** `src/hooks/usePrayerTimes.ts`
-
-**Add import at top:**
-
-```typescript
-import { updateWidgetData } from '@/lib/widgetBridge';
-```
-
-**Add after successful prayer times fetch (around line 390, after `setState`):**
-
-```typescript
-// Update widget with next prayer data
-if (prayerTimes && nextPrayer) {
-  await updateWidgetData({
-    nextPrayer: nextPrayer.name,
-    nextPrayerTime: nextPrayer.time,
-    timeRemaining: nextPrayer.timeRemaining || 'Now',
-    lastUpdate: new Date().toISOString(),
-  });
-}
-```
-
-**Test data bridge:**
-
-```bash
-npm run build
-npx cap sync
-```
-
-Run app and navigate to `/times`. Check console for `[Widget] Data updated` message.
+Expected: Build succeeds. Console should not report any widgetBridge import errors.
 
 ---
 
-## Step 2: iOS Widget Implementation
+## Step 2: iOS Setup in Xcode
 
-### 2.1 Create Widget Extension in Xcode
+The Swift files are ready in `ios/App/DeenCompanionWidgets/`. You must link them to Xcode manually.
+
+### 2.1 Open the project
 
 ```bash
 npm run cap:open:ios
 ```
 
-**In Xcode:**
+### 2.2 Create the Widget Extension target
 
-1. File → New → Target
-2. Search for "Widget Extension"
-3. Product Name: `PrayerTimesWidget`
-4. **Uncheck** "Include Configuration Intent"
-5. Language: Swift
-6. Click "Finish"
-7. **Activate scheme** when prompted
+1. In Xcode: **File → New → Target**
+2. Search for **Widget Extension**
+3. Product Name: `DeenCompanionWidgets`
+4. Language: **Swift**
+5. **Uncheck** "Include Configuration Intent"
+6. Click **Finish** → **Activate** the new scheme when prompted
 
-**Result:** New folder `PrayerTimesWidget/` created in project navigator.
+Xcode creates `ios/App/DeenCompanionWidgets/` with a placeholder Swift file. **Delete the auto-generated Swift files** (DeenCompanionWidgets.swift, Assets.xcassets if empty) — the real files are already in that folder from this repo.
 
-### 2.2 Configure App Groups (for shared storage)
+### 2.3 Add Swift files to the target
 
-**Main App Target:**
-1. Select project → Target "App"
-2. Signing & Capabilities tab
-3. "+ Capability" → App Groups
-4. Click "+" to add new group
-5. Identifier: `group.com.ramadancompanion.app`
-6. Ensure checkbox is **checked**
+In the Xcode Project Navigator, select the `DeenCompanionWidgets` folder. For each of the six files below, ensure **Target Membership** includes `DeenCompanionWidgets` (check the checkbox in the File Inspector panel):
 
-**Widget Target:**
-1. Select Target "PrayerTimesWidget"
-2. Signing & Capabilities tab
-3. "+ Capability" → App Groups
-4. Check **same group**: `group.com.ramadancompanion.app`
+- `DeenCompanionWidgetsBundle.swift`
+- `SharedDefaults.swift`
+- `PrayerWidget.swift`
+- `VerseWidget.swift`
+- `ZikrWidget.swift`
+- `ZikrIntent.swift`
 
-### 2.3 Create Widget Swift Code
+### 2.4 Configure App Groups
 
-**File:** `ios/App/PrayerTimesWidget/PrayerTimesWidget.swift`
+**On the App target (not the widget):**
+1. Select the project file → target **App**
+2. **Signing & Capabilities** tab → **+ Capability** → **App Groups**
+3. Click **+** → Identifier: `group.com.deencompanion.app`
+4. Ensure the checkbox is **checked**
 
-Replace entire file content:
+**On the Widget target:**
+1. Select target **DeenCompanionWidgets**
+2. **Signing & Capabilities** → **+ Capability** → **App Groups**
+3. Check the **same group**: `group.com.deencompanion.app`
 
-```swift
-import WidgetKit
-import SwiftUI
+> Both targets must share the same App Group for `SharedDefaults` to work.
 
-// MARK: - Widget Data Model
-struct PrayerTimesEntry: TimelineEntry {
-    let date: Date
-    let nextPrayer: String
-    let nextPrayerTime: String
-    let timeRemaining: String
-}
+### 2.5 Build and test
 
-// MARK: - Widget Provider
-struct PrayerTimesProvider: TimelineProvider {
-    func placeholder(in context: Context) -> PrayerTimesEntry {
-        PrayerTimesEntry(
-            date: Date(),
-            nextPrayer: "Fajr",
-            nextPrayerTime: "5:30 AM",
-            timeRemaining: "2h 15m"
-        )
-    }
-    
-    func getSnapshot(in context: Context, completion: @escaping (PrayerTimesEntry) -> Void) {
-        let entry = loadPrayerTimes()
-        completion(entry)
-    }
-    
-    func getTimeline(in context: Context, completion: @escaping (Timeline<PrayerTimesEntry>) -> Void) {
-        let entry = loadPrayerTimes()
-        
-        // Update every 5 minutes
-        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 5, to: Date())!
-        let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
-        
-        completion(timeline)
-    }
-    
-    // Load prayer times from UserDefaults (shared with main app)
-    private func loadPrayerTimes() -> PrayerTimesEntry {
-        let sharedDefaults = UserDefaults(suiteName: "group.com.ramadancompanion.app")
-        
-        let nextPrayer = sharedDefaults?.string(forKey: "widget_nextPrayer") ?? "Fajr"
-        let nextPrayerTime = sharedDefaults?.string(forKey: "widget_nextPrayerTime") ?? "Loading..."
-        let timeRemaining = sharedDefaults?.string(forKey: "widget_timeRemaining") ?? "—"
-        
-        return PrayerTimesEntry(
-            date: Date(),
-            nextPrayer: nextPrayer,
-            nextPrayerTime: nextPrayerTime,
-            timeRemaining: timeRemaining
-        )
-    }
-}
-
-// MARK: - Widget Views
-struct SmallWidgetView: View {
-    var entry: PrayerTimesEntry
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Next Prayer")
-                .font(.caption2)
-                .foregroundColor(.secondary)
-            
-            Text(entry.nextPrayer)
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(Color(red: 0.06, green: 0.24, blue: 0.24)) // #0f3d3e
-            
-            Text(entry.nextPrayerTime)
-                .font(.headline)
-            
-            Spacer()
-            
-            HStack {
-                Image(systemName: "clock.fill")
-                    .font(.caption2)
-                    .foregroundColor(.green)
-                Text(entry.timeRemaining)
-                    .font(.caption)
-                    .foregroundColor(.green)
-            }
-        }
-        .padding()
-    }
-}
-
-struct MediumWidgetView: View {
-    var entry: PrayerTimesEntry
-    
-    var body: some View {
-        HStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Next Prayer")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                Text(entry.nextPrayer)
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color(red: 0.06, green: 0.24, blue: 0.24))
-                
-                Text(entry.nextPrayerTime)
-                    .font(.title3)
-            }
-            
-            Spacer()
-            
-            VStack(alignment: .trailing, spacing: 8) {
-                Image(systemName: "clock.fill")
-                    .font(.title2)
-                    .foregroundColor(.green)
-                
-                Text(entry.timeRemaining)
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.green)
-            }
-        }
-        .padding()
-    }
-}
-
-// MARK: - Widget Entry View
-struct PrayerTimesWidgetEntryView: View {
-    var entry: PrayerTimesEntry
-    @Environment(\.widgetFamily) var family
-    
-    var body: some View {
-        switch family {
-        case .systemSmall:
-            SmallWidgetView(entry: entry)
-        case .systemMedium:
-            MediumWidgetView(entry: entry)
-        default:
-            SmallWidgetView(entry: entry)
-        }
-    }
-}
-
-// MARK: - Widget Configuration
-@main
-struct PrayerTimesWidget: Widget {
-    let kind: String = "PrayerTimesWidget"
-    
-    var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: PrayerTimesProvider()) { entry in
-            PrayerTimesWidgetEntryView(entry: entry)
-        }
-        .configurationDisplayName("Prayer Times")
-        .description("View next prayer time and countdown.")
-        .supportedFamilies([.systemSmall, .systemMedium])
-    }
-}
-
-// MARK: - Preview
-struct PrayerTimesWidget_Previews: PreviewProvider {
-    static var previews: some View {
-        PrayerTimesWidgetEntryView(entry: PrayerTimesEntry(
-            date: Date(),
-            nextPrayer: "Fajr",
-            nextPrayerTime: "5:30 AM",
-            timeRemaining: "2h 15m"
-        ))
-        .previewContext(WidgetPreviewContext(family: .systemSmall))
-    }
-}
-```
-
-### 2.4 Update Capacitor Configuration for iOS
-
-**File:** `capacitor.config.ts`
-
-Add preference configuration for App Groups:
-
-```typescript
-ios: {
-  contentInset: 'always',
-  // Configure App Group for widget data sharing
-  backgroundColor: '#0f3d3e',
-},
-plugins: {
-  Preferences: {
-    group: 'group.com.ramadancompanion.app', // Must match App Group ID
-  },
-  // ... other plugins
-},
-```
-
-### 2.5 Build and Test iOS Widget
-
-**In Xcode:**
-1. Select scheme: `PrayerTimesWidget` (not "App")
-2. Select device/simulator
-3. Run (⌘R)
-
-**Expected:** Widget preview appears showing prayer times data.
-
-**Add to Home Screen:**
-1. Stop widget preview
-2. Run main app scheme: "App"
-3. Build and run on device
-4. Navigate to `/times` to populate widget data
-5. Long-press home screen → "+" → Search "Prayer"
-6. Select "Prayer Times" widget
-7. Choose Small or Medium size
-8. "Add Widget"
-
-**Expected:** Widget appears on home screen with actual prayer times.
+1. Select scheme **DeenCompanionWidgets** → Run (⌘R) → verify no compile errors
+2. Switch back to scheme **App** → Build and run on device
+3. Navigate to `/times` in the app to populate prayer data
+4. Long-press home screen → **+** → search "Deen Companion"
+5. You should see three widgets: Prayer Times, Verse of the Day, Zikr Counter
 
 ---
 
-## Step 3: Android Widget Implementation
+## Step 3: Android Build
 
-### 3.1 Create Widget Layout XML
-
-**File:** `android/app/src/main/res/layout/prayer_times_widget.xml`
-
-Create if doesn't exist:
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/widget_container"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@drawable/widget_background">
-
-    <TextView
-        android:id="@+id/next_prayer_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Next Prayer"
-        android:textSize="12sp"
-        android:textColor="#888888"
-        android:fontFamily="sans-serif-medium" />
-
-    <TextView
-        android:id="@+id/next_prayer_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Fajr"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="#0f3d3e"
-        android:layout_marginTop="4dp" />
-
-    <TextView
-        android:id="@+id/next_prayer_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="5:30 AM"
-        android:textSize="18sp"
-        android:textColor="#000000"
-        android:layout_marginTop="4dp" />
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="8dp">
-
-        <TextView
-            android:id="@+id/time_remaining"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="2h 15m"
-            android:textSize="14sp"
-            android:textColor="#00AA00"
-            android:drawableLeft="@android:drawable/ic_menu_recent_history"
-            android:drawablePadding="4dp"
-            android:gravity="center_vertical" />
-    </LinearLayout>
-
-</LinearLayout>
-```
-
-### 3.2 Create Widget Background Drawable
-
-**File:** `android/app/src/main/res/drawable/widget_background.xml`
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#FFFFFF" />
-    <corners android:radius="16dp" />
-    <stroke
-        android:width="1dp"
-        android:color="#E0E0E0" />
-</shape>
-```
-
-### 3.3 Create Widget Info XML
-
-**File:** `android/app/src/main/res/xml/prayer_times_widget_info.xml`
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="180dp"
-    android:minHeight="110dp"
-    android:targetCellWidth="2"
-    android:targetCellHeight="2"
-    android:updatePeriodMillis="300000"
-    android:previewImage="@mipmap/ic_launcher"
-    android:initialLayout="@layout/prayer_times_widget"
-    android:resizeMode="horizontal|vertical"
-    android:widgetCategory="home_screen" />
-```
-
-### 3.4 Create Widget Provider Kotlin Class
-
-**File:** `android/app/src/main/java/com/ramadancompanion/app/widgets/PrayerTimesWidget.kt`
-
-Create directory structure if needed, then create file:
-
-```kotlin
-package com.ramadancompanion.app.widgets
-
-import android.app.PendingIntent
-import android.appwidget.AppWidgetManager
-import android.appwidget.AppWidgetProvider
-import android.content.Context
-import android.content.Intent
-import android.widget.RemoteViews
-import com.ramadancompanion.app.R
-import com.ramadancompanion.app.MainActivity
-
-/**
- * Prayer Times Widget
- * Displays next prayer name, time, and countdown
- */
-class PrayerTimesWidget : AppWidgetProvider() {
-
-    override fun onUpdate(
-        context: Context,
-        appWidgetManager: AppWidgetManager,
-        appWidgetIds: IntArray
-    ) {
-        // Update all widget instances
-        for (appWidgetId in appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId)
-        }
-    }
-
-    companion object {
-        internal fun updateAppWidget(
-            context: Context,
-            appWidgetManager: AppWidgetManager,
-            appWidgetId: Int
-        ) {
-            // Read from SharedPreferences (written by Capacitor Preferences plugin)
-            val prefs = context.getSharedPreferences("CapacitorStorage", Context.MODE_PRIVATE)
-            
-            val nextPrayer = prefs.getString("widget_nextPrayer", "Fajr") ?: "Fajr"
-            val nextPrayerTime = prefs.getString("widget_nextPrayerTime", "Loading...") ?: "Loading..."
-            val timeRemaining = prefs.getString("widget_timeRemaining", "—") ?: "—"
-
-            // Construct the RemoteViews object
-            val views = RemoteViews(context.packageName, R.layout.prayer_times_widget)
-            
-            views.setTextViewText(R.id.next_prayer_label, "Next Prayer")
-            views.setTextViewText(R.id.next_prayer_name, nextPrayer)
-            views.setTextViewText(R.id.next_prayer_time, nextPrayerTime)
-            views.setTextViewText(R.id.time_remaining, timeRemaining)
-
-            // Create intent to open main app when widget is tapped
-            val intent = Intent(context, MainActivity::class.java).apply {
-                putExtra("route", "/times") // Deep link to prayer times page
-            }
-            val pendingIntent = PendingIntent.getActivity(
-                context,
-                0,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            views.setOnClickPendingIntent(R.id.widget_container, pendingIntent)
-
-            // Tell the AppWidgetManager to update the widget
-            appWidgetManager.updateAppWidget(appWidgetId, views)
-        }
-    }
-}
-```
-
-### 3.5 Register Widget in AndroidManifest.xml
-
-**File:** `android/app/src/main/AndroidManifest.xml`
-
-Add inside `<application>` tag (before closing `</application>`):
-
-```xml
-<receiver
-    android:name=".widgets.PrayerTimesWidget"
-    android:exported="true">
-    <intent-filter>
-        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-    </intent-filter>
-    <meta-data
-        android:name="android.appwidget.provider"
-        android:resource="@xml/prayer_times_widget_info" />
-</receiver>
-```
-
-### 3.6 Build and Test Android Widget
+The Kotlin files and XML resources are already in place. No manual IDE steps required.
 
 ```bash
 npx cap sync android
 npm run cap:open:android
 ```
 
-**In Android Studio:**
-1. Build → Make Project (⌘F9)
-2. Run → Run 'app' (Shift+F10)
-3. App installs on device
+In Android Studio:
+1. **Build → Make Project** (⌘F9)
+2. **Run → Run 'app'** (Shift+F10) on device/emulator
 
-**Add Widget to Home Screen:**
-1. Long-press home screen
-2. Widgets → Find "Prayer Times"
-3. Drag to home screen
-4. Resize if needed
-
-**Expected:** Widget shows next prayer information.
-
-**Update Widget:**
-1. Open main app
-2. Navigate to `/times`
-3. Widget should update within ~5 minutes
+**Add widgets:**
+1. Long-press home screen → Widgets
+2. Find "Deen Companion" — three widgets will be listed
+3. Drag each to the home screen
 
 ---
 
 ## Verification Checklist
 
-- [ ] `src/lib/widgetBridge.ts` created
-- [ ] `usePrayerTimes` calls `updateWidgetData()`
-- [ ] iOS widget extension created in Xcode
-- [ ] iOS App Groups configured
-- [ ] iOS widget displays on home screen
-- [ ] iOS widget updates when app changes prayer times
-- [ ] Android widget layout XML created
-- [ ] Android widget Kotlin code created
-- [ ] Android widget registered in manifest
-- [ ] Android widget displays on home screen
-- [ ] Android widget updates when app changes prayer times
-- [ ] Tapping widget opens app to `/times` page
-- [ ] Widget shows placeholder when no data available
+### iOS
+- [ ] `DeenCompanionWidgets` target compiles without errors
+- [ ] App Groups capability added to both targets with same ID
+- [ ] All 3 widgets appear in the iOS widget picker
+- [ ] Prayer widget shows next prayer + countdown
+- [ ] Verse widget shows Arabic + English text
+- [ ] Zikr widget shows current phrase + count
+- [ ] Tapping Prayer widget opens app to `/times`
+- [ ] Tapping Verse widget opens app to `/quran` or `/hadith`
+- [ ] Tapping Zikr widget (iOS 17+): increments count in-widget
+- [ ] Tapping Zikr widget (iOS 15/16): opens app to `/zikr`
+- [ ] Zikr count reconciles correctly when returning to app after in-widget increments
+
+### Android
+- [ ] All 3 widgets appear in Android widget picker
+- [ ] Prayer widget updates within a minute of opening the app
+- [ ] Verse widget shows today's verse/hadith
+- [ ] Zikr "+" button increments count without opening app
+- [ ] Tapping Zikr widget body opens app to `/zikr`
 
 ---
 
 ## Troubleshooting
 
-### iOS: Widget shows "Loading..." forever
+### iOS: Widget shows "—" / "Open app" forever
 
-**Solution:** 
-1. Verify App Group ID matches in both targets
-2. Check Capacitor Preferences plugin configured with group
-3. Rebuild and reinstall app
-4. Open app and navigate to `/times` to populate data
+1. Verify App Group ID matches **exactly** in both targets: `group.com.deencompanion.app`
+2. Check `capacitor.config.json` has `Preferences.group` set to the same ID
+3. Run the app, navigate to `/times` to trigger first data write
+4. Check Xcode console for `[widgetBridge]` log lines
 
-### Android: Widget not found in widget list
+### iOS: ZikrIntent not available (runtime error)
 
-**Solution:**
-1. Verify widget registered in `AndroidManifest.xml`
-2. Check `prayer_times_widget_info.xml` exists
-3. Rebuild: Build → Clean Project → Build → Make Project
-4. Reinstall app
+Ensure `ZikrIntent.swift` is in the widget extension target, not the app target. The `@available(iOS 17.0, *)` guard prevents it running on older devices.
 
-### Widget doesn't update after app changes
+### Android: Widget not in picker
 
-**iOS Solution:** Widgets update on timeline. Either wait 5 minutes or force refresh in Settings → Widget Preview.
+1. Verify all 3 `<receiver>` entries are in `AndroidManifest.xml`
+2. **Build → Clean Project → Make Project**
+3. Reinstall app
 
-**Android Solution:** Increase `updatePeriodMillis` to lower value (minimum is 30 minutes in Android 8+). For more frequent updates, use `AlarmManager` in widget provider.
+### Android: Zikr count not updating
 
-### Widget crashes on tap
+The `ZikrIncrementReceiver` requires `android:exported="false"` and the `ZIKR_INCREMENT` action in the manifest. Confirm both entries exist.
 
-**Solution:** Verify pending intent flags include `PendingIntent.FLAG_IMMUTABLE` (required in Android 12+).
+### Widget doesn't update after app sends new data
+
+iOS widgets update on their own timeline (1-minute minimum). To force a reload, kill and relaunch the app. On Android, the update period is set in `widget_*_info.xml`.
 
 ---
 
 ## Next Steps
-
-✅ **Phase 4 Complete!** You now have:
-- Prayer times widgets on iOS home screen
-- Prayer times widgets on Android home screen
-- Widget data bridge working
-- Widgets update automatically
 
 → **Continue to [Phase 5: Local Testing](./phase-5-local-testing.md)**
 
@@ -703,4 +257,3 @@ npm run cap:open:android
 **Time Spent:** ___ hours  
 **Issues Encountered:** None / [Describe]  
 **Ready for Phase 5:** Yes / No
-

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import type { DailyHadithResponse, HadithLanguageId } from '@/types/hadith.types'
+import { updateVerseWidget } from '@/lib/widgetBridge'
 
 const DEFAULT_LANGUAGE: HadithLanguageId = 'english'
 const LANGUAGE_STORAGE_KEY = 'hadith_language'
@@ -113,6 +114,20 @@ export function useHadithOfTheDay(): UseHadithOfTheDayResult {
           loading: false,
           error: null,
         })
+
+        // Push to native widget (fire-and-forget)
+        // Only push when quran widget hasn't been set yet, or always push to keep hadith fresh.
+        // The verse widget shows whichever was fetched most recently.
+        const sourceLabel = data.book && data.hadithNumber
+          ? `${data.book} #${data.hadithNumber}`
+          : (data.book ?? 'Hadith')
+        updateVerseWidget({
+          type: 'hadith',
+          arabic: data.hadithArabic ?? '',
+          translation: data.hadithEnglish ?? '',
+          source: sourceLabel,
+          updatedAt: new Date().toISOString(),
+        }).catch(() => {/* non-critical */})
       }
     } catch (error) {
       console.error('Error fetching daily hadith:', error)

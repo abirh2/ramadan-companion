@@ -33,6 +33,55 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!-- Prayer Times Widget -->
+        <receiver
+            android:name=".widgets.PrayerTimesWidget"
+            android:exported="true"
+            android:label="Prayer Times">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_prayer_info" />
+        </receiver>
+
+        <!-- Verse of the Day Widget -->
+        <receiver
+            android:name=".widgets.VerseWidget"
+            android:exported="true"
+            android:label="Verse of the Day">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_verse_info" />
+        </receiver>
+
+        <!-- Zikr Counter Widget -->
+        <receiver
+            android:name=".widgets.ZikrWidget"
+            android:exported="true"
+            android:label="Zikr Counter">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_zikr_info" />
+        </receiver>
+
+        <!-- Zikr increment broadcast receiver (handles tap on "+ Count" button) -->
+        <receiver
+            android:name=".widgets.ZikrIncrementReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.deencompanion.app.ZIKR_INCREMENT" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
     <!-- Permissions -->

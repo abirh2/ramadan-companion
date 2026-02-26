@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_zikr_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="14dp"
+    android:background="@drawable/widget_background">
+
+    <!-- Header label -->
+    <TextView
+        android:id="@+id/widget_zikr_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tasbeeh"
+        android:textSize="10sp"
+        android:textColor="#888888"
+        android:letterSpacing="0.05"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
+    <!-- Arabic phrase (center of widget) -->
+    <TextView
+        android:id="@+id/widget_zikr_arabic"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="سُبْحَانَ ٱللَّٰهِ"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#1a1a1a"
+        android:textAlignment="center"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:layout_below="@id/widget_zikr_label"
+        android:layout_marginTop="6dp" />
+
+    <!-- Transliteration -->
+    <TextView
+        android:id="@+id/widget_zikr_transliteration"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SubhanAllah"
+        android:textSize="11sp"
+        android:textColor="#666666"
+        android:textAlignment="center"
+        android:layout_below="@id/widget_zikr_arabic"
+        android:layout_marginTop="2dp" />
+
+    <!-- Count / target -->
+    <TextView
+        android:id="@+id/widget_zikr_count"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="0 / 33"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#0f3d3e"
+        android:textAlignment="center"
+        android:fontFamily="monospace"
+        android:layout_centerInParent="true"
+        android:layout_below="@id/widget_zikr_transliteration"
+        android:layout_marginTop="4dp" />
+
+    <!-- Tap button (entire widget tap-area) -->
+    <Button
+        android:id="@+id/widget_zikr_tap_btn"
+        android:layout_width="match_parent"
+        android:layout_height="32dp"
+        android:text="+ Count"
+        android:textSize="11sp"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#0f3d3e"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
+
+</RelativeLayout>
