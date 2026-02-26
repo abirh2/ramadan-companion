@@ -47,9 +47,9 @@ struct AllPrayersProvider: TimelineProvider {
     }
 }
 
-// MARK: - Accent Color
+// MARK: - Theme Color
 
-private let accentColor = Color(red: 0.06, green: 0.24, blue: 0.24)
+private let tealAccent = Color(red: 0.06, green: 0.24, blue: 0.24)
 
 // MARK: - Prayer Row
 
@@ -62,24 +62,24 @@ private struct PrayerRow: View {
         HStack {
             if isNext {
                 Circle()
-                    .fill(accentColor)
+                    .fill(tealAccent)
                     .frame(width: 6, height: 6)
             } else {
-                Circle()
-                    .fill(Color.clear)
+                // Invisible placeholder to keep alignment
+                Color.clear
                     .frame(width: 6, height: 6)
             }
 
             Text(name)
                 .font(.caption.weight(isNext ? .semibold : .regular))
-                .foregroundStyle(isNext ? accentColor : .primary)
+                .foregroundStyle(isNext ? tealAccent : Color.primary)
                 .frame(width: 60, alignment: .leading)
 
             Spacer()
 
             Text(time)
                 .font(.caption.weight(isNext ? .semibold : .regular).monospacedDigit())
-                .foregroundStyle(isNext ? accentColor : .secondary)
+                .foregroundStyle(isNext ? tealAccent : Color.secondary)
         }
     }
 }
@@ -105,7 +105,7 @@ struct AllPrayersMediumView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Image(systemName: "sun.and.horizon.fill")
                     .font(.title2)
-                    .foregroundStyle(accentColor)
+                    .foregroundStyle(tealAccent)
                 Text("Daily\nPrayers")
                     .font(.caption.weight(.medium))
                     .foregroundStyle(.secondary)

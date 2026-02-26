@@ -53,9 +53,9 @@ struct VerseProvider: TimelineProvider {
     }
 }
 
-// MARK: - Accent Color
+// MARK: - Theme Color
 
-private let accentColor = Color(red: 0.06, green: 0.24, blue: 0.24)
+private let tealAccent = Color(red: 0.06, green: 0.24, blue: 0.24)
 
 // MARK: - Shared Verse Header
 
@@ -69,7 +69,7 @@ private struct VerseTypeLabel: View {
         HStack(spacing: 4) {
             Image(systemName: icon)
                 .font(.caption2)
-                .foregroundStyle(accentColor)
+                .foregroundStyle(tealAccent)
             Text(label)
                 .font(.caption2.weight(.medium))
                 .foregroundStyle(.secondary)
@@ -105,7 +105,7 @@ struct VerseMediumView: View {
             if !entry.source.isEmpty {
                 Text(entry.source)
                     .font(.caption2)
-                    .foregroundStyle(accentColor.opacity(0.8))
+                    .foregroundStyle(tealAccent.opacity(0.8))
                     .lineLimit(1)
             }
         }
@@ -124,7 +124,7 @@ struct VerseLargeView: View {
             VerseTypeLabel(type: entry.type)
 
             Divider()
-                .background(accentColor.opacity(0.2))
+                .background(tealAccent.opacity(0.2))
 
             Text(entry.arabic)
                 .font(.system(size: 20, weight: .medium, design: .default))
@@ -151,7 +151,7 @@ struct VerseLargeView: View {
                     Text(entry.source)
                         .font(.caption)
                 }
-                .foregroundStyle(accentColor)
+                .foregroundStyle(tealAccent)
             }
         }
         .padding(16)

@@ -40,9 +40,9 @@ struct ZikrProvider: TimelineProvider {
     }
 }
 
-// MARK: - Accent Color
+// MARK: - Theme Color
 
-private let accentColor = Color(red: 0.06, green: 0.24, blue: 0.24)
+private let tealAccent = Color(red: 0.06, green: 0.24, blue: 0.24)
 
 // MARK: - Progress Ring
 
@@ -53,10 +53,10 @@ private struct ProgressRing: View {
     var body: some View {
         ZStack {
             Circle()
-                .stroke(accentColor.opacity(0.12), lineWidth: lineWidth)
+                .stroke(tealAccent.opacity(0.12), lineWidth: lineWidth)
             Circle()
                 .trim(from: 0, to: min(progress, 1.0))
-                .stroke(accentColor, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                .stroke(tealAccent, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 .rotationEffect(.degrees(-90))
                 .animation(.easeOut(duration: 0.3), value: progress)
         }
@@ -82,14 +82,14 @@ private struct ZikrSmallContent: View {
             VStack(spacing: 2) {
                 Text(entry.arabic)
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(isComplete ? accentColor : .primary)
+                    .foregroundStyle(isComplete ? tealAccent : Color.primary)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
                     .minimumScaleFactor(0.6)
 
                 Text("\(entry.count)")
                     .font(.title2.bold().monospacedDigit())
-                    .foregroundStyle(isComplete ? accentColor : .primary)
+                    .foregroundStyle(isComplete ? tealAccent : Color.primary)
 
                 if entry.target > 0 {
                     Text("/ \(entry.target)")
@@ -116,9 +116,9 @@ private struct ZikrMediumContent: View {
             ZStack {
                 ProgressRing(progress: progress, lineWidth: 8)
                 VStack(spacing: 0) {
-                    Text("\(entry.count)")
-                        .font(.title.bold().monospacedDigit())
-                        .foregroundStyle(isComplete ? accentColor : .primary)
+                Text("\(entry.count)")
+                    .font(.title.bold().monospacedDigit())
+                    .foregroundStyle(isComplete ? tealAccent : Color.primary)
                     if entry.target > 0 {
                         Text("/ \(entry.target)")
                             .font(.caption2)
@@ -132,7 +132,7 @@ private struct ZikrMediumContent: View {
                 HStack(spacing: 4) {
                     Image(systemName: "hand.raised.fill")
                         .font(.caption2)
-                        .foregroundStyle(accentColor)
+                        .foregroundStyle(tealAccent)
                     Text("Tasbeeh")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
@@ -150,7 +150,7 @@ private struct ZikrMediumContent: View {
                 if isComplete {
                     Label("Complete", systemImage: "checkmark.circle.fill")
                         .font(.caption.weight(.medium))
-                        .foregroundStyle(accentColor)
+                        .foregroundStyle(tealAccent)
                 }
             }
 

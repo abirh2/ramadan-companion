@@ -78,9 +78,9 @@ struct PrayerProvider: TimelineProvider {
     }
 }
 
-// MARK: - Accent Color
+// MARK: - Theme Color
 
-private let accentColor = Color(red: 0.06, green: 0.24, blue: 0.24)
+private let tealAccent = Color(red: 0.06, green: 0.24, blue: 0.24)
 
 // MARK: - Small Widget View
 
@@ -92,7 +92,7 @@ struct PrayerSmallView: View {
             HStack(spacing: 4) {
                 Image(systemName: "moon.stars.fill")
                     .font(.caption2)
-                    .foregroundStyle(accentColor)
+                    .foregroundStyle(tealAccent)
                 Text("Next Prayer")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
@@ -114,7 +114,7 @@ struct PrayerSmallView: View {
 
             Label(entry.countdown, systemImage: "clock")
                 .font(.caption2.weight(.medium))
-                .foregroundStyle(accentColor)
+                .foregroundStyle(tealAccent)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
@@ -132,12 +132,12 @@ struct PrayerMediumView: View {
         HStack(alignment: .center, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 4) {
-                    Image(systemName: "moon.stars.fill")
-                        .font(.caption)
-                        .foregroundStyle(accentColor)
-                    Text("Next Prayer")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                Image(systemName: "moon.stars.fill")
+                    .font(.caption)
+                    .foregroundStyle(tealAccent)
+                Text("Next Prayer")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 }
 
                 Text(entry.prayerName)
@@ -156,11 +156,11 @@ struct PrayerMediumView: View {
             VStack(alignment: .trailing, spacing: 6) {
                 Image(systemName: "clock.fill")
                     .font(.title2)
-                    .foregroundStyle(accentColor)
+                    .foregroundStyle(tealAccent)
 
                 Text(entry.countdown)
                     .font(.headline.weight(.semibold))
-                    .foregroundStyle(accentColor)
+                    .foregroundStyle(tealAccent)
                     .multilineTextAlignment(.trailing)
                     .lineLimit(2)
                     .minimumScaleFactor(0.7)
