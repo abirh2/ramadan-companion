@@ -2,30 +2,18 @@
  * Widget Bridge — writes data to shared native storage so home screen widgets
  * can read it without requiring the app to be open.
  *
- * On iOS  → Uses a custom WidgetBridgePlugin (WidgetBridgePlugin.swift) that
- *           writes directly to UserDefaults(suiteName: "group.com.deencompanion.app").
- *           @capacitor/preferences is NOT used for this purpose: its "group" config
- *           option only changes the key prefix within UserDefaults.standard, which is
- *           sandboxed per process and cannot be read by widget extensions.
+ * On iOS  → @capacitor/preferences writes to UserDefaults.standard with a
+ *           "CapacitorStorage." key prefix. AppDelegate observes these writes
+ *           and mirrors the values to the App Group UserDefaults suite
+ *           (group.com.deencompanion.app) which the widget extension reads.
  *
- * On Android → @capacitor/preferences writes to SharedPreferences "CapacitorStorage"
- *              which the widget BroadcastReceivers read directly.
+ * On Android → @capacitor/preferences writes to SharedPreferences file
+ *              "CapacitorStorage" which the widget BroadcastReceivers read directly.
  *
  * All write functions are no-ops when running in a browser (Capacitor not present).
  */
 
-import { Capacitor, registerPlugin } from '@capacitor/core'
-
-// --------------------------------------------------------------------------
-// Native plugin interface (iOS: WidgetBridgePlugin.swift)
-// --------------------------------------------------------------------------
-
-interface WidgetBridgeNativePlugin {
-  setValues(options: { data: Record<string, string> }): Promise<void>
-  getValue(options: { key: string }): Promise<{ value: string | null }>
-}
-
-const WidgetBridgeNative = registerPlugin<WidgetBridgeNativePlugin>('WidgetBridge')
+import { Capacitor } from '@capacitor/core'
 
 // --------------------------------------------------------------------------
 // Types
@@ -78,21 +66,16 @@ function isNative(): boolean {
 }
 
 /**
- * On iOS: uses WidgetBridgePlugin to write a batch of key-value pairs directly
- * to the App Group UserDefaults container that the widget extension can read.
- *
- * On Android: falls back to @capacitor/preferences which writes to the
- * SharedPreferences file read by widget BroadcastReceivers.
+ * Lazily import and call Preferences.set so the Preferences plugin is never
+ * imported on the web (where it would log harmless but noisy warnings).
  */
+async function set(key: string, value: string): Promise<void> {
+  const { Preferences } = await import('@capacitor/preferences')
+  await Preferences.set({ key, value })
+}
+
 async function setAll(pairs: Record<string, string>): Promise<void> {
-  if (Capacitor.getPlatform() === 'ios') {
-    await WidgetBridgeNative.setValues({ data: pairs })
-  } else {
-    const { Preferences } = await import('@capacitor/preferences')
-    await Promise.all(
-      Object.entries(pairs).map(([key, value]) => Preferences.set({ key, value }))
-    )
-  }
+  await Promise.all(Object.entries(pairs).map(([key, value]) => set(key, value)))
 }
 
 // --------------------------------------------------------------------------
@@ -166,19 +149,10 @@ export async function updateZikrWidget(data: ZikrWidgetData): Promise<void> {
 export async function readWidgetZikrCount(): Promise<number | null> {
   if (!isNative()) return null
   try {
-    let rawValue: string | null = null
-
-    if (Capacitor.getPlatform() === 'ios') {
-      const result = await WidgetBridgeNative.getValue({ key: 'widget_zikr_count' })
-      rawValue = result.value
-    } else {
-      const { Preferences } = await import('@capacitor/preferences')
-      const result = await Preferences.get({ key: 'widget_zikr_count' })
-      rawValue = result.value
-    }
-
-    if (rawValue === null) return null
-    const parsed = parseInt(rawValue, 10)
+    const { Preferences } = await import('@capacitor/preferences')
+    const result = await Preferences.get({ key: 'widget_zikr_count' })
+    if (result.value === null) return null
+    const parsed = parseInt(result.value, 10)
     return isNaN(parsed) ? null : parsed
   } catch (err) {
     console.warn('[widgetBridge] readWidgetZikrCount failed:', err)
