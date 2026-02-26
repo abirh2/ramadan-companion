@@ -68,6 +68,12 @@
             ReferencedContainer = "container:App.xcodeproj">
          </BuildableReference>
       </RemoteRunnable>
+      <CommandLineArguments>
+         <CommandLineArgument
+            argument = ""
+            isEnabled = "YES">
+         </CommandLineArgument>
+      </CommandLineArguments>
       <EnvironmentVariables>
          <EnvironmentVariable
             key = "_XCWidgetKind"
@@ -102,6 +108,11 @@
          <EnvironmentVariable
             key = "_XCWidgetKind"
             value = "VerseWidget"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "_XCWidgetKind"
+            value = "PrayerWidget"
             isEnabled = "YES">
          </EnvironmentVariable>
          <EnvironmentVariable
