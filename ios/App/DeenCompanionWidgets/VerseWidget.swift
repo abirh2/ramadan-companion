@@ -213,7 +213,6 @@ struct VerseWidgetClear: Widget {
         .configurationDisplayName("Verse of the Day - Clear")
         .description("Daily verse with transparent background.")
         .supportedFamilies([.systemMedium, .systemLarge])
-        .contentMarginsDisabled()
     }
 }
 

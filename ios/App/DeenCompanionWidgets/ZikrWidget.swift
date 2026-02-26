@@ -264,7 +264,6 @@ struct ZikrWidgetClear: Widget {
         .configurationDisplayName("Zikr Counter - Clear")
         .description("Zikr counter with transparent background.")
         .supportedFamilies([.systemSmall, .systemMedium])
-        .contentMarginsDisabled()
     }
 }
 

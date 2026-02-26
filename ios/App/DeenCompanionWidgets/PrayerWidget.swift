@@ -217,7 +217,6 @@ struct PrayerWidgetClear: Widget {
         .configurationDisplayName("Next Prayer - Clear")
         .description("Next prayer with transparent background.")
         .supportedFamilies([.systemSmall, .systemMedium])
-        .contentMarginsDisabled()
     }
 }
 
