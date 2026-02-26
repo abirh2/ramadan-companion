@@ -60,9 +60,11 @@ private struct PrayerColumn: View {
 
     var body: some View {
         VStack(spacing: 5) {
-            Text(name.prefix(3).uppercased())
+            Text(name.uppercased())
                 .font(.system(size: 9, weight: .bold))
                 .foregroundStyle(isNext ? tealAccent : Color.secondary)
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
 
             Text(time)
                 .font(.system(size: 11, weight: .semibold).monospacedDigit())
