@@ -59,25 +59,24 @@ private struct PrayerColumn: View {
     let isNext: Bool
 
     var body: some View {
-        VStack(spacing: 3) {
+        VStack(spacing: 5) {
             Text(name.prefix(3).uppercased())
                 .font(.system(size: 9, weight: .bold))
                 .foregroundStyle(isNext ? tealAccent : Color.secondary)
 
             Text(time)
-                .font(.system(size: 10, weight: .semibold).monospacedDigit())
+                .font(.system(size: 11, weight: .semibold).monospacedDigit())
                 .foregroundStyle(isNext ? tealAccent : Color.primary)
                 .minimumScaleFactor(0.7)
                 .lineLimit(1)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 6)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(isNext ? tealAccent.opacity(0.12) : Color.primary.opacity(0.05))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .stroke(isNext ? tealAccent.opacity(0.25) : Color.clear, lineWidth: 0.5)
         )
     }
@@ -110,8 +109,8 @@ struct AllPrayersMediumView: View {
                     .foregroundStyle(.secondary)
             }
 
-            // 5-column prayer grid
-            HStack(spacing: 4) {
+            // 5-column prayer grid — fills remaining vertical space
+            HStack(spacing: 5) {
                 ForEach(prayers, id: \.name) { prayer in
                     PrayerColumn(
                         name: prayer.name,
@@ -120,9 +119,10 @@ struct AllPrayersMediumView: View {
                     )
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .padding(14)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
