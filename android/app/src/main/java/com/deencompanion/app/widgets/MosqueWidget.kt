@@ -10,11 +10,10 @@ import com.deencompanion.app.MainActivity
 import com.deencompanion.app.R
 
 /**
- * Ayah of the Day widget (Quran only -- hadiths have their own HadithWidget).
- * Displays the daily Quran verse with Arabic text (RTL) and English translation.
- * Tapping opens the app to /quran.
+ * Nearest Mosque widget showing name, distance, and address.
+ * Tapping opens the app to /places/mosques.
  */
-class VerseWidget : AppWidgetProvider() {
+class MosqueWidget : AppWidgetProvider() {
 
     override fun onUpdate(
         context: Context,
@@ -26,27 +25,24 @@ class VerseWidget : AppWidgetProvider() {
 
     companion object {
         fun update(context: Context, appWidgetManager: AppWidgetManager, widgetId: Int) {
-            val arabic = WidgetPrefs.verseArabic(context).ifEmpty {
-                "Open the app to load today's verse."
-            }
-            val translation = WidgetPrefs.verseTranslation(context)
-            val source = WidgetPrefs.verseSource(context)
+            val name = WidgetPrefs.mosqueName(context).ifEmpty { "Open app" }
+            val distance = WidgetPrefs.mosqueDistance(context)
+            val address = WidgetPrefs.mosqueAddress(context)
 
-            val views = RemoteViews(context.packageName, R.layout.widget_verse)
-            views.setTextViewText(R.id.widget_verse_label, "Ayah of the Day")
-            views.setTextViewText(R.id.widget_verse_arabic, arabic)
-            views.setTextViewText(R.id.widget_verse_translation, translation)
-            views.setTextViewText(R.id.widget_verse_source, source)
+            val views = RemoteViews(context.packageName, R.layout.widget_mosque)
+            views.setTextViewText(R.id.widget_mosque_name, name)
+            views.setTextViewText(R.id.widget_mosque_distance, distance)
+            views.setTextViewText(R.id.widget_mosque_address, address)
 
             val tapIntent = Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                putExtra("route", "/quran")
+                putExtra("route", "/places/mosques")
             }
             val pendingIntent = PendingIntent.getActivity(
-                context, widgetId + 100, tapIntent,
+                context, widgetId + 800, tapIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            views.setOnClickPendingIntent(R.id.widget_verse_root, pendingIntent)
+            views.setOnClickPendingIntent(R.id.widget_mosque_root, pendingIntent)
 
             appWidgetManager.updateAppWidget(widgetId, views)
         }

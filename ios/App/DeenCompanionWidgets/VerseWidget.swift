@@ -5,7 +5,6 @@ import SwiftUI
 
 struct VerseEntry: TimelineEntry {
     let date: Date
-    let type: String
     let arabic: String
     let translation: String
     let source: String
@@ -17,7 +16,6 @@ struct VerseProvider: TimelineProvider {
     func placeholder(in context: Context) -> VerseEntry {
         VerseEntry(
             date: Date(),
-            type: "quran",
             arabic: "\u{0628}\u{0650}\u{0633}\u{0652}\u{0645}\u{0650} \u{0671}\u{0644}\u{0644}\u{0651}\u{064E}\u{0670}\u{0647}\u{0650} \u{0671}\u{0644}\u{0631}\u{0651}\u{064E}\u{062D}\u{0652}\u{0645}\u{064E}\u{0670}\u{0646}\u{0650} \u{0671}\u{0644}\u{0631}\u{0651}\u{064E}\u{062D}\u{0650}\u{064A}\u{0645}\u{0650}",
             translation: "In the name of Allah, the Most Gracious, the Most Merciful.",
             source: "Surah Al-Fatiha 1:1"
@@ -38,18 +36,16 @@ struct VerseProvider: TimelineProvider {
         let arabic = SharedDefaults.verseArabic
         let translation = SharedDefaults.verseTranslation
         let source = SharedDefaults.verseSource
-        let type = SharedDefaults.verseType
 
         if arabic.isEmpty {
             return VerseEntry(
                 date: Date(),
-                type: "quran",
                 arabic: "\u{0628}\u{0650}\u{0633}\u{0652}\u{0645}\u{0650} \u{0671}\u{0644}\u{0644}\u{0651}\u{064E}\u{0670}\u{0647}\u{0650} \u{0671}\u{0644}\u{0631}\u{0651}\u{064E}\u{062D}\u{0652}\u{0645}\u{064E}\u{0670}\u{0646}\u{0650} \u{0671}\u{0644}\u{0631}\u{0651}\u{064E}\u{062D}\u{0650}\u{064A}\u{0645}\u{0650}",
                 translation: "Open the app to load today's verse.",
                 source: ""
             )
         }
-        return VerseEntry(date: Date(), type: type, arabic: arabic, translation: translation, source: source)
+        return VerseEntry(date: Date(), arabic: arabic, translation: translation, source: source)
     }
 }
 
@@ -59,19 +55,14 @@ struct VerseMediumView: View {
     let entry: VerseEntry
     @Environment(\.colorScheme) var colorScheme
 
-    var icon: String { entry.type == "hadith" ? "text.quote" : "book.closed.fill" }
-    var label: String { entry.type == "hadith" ? "Hadith of the Day" : "Ayah of the Day" }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                WidgetHeader(icon: icon, title: label)
+                WidgetHeader(icon: "book.closed.fill", title: "Ayah of the Day")
                 Spacer()
-                if entry.type == "quran" {
-                    Image(systemName: "play.circle.fill")
-                        .font(.system(size: 18))
-                        .foregroundStyle(WidgetTheme.accent(for: colorScheme).opacity(0.6))
-                }
+                Image(systemName: "play.circle.fill")
+                    .font(.system(size: 18))
+                    .foregroundStyle(WidgetTheme.accent(for: colorScheme).opacity(0.6))
             }
 
             Text(entry.arabic)
@@ -113,12 +104,9 @@ struct VerseLargeView: View {
     let entry: VerseEntry
     @Environment(\.colorScheme) var colorScheme
 
-    var icon: String { entry.type == "hadith" ? "text.quote" : "book.closed.fill" }
-    var label: String { entry.type == "hadith" ? "Hadith of the Day" : "Ayah of the Day" }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            WidgetHeader(icon: icon, title: label)
+            WidgetHeader(icon: "book.closed.fill", title: "Ayah of the Day")
 
             Rectangle()
                 .fill(WidgetTheme.accent(for: colorScheme).opacity(0.2))
@@ -144,7 +132,7 @@ struct VerseLargeView: View {
 
             if !entry.source.isEmpty {
                 HStack(spacing: 4) {
-                    Image(systemName: icon)
+                    Image(systemName: "book.closed.fill")
                         .font(.caption2)
                     Text(entry.source)
                         .font(.caption)
@@ -163,11 +151,6 @@ struct VerseWidgetEntryView: View {
     let entry: VerseEntry
     @Environment(\.widgetFamily) var family
 
-    var deepLinkURL: URL {
-        let path = entry.type == "hadith" ? "/hadith" : "/quran"
-        return URL(string: "deencompanion://\(path)") ?? URL(string: "https://ramadan-companion.vercel.app")!
-    }
-
     var body: some View {
         Group {
             switch family {
@@ -179,7 +162,7 @@ struct VerseWidgetEntryView: View {
                 VerseMediumView(entry: entry)
             }
         }
-        .widgetURL(deepLinkURL)
+        .widgetURL(URL(string: "deencompanion:///quran"))
     }
 }
 
@@ -196,7 +179,7 @@ struct VerseWidget: Widget {
                 }
         }
         .configurationDisplayName("Ayah of the Day")
-        .description("Daily Quran verse or Hadith with Arabic text and translation.")
+        .description("Daily Quran verse with Arabic text and translation.")
         .supportedFamilies([.systemMedium, .systemLarge])
         .contentMarginsDisabled()
     }
@@ -209,7 +192,6 @@ struct VerseWidget: Widget {
 } timeline: {
     VerseEntry(
         date: .now,
-        type: "quran",
         arabic: "\u{0625}\u{0650}\u{0646}\u{0651}\u{064E}\u{0645}\u{064E}\u{0627} \u{064A}\u{064E}\u{062E}\u{0652}\u{0634}\u{064E}\u{0649} \u{0671}\u{0644}\u{0644}\u{0651}\u{064E}\u{0670}\u{0647}\u{064E} \u{0645}\u{0650}\u{0646}\u{0652} \u{0639}\u{0650}\u{0628}\u{064E}\u{0627}\u{062F}\u{0650}\u{0647}\u{0650} \u{0671}\u{0644}\u{0652}\u{0639}\u{064F}\u{0644}\u{064E}\u{0645}\u{064E}\u{0670}\u{0653}\u{0624}\u{064F}\u{0627}\u{06DF}",
         translation: "Only those fear Allah, from among His servants, who have knowledge.",
         source: "Surah Fatir 35:28"
@@ -221,9 +203,8 @@ struct VerseWidget: Widget {
 } timeline: {
     VerseEntry(
         date: .now,
-        type: "hadith",
-        arabic: "\u{0625}\u{0650}\u{0646}\u{0651}\u{064E}\u{0645}\u{064E}\u{0627} \u{0627}\u{0644}\u{0623}\u{064E}\u{0639}\u{0652}\u{0645}\u{064E}\u{0627}\u{0644}\u{064F} \u{0628}\u{0650}\u{0627}\u{0644}\u{0646}\u{0651}\u{0650}\u{064A}\u{0651}\u{064E}\u{0627}\u{062A}\u{0650}",
-        translation: "Actions are judged by their intentions.",
-        source: "Sahih al-Bukhari #1"
+        arabic: "\u{0625}\u{0650}\u{0646}\u{0651}\u{064E}\u{0645}\u{064E}\u{0627} \u{064A}\u{064E}\u{062E}\u{0652}\u{0634}\u{064E}\u{0649} \u{0671}\u{0644}\u{0644}\u{0651}\u{064E}\u{0670}\u{0647}\u{064E} \u{0645}\u{0650}\u{0646}\u{0652} \u{0639}\u{0650}\u{0628}\u{064E}\u{0627}\u{062F}\u{0650}\u{0647}\u{0650} \u{0671}\u{0644}\u{0652}\u{0639}\u{064F}\u{0644}\u{064E}\u{0645}\u{064E}\u{0670}\u{0653}\u{0624}\u{064F}\u{0627}\u{06DF}",
+        translation: "Only those fear Allah, from among His servants, who have knowledge.",
+        source: "Surah Fatir 35:28"
     )
 }

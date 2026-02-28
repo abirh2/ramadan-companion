@@ -82,6 +82,84 @@
             </intent-filter>
         </receiver>
 
+        <!-- Hadith of the Day Widget -->
+        <receiver
+            android:name=".widgets.HadithWidget"
+            android:exported="true"
+            android:label="Hadith of the Day">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_hadith_info" />
+        </receiver>
+
+        <!-- All Prayers Widget -->
+        <receiver
+            android:name=".widgets.AllPrayersWidget"
+            android:exported="true"
+            android:label="Daily Prayers">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_all_prayers_info" />
+        </receiver>
+
+        <!-- Hijri Date Widget -->
+        <receiver
+            android:name=".widgets.HijriDateWidget"
+            android:exported="true"
+            android:label="Islamic Date">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_hijri_info" />
+        </receiver>
+
+        <!-- Charity Widget -->
+        <receiver
+            android:name=".widgets.CharityWidget"
+            android:exported="true"
+            android:label="Charity Tracker">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_charity_info" />
+        </receiver>
+
+        <!-- Qibla Widget -->
+        <receiver
+            android:name=".widgets.QiblaWidget"
+            android:exported="true"
+            android:label="Qibla Direction">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_qibla_info" />
+        </receiver>
+
+        <!-- Mosque Widget -->
+        <receiver
+            android:name=".widgets.MosqueWidget"
+            android:exported="true"
+            android:label="Nearest Mosque">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_mosque_info" />
+        </receiver>
+
     </application>
 
     <!-- Permissions -->

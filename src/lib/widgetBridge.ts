@@ -36,6 +36,12 @@ export interface AllPrayersWidgetData {
   asr: string
   maghrib: string
   isha: string
+  /** 24hr times (HH:MM) for widget self-computation of next prayer */
+  fajr24: string
+  dhuhr24: string
+  asr24: string
+  maghrib24: string
+  isha24: string
   /** Name of the next upcoming prayer, used for highlighting */
   nextPrayer: string
   /** ISO timestamp of last update */
@@ -43,13 +49,22 @@ export interface AllPrayersWidgetData {
 }
 
 export interface VerseWidgetData {
-  /** Source type -- determines which deep-link the widget opens */
-  type: 'quran' | 'hadith'
   /** Arabic text (RTL) */
   arabic: string
-  /** English translation or hadith text */
+  /** English translation */
   translation: string
-  /** Attribution line, e.g. "Surah Al-Fatiha 1:1" or "Sahih Muslim 123" */
+  /** Attribution line, e.g. "Surah Al-Fatiha 1:1" */
+  source: string
+  /** ISO timestamp of last update */
+  updatedAt: string
+}
+
+export interface HadithWidgetData {
+  /** Arabic text (RTL) */
+  arabic: string
+  /** English translation */
+  translation: string
+  /** Attribution line, e.g. "Sahih Muslim 123" */
   source: string
   /** ISO timestamp of last update */
   updatedAt: string
@@ -112,6 +127,36 @@ export interface MosqueWidgetData {
   distance: string
   /** Address string */
   address: string
+  /** ISO timestamp of last update */
+  updatedAt: string
+}
+
+export interface WidgetConfigData {
+  /** Latitude, e.g. "40.7128" */
+  lat: string
+  /** Longitude, e.g. "-74.0060" */
+  lng: string
+  /** AlAdhan calculation method ID, e.g. "4" */
+  calculationMethod: string
+  /** AlAdhan madhab ID: "0" = Standard, "1" = Hanafi */
+  madhab: string
+  /** IANA timezone string, e.g. "America/New_York" */
+  timezone: string
+  /** ISO timestamp of last update */
+  updatedAt: string
+}
+
+export interface PrayerDaySchedule {
+  fajr: string    // HH:MM 24hr
+  dhuhr: string
+  asr: string
+  maghrib: string
+  isha: string
+}
+
+export interface PrayerScheduleData {
+  /** Map of ISO date string (YYYY-MM-DD) to prayer times for that day */
+  schedule: Record<string, PrayerDaySchedule>
   /** ISO timestamp of last update */
   updatedAt: string
 }
@@ -196,6 +241,11 @@ export async function updateAllPrayersWidget(data: AllPrayersWidgetData): Promis
       widget_all_prayers_asr: data.asr,
       widget_all_prayers_maghrib: data.maghrib,
       widget_all_prayers_isha: data.isha,
+      widget_all_prayers_fajr_24: data.fajr24,
+      widget_all_prayers_dhuhr_24: data.dhuhr24,
+      widget_all_prayers_asr_24: data.asr24,
+      widget_all_prayers_maghrib_24: data.maghrib24,
+      widget_all_prayers_isha_24: data.isha24,
       widget_all_prayers_next: data.nextPrayer,
       widget_all_prayers_update: data.updatedAt,
     })
@@ -205,13 +255,13 @@ export async function updateAllPrayersWidget(data: AllPrayersWidgetData): Promis
 }
 
 /**
- * Write Quran-verse or Hadith widget data. Content is truncated to fit widgets.
+ * Write Quran verse widget data (quran only). Content is truncated to fit widgets.
  */
 export async function updateVerseWidget(data: VerseWidgetData): Promise<void> {
   if (!isNative()) return
   try {
     await setAll({
-      widget_verse_type: data.type,
+      widget_verse_type: 'quran',
       widget_verse_arabic: truncateForWidget(data.arabic, WIDGET_ARABIC_MAX),
       widget_verse_translation: truncateForWidget(data.translation, WIDGET_TRANSLATION_MAX),
       widget_verse_source: data.source,
@@ -219,6 +269,23 @@ export async function updateVerseWidget(data: VerseWidgetData): Promise<void> {
     })
   } catch (err) {
     console.warn('[widgetBridge] updateVerseWidget failed:', err)
+  }
+}
+
+/**
+ * Write Hadith widget data to dedicated hadith keys (separate from verse).
+ */
+export async function updateHadithWidget(data: HadithWidgetData): Promise<void> {
+  if (!isNative()) return
+  try {
+    await setAll({
+      widget_hadith_arabic: truncateForWidget(data.arabic, WIDGET_ARABIC_MAX),
+      widget_hadith_translation: truncateForWidget(data.translation, WIDGET_TRANSLATION_MAX),
+      widget_hadith_source: data.source,
+      widget_hadith_update: data.updatedAt,
+    })
+  } catch (err) {
+    console.warn('[widgetBridge] updateHadithWidget failed:', err)
   }
 }
 
@@ -324,5 +391,41 @@ export async function updateMosqueWidget(data: MosqueWidgetData): Promise<void> 
     })
   } catch (err) {
     console.warn('[widgetBridge] updateMosqueWidget failed:', err)
+  }
+}
+
+/**
+ * Write location + method config so widget extensions can self-compute prayer times.
+ * This is the primary data source for Strategy B (embedded algorithm).
+ */
+export async function updateWidgetConfig(data: WidgetConfigData): Promise<void> {
+  if (!isNative()) return
+  try {
+    await setAll({
+      widget_config_lat: data.lat,
+      widget_config_lng: data.lng,
+      widget_config_method: data.calculationMethod,
+      widget_config_madhab: data.madhab,
+      widget_config_timezone: data.timezone,
+      widget_config_update: data.updatedAt,
+    })
+  } catch (err) {
+    console.warn('[widgetBridge] updateWidgetConfig failed:', err)
+  }
+}
+
+/**
+ * Write a 14-day prayer time schedule as a JSON blob.
+ * Used as Strategy A fallback when the embedded algorithm has no config data.
+ */
+export async function updatePrayerSchedule(data: PrayerScheduleData): Promise<void> {
+  if (!isNative()) return
+  try {
+    await setAll({
+      widget_prayer_schedule: JSON.stringify(data.schedule),
+      widget_prayer_schedule_update: data.updatedAt,
+    })
+  } catch (err) {
+    console.warn('[widgetBridge] updatePrayerSchedule failed:', err)
   }
 }

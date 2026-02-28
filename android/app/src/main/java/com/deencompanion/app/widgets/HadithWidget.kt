@@ -10,11 +10,10 @@ import com.deencompanion.app.MainActivity
 import com.deencompanion.app.R
 
 /**
- * Ayah of the Day widget (Quran only -- hadiths have their own HadithWidget).
- * Displays the daily Quran verse with Arabic text (RTL) and English translation.
- * Tapping opens the app to /quran.
+ * Hadith of the Day widget. Reads from dedicated hadith keys
+ * (separate from verse/quran data). Tapping opens the app to /hadith.
  */
-class VerseWidget : AppWidgetProvider() {
+class HadithWidget : AppWidgetProvider() {
 
     override fun onUpdate(
         context: Context,
@@ -26,27 +25,26 @@ class VerseWidget : AppWidgetProvider() {
 
     companion object {
         fun update(context: Context, appWidgetManager: AppWidgetManager, widgetId: Int) {
-            val arabic = WidgetPrefs.verseArabic(context).ifEmpty {
-                "Open the app to load today's verse."
+            val arabic = WidgetPrefs.hadithArabic(context)
+            val translation = WidgetPrefs.hadithTranslation(context).ifEmpty {
+                "Open the app to load today's hadith."
             }
-            val translation = WidgetPrefs.verseTranslation(context)
-            val source = WidgetPrefs.verseSource(context)
+            val source = WidgetPrefs.hadithSource(context)
 
-            val views = RemoteViews(context.packageName, R.layout.widget_verse)
-            views.setTextViewText(R.id.widget_verse_label, "Ayah of the Day")
-            views.setTextViewText(R.id.widget_verse_arabic, arabic)
-            views.setTextViewText(R.id.widget_verse_translation, translation)
-            views.setTextViewText(R.id.widget_verse_source, source)
+            val views = RemoteViews(context.packageName, R.layout.widget_hadith)
+            views.setTextViewText(R.id.widget_hadith_arabic, arabic)
+            views.setTextViewText(R.id.widget_hadith_translation, "\u201C$translation\u201D")
+            views.setTextViewText(R.id.widget_hadith_source, source)
 
             val tapIntent = Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                putExtra("route", "/quran")
+                putExtra("route", "/hadith")
             }
             val pendingIntent = PendingIntent.getActivity(
-                context, widgetId + 100, tapIntent,
+                context, widgetId + 300, tapIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            views.setOnClickPendingIntent(R.id.widget_verse_root, pendingIntent)
+            views.setOnClickPendingIntent(R.id.widget_hadith_root, pendingIntent)
 
             appWidgetManager.updateAppWidget(widgetId, views)
         }

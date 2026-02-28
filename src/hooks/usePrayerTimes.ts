@@ -22,7 +22,14 @@ import {
 } from '@/lib/location'
 import { calculatePrayerTimesLocal, validatePrayerTimes } from '@/lib/prayerTimes'
 import { getDefaultCalculationMethodByCountry, extractCountryFromCity } from '@/lib/calculationMethod'
-import { updatePrayerWidget, updateAllPrayersWidget, updateQiblaWidget, to12Hour } from '@/lib/widgetBridge'
+import {
+  updatePrayerWidget,
+  updateAllPrayersWidget,
+  updateQiblaWidget,
+  updateWidgetConfig,
+  updatePrayerSchedule,
+  to12Hour,
+} from '@/lib/widgetBridge'
 
 // Prayer names in order (excluding Sunrise for next prayer calculation)
 const PRAYER_NAMES = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const
@@ -377,9 +384,52 @@ export function usePrayerTimes(): UsePrayerTimesResult {
           asr: to12Hour(prayerTimes.Asr),
           maghrib: to12Hour(prayerTimes.Maghrib),
           isha: to12Hour(prayerTimes.Isha),
+          fajr24: prayerTimes.Fajr,
+          dhuhr24: prayerTimes.Dhuhr,
+          asr24: prayerTimes.Asr,
+          maghrib24: prayerTimes.Maghrib,
+          isha24: prayerTimes.Isha,
           nextPrayer: nextPrayer.name,
           updatedAt: now.toISOString(),
         }).catch(() => {/* non-critical */})
+      }
+
+      // Write config + 14-day schedule so widget extensions can self-compute prayer times
+      if (location) {
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+        updateWidgetConfig({
+          lat: String(location.lat),
+          lng: String(location.lng),
+          calculationMethod: method,
+          madhab,
+          timezone,
+          updatedAt: new Date().toISOString(),
+        }).catch(() => {/* non-critical */})
+
+        // Compute and store next 14 days as Strategy A fallback
+        const schedule: Record<string, { fajr: string; dhuhr: string; asr: string; maghrib: string; isha: string }> = {}
+        const scheduleNow = new Date()
+        for (let i = 0; i < 14; i++) {
+          const date = new Date(scheduleNow.getTime() + i * 24 * 60 * 60 * 1000)
+          try {
+            const times = calculatePrayerTimesLocal(location.lat, location.lng, method, madhab, timezone, date)
+            if (validatePrayerTimes(times)) {
+              const key = date.toLocaleDateString('sv-SE')  // YYYY-MM-DD in local time
+              schedule[key] = {
+                fajr: times.Fajr,
+                dhuhr: times.Dhuhr,
+                asr: times.Asr,
+                maghrib: times.Maghrib,
+                isha: times.Isha,
+              }
+            }
+          } catch {
+            // skip this day
+          }
+        }
+        if (Object.keys(schedule).length > 0) {
+          updatePrayerSchedule({ schedule, updatedAt: new Date().toISOString() }).catch(() => {/* non-critical */})
+        }
       }
 
       if (qiblaData && location) {
@@ -438,6 +488,11 @@ export function usePrayerTimes(): UsePrayerTimesResult {
             asr: to12Hour(prayerTimes.Asr),
             maghrib: to12Hour(prayerTimes.Maghrib),
             isha: to12Hour(prayerTimes.Isha),
+            fajr24: prayerTimes.Fajr,
+            dhuhr24: prayerTimes.Dhuhr,
+            asr24: prayerTimes.Asr,
+            maghrib24: prayerTimes.Maghrib,
+            isha24: prayerTimes.Isha,
             nextPrayer: updatedNextPrayer.name,
             updatedAt: now.toISOString(),
           }).catch(() => {/* non-critical */})

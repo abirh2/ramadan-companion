@@ -100,7 +100,6 @@ export function useQuranOfTheDay(): UseQuranOfTheDayResult {
         const surahName = data.surah?.englishName ?? 'Quran'
         const ayahRef = data.numberInSurah ? `${surahName} ${data.surah?.number ?? ''}:${data.numberInSurah}` : surahName
         updateVerseWidget({
-          type: 'quran',
           arabic: data.arabic?.text ?? '',
           translation: data.translation?.text ?? '',
           source: ayahRef,

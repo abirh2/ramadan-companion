@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_charity_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="14dp"
+    android:gravity="start"
+    android:background="@drawable/widget_background">
+
+    <!-- Header -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Charity"
+        android:textSize="10sp"
+        android:textColor="#888888"
+        android:textStyle="bold"
+        android:letterSpacing="0.05" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Monthly label -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="This Month"
+        android:textSize="10sp"
+        android:textColor="#888888" />
+
+    <!-- Monthly total -->
+    <TextView
+        android:id="@+id/widget_charity_monthly"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="$0"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#10BA7A" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="4dp" />
+
+    <!-- Yearly label -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="This Year"
+        android:textSize="10sp"
+        android:textColor="#888888" />
+
+    <!-- Yearly total -->
+    <TextView
+        android:id="@+id/widget_charity_yearly"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="$0"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="#0f3d3e" />
+
+</LinearLayout>
