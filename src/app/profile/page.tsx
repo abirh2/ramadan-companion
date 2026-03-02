@@ -178,9 +178,9 @@ export default function ProfilePage() {
                 <div className="space-y-2 mt-4">
                   <p className="text-sm font-medium">Enabled Prayers:</p>
                   <div className="grid grid-cols-2 gap-2">
-                    {(Object.entries(preferences.prayers) as [PrayerName, boolean][]).map(
-                      ([prayer, enabled]) =>
-                        enabled && (
+                    {(Object.entries(preferences.prayers) as [PrayerName, { enabled: boolean; minutesBefore: number }][]).map(
+                      ([prayer, setting]) =>
+                        setting.enabled && (
                           <div
                             key={prayer}
                             className="flex items-center gap-2 text-sm"

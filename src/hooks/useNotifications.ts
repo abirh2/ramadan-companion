@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth'
 import type {
   NotificationPreferences,
   PrayerName,
+  MinutesBefore,
   UseNotificationsResult,
 } from '@/types/notification.types'
 import {
@@ -122,16 +123,20 @@ export function useNotifications(): UseNotificationsResult {
           }
         }
 
+        const PRAYER_NAMES: PrayerName[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
+        const enabledPrayers = {} as NotificationPreferences['prayers']
+        for (const p of PRAYER_NAMES) {
+          const existing = state.preferences.prayers[p]
+          enabledPrayers[p] = {
+            enabled: true,
+            minutesBefore: (existing && typeof existing === 'object') ? existing.minutesBefore : 0,
+          }
+        }
+
         const newPreferences: NotificationPreferences = {
           ...state.preferences,
           enabled: true,
-          prayers: {
-            Fajr: true,
-            Dhuhr: true,
-            Asr: true,
-            Maghrib: true,
-            Isha: true,
-          },
+          prayers: enabledPrayers,
         }
 
         await saveNotificationPreferences(newPreferences, profile)
@@ -189,15 +194,16 @@ export function useNotifications(): UseNotificationsResult {
     }
   }, [profile])
 
-  // Toggle individual prayer notification
+  // Toggle individual prayer notification on/off
   const togglePrayer = useCallback(
     async (prayer: PrayerName): Promise<void> => {
       try {
+        const current = state.preferences.prayers[prayer]
         const newPreferences: NotificationPreferences = {
           ...state.preferences,
           prayers: {
             ...state.preferences.prayers,
-            [prayer]: !state.preferences.prayers[prayer],
+            [prayer]: { ...current, enabled: !current.enabled },
           },
         }
 
@@ -225,19 +231,20 @@ export function useNotifications(): UseNotificationsResult {
     [state.preferences, profile]
   )
 
-  // Enable all notifications (preserves minutesBefore)
+  // Enable all notifications (preserves per-prayer minutesBefore)
   const enableAll = useCallback(async (): Promise<void> => {
     try {
+      const PRAYER_NAMES: PrayerName[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
+      const enabledPrayers = {} as NotificationPreferences['prayers']
+      for (const p of PRAYER_NAMES) {
+        const existing = state.preferences.prayers[p]
+        enabledPrayers[p] = { ...existing, enabled: true }
+      }
+
       const newPreferences: NotificationPreferences = {
         ...state.preferences,
         enabled: true,
-        prayers: {
-          Fajr: true,
-          Dhuhr: true,
-          Asr: true,
-          Maghrib: true,
-          Isha: true,
-        },
+        prayers: enabledPrayers,
       }
 
       await saveNotificationPreferences(newPreferences, profile)
@@ -262,12 +269,16 @@ export function useNotifications(): UseNotificationsResult {
     }
   }, [state.preferences, profile])
 
-  // Update advance reminder offset and reschedule
-  const setMinutesBefore = useCallback(async (minutes: 0 | 5 | 10): Promise<void> => {
+  // Update advance reminder offset for a specific prayer and reschedule
+  const setPrayerMinutesBefore = useCallback(async (prayer: PrayerName, minutes: MinutesBefore): Promise<void> => {
     try {
+      const current = state.preferences.prayers[prayer]
       const newPreferences: NotificationPreferences = {
         ...state.preferences,
-        minutesBefore: minutes,
+        prayers: {
+          ...state.preferences.prayers,
+          [prayer]: { ...current, minutesBefore: minutes },
+        },
       }
 
       await saveNotificationPreferences(newPreferences, profile)
@@ -284,7 +295,7 @@ export function useNotifications(): UseNotificationsResult {
         preferences: newPreferences,
       }))
     } catch (error) {
-      console.error('[useNotifications] Failed to update minutesBefore:', error)
+      console.error(`[useNotifications] Failed to update minutesBefore for ${prayer}:`, error)
       setState((prev) => ({
         ...prev,
         error: error instanceof Error ? error.message : 'Failed to update reminder timing',
@@ -347,7 +358,7 @@ export function useNotifications(): UseNotificationsResult {
     togglePrayer,
     enableAll,
     disableAll,
-    setMinutesBefore,
+    setPrayerMinutesBefore,
     refetch,
   }
 }

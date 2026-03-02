@@ -2,18 +2,18 @@
 
 export type PrayerName = 'Fajr' | 'Dhuhr' | 'Asr' | 'Maghrib' | 'Isha'
 
-export interface PrayerNotificationPreferences {
-  Fajr: boolean
-  Dhuhr: boolean
-  Asr: boolean
-  Maghrib: boolean
-  Isha: boolean
+export type MinutesBefore = 0 | 5 | 10
+
+export interface PrayerNotificationSetting {
+  enabled: boolean
+  minutesBefore: MinutesBefore
 }
+
+export type PrayerNotificationPreferences = Record<PrayerName, PrayerNotificationSetting>
 
 export interface NotificationPreferences {
   enabled: boolean
   prayers: PrayerNotificationPreferences
-  minutesBefore: 0 | 5 | 10
 }
 
 export interface PrayerQuote {
@@ -59,7 +59,7 @@ export interface UseNotificationsResult {
   togglePrayer: (prayer: PrayerName) => Promise<void>
   enableAll: () => Promise<void>
   disableAll: () => Promise<void>
-  setMinutesBefore: (minutes: 0 | 5 | 10) => Promise<void>
+  setPrayerMinutesBefore: (prayer: PrayerName, minutes: MinutesBefore) => Promise<void>
   refetch: () => Promise<void>
 }
 

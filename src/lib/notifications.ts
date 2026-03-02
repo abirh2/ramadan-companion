@@ -16,17 +16,54 @@ const STORAGE_KEYS = {
   PERMISSION_REQUESTED: 'notification_permission_requested',
 } as const
 
-// Default notification preferences
+const DEFAULT_PRAYER_SETTING = { enabled: true, minutesBefore: 0 as const }
+
 export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
   enabled: false,
   prayers: {
-    Fajr: true,
-    Dhuhr: true,
-    Asr: true,
-    Maghrib: true,
-    Isha: true,
+    Fajr: { ...DEFAULT_PRAYER_SETTING },
+    Dhuhr: { ...DEFAULT_PRAYER_SETTING },
+    Asr: { ...DEFAULT_PRAYER_SETTING },
+    Maghrib: { ...DEFAULT_PRAYER_SETTING },
+    Isha: { ...DEFAULT_PRAYER_SETTING },
   },
-  minutesBefore: 0,
+}
+
+/**
+ * Migrate old-format preferences (boolean prayers + global minutesBefore)
+ * to the new per-prayer format ({ enabled, minutesBefore } per prayer).
+ */
+function migratePreferences(raw: Record<string, unknown>): NotificationPreferences {
+  const prayers = (raw.prayers ?? {}) as Record<string, unknown>
+  const globalMinutes = typeof raw.minutesBefore === 'number' ? (raw.minutesBefore as 0 | 5 | 10) : 0
+
+  const isOldFormat = Object.values(prayers).some((v) => typeof v === 'boolean')
+
+  const PRAYER_NAMES: PrayerName[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
+
+  const migratedPrayers = {} as Record<PrayerName, { enabled: boolean; minutesBefore: 0 | 5 | 10 }>
+  for (const name of PRAYER_NAMES) {
+    const val = prayers[name]
+    if (isOldFormat || typeof val === 'boolean') {
+      migratedPrayers[name] = {
+        enabled: typeof val === 'boolean' ? val : DEFAULT_PRAYER_SETTING.enabled,
+        minutesBefore: globalMinutes,
+      }
+    } else if (val && typeof val === 'object' && 'enabled' in (val as object)) {
+      const setting = val as { enabled?: boolean; minutesBefore?: number }
+      migratedPrayers[name] = {
+        enabled: setting.enabled ?? DEFAULT_PRAYER_SETTING.enabled,
+        minutesBefore: (setting.minutesBefore ?? 0) as 0 | 5 | 10,
+      }
+    } else {
+      migratedPrayers[name] = { ...DEFAULT_PRAYER_SETTING }
+    }
+  }
+
+  return {
+    enabled: typeof raw.enabled === 'boolean' ? raw.enabled : false,
+    prayers: migratedPrayers,
+  }
 }
 
 // Note: Notification scheduling now handled by backend cron job + Web Push API
@@ -151,16 +188,9 @@ export async function requestNotificationPermission(): Promise<boolean> {
 export function getNotificationPreferences(
   profile?: { notification_preferences?: NotificationPreferences } | null
 ): NotificationPreferences {
-  // Ensures backward-compat with stored prefs that predate minutesBefore field
-  const withDefaults = (prefs: Partial<NotificationPreferences>): NotificationPreferences => ({
-    ...DEFAULT_NOTIFICATION_PREFERENCES,
-    ...prefs,
-    prayers: { ...DEFAULT_NOTIFICATION_PREFERENCES.prayers, ...prefs.prayers },
-  })
-
   // 1. Try profile first (authenticated users)
   if (profile?.notification_preferences) {
-    return withDefaults(profile.notification_preferences)
+    return migratePreferences(profile.notification_preferences as unknown as Record<string, unknown>)
   }
 
   // 2. Try localStorage (guest users + fallback)
@@ -168,7 +198,7 @@ export function getNotificationPreferences(
     try {
       const stored = localStorage.getItem(STORAGE_KEYS.PREFERENCES)
       if (stored) {
-        return withDefaults(JSON.parse(stored) as Partial<NotificationPreferences>)
+        return migratePreferences(JSON.parse(stored) as Record<string, unknown>)
       }
     } catch (error) {
       console.error('[Notifications] Failed to load from localStorage:', error)

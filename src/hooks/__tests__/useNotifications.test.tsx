@@ -15,17 +15,18 @@ const mockRequestNotificationPermission = notificationLib.requestNotificationPer
 const mockGetNotificationPreferences = notificationLib.getNotificationPreferences as jest.MockedFunction<typeof notificationLib.getNotificationPreferences>
 const mockSaveNotificationPreferences = notificationLib.saveNotificationPreferences as jest.MockedFunction<typeof notificationLib.saveNotificationPreferences>
 
-// Mock default preferences
+const mp = (enabled: boolean, minutesBefore = 0) => ({ enabled, minutesBefore: minutesBefore as 0 | 5 | 10 })
+
+// Mock default preferences (new per-prayer format)
 const DEFAULT_PREFS = {
   enabled: false,
   prayers: {
-    Fajr: true,
-    Dhuhr: true,
-    Asr: true,
-    Maghrib: true,
-    Isha: true,
+    Fajr: mp(true),
+    Dhuhr: mp(true),
+    Asr: mp(true),
+    Maghrib: mp(true),
+    Isha: mp(true),
   },
-  minutesBefore: 0 as const,
 }
 
 describe('useNotifications', () => {
@@ -142,13 +143,12 @@ describe('useNotifications', () => {
         notification_preferences: {
           enabled: true,
           prayers: {
-            Fajr: true,
-            Dhuhr: false,
-            Asr: true,
-            Maghrib: true,
-            Isha: false,
+            Fajr: mp(true),
+            Dhuhr: mp(false),
+            Asr: mp(true),
+            Maghrib: mp(true),
+            Isha: mp(false),
           },
-          minutesBefore: 0 as const,
         },
       }
 
@@ -187,13 +187,13 @@ describe('useNotifications', () => {
       expect(mockSaveNotificationPreferences).toHaveBeenCalledWith(
         expect.objectContaining({
           enabled: true,
-          prayers: {
-            Fajr: true,
-            Dhuhr: true,
-            Asr: true,
-            Maghrib: true,
-            Isha: true,
-          },
+          prayers: expect.objectContaining({
+            Fajr: expect.objectContaining({ enabled: true }),
+            Dhuhr: expect.objectContaining({ enabled: true }),
+            Asr: expect.objectContaining({ enabled: true }),
+            Maghrib: expect.objectContaining({ enabled: true }),
+            Isha: expect.objectContaining({ enabled: true }),
+          }),
         }),
         null
       )
@@ -219,13 +219,12 @@ describe('useNotifications', () => {
       mockGetNotificationPreferences.mockReturnValue({
         enabled: true,
         prayers: {
-          Fajr: false,
-          Dhuhr: true,
-          Asr: true,
-          Maghrib: true,
-          Isha: true,
+          Fajr: mp(false),
+          Dhuhr: mp(true),
+          Asr: mp(true),
+          Maghrib: mp(true),
+          Isha: mp(true),
         },
-        minutesBefore: 0 as const,
       })
 
       const { result } = renderHook(() => useNotifications())
@@ -237,13 +236,9 @@ describe('useNotifications', () => {
       expect(mockSaveNotificationPreferences).toHaveBeenCalledWith(
         expect.objectContaining({
           enabled: true,
-          prayers: {
-            Fajr: true,
-            Dhuhr: true,
-            Asr: true,
-            Maghrib: true,
-            Isha: true,
-          },
+          prayers: expect.objectContaining({
+            Fajr: expect.objectContaining({ enabled: true }),
+          }),
         }),
         null
       )
@@ -253,13 +248,12 @@ describe('useNotifications', () => {
       mockGetNotificationPreferences.mockReturnValue({
         enabled: true,
         prayers: {
-          Fajr: true,
-          Dhuhr: true,
-          Asr: true,
-          Maghrib: true,
-          Isha: true,
+          Fajr: mp(true),
+          Dhuhr: mp(true),
+          Asr: mp(true),
+          Maghrib: mp(true),
+          Isha: mp(true),
         },
-        minutesBefore: 0 as const,
       })
 
       const { result } = renderHook(() => useNotifications())
@@ -271,13 +265,9 @@ describe('useNotifications', () => {
       expect(mockSaveNotificationPreferences).toHaveBeenCalledWith(
         expect.objectContaining({
           enabled: true,
-          prayers: {
-            Fajr: true,
-            Dhuhr: false,
-            Asr: true,
-            Maghrib: true,
-            Isha: true,
-          },
+          prayers: expect.objectContaining({
+            Dhuhr: expect.objectContaining({ enabled: false }),
+          }),
         }),
         null
       )
@@ -295,13 +285,13 @@ describe('useNotifications', () => {
       expect(mockSaveNotificationPreferences).toHaveBeenCalledWith(
         expect.objectContaining({
           enabled: true,
-          prayers: {
-            Fajr: true,
-            Dhuhr: true,
-            Asr: true,
-            Maghrib: true,
-            Isha: true,
-          },
+          prayers: expect.objectContaining({
+            Fajr: expect.objectContaining({ enabled: true }),
+            Dhuhr: expect.objectContaining({ enabled: true }),
+            Asr: expect.objectContaining({ enabled: true }),
+            Maghrib: expect.objectContaining({ enabled: true }),
+            Isha: expect.objectContaining({ enabled: true }),
+          }),
         }),
         null
       )
@@ -311,13 +301,12 @@ describe('useNotifications', () => {
       mockGetNotificationPreferences.mockReturnValue({
         enabled: true,
         prayers: {
-          Fajr: true,
-          Dhuhr: true,
-          Asr: false,
-          Maghrib: true,
-          Isha: false,
+          Fajr: mp(true),
+          Dhuhr: mp(true),
+          Asr: mp(false),
+          Maghrib: mp(true),
+          Isha: mp(false),
         },
-        minutesBefore: 0 as const,
       })
 
       const { result } = renderHook(() => useNotifications())
@@ -329,13 +318,6 @@ describe('useNotifications', () => {
       expect(mockSaveNotificationPreferences).toHaveBeenCalledWith(
         expect.objectContaining({
           enabled: false,
-          prayers: {
-            Fajr: true,
-            Dhuhr: true,
-            Asr: false,
-            Maghrib: true,
-            Isha: false,
-          },
         }),
         null
       )

@@ -14,8 +14,17 @@ describe('NotificationSettings', () => {
   const mockTogglePrayer = jest.fn()
   const mockEnableAll = jest.fn()
   const mockDisableAll = jest.fn()
-  const mockSetMinutesBefore = jest.fn()
+  const mockSetPrayerMinutesBefore = jest.fn()
   const mockRefetch = jest.fn()
+
+  const makePrayers = (overrides: Partial<Record<string, { enabled: boolean; minutesBefore: 0 | 5 | 10 }>>) => ({
+    Fajr: { enabled: true, minutesBefore: 0 as const },
+    Dhuhr: { enabled: true, minutesBefore: 0 as const },
+    Asr: { enabled: true, minutesBefore: 0 as const },
+    Maghrib: { enabled: true, minutesBefore: 0 as const },
+    Isha: { enabled: true, minutesBefore: 0 as const },
+    ...overrides,
+  })
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -26,14 +35,7 @@ describe('NotificationSettings', () => {
       permission: 'default',
       preferences: {
         enabled: false,
-        prayers: {
-          Fajr: true,
-          Dhuhr: true,
-          Asr: true,
-          Maghrib: true,
-          Isha: true,
-        },
-        minutesBefore: 0,
+        prayers: makePrayers({}),
       },
       loading: false,
       error: null,
@@ -41,7 +43,7 @@ describe('NotificationSettings', () => {
       togglePrayer: mockTogglePrayer,
       enableAll: mockEnableAll,
       disableAll: mockDisableAll,
-      setMinutesBefore: mockSetMinutesBefore,
+      setPrayerMinutesBefore: mockSetPrayerMinutesBefore,
       refetch: mockRefetch,
     })
   })
@@ -97,14 +99,7 @@ describe('NotificationSettings', () => {
         permission: 'granted',
         preferences: {
           enabled: true,
-          prayers: {
-            Fajr: true,
-            Dhuhr: true,
-            Asr: true,
-            Maghrib: true,
-            Isha: true,
-          },
-          minutesBefore: 0,
+          prayers: makePrayers({}),
         },
       })
 
@@ -152,14 +147,10 @@ describe('NotificationSettings', () => {
         permission: 'granted',
         preferences: {
           enabled: true,
-          prayers: {
-            Fajr: true,
-            Dhuhr: false,
-            Asr: true,
-            Maghrib: true,
-            Isha: false,
-          },
-          minutesBefore: 0,
+          prayers: makePrayers({
+            Dhuhr: { enabled: false, minutesBefore: 0 as const },
+            Isha: { enabled: false, minutesBefore: 0 as const },
+          }),
         },
       })
 
@@ -176,14 +167,7 @@ describe('NotificationSettings', () => {
         permission: 'granted',
         preferences: {
           enabled: false,
-          prayers: {
-            Fajr: true,
-            Dhuhr: true,
-            Asr: true,
-            Maghrib: true,
-            Isha: true,
-          },
-          minutesBefore: 0,
+          prayers: makePrayers({}),
         },
       })
 
@@ -205,14 +189,7 @@ describe('NotificationSettings', () => {
         permission: 'granted',
         preferences: {
           enabled: true,
-          prayers: {
-            Fajr: true,
-            Dhuhr: true,
-            Asr: true,
-            Maghrib: true,
-            Isha: true,
-          },
-          minutesBefore: 0,
+          prayers: makePrayers({}),
         },
       })
 
@@ -234,14 +211,10 @@ describe('NotificationSettings', () => {
         permission: 'granted',
         preferences: {
           enabled: true,
-          prayers: {
-            Fajr: true,
-            Dhuhr: false,
-            Asr: true,
-            Maghrib: true,
-            Isha: false,
-          },
-          minutesBefore: 0,
+          prayers: makePrayers({
+            Dhuhr: { enabled: false, minutesBefore: 0 as const },
+            Isha: { enabled: false, minutesBefore: 0 as const },
+          }),
         },
       })
     })
@@ -288,14 +261,7 @@ describe('NotificationSettings', () => {
         permission: 'granted',
         preferences: {
           enabled: true,
-          prayers: {
-            Fajr: true,
-            Dhuhr: true,
-            Asr: true,
-            Maghrib: true,
-            Isha: true,
-          },
-          minutesBefore: 0,
+          prayers: makePrayers({}),
         },
         loading: false,
         error: 'Failed to save preferences',
@@ -303,7 +269,7 @@ describe('NotificationSettings', () => {
         togglePrayer: mockTogglePrayer,
         enableAll: mockEnableAll,
         disableAll: mockDisableAll,
-        setMinutesBefore: mockSetMinutesBefore,
+        setPrayerMinutesBefore: mockSetPrayerMinutesBefore,
         refetch: mockRefetch,
       })
 
@@ -320,14 +286,7 @@ describe('NotificationSettings', () => {
         permission: 'granted',
         preferences: {
           enabled: false,
-          prayers: {
-            Fajr: true,
-            Dhuhr: true,
-            Asr: true,
-            Maghrib: true,
-            Isha: true,
-          },
-          minutesBefore: 0,
+          prayers: makePrayers({}),
         },
       })
 

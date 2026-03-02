@@ -11,7 +11,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { Capacitor } from '@capacitor/core'
 import { isIOS, getIOSBrowser } from '@/lib/notifications'
 import { sendTestNotification } from '@/lib/localNotifications'
-import type { PrayerName } from '@/types/notification.types'
+import type { PrayerName, MinutesBefore } from '@/types/notification.types'
 
 const PRAYER_INFO: Record<
   PrayerName,
@@ -51,7 +51,7 @@ export function NotificationSettings() {
     togglePrayer,
     enableAll,
     disableAll,
-    setMinutesBefore,
+    setPrayerMinutesBefore,
   } = useNotifications()
 
   // Browser not supported
@@ -168,7 +168,8 @@ export function NotificationSettings() {
   }
 
   // Permission granted - show full settings
-  const enabledCount = Object.values(preferences.prayers).filter(Boolean).length
+  const enabledCount = Object.values(preferences.prayers).filter((p) => p.enabled).length
+  const isNative = Capacitor.isNativePlatform()
 
   return (
     <Card className="p-6">
@@ -211,60 +212,55 @@ export function NotificationSettings() {
           </p>
         )}
 
-        {/* Advance reminder selector — native only */}
-        {preferences.enabled && Capacitor.isNativePlatform() && (
-          <div className="space-y-2 pt-1">
-            <p className="text-xs font-medium text-foreground">Remind me</p>
-            <div className="flex gap-2">
-              {([0, 5, 10] as const).map((mins) => (
-                <button
-                  key={mins}
-                  onClick={() => setMinutesBefore(mins)}
-                  disabled={loading}
-                  className={`flex-1 rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors ${
-                    preferences.minutesBefore === mins
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border bg-background text-muted-foreground hover:border-primary/50'
-                  }`}
-                >
-                  {mins === 0 ? 'At prayer time' : `${mins} min before`}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Individual prayer toggles */}
+        {/* Individual prayer toggles with per-prayer reminder selector */}
         {preferences.enabled && (
           <div className="space-y-3 pt-2 border-t">
             {(Object.keys(PRAYER_INFO) as PrayerName[]).map((prayerName) => {
               const info = PRAYER_INFO[prayerName]
-              const isEnabled = preferences.prayers[prayerName]
+              const setting = preferences.prayers[prayerName]
+              const isEnabled = setting.enabled
 
               return (
-                <div
-                  key={prayerName}
-                  className="flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-2">
-                    {isEnabled && (
-                      <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    )}
-                    {!isEnabled && (
-                      <div className="h-4 w-4 flex-shrink-0" />
-                    )}
-                    <div>
-                      <p className="text-sm font-medium">{info.label}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {info.description}
-                      </p>
+                <div key={prayerName} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {isEnabled ? (
+                        <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                      ) : (
+                        <div className="h-4 w-4 flex-shrink-0" />
+                      )}
+                      <div>
+                        <p className="text-sm font-medium">{info.label}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {info.description}
+                        </p>
+                      </div>
                     </div>
+                    <Switch
+                      checked={isEnabled}
+                      onCheckedChange={() => togglePrayer(prayerName)}
+                      disabled={loading}
+                    />
                   </div>
-                  <Switch
-                    checked={isEnabled}
-                    onCheckedChange={() => togglePrayer(prayerName)}
-                    disabled={loading}
-                  />
+
+                  {isEnabled && isNative && (
+                    <div className="flex gap-1.5 ml-6">
+                      {([0, 5, 10] as const).map((mins: MinutesBefore) => (
+                        <button
+                          key={mins}
+                          onClick={() => setPrayerMinutesBefore(prayerName, mins)}
+                          disabled={loading}
+                          className={`rounded-md border px-2 py-1 text-[11px] font-medium transition-colors ${
+                            setting.minutesBefore === mins
+                              ? 'border-primary bg-primary/10 text-primary'
+                              : 'border-border bg-background text-muted-foreground hover:border-primary/50'
+                          }`}
+                        >
+                          {mins === 0 ? 'At time' : `${mins}m before`}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )
             })}

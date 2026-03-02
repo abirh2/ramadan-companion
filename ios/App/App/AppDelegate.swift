@@ -7,9 +7,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-    // Keys that @capacitor/preferences writes to UserDefaults.standard
-    // (with "CapacitorStorage." prefix). These are mirrored to the App Group
-    // suite so the widget extension can read them.
+    // All widget-related keys that @capacitor/preferences writes to the
+    // App Group suite (group.com.deencompanion.app). When any of these
+    // change we tell WidgetKit to reload timelines.
     private static let widgetKeys = [
         // Next Prayer widget
         "widget_prayer_name",
@@ -25,12 +25,33 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "widget_all_prayers_isha",
         "widget_all_prayers_next",
         "widget_all_prayers_update",
+        // All Prayers 24hr keys (legacy fallback)
+        "widget_all_prayers_fajr_24",
+        "widget_all_prayers_dhuhr_24",
+        "widget_all_prayers_asr_24",
+        "widget_all_prayers_maghrib_24",
+        "widget_all_prayers_isha_24",
+        // Widget config (Strategy B -- embedded calculator)
+        "widget_config_lat",
+        "widget_config_lng",
+        "widget_config_method",
+        "widget_config_madhab",
+        "widget_config_timezone",
+        "widget_config_update",
+        // 14-day prayer schedule (Strategy A)
+        "widget_prayer_schedule",
+        "widget_prayer_schedule_update",
         // Verse widget
         "widget_verse_type",
         "widget_verse_arabic",
         "widget_verse_translation",
         "widget_verse_source",
         "widget_verse_update",
+        // Hadith widget
+        "widget_hadith_arabic",
+        "widget_hadith_translation",
+        "widget_hadith_source",
+        "widget_hadith_update",
         // Zikr widget
         "widget_zikr_arabic",
         "widget_zikr_transliteration",
@@ -61,10 +82,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "widget_mosque_update",
     ]
 
-    private static let preferencesPrefix = "CapacitorStorage."
     private static let appGroupId = "group.com.deencompanion.app"
 
+    /// Snapshot of the last-seen values for change detection.
+    private var lastSnapshot: [String: String] = [:]
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // Take initial snapshot so the first real write is detected as a change
+        if let shared = UserDefaults(suiteName: Self.appGroupId) {
+            for key in Self.widgetKeys {
+                if let value = shared.string(forKey: key) {
+                    lastSnapshot[key] = value
+                }
+            }
+        }
+
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(defaultsDidChange),
@@ -75,25 +107,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     @objc private func defaultsDidChange(_ notification: Notification) {
-        syncWidgetData()
+        checkWidgetDataChanged()
     }
 
-    /// Mirror widget-related keys from UserDefaults.standard (where
-    /// @capacitor/preferences writes) to the App Group suite (where the
-    /// widget extension reads via SharedDefaults).
-    private func syncWidgetData() {
-        let standard = UserDefaults.standard
+    /// Detect whether any widget keys in the App Group suite have changed
+    /// since the last check and, if so, tell WidgetKit to reload timelines.
+    ///
+    /// Capacitor Preferences (with group config) writes directly to the App
+    /// Group suite -- NOT to UserDefaults.standard. So we read from the App
+    /// Group suite and compare against our in-memory snapshot.
+    private func checkWidgetDataChanged() {
         guard let shared = UserDefaults(suiteName: Self.appGroupId) else { return }
 
         var didChange = false
 
         for key in Self.widgetKeys {
-            let prefixedKey = Self.preferencesPrefix + key
-            guard let value = standard.string(forKey: prefixedKey) else { continue }
-
-            let existing = shared.string(forKey: key)
-            if existing != value {
-                shared.set(value, forKey: key)
+            let current = shared.string(forKey: key)
+            let previous = lastSnapshot[key]
+            if current != previous {
+                lastSnapshot[key] = current ?? ""
                 didChange = true
             }
         }
@@ -104,22 +136,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
-        syncWidgetData()
+        checkWidgetDataChanged()
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
-        syncWidgetData()
+        checkWidgetDataChanged()
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
-        syncWidgetData()
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
-        syncWidgetData()
+        checkWidgetDataChanged()
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {

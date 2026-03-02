@@ -7,7 +7,8 @@ struct PrayerListEntry: TimelineEntry {
     let date: Date
     let nextPrayerName: String
     let nextPrayerTime: String
-    let targetDate: Date?   // for live countdown via Text(date, style: .relative)
+    let targetDate: Date?   // non-nil = live countdown via Text(date, style: .relative)
+    let countdown: String   // static fallback string for when targetDate is nil
     let fajr: String
     let dhuhr: String
     let asr: String
@@ -15,7 +16,7 @@ struct PrayerListEntry: TimelineEntry {
     let isha: String
 }
 
-// MARK: - Schedule resolution (shared logic with PrayerWidget)
+// MARK: - Schedule resolution (three-tier strategy)
 
 private func listResolveSchedule() -> [PrayerTimes] {
     if SharedDefaults.hasConfig {
@@ -43,7 +44,7 @@ private func listResolveSchedule() -> [PrayerTimes] {
 
 private func listNextPrayer(from schedule: [PrayerTimes]) -> (name: String, display: String, target: Date)? {
     let now = Date()
-    for times in schedule {
+    for (dayIndex, times) in schedule.enumerated() {
         let pairs: [(String, Date)] = [
             ("Fajr", times.fajr), ("Dhuhr", times.dhuhr), ("Asr", times.asr),
             ("Maghrib", times.maghrib), ("Isha", times.isha),
@@ -51,8 +52,24 @@ private func listNextPrayer(from schedule: [PrayerTimes]) -> (name: String, disp
         for (name, date) in pairs where date > now {
             return (name, formatPrayerDate(date), date)
         }
+        if dayIndex + 1 < schedule.count {
+            let tomorrowFajr = schedule[dayIndex + 1].fajr
+            if tomorrowFajr > now {
+                return ("Fajr", formatPrayerDate(tomorrowFajr), tomorrowFajr)
+            }
+        }
     }
     return nil
+}
+
+private func listCountdownString(to target: Date) -> String {
+    let diff = Int(target.timeIntervalSince(Date()))
+    guard diff > 0 else { return "now" }
+    let h = diff / 3600
+    let m = (diff % 3600) / 60
+    if h > 0 { return "\(h)h \(m)m" }
+    if m > 0 { return "\(m)m" }
+    return "<1m"
 }
 
 // MARK: - Timeline Provider
@@ -62,7 +79,7 @@ struct PrayerListProvider: TimelineProvider {
         PrayerListEntry(
             date: Date(),
             nextPrayerName: "Asr", nextPrayerTime: "3:45 PM",
-            targetDate: Date().addingTimeInterval(2 * 3600),
+            targetDate: Date().addingTimeInterval(2 * 3600), countdown: "2h 0m",
             fajr: "5:12 AM", dhuhr: "12:30 PM", asr: "3:45 PM",
             maghrib: "6:15 PM", isha: "7:45 PM"
         )
@@ -75,7 +92,7 @@ struct PrayerListProvider: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<PrayerListEntry>) -> Void) {
         let schedule = listResolveSchedule()
         guard !schedule.isEmpty else {
-            let entry = buildFallbackEntry()
+            let entry = buildLegacyEntry()
             let reload = Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date()
             completion(Timeline(entries: [entry], policy: .after(reload)))
             return
@@ -107,6 +124,7 @@ struct PrayerListProvider: TimelineProvider {
                     nextPrayerName: next.name,
                     nextPrayerTime: formatPrayerDate(next.date),
                     targetDate: next.date,
+                    countdown: listCountdownString(to: next.date),
                     fajr: displayTimes.fajr, dhuhr: displayTimes.dhuhr,
                     asr: displayTimes.asr, maghrib: displayTimes.maghrib,
                     isha: displayTimes.isha
@@ -114,7 +132,20 @@ struct PrayerListProvider: TimelineProvider {
             }
         }
 
-        completion(Timeline(entries: entries.isEmpty ? [buildCurrentEntry()] : entries,
+        // Ensure there is an entry for RIGHT NOW
+        if let next = listNextPrayer(from: schedule), let today = schedule.first {
+            let nowEntry = PrayerListEntry(
+                date: .distantPast,
+                nextPrayerName: next.name, nextPrayerTime: next.display,
+                targetDate: next.target, countdown: listCountdownString(to: next.target),
+                fajr: formatPrayerDate(today.fajr), dhuhr: formatPrayerDate(today.dhuhr),
+                asr: formatPrayerDate(today.asr), maghrib: formatPrayerDate(today.maghrib),
+                isha: formatPrayerDate(today.isha)
+            )
+            entries.insert(nowEntry, at: 0)
+        }
+
+        completion(Timeline(entries: entries.isEmpty ? [buildLegacyEntry()] : entries,
                             policy: .atEnd))
     }
 
@@ -123,21 +154,36 @@ struct PrayerListProvider: TimelineProvider {
         if let next = listNextPrayer(from: schedule), let today = schedule.first {
             return PrayerListEntry(
                 date: Date(), nextPrayerName: next.name, nextPrayerTime: next.display,
-                targetDate: next.target,
+                targetDate: next.target, countdown: listCountdownString(to: next.target),
                 fajr: formatPrayerDate(today.fajr), dhuhr: formatPrayerDate(today.dhuhr),
                 asr: formatPrayerDate(today.asr), maghrib: formatPrayerDate(today.maghrib),
                 isha: formatPrayerDate(today.isha)
             )
         }
-        return buildFallbackEntry()
+        return buildLegacyEntry()
     }
 
-    private func buildFallbackEntry() -> PrayerListEntry {
-        PrayerListEntry(
+    /// Last-resort fallback using the simple keys written by the app
+    private func buildLegacyEntry() -> PrayerListEntry {
+        let name = SharedDefaults.prayerName.isEmpty ? "---" : SharedDefaults.prayerName
+        let time = SharedDefaults.prayerTime.isEmpty ? "Open app" : SharedDefaults.prayerTime
+
+        var targetDate: Date? = nil
+        var countdown = "---"
+        let targetISO = SharedDefaults.prayerTargetTime
+        if !targetISO.isEmpty {
+            let fmt = ISO8601DateFormatter()
+            fmt.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            if let d = fmt.date(from: targetISO) ?? ISO8601DateFormatter().date(from: targetISO) {
+                targetDate = d
+                countdown = listCountdownString(to: d)
+            }
+        }
+
+        return PrayerListEntry(
             date: Date(),
-            nextPrayerName: SharedDefaults.prayerName.isEmpty ? "---" : SharedDefaults.prayerName,
-            nextPrayerTime: SharedDefaults.prayerTime.isEmpty ? "Open app" : SharedDefaults.prayerTime,
-            targetDate: nil,
+            nextPrayerName: name, nextPrayerTime: time,
+            targetDate: targetDate, countdown: countdown,
             fajr: SharedDefaults.allPrayersFajr.isEmpty ? "---" : SharedDefaults.allPrayersFajr,
             dhuhr: SharedDefaults.allPrayersDhuhr.isEmpty ? "---" : SharedDefaults.allPrayersDhuhr,
             asr: SharedDefaults.allPrayersAsr.isEmpty ? "---" : SharedDefaults.allPrayersAsr,
@@ -215,10 +261,10 @@ struct PrayerListMediumView: View {
                     .lineLimit(1)
 
                 Group {
-                    if let target = entry.targetDate {
+                    if let target = entry.targetDate, target > Date() {
                         Text("in ") + Text(target, style: .relative)
                     } else {
-                        Text("---")
+                        Text(entry.countdown.isEmpty ? "---" : "in \(entry.countdown)")
                     }
                 }
                 .font(.system(size: 12, weight: .semibold))
@@ -277,14 +323,14 @@ struct PrayerListWidget: Widget {
                     ThemedWidgetBackground()
                 }
         }
-        .configurationDisplayName("Prayer Schedule")
-        .description("Next prayer with full daily prayer list.")
+        .configurationDisplayName("Prayer Times")
+        .description("Next prayer with full daily schedule.")
         .supportedFamilies([.systemMedium])
         .contentMarginsDisabled()
     }
 }
 
-// MARK: - Previews
+// MARK: - Preview
 
 #Preview(as: .systemMedium) {
     PrayerListWidget()
@@ -292,7 +338,7 @@ struct PrayerListWidget: Widget {
     PrayerListEntry(
         date: .now,
         nextPrayerName: "Asr", nextPrayerTime: "3:45 PM",
-        targetDate: Date().addingTimeInterval(2 * 3600 + 14 * 60),
+        targetDate: Date().addingTimeInterval(2 * 3600 + 14 * 60), countdown: "2h 14m",
         fajr: "5:12 AM", dhuhr: "12:30 PM", asr: "3:45 PM",
         maghrib: "6:15 PM", isha: "7:45 PM"
     )

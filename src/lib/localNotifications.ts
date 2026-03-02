@@ -90,7 +90,6 @@ export async function schedulePrayerNotifications(
 
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
     const now = Date.now()
-    const minutesBefore = preferences.minutesBefore ?? 0
     const prayerNames: PrayerName[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
 
     const notifications: Array<{
@@ -115,12 +114,13 @@ export async function schedulePrayerNotifications(
       )
 
       for (const prayerName of prayerNames) {
-        if (!preferences.prayers?.[prayerName]) continue
+        const setting = preferences.prayers?.[prayerName]
+        if (!setting || (typeof setting === 'object' ? !setting.enabled : !setting)) continue
 
+        const minutesBefore = typeof setting === 'object' ? (setting.minutesBefore ?? 0) : 0
         const timeStr = prayerTimes[prayerName]
         const prayerDate = timeToDate(timeStr, targetDate)
 
-        // Apply advance reminder offset
         const scheduledDate = new Date(prayerDate.getTime() - minutesBefore * 60 * 1000)
 
         if (scheduledDate.getTime() <= now) continue

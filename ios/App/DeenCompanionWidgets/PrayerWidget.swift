@@ -4,10 +4,11 @@ import SwiftUI
 // MARK: - Data Model
 
 struct PrayerEntry: TimelineEntry {
-    let date: Date          // when this entry becomes active (= previous prayer time)
+    let date: Date          // when this entry becomes active
     let prayerName: String  // name of the NEXT prayer we're counting down TO
     let prayerTime: String  // display time of that prayer, e.g. "12:15 PM"
-    let targetDate: Date?   // nil = no data (show placeholder)
+    let targetDate: Date?   // non-nil = live countdown via Text(date, style: .relative)
+    let countdown: String   // static fallback string for when targetDate is nil
 }
 
 // MARK: - Schedule helpers
@@ -29,7 +30,9 @@ private func namedPrayers(from times: PrayerTimes) -> [NamedPrayer] {
 }
 
 /// Resolve the best available prayer schedule using the three-tier strategy.
-/// Returns an array of daily PrayerTimes, newest to oldest (chronological order).
+/// B: embedded algorithm (permanent accuracy)
+/// A: 14-day JSON schedule (from app)
+/// Legacy: single-day 24hr strings (from app)
 private func resolveSchedule() -> [PrayerTimes] {
     // Strategy B: embedded algorithm
     if SharedDefaults.hasConfig {
@@ -65,14 +68,12 @@ private func resolveSchedule() -> [PrayerTimes] {
         SharedDefaults.allPrayersIsha24,
     ]
     if t24.allSatisfy({ !$0.isEmpty }) {
-        func makeDate(_ hhmm: String, addDays: Int = 0) -> Date? {
+        func makeDate(_ hhmm: String) -> Date? {
             let parts = hhmm.split(separator: ":").compactMap { Int($0) }
             guard parts.count == 2 else { return nil }
             var c = Calendar.current.dateComponents([.year, .month, .day], from: Date())
             c.hour = parts[0]; c.minute = parts[1]; c.second = 0
-            guard var d = Calendar.current.date(from: c) else { return nil }
-            if addDays != 0 { d = Calendar.current.date(byAdding: .day, value: addDays, to: d)! }
-            return d
+            return Calendar.current.date(from: c)
         }
         if let f = makeDate(t24[0]), let d = makeDate(t24[1]),
            let a = makeDate(t24[2]), let m = makeDate(t24[3]), let i = makeDate(t24[4]) {
@@ -83,12 +84,44 @@ private func resolveSchedule() -> [PrayerTimes] {
     return []
 }
 
+/// Find the next upcoming prayer from a schedule, returning both the
+/// prayer info and a computed countdown string.
+private func findNextPrayer(in schedule: [PrayerTimes]) -> (name: String, display: String, target: Date)? {
+    let now = Date()
+    for (dayIndex, times) in schedule.enumerated() {
+        let prayers = namedPrayers(from: times)
+        for prayer in prayers {
+            if prayer.date > now {
+                return (prayer.name, prayer.display, prayer.date)
+            }
+        }
+        // All prayers passed for this day; check tomorrow's Fajr
+        if dayIndex + 1 < schedule.count {
+            let tomorrowFajr = namedPrayers(from: schedule[dayIndex + 1])[0]
+            if tomorrowFajr.date > now {
+                return (tomorrowFajr.name, tomorrowFajr.display, tomorrowFajr.date)
+            }
+        }
+    }
+    return nil
+}
+
+private func countdownString(to target: Date) -> String {
+    let diff = Int(target.timeIntervalSince(Date()))
+    guard diff > 0 else { return "now" }
+    let h = diff / 3600
+    let m = (diff % 3600) / 60
+    if h > 0 { return "\(h)h \(m)m" }
+    if m > 0 { return "\(m)m" }
+    return "<1m"
+}
+
 // MARK: - Timeline Provider
 
 struct PrayerProvider: TimelineProvider {
     func placeholder(in context: Context) -> PrayerEntry {
         PrayerEntry(date: Date(), prayerName: "Fajr", prayerTime: "5:30 AM",
-                    targetDate: Date().addingTimeInterval(2 * 3600))
+                    targetDate: Date().addingTimeInterval(2 * 3600), countdown: "2h 0m")
     }
 
     func getSnapshot(in context: Context, completion: @escaping (PrayerEntry) -> Void) {
@@ -97,34 +130,30 @@ struct PrayerProvider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<PrayerEntry>) -> Void) {
         let schedule = resolveSchedule()
+
         guard !schedule.isEmpty else {
-            // No data at all – show placeholder, retry in 15 min
-            let entry = PrayerEntry(date: Date(), prayerName: "---",
-                                    prayerTime: "Open app", targetDate: nil)
+            // No computed schedule available — fall back to legacy stored keys
+            let entry = buildLegacyEntry()
             let retry = Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date()
             completion(Timeline(entries: [entry], policy: .after(retry)))
             return
         }
 
-        // Build entries: one per prayer-period transition across 14 days.
-        // Each entry is active from prayer[i] until prayer[i+1], and shows
-        // the NEXT prayer (i+1) with a live targetDate countdown.
+        // Build entries: one per prayer transition across all available days.
+        // Each entry becomes active when a prayer PASSES, and shows the NEXT one.
         var entries: [PrayerEntry] = []
 
         for (dayIndex, times) in schedule.enumerated() {
             let prayers = namedPrayers(from: times)
             for j in 0..<prayers.count {
-                let entryDate = prayers[j].date  // when this entry becomes active
+                let entryDate = prayers[j].date
 
-                // The prayer we're counting down TO
                 let next: NamedPrayer
                 if j + 1 < prayers.count {
                     next = prayers[j + 1]
                 } else if dayIndex + 1 < schedule.count {
-                    // Wrap: after Isha, count down to tomorrow's Fajr
                     next = namedPrayers(from: schedule[dayIndex + 1])[0]
                 } else {
-                    // Last entry in our window – use .atEnd reload to regenerate
                     continue
                 }
 
@@ -132,49 +161,70 @@ struct PrayerProvider: TimelineProvider {
                     date: entryDate,
                     prayerName: next.name,
                     prayerTime: next.display,
-                    targetDate: next.date
+                    targetDate: next.date,
+                    countdown: countdownString(to: next.date)
                 ))
             }
         }
 
+        // Ensure there is an entry for RIGHT NOW (before the first prayer of the day)
+        // WidgetKit needs an entry with date <= now to have something to display.
+        if let next = findNextPrayer(in: schedule) {
+            let nowEntry = PrayerEntry(
+                date: .distantPast,
+                prayerName: next.name,
+                prayerTime: next.display,
+                targetDate: next.target,
+                countdown: countdownString(to: next.target)
+            )
+            entries.insert(nowEntry, at: 0)
+        }
+
         if entries.isEmpty {
-            let entry = buildCurrentEntry()
+            let entry = buildLegacyEntry()
             let retry = Calendar.current.date(byAdding: .minute, value: 30, to: Date()) ?? Date()
             completion(Timeline(entries: [entry], policy: .after(retry)))
         } else {
-            // .atEnd triggers a reload after the last entry (~14 days)
             completion(Timeline(entries: entries, policy: .atEnd))
         }
     }
 
+    /// Build an entry using computed schedule data.
     private func buildCurrentEntry() -> PrayerEntry {
         let schedule = resolveSchedule()
-        guard !schedule.isEmpty else {
-            return PrayerEntry(date: Date(), prayerName: "---",
-                               prayerTime: "Open app", targetDate: nil)
+        if let next = findNextPrayer(in: schedule) {
+            return PrayerEntry(
+                date: Date(),
+                prayerName: next.name,
+                prayerTime: next.display,
+                targetDate: next.target,
+                countdown: countdownString(to: next.target)
+            )
         }
-        let now = Date()
-        for (dayIndex, times) in schedule.enumerated() {
-            let prayers = namedPrayers(from: times)
-            for j in 0..<prayers.count {
-                if prayers[j].date > now {
-                    return PrayerEntry(date: now, prayerName: prayers[j].name,
-                                       prayerTime: prayers[j].display,
-                                       targetDate: prayers[j].date)
-                }
-            }
-            // All passed today; check if tomorrow's Fajr is upcoming
-            if dayIndex + 1 < schedule.count {
-                let tomorrowFajr = namedPrayers(from: schedule[dayIndex + 1])[0]
-                return PrayerEntry(date: now, prayerName: tomorrowFajr.name,
-                                   prayerTime: tomorrowFajr.display,
-                                   targetDate: tomorrowFajr.date)
+        return buildLegacyEntry()
+    }
+
+    /// Last-resort fallback: read the simple single-prayer keys written by the app.
+    /// These exist even before any of the new strategy keys are written.
+    private func buildLegacyEntry() -> PrayerEntry {
+        let name = SharedDefaults.prayerName.isEmpty ? "---" : SharedDefaults.prayerName
+        let time = SharedDefaults.prayerTime.isEmpty ? "Open app" : SharedDefaults.prayerTime
+
+        // Try to parse the legacy ISO target time for a live countdown
+        var targetDate: Date? = nil
+        var countdown = "---"
+        let targetISO = SharedDefaults.prayerTargetTime
+        if !targetISO.isEmpty {
+            let fmt = ISO8601DateFormatter()
+            fmt.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            if let d = fmt.date(from: targetISO) ?? ISO8601DateFormatter().date(from: targetISO) {
+                targetDate = d
+                countdown = countdownString(to: d)
             }
         }
-        // Exhausted schedule (shouldn't happen with 14 days)
-        let last = namedPrayers(from: schedule[0])
-        return PrayerEntry(date: now, prayerName: last[0].name,
-                           prayerTime: last[0].display, targetDate: nil)
+
+        return PrayerEntry(date: Date(), prayerName: name, prayerTime: time,
+                           targetDate: targetDate, countdown: countdown)
     }
 }
 
@@ -205,11 +255,12 @@ struct PrayerSmallView: View {
             HStack(spacing: 4) {
                 Image(systemName: "clock")
                     .font(.system(size: 10, weight: .semibold))
-                if let target = entry.targetDate {
+                if let target = entry.targetDate, target > Date() {
                     Text(target, style: .relative)
                         .font(.caption2.weight(.bold))
                 } else {
-                    Text("---").font(.caption2.weight(.bold))
+                    Text(entry.countdown)
+                        .font(.caption2.weight(.bold))
                 }
             }
             .foregroundStyle(WidgetTheme.accent(for: colorScheme))
@@ -250,7 +301,7 @@ struct PrayerMediumView: View {
                     .font(.title2)
                     .foregroundStyle(WidgetTheme.accent(for: colorScheme))
 
-                if let target = entry.targetDate {
+                if let target = entry.targetDate, target > Date() {
                     Text(target, style: .relative)
                         .font(.headline.weight(.bold))
                         .foregroundStyle(WidgetTheme.accent(for: colorScheme))
@@ -258,7 +309,7 @@ struct PrayerMediumView: View {
                         .lineLimit(2)
                         .minimumScaleFactor(0.7)
                 } else {
-                    Text("---")
+                    Text(entry.countdown)
                         .font(.headline.weight(.bold))
                         .foregroundStyle(WidgetTheme.accent(for: colorScheme))
                 }
@@ -282,8 +333,12 @@ struct PrayerAccessoryRectangularView: View {
                 .widgetAccentable()
             Text(entry.prayerTime)
                 .font(.subheadline)
-            if let target = entry.targetDate {
+            if let target = entry.targetDate, target > Date() {
                 Text(target, style: .relative)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                Text(entry.countdown)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -301,13 +356,16 @@ struct PrayerAccessoryCircularView: View {
             Image(systemName: "moon.stars.fill")
                 .font(.system(size: 12))
                 .widgetAccentable()
-            if let target = entry.targetDate {
+            if let target = entry.targetDate, target > Date() {
                 Text(target, style: .timer)
                     .font(.system(size: 10, weight: .bold).monospacedDigit())
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)
             } else {
-                Text("---").font(.system(size: 12, weight: .bold))
+                Text(entry.countdown)
+                    .font(.system(size: 12, weight: .bold))
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
             }
         }
     }
@@ -385,12 +443,12 @@ struct PrayerWidget: Widget {
     PrayerWidget()
 } timeline: {
     PrayerEntry(date: .now, prayerName: "Fajr", prayerTime: "5:30 AM",
-                targetDate: Date().addingTimeInterval(2 * 3600 + 15 * 60))
+                targetDate: Date().addingTimeInterval(2 * 3600 + 15 * 60), countdown: "2h 15m")
 }
 
 #Preview(as: .systemMedium) {
     PrayerWidget()
 } timeline: {
     PrayerEntry(date: .now, prayerName: "Dhuhr", prayerTime: "1:05 PM",
-                targetDate: Date().addingTimeInterval(45 * 60))
+                targetDate: Date().addingTimeInterval(45 * 60), countdown: "45m")
 }
