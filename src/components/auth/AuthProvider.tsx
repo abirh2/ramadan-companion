@@ -61,7 +61,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await Browser.close();
         } catch { /* browser may already be closed */ }
 
-        // Extract tokens from the URL fragment (#access_token=...&refresh_token=...)
+        // PKCE flow (Supabase v2 default): code is in the query string
+        const urlObj = new URL(url);
+        const code = urlObj.searchParams.get('code');
+
+        if (code) {
+          await supabase.auth.exchangeCodeForSession(code);
+          return;
+        }
+
+        // Implicit flow fallback: tokens in the URL fragment
         const hashParams = new URLSearchParams(url.split('#')[1] ?? '');
         const accessToken = hashParams.get('access_token');
         const refreshToken = hashParams.get('refresh_token');
