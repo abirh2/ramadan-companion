@@ -19,6 +19,9 @@ import {
   requestGeolocation,
   saveLocationToStorage,
   MECCA_COORDS,
+  getStoredLocation,
+  getLocationSilently,
+  calculateDistance,
 } from '@/lib/location'
 import { calculatePrayerTimesLocal, validatePrayerTimes } from '@/lib/prayerTimes'
 import { getDefaultCalculationMethodByCountry, extractCountryFromCity } from '@/lib/calculationMethod'
@@ -695,6 +698,51 @@ export function usePrayerTimes(): UsePrayerTimesResult {
     },
     [profile, refetch]
   )
+
+  // Auto-location: silently re-check GPS every 30 minutes and on app foreground.
+  // Only active when the stored location type is 'detected' (user consented to GPS).
+  // If the user has moved more than 1 km, updateLocation() is called to refresh
+  // prayer times, Qibla direction, widgets, and persisted storage automatically.
+  // Users who manually selected a city ('selected') are unaffected.
+  useEffect(() => {
+    const AUTO_LOCATION_INTERVAL_MS = 30 * 60 * 1000 // 30 minutes
+    const AUTO_LOCATION_THRESHOLD_KM = 1.0
+
+    const runAutoLocationCheck = async () => {
+      // Guard: skip if hook is unmounted or a fetch is already in progress
+      if (!mountedRef.current || isFetchingRef.current) return
+
+      // Only auto-update when the user previously granted GPS access
+      const stored = getStoredLocation()
+      if (!stored || stored.type !== 'detected') return
+
+      // Obtain current position without permission prompts (low accuracy, cached OK)
+      const current = await getLocationSilently()
+      if (!current || !mountedRef.current) return
+
+      // Only update if the user has moved a meaningful distance
+      const distanceKm = calculateDistance(stored.lat, stored.lng, current.lat, current.lng)
+      if (distanceKm < AUTO_LOCATION_THRESHOLD_KM) return
+
+      // Location changed — refresh prayer times, Qibla, and storage
+      await updateLocation(current.lat, current.lng, current.city, 'detected')
+    }
+
+    const intervalId = setInterval(runAutoLocationCheck, AUTO_LOCATION_INTERVAL_MS)
+
+    // Also check immediately when the user brings the app to the foreground
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        runAutoLocationCheck()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      clearInterval(intervalId)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [updateLocation])
 
   return {
     ...state,

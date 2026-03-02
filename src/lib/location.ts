@@ -278,3 +278,78 @@ export function isValidCoordinates(lat: number, lng: number): boolean {
   return !isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180
 }
 
+/**
+ * Calculate the great-circle distance between two coordinates using the Haversine formula.
+ * Returns distance in kilometres.
+ */
+export function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371 // Earth radius in km
+  const dLat = (lat2 - lat1) * (Math.PI / 180)
+  const dLng = (lng2 - lng1) * (Math.PI / 180)
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLng / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+
+/**
+ * Silently obtain the device's current position for background auto-location checks.
+ *
+ * Key differences from requestGeolocation():
+ * - Does NOT prompt for permissions — returns null if permission was not previously granted
+ * - Uses low accuracy and accepts a 30-minute cached position to minimise battery impact
+ * - Intended for periodic travel-detection checks, not first-time setup
+ */
+export async function getLocationSilently(): Promise<LocationData | null> {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      // Only proceed if permission was already granted — never prompt during background check
+      const permission = await Geolocation.checkPermissions()
+      if (permission.location !== 'granted') return null
+
+      const position = await Geolocation.getCurrentPosition({
+        timeout: 8000,
+        maximumAge: 1800000, // Accept a position cached up to 30 minutes
+        enableHighAccuracy: false,
+      })
+
+      const lat = position.coords.latitude
+      const lng = position.coords.longitude
+      const city = await reverseGeocode(lat, lng)
+
+      return {
+        lat,
+        lng,
+        city: city || `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+        type: 'detected',
+      }
+    } catch {
+      return null
+    }
+  } else {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) return null
+
+    return new Promise((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude
+          const lng = position.coords.longitude
+          const city = await reverseGeocode(lat, lng)
+          resolve({
+            lat,
+            lng,
+            city: city || `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+            type: 'detected',
+          })
+        },
+        () => resolve(null), // Permission denied or unavailable — silent fail
+        {
+          timeout: 8000,
+          maximumAge: 1800000, // Accept a position cached up to 30 minutes
+          enableHighAccuracy: false,
+        }
+      )
+    })
+  }
+}
+
