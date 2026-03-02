@@ -7,19 +7,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-    // Widget-relevant keys written by the web app via @capacitor/preferences.
-    // The Capacitor Preferences plugin stores these in UserDefaults.standard
-    // with a prefix of "group.com.deencompanion.app." (the configured group).
-    // We mirror the values to the real App Group UserDefaults suite so the
-    // widget extension can read them.
     private static let widgetKeys = [
-        // Next Prayer widget
         "widget_prayer_name",
         "widget_prayer_time",
         "widget_prayer_target_time",
         "widget_prayer_countdown",
         "widget_prayer_update",
-        // All Prayers widget
         "widget_all_prayers_fajr",
         "widget_all_prayers_dhuhr",
         "widget_all_prayers_asr",
@@ -27,69 +20,78 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "widget_all_prayers_isha",
         "widget_all_prayers_next",
         "widget_all_prayers_update",
-        // All Prayers 24hr keys (legacy fallback)
         "widget_all_prayers_fajr_24",
         "widget_all_prayers_dhuhr_24",
         "widget_all_prayers_asr_24",
         "widget_all_prayers_maghrib_24",
         "widget_all_prayers_isha_24",
-        // Widget config (Strategy B -- embedded calculator)
         "widget_config_lat",
         "widget_config_lng",
         "widget_config_method",
         "widget_config_madhab",
         "widget_config_timezone",
         "widget_config_update",
-        // 14-day prayer schedule (Strategy A)
         "widget_prayer_schedule",
         "widget_prayer_schedule_update",
-        // Verse widget
         "widget_verse_type",
         "widget_verse_arabic",
         "widget_verse_translation",
         "widget_verse_source",
         "widget_verse_update",
-        // Hadith widget
         "widget_hadith_arabic",
         "widget_hadith_translation",
         "widget_hadith_source",
         "widget_hadith_update",
-        // Zikr widget
         "widget_zikr_arabic",
         "widget_zikr_transliteration",
         "widget_zikr_count",
         "widget_zikr_target",
         "widget_zikr_update",
-        // Hijri Date widget
         "widget_hijri_day",
         "widget_hijri_month_name",
         "widget_hijri_year",
         "widget_hijri_gregorian_date",
         "widget_hijri_weekday",
         "widget_hijri_update",
-        // Charity widget
         "widget_charity_monthly",
         "widget_charity_yearly",
         "widget_charity_currency",
         "widget_charity_update",
-        // Qibla widget
         "widget_qibla_direction",
         "widget_qibla_compass",
         "widget_qibla_city",
         "widget_qibla_update",
-        // Mosque widget
         "widget_mosque_name",
         "widget_mosque_distance",
         "widget_mosque_address",
         "widget_mosque_update",
     ]
 
-    // Capacitor Preferences (with group: "group.com.deencompanion.app")
-    // stores keys in UserDefaults.standard prefixed with the group name + "."
-    private static let preferencesPrefix = "group.com.deencompanion.app."
     private static let appGroupId = "group.com.deencompanion.app"
 
+    // Capacitor Preferences uses UserDefaults.standard with a prefix.
+    // The prefix depends on whether configure() was called from JS.
+    // Default is "CapacitorStorage.", but if the web app calls configure()
+    // with the group from capacitor.config.json it becomes
+    // "group.com.deencompanion.app." -- we check both.
+    private static let possiblePrefixes = [
+        "CapacitorStorage.",
+        "group.com.deencompanion.app.",
+    ]
+
+    /// Snapshot of the last-seen values in the App Group suite for change detection.
+    private var lastSnapshot: [String: String] = [:]
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // Take initial snapshot from App Group suite
+        if let shared = UserDefaults(suiteName: Self.appGroupId) {
+            for key in Self.widgetKeys {
+                if let value = shared.string(forKey: key) {
+                    lastSnapshot[key] = value
+                }
+            }
+        }
+
         syncWidgetData()
 
         NotificationCenter.default.addObserver(
@@ -105,14 +107,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         syncWidgetData()
     }
 
-    /// Mirror widget keys from UserDefaults.standard (where Capacitor
-    /// Preferences writes with a group prefix) to the real App Group
-    /// UserDefaults suite (where the widget extension reads).
+    /// Mirror widget data from UserDefaults.standard (where Capacitor
+    /// Preferences writes with a key prefix) into the App Group suite
+    /// (where widget extensions read via SharedDefaults).
     ///
-    /// The Capacitor Preferences iOS plugin always uses UserDefaults.standard
-    /// and prepends the configured group name as a key prefix. It does NOT
-    /// use UserDefaults(suiteName:). So we read the prefixed keys from
-    /// standard and copy the raw values to the App Group suite.
+    /// Only writes to the App Group suite when a newer value is found in
+    /// standard. Never deletes from the App Group suite -- if Capacitor
+    /// hasn't written a key yet, the existing App Group value is preserved.
     private func syncWidgetData() {
         let standard = UserDefaults.standard
         guard let shared = UserDefaults(suiteName: Self.appGroupId) else { return }
@@ -120,17 +121,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         var didChange = false
 
         for key in Self.widgetKeys {
-            let prefixedKey = Self.preferencesPrefix + key
-            let value = standard.string(forKey: prefixedKey)
-            let existing = shared.string(forKey: key)
-
-            if value != existing {
-                if let value = value {
-                    shared.set(value, forKey: key)
-                } else {
-                    shared.removeObject(forKey: key)
+            // Try each known prefix to find the value Capacitor wrote
+            var value: String? = nil
+            for prefix in Self.possiblePrefixes {
+                if let v = standard.string(forKey: prefix + key) {
+                    value = v
+                    break
                 }
+            }
+
+            // Only update App Group suite if we found a value in standard
+            // and it differs from what's already there. Never delete.
+            guard let newValue = value else { continue }
+
+            let existing = shared.string(forKey: key)
+            if newValue != existing {
+                shared.set(newValue, forKey: key)
                 didChange = true
+            }
+
+            // Track for snapshot-based change detection
+            if lastSnapshot[key] != newValue {
+                lastSnapshot[key] = newValue
             }
         }
 

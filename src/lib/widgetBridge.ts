@@ -3,9 +3,9 @@
  * can read it without requiring the app to be open.
  *
  * On iOS  -> @capacitor/preferences writes to UserDefaults.standard with a
- *           "group.com.deencompanion.app." key prefix (the configured group).
- *           AppDelegate observes these writes and mirrors the values to the
- *           real App Group UserDefaults suite (group.com.deencompanion.app)
+ *           key prefix (default "CapacitorStorage."). AppDelegate observes
+ *           these writes and mirrors the values (stripping the prefix) into
+ *           the App Group UserDefaults suite (group.com.deencompanion.app)
  *           which the widget extension reads via SharedDefaults.
  *
  * On Android -> @capacitor/preferences writes to SharedPreferences file
