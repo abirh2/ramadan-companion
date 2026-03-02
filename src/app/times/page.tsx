@@ -454,17 +454,7 @@ export default function TimesPage() {
             </section>
 
             {/* Right Column - Sidebar */}
-            <aside className="space-y-6" aria-label="Qibla compass and settings">
-              {/* Qibla Compass */}
-              <section id="qibla" aria-labelledby="qibla-title">
-                <h2 id="qibla-title" className="sr-only">Qibla Compass</h2>
-                <QiblaCompass
-                qiblaDirection={qiblaDirection}
-                loading={loading}
-                error={!qiblaDirection && location ? 'Unable to determine direction' : error}
-              />
-              </section>
-
+            <aside className="space-y-6" aria-label="Settings and Qibla compass">
               {/* Compact Preferences Card */}
               <section aria-labelledby="preferences-title">
                 <h2 id="preferences-title" className="sr-only">Prayer Preferences</h2>
@@ -480,6 +470,16 @@ export default function TimesPage() {
               <section aria-labelledby="notification-settings-title">
                 <h2 id="notification-settings-title" className="sr-only">Notification Settings</h2>
                 <NotificationSettings />
+              </section>
+
+              {/* Qibla Compass */}
+              <section id="qibla" aria-labelledby="qibla-title">
+                <h2 id="qibla-title" className="sr-only">Qibla Compass</h2>
+                <QiblaCompass
+                  qiblaDirection={qiblaDirection}
+                  loading={loading}
+                  error={!qiblaDirection && location ? 'Unable to determine direction' : error}
+                />
               </section>
             </aside>
           </div>

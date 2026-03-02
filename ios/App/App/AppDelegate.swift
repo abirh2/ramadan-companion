@@ -7,9 +7,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-    // All widget-related keys that @capacitor/preferences writes to the
-    // App Group suite (group.com.deencompanion.app). When any of these
-    // change we tell WidgetKit to reload timelines.
+    // Widget-relevant keys written by the web app via @capacitor/preferences.
+    // The Capacitor Preferences plugin stores these in UserDefaults.standard
+    // with a prefix of "group.com.deencompanion.app." (the configured group).
+    // We mirror the values to the real App Group UserDefaults suite so the
+    // widget extension can read them.
     private static let widgetKeys = [
         // Next Prayer widget
         "widget_prayer_name",
@@ -82,20 +84,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "widget_mosque_update",
     ]
 
+    // Capacitor Preferences (with group: "group.com.deencompanion.app")
+    // stores keys in UserDefaults.standard prefixed with the group name + "."
+    private static let preferencesPrefix = "group.com.deencompanion.app."
     private static let appGroupId = "group.com.deencompanion.app"
 
-    /// Snapshot of the last-seen values for change detection.
-    private var lastSnapshot: [String: String] = [:]
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Take initial snapshot so the first real write is detected as a change
-        if let shared = UserDefaults(suiteName: Self.appGroupId) {
-            for key in Self.widgetKeys {
-                if let value = shared.string(forKey: key) {
-                    lastSnapshot[key] = value
-                }
-            }
-        }
+        syncWidgetData()
 
         NotificationCenter.default.addObserver(
             self,
@@ -107,25 +102,34 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     @objc private func defaultsDidChange(_ notification: Notification) {
-        checkWidgetDataChanged()
+        syncWidgetData()
     }
 
-    /// Detect whether any widget keys in the App Group suite have changed
-    /// since the last check and, if so, tell WidgetKit to reload timelines.
+    /// Mirror widget keys from UserDefaults.standard (where Capacitor
+    /// Preferences writes with a group prefix) to the real App Group
+    /// UserDefaults suite (where the widget extension reads).
     ///
-    /// Capacitor Preferences (with group config) writes directly to the App
-    /// Group suite -- NOT to UserDefaults.standard. So we read from the App
-    /// Group suite and compare against our in-memory snapshot.
-    private func checkWidgetDataChanged() {
+    /// The Capacitor Preferences iOS plugin always uses UserDefaults.standard
+    /// and prepends the configured group name as a key prefix. It does NOT
+    /// use UserDefaults(suiteName:). So we read the prefixed keys from
+    /// standard and copy the raw values to the App Group suite.
+    private func syncWidgetData() {
+        let standard = UserDefaults.standard
         guard let shared = UserDefaults(suiteName: Self.appGroupId) else { return }
 
         var didChange = false
 
         for key in Self.widgetKeys {
-            let current = shared.string(forKey: key)
-            let previous = lastSnapshot[key]
-            if current != previous {
-                lastSnapshot[key] = current ?? ""
+            let prefixedKey = Self.preferencesPrefix + key
+            let value = standard.string(forKey: prefixedKey)
+            let existing = shared.string(forKey: key)
+
+            if value != existing {
+                if let value = value {
+                    shared.set(value, forKey: key)
+                } else {
+                    shared.removeObject(forKey: key)
+                }
                 didChange = true
             }
         }
@@ -136,22 +140,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
-        checkWidgetDataChanged()
+        syncWidgetData()
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
-        checkWidgetDataChanged()
+        syncWidgetData()
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
+        syncWidgetData()
         WidgetCenter.shared.reloadAllTimelines()
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
-        checkWidgetDataChanged()
+        syncWidgetData()
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
