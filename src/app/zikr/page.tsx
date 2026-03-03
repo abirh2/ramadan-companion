@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card'
 import { ZikrCounter } from '@/components/zikr/ZikrCounter'
 import { ZikrPhraseSelector } from '@/components/zikr/ZikrPhraseSelector'
 import { DuaList } from '@/components/zikr/DuaList'
+import { AsmaAlHusnaList } from '@/components/zikr/AsmaAlHusnaList'
 import { useZikr } from '@/hooks/useZikr'
 import { FeedbackButton } from '@/components/FeedbackButton'
 
@@ -169,6 +170,21 @@ export default function ZikrPage() {
           </div>
 
           <DuaList />
+        </section>
+
+        {/* Divider */}
+        <div className="border-t" />
+
+        {/* 99 Names of Allah Section */}
+        <section className="space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold mb-2">99 Names of Allah</h2>
+            <p className="text-sm text-muted-foreground">
+              Asma ul-Husna — The Most Beautiful Names
+            </p>
+          </div>
+
+          <AsmaAlHusnaList />
         </section>
 
       {/* Feedback Button */}

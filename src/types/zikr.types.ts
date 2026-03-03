@@ -43,3 +43,14 @@ export interface ZikrFeedbackPreferences {
   hapticEnabled: boolean
 }
 
+/**
+ * One of the 99 Names of Allah (Asma ul-Husna)
+ * Source: AlAdhan API — https://api.aladhan.com/v1/asmaAlHusna
+ */
+export interface AsmaAlHusna {
+  number: number
+  name: string          // Arabic text
+  transliteration: string
+  meaning: string       // English meaning
+}
+
