@@ -71,6 +71,11 @@ export function calculatePrayerTimesLocal(
   // Set time format to 24-hour
   praytime.format('24h')
 
+  // Use floor rounding to match AlAdhan API's truncation behavior.
+  // Default 'nearest' (Math.round) causes a 1-minute discrepancy vs the API
+  // when a prayer's fractional minute is >= 0.5 (e.g. 5:30:40 → "05:31" vs "05:30").
+  praytime.round('down')
+
   // Get prayer times for the specified date (or today)
   const times = praytime.getTimes(date || new Date())
 
