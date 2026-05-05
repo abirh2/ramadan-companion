@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { rateLimit, PUBLIC_LIMIT } from '@/lib/rateLimit'
 import { getSurahByNumber, isValidSurahNumber } from '@/lib/quranData'
 import type { 
   AlQuranCloudSurahMultiResponse, 
@@ -17,6 +18,9 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ number: string }> }
 ) {
+  const limited = rateLimit(request, PUBLIC_LIMIT)
+  if (limited) return limited
+
   try {
     const resolvedParams = await params
     const surahNumber = parseInt(resolvedParams.number)

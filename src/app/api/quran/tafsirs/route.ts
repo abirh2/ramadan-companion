@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import type { QuranComTafsirListResponse } from '@/types/quran.types'
+import { rateLimit, PUBLIC_LIMIT } from '@/lib/rateLimit'
 
 const QURAN_COM_API_BASE = 'https://api.quran.com/api/v4'
 
@@ -9,7 +10,10 @@ const QURAN_COM_API_BASE = 'https://api.quran.com/api/v4'
  * Fetches list of available tafsirs from Quran.com API
  * Returns all tafsirs grouped by language
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const limited = rateLimit(request, PUBLIC_LIMIT)
+  if (limited) return limited
+
   try {
     const apiUrl = `${QURAN_COM_API_BASE}/resources/tafsirs`
 

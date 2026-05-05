@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { rateLimit, PUBLIC_LIMIT } from '@/lib/rateLimit'
 
 const ALADHAN_BASE_URL = 'https://api.aladhan.com/v1'
 
@@ -10,6 +11,9 @@ function bearingToDirection(bearing: number): string {
 }
 
 export async function GET(request: NextRequest) {
+  const limited = rateLimit(request, PUBLIC_LIMIT)
+  if (limited) return limited
+
   try {
     const searchParams = request.nextUrl.searchParams
     const latitude = searchParams.get('latitude')

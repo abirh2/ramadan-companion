@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { rateLimit, PUBLIC_LIMIT } from '@/lib/rateLimit'
 
 const HADITH_API_BASE_URL = 'https://hadithapi.com/api'
 const HADITH_API_KEY = process.env.HADITH_API_KEY
@@ -28,7 +29,10 @@ interface RawHadithBooksResponse {
  * Filters out collections with no hadith content
  * Returns list of books with metadata (name, author, slug)
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const limited = rateLimit(request, PUBLIC_LIMIT)
+  if (limited) return limited
+
   try {
     // Validate API key
     if (!HADITH_API_KEY) {

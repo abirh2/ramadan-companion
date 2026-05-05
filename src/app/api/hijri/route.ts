@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { HijriApiResponse } from '@/types/ramadan.types'
+import { rateLimit, PUBLIC_LIMIT } from '@/lib/rateLimit'
 
 const ALADHAN_BASE_URL = 'https://api.aladhan.com/v1'
 
 export async function GET(request: NextRequest) {
+  const limited = rateLimit(request, PUBLIC_LIMIT)
+  if (limited) return limited
+
   try {
     const searchParams = request.nextUrl.searchParams
     const offset = parseInt(searchParams.get('offset') || '0', 10)

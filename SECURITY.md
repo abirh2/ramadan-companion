@@ -6,7 +6,9 @@ Currently supported versions of Deen Companion:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.0.x   | :white_check_mark: |
+| 1.2.x   | :white_check_mark: |
+| 1.1.x   | :white_check_mark: |
+| < 1.1   | :x:                |
 
 ## Reporting a Vulnerability
 
@@ -50,6 +52,9 @@ We take the security of Deen Companion seriously. If you discover a security vul
 - ✅ Environment variable protection (`.env.local` in `.gitignore`)
 - ✅ Input validation on all forms
 - ✅ HTTPS enforcement in production
+- ✅ HTTP security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy)
+- ✅ In-memory rate limiting on all public API routes (30 req/min) and auth routes (10 req/min)
+- ✅ CRON_SECRET required (no insecure default) for push notification schedule endpoint
 - ✅ No third-party tracking or analytics (privacy-first)
 
 ## Responsible Disclosure

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { rateLimit, PUBLIC_LIMIT } from '@/lib/rateLimit'
 
 const ALADHAN_BASE_URL = 'https://api.aladhan.com/v1'
 
@@ -14,6 +15,9 @@ const ALADHAN_BASE_URL = 'https://api.aladhan.com/v1'
  * Returns: Converted date with full metadata for both calendars
  */
 export async function GET(request: NextRequest) {
+  const limited = rateLimit(request, PUBLIC_LIMIT)
+  if (limited) return limited
+
   try {
     const searchParams = request.nextUrl.searchParams
     const date = searchParams.get('date')

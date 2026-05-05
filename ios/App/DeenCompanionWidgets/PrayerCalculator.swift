@@ -164,7 +164,7 @@ struct PrayerCalculator {
         func toDate(_ key: String) -> Date? {
             guard let h = times[key], !h.isNaN else { return nil }
             let ms = utcTime + (h - longitude / 15.0) * 3_600_000.0
-            let rounded = (ms / 60_000.0).rounded() * 60_000.0
+            let rounded = (ms / 60_000.0).rounded(.down) * 60_000.0
             return Date(timeIntervalSince1970: rounded / 1000.0)
         }
         guard let fajr    = toDate("fajr"),

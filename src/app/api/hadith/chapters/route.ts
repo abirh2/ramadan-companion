@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { HadithChaptersResponse } from '@/types/hadith.types'
+import { rateLimit, PUBLIC_LIMIT } from '@/lib/rateLimit'
 
 const HADITH_API_BASE_URL = 'https://hadithapi.com/api'
 const HADITH_API_KEY = process.env.HADITH_API_KEY
@@ -14,6 +15,9 @@ const HADITH_API_KEY = process.env.HADITH_API_KEY
  * @returns {HadithChaptersResponse} List of chapters for the book
  */
 export async function GET(request: NextRequest) {
+  const limited = rateLimit(request, PUBLIC_LIMIT)
+  if (limited) return limited
+
   try {
     // Validate API key
     if (!HADITH_API_KEY) {

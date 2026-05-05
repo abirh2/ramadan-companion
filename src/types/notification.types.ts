@@ -62,4 +62,3 @@ export interface UseNotificationsResult {
   setPrayerMinutesBefore: (prayer: PrayerName, minutes: MinutesBefore) => Promise<void>
   refetch: () => Promise<void>
 }
-

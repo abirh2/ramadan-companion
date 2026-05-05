@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { QuranComTafsirContentResponse } from '@/types/quran.types'
+import { rateLimit, PUBLIC_LIMIT } from '@/lib/rateLimit'
 
 const QURAN_COM_API_BASE = 'https://api.quran.com/api/v4'
 
@@ -16,6 +17,9 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; surah: string; ayah: string }> }
 ) {
+  const limited = rateLimit(request, PUBLIC_LIMIT)
+  if (limited) return limited
+
   try {
     const resolvedParams = await params
     const { id, surah, ayah } = resolvedParams

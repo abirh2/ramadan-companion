@@ -160,7 +160,7 @@ class PrayerCalculator(
             val h = times[key] ?: return null
             if (h.isNaN()) return null
             val ms = utcTime + (h - longitude / 15.0) * 3_600_000.0
-            val rounded = kotlin.math.round(ms / 60_000.0) * 60_000L
+            val rounded = kotlin.math.floor(ms / 60_000.0).toLong() * 60_000L
             return Date(rounded)
         }
         return PrayerTimes(

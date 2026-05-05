@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { rateLimit, PUBLIC_LIMIT } from '@/lib/rateLimit'
 
 /**
  * fawazahmed0 Currency API - Exchange Rate Endpoint
@@ -10,6 +11,9 @@ import { NextRequest, NextResponse } from 'next/server'
  * Supports 200+ currencies including gold (XAU) and silver (XAG)
  */
 export async function GET(request: NextRequest) {
+  const limited = rateLimit(request, PUBLIC_LIMIT)
+  if (limited) return limited
+
   try {
     const searchParams = request.nextUrl.searchParams
     const base = searchParams.get('base') || 'USD'

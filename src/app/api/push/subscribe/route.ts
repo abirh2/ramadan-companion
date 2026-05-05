@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { rateLimit, AUTH_LIMIT } from '@/lib/rateLimit'
 
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(request, AUTH_LIMIT)
+  if (limited) return limited
+
   try {
     const supabase = await createClient()
 

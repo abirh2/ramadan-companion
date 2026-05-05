@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { rateLimit, PUBLIC_LIMIT } from '@/lib/rateLimit'
 import type { 
   AlQuranCloudMultiResponse, 
   DailyQuranResponse,
@@ -96,6 +97,9 @@ function getDailyAyahNumber(): number {
 }
 
 export async function GET(request: NextRequest) {
+  const limited = rateLimit(request, PUBLIC_LIMIT)
+  if (limited) return limited
+
   try {
     const searchParams = request.nextUrl.searchParams
     const translation = (searchParams.get('translation') || DEFAULT_TRANSLATION) as QuranTranslationId

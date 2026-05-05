@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { OverpassResponse } from '@/types/places.types'
 import { buildOverpassQuery, parseMosqueData, sortMosquesByDistance } from '@/lib/places'
+import { rateLimit, PUBLIC_LIMIT } from '@/lib/rateLimit'
 
 const OVERPASS_API_URL = 'https://overpass-api.de/api/interpreter'
 
 export async function GET(request: NextRequest) {
+  const limited = rateLimit(request, PUBLIC_LIMIT)
+  if (limited) return limited
+
   try {
     const searchParams = request.nextUrl.searchParams
     const latitude = searchParams.get('latitude')

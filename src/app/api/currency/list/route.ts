@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { rateLimit, PUBLIC_LIMIT } from '@/lib/rateLimit'
 
 /**
  * fawazahmed0 Currency API - Currency List Endpoint
@@ -10,7 +11,10 @@ import { NextResponse } from 'next/server'
  * Includes: All fiat currencies, XAU (Gold), XAG (Silver)
  * Static cache (currency list rarely changes)
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const limited = rateLimit(request, PUBLIC_LIMIT)
+  if (limited) return limited
+
   try {
     // Build primary and fallback URLs
     const primaryUrl = 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies.min.json'

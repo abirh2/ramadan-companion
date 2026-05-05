@@ -210,43 +210,51 @@ function AboutContent() {
                 </div>
 
                 <div>
-                  <h3 className="font-semibold mb-2">Key Features (V1.1)</h3>
+                  <h3 className="font-semibold mb-2">Key Features (V1.2)</h3>
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">•</span>
-                      <span><strong className="text-foreground">Prayer Times & Qibla:</strong> Accurate prayer times with multiple calculation methods and Qibla compass</span>
+                      <span><strong className="text-foreground">Prayer Times & Qibla:</strong> Accurate prayer times with multiple calculation methods, Qibla compass, and prayer tracking with analytics</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">•</span>
-                      <span><strong className="text-foreground">Prayer Notifications:</strong> Browser notifications at exact prayer times with hadith quotes</span>
+                      <span><strong className="text-foreground">Prayer Notifications:</strong> Native and browser push notifications at exact prayer times with authentic hadith quotes</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">•</span>
-                      <span><strong className="text-foreground">Prayer Tracking:</strong> Track daily prayers with historical analytics and charts</span>
+                      <span><strong className="text-foreground">Full Quran Browser:</strong> Browse all 114 surahs with bookmarks, multiple translations, transliteration, tafsir commentary, and audio recitation</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">•</span>
-                      <span><strong className="text-foreground">Full Quran Browser:</strong> Browse 114 surahs with bookmarks, translations, and search</span>
+                      <span><strong className="text-foreground">Hadith Browser:</strong> Browse 6 major hadith collections with chapter navigation, authentication grading, and favorites</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">•</span>
-                      <span><strong className="text-foreground">Daily Quran & Hadith:</strong> Inspirational verses and authentic hadith with translations</span>
+                      <span><strong className="text-foreground">Daily Quran & Hadith:</strong> Inspirational verses and authentic hadith with Arabic text and translations</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">•</span>
-                      <span><strong className="text-foreground">Charity Tracker:</strong> Full donation management with charts and zakat calculator</span>
+                      <span><strong className="text-foreground">Islamic Calendar:</strong> Dual Gregorian/Hijri calendar with Islamic events, important dates, and Hijri offset adjustment</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">•</span>
-                      <span><strong className="text-foreground">Zikr & Duas:</strong> Digital tasbih with 20 categorized duas and goal tracking</span>
+                      <span><strong className="text-foreground">Charity Tracker:</strong> Full donation management with charts, multi-currency support, and built-in Zakat calculator</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">•</span>
-                      <span><strong className="text-foreground">Places Finder:</strong> Locate nearby mosques and halal restaurants with maps</span>
+                      <span><strong className="text-foreground">Zikr & 99 Names:</strong> Digital tasbih counter, categorized duas, and the 99 Names of Allah with Arabic and transliteration</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">•</span>
-                      <span><strong className="text-foreground">PWA Support:</strong> Install as native app on iOS, Android, and Desktop</span>
+                      <span><strong className="text-foreground">Places Finder:</strong> Locate nearby mosques and halal restaurants with interactive maps and detailed info</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary mt-1">•</span>
+                      <span><strong className="text-foreground">Native App:</strong> Full iOS and Android native apps with home screen widgets displaying live prayer times</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary mt-1">•</span>
+                      <span><strong className="text-foreground">PWA Support:</strong> Install as a progressive web app on any device for offline access and fast loading</span>
                     </li>
                   </ul>
                 </div>
@@ -257,12 +265,14 @@ function AboutContent() {
                     Built with modern web technologies for performance, reliability, and user experience:
                   </p>
                   <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                    <div><span className="font-medium text-foreground">Frontend:</span> Next.js 16, React 19, TypeScript</div>
+                    <div><span className="font-medium text-foreground">Frontend:</span> Next.js 15, React 19, TypeScript</div>
                     <div><span className="font-medium text-foreground">UI:</span> TailwindCSS, shadcn/ui, Lucide Icons</div>
                     <div><span className="font-medium text-foreground">Backend:</span> Next.js API Routes, Supabase</div>
                     <div><span className="font-medium text-foreground">Database:</span> PostgreSQL (Supabase)</div>
                     <div><span className="font-medium text-foreground">Auth:</span> Supabase Auth (Email + OAuth)</div>
                     <div><span className="font-medium text-foreground">Maps:</span> MapLibre GL, OpenStreetMap</div>
+                    <div><span className="font-medium text-foreground">Native Apps:</span> Capacitor (iOS & Android)</div>
+                    <div><span className="font-medium text-foreground">Push:</span> Web Push API, Firebase Cloud Messaging</div>
                   </div>
                 </div>
 
@@ -289,11 +299,11 @@ function AboutContent() {
                 </div>
 
                 <div>
-                  <h3 className="font-semibold mb-2">Future Roadmap (V1.2+)</h3>
+                  <h3 className="font-semibold mb-2">Roadmap (V1.3+)</h3>
                   <p className="text-sm text-muted-foreground">
-                    Planned features include Quran audio recitation with multiple reciters, hadith browser with 6 major collections, 
-                    tafsir commentary, Islamic calendar, performance optimizations, and community features for sharing reflections 
-                    and charitable opportunities.
+                    Planned improvements include Islamic events countdown carousel, adhaan audio for prayer notifications,
+                    App Store and Google Play distribution, expanded notification sound options, 
+                    community features for sharing reflections, and continued performance optimizations.
                   </p>
                 </div>
               </CardContent>
@@ -328,7 +338,7 @@ function AboutContent() {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">✓</span>
-                      <span><strong className="text-foreground">Notifications (Coming Soon):</strong> Get prayer time reminders on your device</span>
+                      <span><strong className="text-foreground">Prayer Notifications:</strong> Get prayer time reminders directly on your device, even when the app is closed</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">✓</span>
@@ -406,12 +416,27 @@ function AboutContent() {
                   </div>
                 </div>
 
+                {/* Native App Section */}
+                <div className="border-l-4 border-primary/30 pl-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Smartphone className="h-5 w-5" />
+                    <h3 className="font-semibold">Native iOS & Android Apps</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Deen Companion is also available as a native iOS and Android app with additional capabilities including home screen widgets, native push notifications, and deeper system integration.
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Contact the developer for access to the iOS TestFlight or Android beta. App Store and Google Play listings are planned for a future release.
+                  </p>
+                </div>
+
                 {/* After Installation */}
                 <div>
                   <h3 className="font-semibold mb-2">After Installation</h3>
                   <p className="text-sm text-muted-foreground">
                     Once installed, you can launch Deen Companion directly from your home screen or app drawer. 
                     The app will remember your preferences, work offline, and provide a seamless experience across all your devices.
+                    Enable notifications from the Prayer Times page to receive reminders at each prayer time.
                   </p>
                 </div>
               </CardContent>
@@ -476,6 +501,30 @@ function AboutContent() {
                         ⚠ Volunteer-run infrastructure with rate limits. Service availability may vary.
                       </p>
                     </div>
+                    <div className="border-l-2 border-primary/20 pl-3">
+                      <p className="font-medium text-foreground">Geoapify</p>
+                      <p className="text-xs text-muted-foreground mb-1">
+                        Halal food and restaurant location data
+                      </p>
+                      <p className="text-xs text-amber-600 dark:text-amber-500">
+                        ⚠ Community-contributed data. Always verify with the establishment before visiting.
+                      </p>
+                    </div>
+                    <div className="border-l-2 border-primary/20 pl-3">
+                      <p className="font-medium text-foreground">Quran.com API</p>
+                      <p className="text-xs text-muted-foreground mb-1">
+                        Tafsir commentary resources in multiple languages
+                      </p>
+                      <p className="text-xs text-amber-600 dark:text-amber-500">
+                        ⚠ Tafsir interpretations vary by scholar and school of thought. Consult qualified scholars.
+                      </p>
+                    </div>
+                    <div className="border-l-2 border-primary/20 pl-3">
+                      <p className="font-medium text-foreground">fawazahmed0 Currency API</p>
+                      <p className="text-xs text-muted-foreground mb-1">
+                        Live currency exchange rates for the Zakat/charity tracker
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -513,6 +562,30 @@ function AboutContent() {
                     <div className="p-2 rounded bg-muted/30">
                       <p className="font-medium text-foreground">Lucide Icons</p>
                       <p className="text-muted-foreground">ISC License</p>
+                    </div>
+                    <div className="p-2 rounded bg-muted/30">
+                      <p className="font-medium text-foreground">Capacitor (Ionic)</p>
+                      <p className="text-muted-foreground">MIT License</p>
+                    </div>
+                    <div className="p-2 rounded bg-muted/30">
+                      <p className="font-medium text-foreground">Firebase Admin SDK</p>
+                      <p className="text-muted-foreground">Apache 2.0 License</p>
+                    </div>
+                    <div className="p-2 rounded bg-muted/30">
+                      <p className="font-medium text-foreground">web-push</p>
+                      <p className="text-muted-foreground">MIT License</p>
+                    </div>
+                    <div className="p-2 rounded bg-muted/30">
+                      <p className="font-medium text-foreground">praytime</p>
+                      <p className="text-muted-foreground">MIT License</p>
+                    </div>
+                    <div className="p-2 rounded bg-muted/30">
+                      <p className="font-medium text-foreground">date-fns</p>
+                      <p className="text-muted-foreground">MIT License</p>
+                    </div>
+                    <div className="p-2 rounded bg-muted/30">
+                      <p className="font-medium text-foreground">geo-tz</p>
+                      <p className="text-muted-foreground">MIT License</p>
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground mt-3">

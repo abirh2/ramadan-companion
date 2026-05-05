@@ -1,5 +1,5 @@
 import { NextPrayerCard } from '@/components/dashboard/NextPrayerCard'
-import { RamadanCard } from '@/components/dashboard/RamadanCard'
+import { IslamicEventsCarousel } from '@/components/dashboard/IslamicEventsCarousel'
 import { CalendarCard } from '@/components/dashboard/CalendarCard'
 import { QuranCard } from '@/components/dashboard/QuranCard'
 import { HadithCard } from '@/components/dashboard/HadithCard'
@@ -12,10 +12,10 @@ import { FeedbackButton } from '@/components/FeedbackButton'
 export default function Home() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-6">
-        {/* Hero Section - Ramadan Countdown */}
+        {/* Hero Section - Islamic Events Carousel */}
         <div className="mb-6 md:mb-8">
           <div className="md:max-w-3xl md:mx-auto">
-            <RamadanCard />
+            <IslamicEventsCarousel />
           </div>
         </div>
 
