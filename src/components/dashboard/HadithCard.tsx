@@ -153,7 +153,7 @@ export function HadithCard() {
                   </p>
                   
                   {/* Selected Language Translation */}
-                  <p className="text-sm text-muted-foreground leading-relaxed italic">
+                  <p className="text-sm text-muted-foreground leading-relaxed font-serif">
                     {getSelectedText()}
                   </p>
                 </div>
@@ -161,7 +161,7 @@ export function HadithCard() {
                 {/* Narrator and Reference */}
                 <div className="space-y-2 pt-4 border-t border-muted">
                   {narrator && (
-                    <p className="text-xs text-muted-foreground italic">{narrator}</p>
+                    <p className="text-xs text-muted-foreground">{narrator}</p>
                   )}
                   <div className="flex items-center justify-between">
                     <div>

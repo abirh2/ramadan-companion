@@ -5,6 +5,7 @@ import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import {
   Select,
@@ -93,7 +94,7 @@ export default function HalalFoodPage() {
         <p className="text-muted-foreground mt-2">Discover halal restaurants nearby</p>
       </div>
 
-      {/* Content */}
+      <Card className="rounded-3xl p-6 space-y-6">
         {/* Location Search */}
         <div>
           <LocationSearch onLocationSelect={handleLocationSelect} currentLocation={location} />
@@ -197,7 +198,7 @@ export default function HalalFoodPage() {
 
         {/* Data Source Notice */}
         {!loading && !error && (
-          <div className="bg-muted/50 border rounded-lg px-4 py-3 mt-6">
+          <div className="bg-muted/50 border rounded-lg px-4 py-3">
             <p className="text-xs text-muted-foreground">
               Data provided by{' '}
               <a
@@ -221,6 +222,7 @@ export default function HalalFoodPage() {
             </p>
           </div>
         )}
+      </Card>
 
       {/* Food Detail Dialog */}
       <FoodDetailDialog

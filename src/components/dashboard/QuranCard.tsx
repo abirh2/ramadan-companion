@@ -105,7 +105,7 @@ export function QuranCard() {
                 >
                   {arabic.text}
                 </p>
-                <p className="text-sm text-muted-foreground leading-relaxed italic">
+                <p className="text-sm text-muted-foreground leading-relaxed font-serif">
                   {translation.text}
                 </p>
               </div>

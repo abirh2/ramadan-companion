@@ -154,14 +154,16 @@ export function AyahActions({
         Tafsir
       </Button>
 
-      {/* Tafsir Dialog */}
-      <TafsirDialog
-        open={tafsirOpen}
-        onOpenChange={setTafsirOpen}
-        surahNumber={surahNumber}
-        surahName={surahName}
-        ayahNumber={ayahNumber}
-      />
+      {/* Only mount TafsirDialog when opened to avoid per-ayah API calls */}
+      {tafsirOpen && (
+        <TafsirDialog
+          open={tafsirOpen}
+          onOpenChange={setTafsirOpen}
+          surahNumber={surahNumber}
+          surahName={surahName}
+          ayahNumber={ayahNumber}
+        />
+      )}
     </div>
   )
 }
