@@ -63,6 +63,7 @@ export async function GET(request: NextRequest) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'RamadanCompanion/1.0 (https://github.com/ahossain/ramadan-companion)',
           },
           body: `data=${encodeURIComponent(query)}`,
           next: { revalidate: 3600 }, // Cache for 1 hour

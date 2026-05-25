@@ -106,75 +106,42 @@ async function requestGeolocationBrowser(): Promise<LocationData | null> {
   })
 }
 
-// Reverse geocode: convert coordinates to city name using Nominatim API
+// Reverse geocode: convert coordinates to city name via server-side API route
+// (Nominatim requires a custom User-Agent which browsers cannot set client-side)
 export async function reverseGeocode(lat: number, lng: number): Promise<string | null> {
   try {
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
-      {
-        headers: {
-          'User-Agent': 'RamadanCompanion/1.0', // Required by Nominatim
-        },
-      }
+      `/api/geocode/reverse?lat=${lat}&lng=${lng}`,
+      { signal: AbortSignal.timeout(10000) }
     )
 
     if (!response.ok) {
-      throw new Error(`Nominatim API error: ${response.status}`)
+      throw new Error(`Geocode API error: ${response.status}`)
     }
 
     const data = await response.json()
-
-    // Extract city name from address components
-    const address = data.address
-    const city =
-      address?.city ||
-      address?.town ||
-      address?.village ||
-      address?.municipality ||
-      address?.county ||
-      address?.state ||
-      null
-
-    const country = address?.country || null
-
-    if (city && country) {
-      return `${city}, ${country}`
-    } else if (city) {
-      return city
-    } else if (country) {
-      return country
-    }
-
-    return data.display_name || null
+    return data.city || null
   } catch (error) {
     console.error('Reverse geocoding error:', error)
     return null
   }
 }
 
-// Geocode city name to coordinates using Nominatim API
+// Geocode city name to coordinates via server-side API route
+// (Nominatim requires a custom User-Agent which browsers cannot set client-side)
 export async function geocodeCity(cityName: string): Promise<GeocodingResult[]> {
   try {
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityName)}&format=json&limit=5`,
-      {
-        headers: {
-          'User-Agent': 'RamadanCompanion/1.0', // Required by Nominatim
-        },
-      }
+      `/api/geocode/search?q=${encodeURIComponent(cityName)}`,
+      { signal: AbortSignal.timeout(10000) }
     )
 
     if (!response.ok) {
-      throw new Error(`Nominatim API error: ${response.status}`)
+      throw new Error(`Geocode API error: ${response.status}`)
     }
 
     const data = await response.json()
-
-    return data.map((result: any) => ({
-      lat: parseFloat(result.lat),
-      lng: parseFloat(result.lon),
-      displayName: result.display_name,
-    }))
+    return data.results || []
   } catch (error) {
     console.error('Geocoding error:', error)
     return []
