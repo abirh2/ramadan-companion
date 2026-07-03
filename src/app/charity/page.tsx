@@ -126,10 +126,6 @@ export default function CharityPage() {
     setFormOpen(true)
   }
 
-  const formatAmount = (amount: number, currency: string) => {
-    return formatCurrency(amount, currency)
-  }
-
   return (
     <div className="container mx-auto px-4 py-6 max-w-6xl">
       <div className="mb-6">
@@ -200,7 +196,7 @@ export default function CharityPage() {
                   <CardContent className="p-6">
                     <p className="text-sm text-muted-foreground mb-1">This Ramadan</p>
                     <p className="text-3xl font-bold">
-                      {formatAmount(summary.ramadanTotal, preferredCurrency)}
+                      {formatCurrency(summary.ramadanTotal, preferredCurrency)}
                     </p>
                     {converting && (
                       <p className="text-xs text-muted-foreground mt-1">Converting...</p>
@@ -211,7 +207,7 @@ export default function CharityPage() {
                   <CardContent className="p-6">
                     <p className="text-sm text-muted-foreground mb-1">This Year</p>
                     <p className="text-3xl font-bold">
-                      {formatAmount(summary.yearlyTotal, preferredCurrency)}
+                      {formatCurrency(summary.yearlyTotal, preferredCurrency)}
                     </p>
                     {converting && (
                       <p className="text-xs text-muted-foreground mt-1">Converting...</p>
@@ -222,7 +218,7 @@ export default function CharityPage() {
                   <CardContent className="p-6">
                     <p className="text-sm text-muted-foreground mb-1">All Time</p>
                     <p className="text-3xl font-bold">
-                      {formatAmount(summary.allTimeTotal, preferredCurrency)}
+                      {formatCurrency(summary.allTimeTotal, preferredCurrency)}
                     </p>
                     {converting && (
                       <p className="text-xs text-muted-foreground mt-1">Converting...</p>
@@ -348,7 +344,7 @@ export default function CharityPage() {
             <div className="py-4">
               <p className="text-sm">
                 <span className="font-semibold">
-                  {formatAmount(Number(deletingDonation.amount), deletingDonation.currency)}
+                  {formatCurrency(Number(deletingDonation.amount), deletingDonation.currency)}
                 </span>
                 {' '}•{' '}
                 <span className="capitalize">{deletingDonation.type}</span>

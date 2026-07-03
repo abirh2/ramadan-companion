@@ -65,10 +65,6 @@ export function MonthlyView({ donations, onEdit, onDelete, viewMode, preferredCu
     }
   })
 
-  const formatAmount = (amount: number, currency: string) => {
-    return formatCurrency(amount, currency)
-  }
-
   const formatDate = (dateString: string) => {
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
@@ -143,7 +139,7 @@ export function MonthlyView({ donations, onEdit, onDelete, viewMode, preferredCu
                   <p className="text-sm text-muted-foreground">No donations</p>
                 ) : (
                   <>
-                    <p className="text-2xl font-bold">{formatAmount(monthData.total, preferredCurrency)}</p>
+                    <p className="text-2xl font-bold">{formatCurrency(monthData.total, preferredCurrency)}</p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {monthData.count} {monthData.count === 1 ? 'donation' : 'donations'}
                     </p>
@@ -160,7 +156,7 @@ export function MonthlyView({ donations, onEdit, onDelete, viewMode, preferredCu
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="font-semibold">
-                                  {formatAmount(Number(donation.convertedAmount), donation.convertedCurrency)}
+                                  {formatCurrency(Number(donation.convertedAmount), donation.convertedCurrency)}
                                 </span>
                                 <span
                                   className={`text-xs px-2 py-0.5 rounded-full capitalize ${getTypeBadgeClass(

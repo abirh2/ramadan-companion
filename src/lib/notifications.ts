@@ -9,6 +9,7 @@ import type {
   PushSubscription,
 } from '@/types/notification.types'
 import { Capacitor } from '@capacitor/core'
+import { getIOSBrowser, isIOS } from '@/lib/platform'
 
 // LocalStorage keys
 const STORAGE_KEYS = {
@@ -68,32 +69,6 @@ function migratePreferences(raw: Record<string, unknown>): NotificationPreferenc
 
 // Note: Notification scheduling now handled by backend cron job + Web Push API
 // No more client-side setTimeout scheduling
-
-/**
- * Detect if device is iOS
- * @returns true if running on iOS
- */
-export function isIOS(): boolean {
-  if (typeof window === 'undefined') return false
-  const ua = navigator.userAgent
-  return /iPad|iPhone|iPod/.test(ua)
-}
-
-/**
- * Detect iOS browser type
- * @returns 'safari' | 'chrome' | 'firefox' | 'edge' | 'other' | 'not-ios'
- */
-export function getIOSBrowser(): string {
-  if (!isIOS()) return 'not-ios'
-  
-  const ua = navigator.userAgent
-  if (/CriOS/.test(ua)) return 'chrome'
-  if (/FxiOS/.test(ua)) return 'firefox'
-  if (/EdgiOS/.test(ua)) return 'edge'
-  if (/Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua)) return 'safari'
-  
-  return 'other'
-}
 
 /**
  * Check if notifications are supported

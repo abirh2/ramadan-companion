@@ -863,7 +863,7 @@ Show one ayah and one hadith per day (same for all users) and allow favorites. *
 - `/hooks/useHadithFavorites.ts` - Manage favorite state with auth protection
 - `/components/dashboard/HadithCard.tsx` - Dashboard card with live data
 - `/components/favorites/FavoriteHadithItem.tsx` - Favorites list item with copy buttons
-- `/components/hadith/LanguageSelector.tsx` - Language preference selector
+- `/components/hadith/HadithLanguageSelector.tsx` - Language preference selector (`variant="form"` or compact)
 - `/types/hadith.types.ts` - TypeScript types for all Hadith data
 
 **Shared:**
@@ -3112,41 +3112,14 @@ All forms follow accessibility best practices:
 - Keyboard navigation paths
 - Live region announcements
 
-### Accessibility Utilities
+### Accessibility
 
-**Helper Functions:**
-- `generateAriaLabel()` - Create descriptive ARIA labels
-- `generateCardAriaLabel()` - Labels for card components
-- `formatCountdownForScreenReader()` - Time formatting for screen readers
-- `shouldHandleKeyboardEvent()` - Filter keyboard events from inputs
-- `trapFocus()` - Implement focus trapping in modals
+**In production:**
+- `SkipLink` in root layout for keyboard skip navigation
+- shadcn/ui (Radix) components with built-in ARIA patterns
+- Per-component ARIA labels on dashboard cards, Qibla compass, charity views, etc.
 
-**Custom Hook:**
-- `useAnnouncer()` - Manage screen reader announcements
-  - `announce(message, priority)` - Announce to screen readers
-  - `clear()` - Clear all announcements
-
-**Example Usage:**
-```tsx
-import { useAnnouncer } from '@/hooks/useAnnouncer'
-
-function MyComponent() {
-  const { announce } = useAnnouncer()
-  
-  const handleSubmit = async () => {
-    try {
-      await saveDonation()
-      announce('Donation saved successfully', 'polite')
-    } catch (error) {
-      announce('Failed to save donation', 'assertive')
-    }
-  }
-}
-```
-
-### Future Enhancements
-
-**V1.2+:**
+**Future enhancements (V1.2+):**
 - High contrast mode option
 - Reduced motion preference support
 - Font size adjustment controls

@@ -18,6 +18,7 @@ jest.mock('@/hooks/useDonations', () => ({
       allTimeTotal: 0,
       totalCount: 0,
     },
+    preferredCurrency: 'USD',
   }),
 }))
 

@@ -73,8 +73,8 @@ export function HadithList({ bookSlug, chapterNumber }: HadithListProps) {
             <Info className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
           </Button>
           <HadithLanguageSelector
-            selectedLanguage={selectedLanguage}
-            onLanguageChange={setLanguage}
+            value={selectedLanguage}
+            onValueChange={setLanguage}
           />
         </div>
       </div>

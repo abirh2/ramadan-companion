@@ -120,8 +120,7 @@ npm run dev
 │       ├── client.ts              # Client-side Supabase client
 │       └── server.ts              # Server-side Supabase client
 ├── hooks/
-│   ├── useAuth.ts                 # Auth context hook
-│   └── useRequireAuth.ts          # Protected route hook
+│   └── useAuth.ts                 # Auth context hook
 ├── components/
 │   └── auth/
 │       ├── AuthProvider.tsx       # Auth context provider
@@ -293,17 +292,20 @@ export function MyProtectedFeature() {
 
 ### Protected Route
 
+Use the `ProtectedFeature` wrapper component for auth-gated pages and features:
+
 ```typescript
-'use client';
+import { ProtectedFeature } from '@/components/auth/ProtectedFeature';
 
-import { useRequireAuth } from '@/hooks/useRequireAuth';
-
-export default function ProtectedPage() {
-  const { user, loading } = useRequireAuth('/'); // Redirect to '/' if not authenticated
-
-  if (loading) return <div>Loading...</div>;
-
-  return <div>Protected page content</div>;
+export function MyProtectedFeature() {
+  return (
+    <ProtectedFeature
+      title="Feature Name"
+      description="Sign in to access this feature"
+    >
+      {/* Protected content */}
+    </ProtectedFeature>
+  );
 }
 ```
 

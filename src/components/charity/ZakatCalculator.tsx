@@ -42,10 +42,6 @@ export function ZakatCalculator({ onLogAsDonation }: ZakatCalculatorProps) {
 
   const calculation = calculateZakat()
 
-  const formatAmount = (amount: number) => {
-    return formatCurrency(amount, selectedCurrency)
-  }
-
   const handleInputChange = (field: keyof ZakatCalculationInputs, value: string) => {
     const numValue = parseFloat(value) || 0
     setInputs({ ...inputs, [field]: numValue })
@@ -184,21 +180,21 @@ export function ZakatCalculator({ onLogAsDonation }: ZakatCalculatorProps) {
           <div className="border-t pt-6 space-y-3">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Total Assets:</span>
-              <span className="font-medium">{formatAmount(calculation.totalAssets)}</span>
+              <span className="font-medium">{formatCurrency(calculation.totalAssets, selectedCurrency)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Minus Debts:</span>
-              <span className="font-medium">- {formatAmount(calculation.totalDebts)}</span>
+              <span className="font-medium">- {formatCurrency(calculation.totalDebts, selectedCurrency)}</span>
             </div>
             <div className="flex justify-between text-sm border-t pt-3">
               <span className="text-muted-foreground">Net Zakatable Wealth:</span>
-              <span className="font-semibold">{formatAmount(calculation.netAssets)}</span>
+              <span className="font-semibold">{formatCurrency(calculation.netAssets, selectedCurrency)}</span>
             </div>
             <div className="flex justify-between items-center bg-primary/5 p-4 rounded-lg border-2 border-primary/20">
               <div>
                 <p className="text-sm text-muted-foreground">Zakat Due (2.5%):</p>
                 <p className="text-2xl font-bold text-primary">
-                  {formatAmount(calculation.zakatAmount)}
+                  {formatCurrency(calculation.zakatAmount, selectedCurrency)}
                 </p>
               </div>
               <Button

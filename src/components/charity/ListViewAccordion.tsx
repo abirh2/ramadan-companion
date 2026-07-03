@@ -71,10 +71,6 @@ export function ListViewAccordion({ donations, onEdit, onDelete, viewMode, prefe
     setExpandedMonths(newExpanded)
   }
 
-  const formatAmount = (amount: number, currency: string) => {
-    return formatCurrency(amount, currency)
-  }
-
   const formatDate = (dateString: string) => {
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
@@ -130,7 +126,7 @@ export function ListViewAccordion({ donations, onEdit, onDelete, viewMode, prefe
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-xl font-bold">{formatAmount(group.total, preferredCurrency)}</p>
+                <p className="text-xl font-bold">{formatCurrency(group.total, preferredCurrency)}</p>
               </div>
             </button>
 
@@ -165,7 +161,7 @@ export function ListViewAccordion({ donations, onEdit, onDelete, viewMode, prefe
                           <tr key={donation.id} className="border-b last:border-0 hover:bg-muted/30">
                             <td className="py-3 px-2 text-sm">{formatDate(donation.date)}</td>
                             <td className="py-3 px-2 text-sm text-right font-semibold">
-                              {formatAmount(Number(donation.convertedAmount), donation.convertedCurrency)}
+                              {formatCurrency(Number(donation.convertedAmount), donation.convertedCurrency)}
                             </td>
                             <td className="py-3 px-2">
                               <span

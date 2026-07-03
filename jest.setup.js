@@ -40,16 +40,6 @@ jest.mock('@capacitor/geolocation', () => ({
   },
 }))
 
-// Mock Capacitor Motion plugin
-jest.mock('@capacitor/motion', () => ({
-  Motion: {
-    addListener: jest.fn().mockResolvedValue({
-      remove: jest.fn().mockResolvedValue(undefined),
-    }),
-    removeAllListeners: jest.fn().mockResolvedValue(undefined),
-  },
-}))
-
 // Mock Capacitor Push Notifications plugin
 jest.mock('@capacitor/push-notifications', () => ({
   PushNotifications: {
@@ -172,35 +162,5 @@ jest.mock('@/lib/supabase/server', () => ({
       exchangeCodeForSession: jest.fn(),
     },
   })),
-}))
-
-// Mock the legacy supabaseClient to prevent initialization errors
-jest.mock('@/lib/supabaseClient', () => ({
-  supabase: {
-    auth: {
-      getSession: jest.fn(),
-      onAuthStateChange: jest.fn(() => ({
-        data: { subscription: { unsubscribe: jest.fn() } },
-      })),
-      signInWithPassword: jest.fn(),
-      signUp: jest.fn(),
-      signInWithOAuth: jest.fn(),
-      signInWithIdToken: jest.fn(),
-      updateUser: jest.fn(),
-      getUser: jest.fn(),
-      signOut: jest.fn(),
-    },
-    from: jest.fn(() => ({
-      select: jest.fn(() => ({
-        eq: jest.fn(() => ({
-          single: jest.fn().mockResolvedValue({ data: null, error: null }),
-        })),
-      })),
-      insert: jest.fn().mockResolvedValue({ data: null, error: null }),
-      upsert: jest.fn().mockResolvedValue({ data: null, error: null }),
-      update: jest.fn().mockResolvedValue({ data: null, error: null }),
-      delete: jest.fn().mockResolvedValue({ data: null, error: null }),
-    })),
-  },
 }))
 

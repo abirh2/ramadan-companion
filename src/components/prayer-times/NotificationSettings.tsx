@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useAuth } from '@/hooks/useAuth'
 import { Capacitor } from '@capacitor/core'
-import { isIOS, getIOSBrowser } from '@/lib/notifications'
+import { isIOS, getIOSBrowser } from '@/lib/platform'
 import { sendTestNotification } from '@/lib/localNotifications'
 import type { PrayerName, MinutesBefore } from '@/types/notification.types'
 

@@ -4,20 +4,14 @@ import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Heart, Loader2 } from 'lucide-react'
 import { ProtectedFeature } from '@/components/auth/ProtectedFeature'
+import { formatCurrency } from '@/lib/currency'
 import { useDonations } from '@/hooks/useDonations'
 
 export function CharityCard() {
-  const { loading, error, summary } = useDonations()
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount)
-  }
+  const { loading, error, summary, preferredCurrency } = useDonations()
 
   const cardAriaLabel = !loading && !error
-    ? `Charity Tracker. This Ramadan: ${formatCurrency(summary.ramadanTotal)}. All time: ${formatCurrency(summary.allTimeTotal)}. ${summary.totalCount} ${summary.totalCount === 1 ? 'donation' : 'donations'} recorded. Click to view details.`
+    ? `Charity Tracker. This Ramadan: ${formatCurrency(summary.ramadanTotal, preferredCurrency)}. All time: ${formatCurrency(summary.allTimeTotal, preferredCurrency)}. ${summary.totalCount} ${summary.totalCount === 1 ? 'donation' : 'donations'} recorded. Click to view details.`
     : loading
     ? 'Loading charity tracker'
     : 'Charity Tracker card'
@@ -63,11 +57,11 @@ export function CharityCard() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1" id="ramadan-total-label">This Ramadan</p>
-                    <p className="text-2xl font-bold" aria-labelledby="ramadan-total-label">{formatCurrency(summary.ramadanTotal)}</p>
+                    <p className="text-2xl font-bold" aria-labelledby="ramadan-total-label">{formatCurrency(summary.ramadanTotal, preferredCurrency)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1" id="alltime-total-label">All Time</p>
-                    <p className="text-2xl font-bold" aria-labelledby="alltime-total-label">{formatCurrency(summary.allTimeTotal)}</p>
+                    <p className="text-2xl font-bold" aria-labelledby="alltime-total-label">{formatCurrency(summary.allTimeTotal, preferredCurrency)}</p>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground pt-2 border-t border-muted">

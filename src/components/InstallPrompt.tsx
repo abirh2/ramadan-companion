@@ -5,6 +5,7 @@ import { Capacitor } from '@capacitor/core'
 import { X, Download, Info, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { getIOSBrowser, getIOSBrowserPrefixed } from '@/lib/platform'
 import type { 
   BeforeInstallPromptEvent, 
   InstallPromptState,
@@ -23,36 +24,6 @@ const STORAGE_KEYS = {
 
 const DISMISSAL_DURATION = 7 * 24 * 60 * 60 * 1000 // 7 days
 const MIN_PAGE_VIEWS = 2
-
-/**
- * Helper to detect iOS Safari
- */
-const isIOSSafari = () => {
-  if (typeof window === 'undefined') return false
-  const ua = navigator.userAgent
-  const isIOS = /iPad|iPhone|iPod/.test(ua)
-  const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua)
-  return isIOS && isSafari
-}
-
-/**
- * Helper to detect iOS browser type
- * Returns: 'ios-safari', 'ios-chrome', 'ios-firefox', 'ios-edge', 'ios-other', or 'not-ios'
- */
-const getIOSBrowserType = () => {
-  if (typeof window === 'undefined') return 'not-ios'
-  const ua = navigator.userAgent
-  const isIOS = /iPad|iPhone|iPod/.test(ua)
-  
-  if (!isIOS) return 'not-ios'
-  
-  if (/CriOS/.test(ua)) return 'ios-chrome' // iOS Chrome
-  if (/FxiOS/.test(ua)) return 'ios-firefox' // iOS Firefox
-  if (/EdgiOS/.test(ua)) return 'ios-edge' // iOS Edge
-  if (/Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua)) return 'ios-safari' // iOS Safari
-  
-  return 'ios-other' // Other iOS browsers
-}
 
 /**
  * InstallPrompt Component
@@ -139,12 +110,12 @@ export function InstallPrompt() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener)
 
     // For iOS Safari, we show a custom banner as it doesn't fire beforeinstallprompt
-    if (isIOSSafari() && isEngaged && !isDismissed) {
+    if (getIOSBrowser() === 'safari' && isEngaged && !isDismissed) {
       setShowPrompt(true)
       console.log('[PWA] Detected iOS Safari, showing custom install banner.')
     } else {
       // For other iOS browsers (Chrome, Firefox, Edge), show a different banner
-      const iosBrowserType = getIOSBrowserType()
+      const iosBrowserType = getIOSBrowserPrefixed()
       if (iosBrowserType !== 'not-ios' && iosBrowserType !== 'ios-safari' && isEngaged && !isDismissed) {
         setShowPrompt(true)
         console.log(`[PWA] Detected ${iosBrowserType}, showing 'Open in Safari' banner.`)
@@ -223,7 +194,7 @@ export function InstallPrompt() {
     return null
   }
 
-  const iosBrowserType = getIOSBrowserType()
+  const iosBrowserType = getIOSBrowserPrefixed()
 
   // Render iOS Safari banner - manual installation instructions
   if (iosBrowserType === 'ios-safari') {

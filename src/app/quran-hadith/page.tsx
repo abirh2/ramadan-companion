@@ -11,7 +11,7 @@ import { useHadithOfTheDay } from '@/hooks/useHadithOfTheDay'
 import { useHadithFavorites } from '@/hooks/useHadithFavorites'
 import { LoginModal } from '@/components/auth/LoginModal'
 import { TranslationSelector } from '@/components/quran/TranslationSelector'
-import { LanguageSelector } from '@/components/hadith/LanguageSelector'
+import { HadithLanguageSelector } from '@/components/hadith/HadithLanguageSelector'
 import { FeedbackButton } from '@/components/FeedbackButton'
 import type { QuranFavoriteData } from '@/types/quran.types'
 import type { HadithFavoriteData } from '@/types/hadith.types'
@@ -570,7 +570,8 @@ export default function QuranHadithPage() {
 
                 {/* Language Selector */}
                 <div className="border-t pt-4">
-                  <LanguageSelector
+                  <HadithLanguageSelector
+                    variant="form"
                     value={selectedLanguage}
                     onValueChange={setLanguage}
                     disabled={hadithLoading}
