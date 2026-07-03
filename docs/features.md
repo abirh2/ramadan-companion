@@ -34,16 +34,18 @@ User authentication and profile management using Supabase Auth.
 
 ### Auth Methods
 - **Email/Password:** Standard sign up and login
-- **OAuth:** Google social login with brand logo
+- **OAuth:** Google social login with brand logo (web + native)
+- **Sign in with Apple:** Native iOS only via Capacitor plugin (App Store Guideline 4.8)
 - **Session Management:** httpOnly cookies, automatic session refresh
 
 ### User Flow
 1. **Anonymous browsing:** Users can view dashboard (prayer times, Quran, Hadith) without auth
 2. **Protected features:** Charity tracker and favorites require authentication
 3. **Login modal:** Click "Login" button in header → modal with tabs (Sign In / Sign Up)
-4. **OAuth flow:** Click Google/GitHub → redirect to OAuth → callback → authenticated
-5. **User menu:** When authenticated, user icon in header opens sheet with profile link, favorites, sign out
-6. **Theme toggle:** Always visible in header (sun/moon icon) - no authentication required
+4. **OAuth flow:** Click Google → redirect to OAuth → callback → authenticated
+5. **Apple Sign-In (iOS):** Click Continue with Apple → native sheet → `signInWithIdToken` → authenticated
+6. **User menu:** When authenticated, user icon in header opens sheet with profile link, favorites, sign out
+7. **Theme toggle:** Always visible in header (sun/moon icon) - no authentication required
 
 ### Data
 - `profiles` table auto-created on signup via trigger
@@ -62,6 +64,7 @@ User authentication and profile management using Supabase Auth.
 None (Supabase Auth handles all authentication)
 
 **V1 Status:** ✅ **Complete** (November 2024) - Email/password + Google OAuth, profile management, protected routes, RLS security  
+**V1.2:** ✅ Native Sign in with Apple on iOS (July 2026)
 
 **Future Enhancements (V1.2+):**
 - **V1.3:** Profile picture upload (Supabase Storage)

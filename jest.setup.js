@@ -92,6 +92,13 @@ jest.mock('@capacitor/haptics', () => ({
   },
 }))
 
+// Mock Capacitor Apple Sign-In plugin
+jest.mock('@capacitor-community/apple-sign-in', () => ({
+  SignInWithApple: {
+    authorize: jest.fn(),
+  },
+}))
+
 // =============================================================================
 // Framework Mocks
 // =============================================================================
@@ -138,6 +145,9 @@ jest.mock('@/lib/supabase/client', () => ({
       signInWithPassword: jest.fn(),
       signUp: jest.fn(),
       signInWithOAuth: jest.fn(),
+      signInWithIdToken: jest.fn(),
+      updateUser: jest.fn(),
+      getUser: jest.fn(),
       signOut: jest.fn(),
     },
     from: jest.fn(() => ({
@@ -147,6 +157,9 @@ jest.mock('@/lib/supabase/client', () => ({
         })),
       })),
       upsert: jest.fn(),
+      update: jest.fn(() => ({
+        eq: jest.fn().mockResolvedValue({ data: null, error: null }),
+      })),
     })),
   })),
 }))
@@ -172,6 +185,9 @@ jest.mock('@/lib/supabaseClient', () => ({
       signInWithPassword: jest.fn(),
       signUp: jest.fn(),
       signInWithOAuth: jest.fn(),
+      signInWithIdToken: jest.fn(),
+      updateUser: jest.fn(),
+      getUser: jest.fn(),
       signOut: jest.fn(),
     },
     from: jest.fn(() => ({

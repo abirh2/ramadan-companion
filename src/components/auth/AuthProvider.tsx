@@ -4,6 +4,12 @@ import { createContext, useEffect, useState, useCallback } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { User, Session, Profile, AuthContextType } from '@/types/auth.types';
 import { createClient } from '@/lib/supabase/client';
+import {
+  APPLE_BUNDLE_ID,
+  APPLE_NATIVE_REDIRECT,
+  generateAppleNonce,
+  isAppleSignInCancelled,
+} from '@/lib/appleAuth';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -166,6 +172,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: null };
   };
 
+  const signInWithApple = async () => {
+    if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'ios') {
+      return { error: new Error('Apple Sign-In is only available on iOS') };
+    }
+
+    try {
+      const { SignInWithApple } = await import('@capacitor-community/apple-sign-in');
+      const { rawNonce, hashedNonce } = await generateAppleNonce();
+
+      const result = await SignInWithApple.authorize({
+        clientId: APPLE_BUNDLE_ID,
+        redirectURI: APPLE_NATIVE_REDIRECT,
+        scopes: 'email name',
+        nonce: hashedNonce,
+      });
+
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: 'apple',
+        token: result.response.identityToken,
+        nonce: rawNonce,
+      });
+
+      if (error) {
+        return { error };
+      }
+
+      if (result.response.givenName && data.user) {
+        const fullName = `${result.response.givenName} ${result.response.familyName ?? ''}`.trim();
+        await supabase.auth.updateUser({
+          data: {
+            full_name: fullName,
+            given_name: result.response.givenName,
+            family_name: result.response.familyName ?? undefined,
+          },
+        });
+        await supabase
+          .from('profiles')
+          .update({ display_name: fullName })
+          .eq('id', data.user.id);
+      }
+
+      return { error: null };
+    } catch (err) {
+      if (isAppleSignInCancelled(err)) {
+        return { error: null };
+      }
+      return { error: err instanceof Error ? err : new Error('Apple sign-in failed') };
+    }
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
@@ -178,6 +234,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signIn,
     signUp,
     signInWithOAuth,
+    signInWithApple,
     signOut,
     refreshProfile,
   };

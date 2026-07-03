@@ -4,7 +4,8 @@
 
 Full Supabase authentication has been successfully integrated into Deen Companion with:
 - Email/password authentication
-- OAuth (Google & GitHub)
+- OAuth (Google)
+- Native Sign in with Apple (iOS app only)
 - Protected features (Charity tracker requires auth)
 - Row-Level Security (RLS) policies
 - Profile management
@@ -29,6 +30,33 @@ Full Supabase authentication has been successfully integrated into Deen Companio
 7. In Supabase Dashboard → Authentication → Providers:
    - Enable Google provider
    - Paste Client ID and Client Secret
+
+#### Apple Sign-In Setup (iOS native app only)
+
+Required for App Store Guideline 4.8 when Google OAuth is offered on iOS. Uses native AuthenticationServices (no web OAuth redirect, no 6-month secret rotation).
+
+1. **Apple Developer Console**
+   - Open your App ID (`com.deencompanion.app`)
+   - Enable **Sign in with Apple** capability
+   - No Services ID or signing key (`.p8`) needed for native-only flow
+
+2. **Supabase Dashboard** → Authentication → Providers → Apple
+   - Enable Sign in with Apple
+   - Add **Client ID**: `com.deencompanion.app` (bundle ID)
+   - Leave **Secret Key (for OAuth)** blank (native `signInWithIdToken` only)
+   - Confirm redirect URL remains for Google native OAuth: `com.deencompanion.app://login-callback`
+
+3. **Xcode**
+   - Open `ios/App/App.xcworkspace`
+   - App target → Signing & Capabilities → add **Sign in with Apple**
+   - Entitlement is also in `ios/App/App/AppRelease.entitlements`
+
+4. **Capacitor plugin**
+   - `@capacitor-community/apple-sign-in` (installed in project)
+   - After code changes: deploy to Vercel, then `npm run cap:sync:ios` and rebuild in Xcode
+   - Test on a **physical device** (Simulator may not complete Apple ID login)
+
+**Implementation:** `AuthProvider.signInWithApple()` → Capacitor plugin → `supabase.auth.signInWithIdToken()`. Apple button appears in `LoginModal` on iOS only.
 
 ### 2. Run Database Migrations
 
@@ -119,10 +147,11 @@ npm run dev
 
 1. **Anonymous Browsing**: Users can view dashboard without auth
 2. **Login**: Click "Login" → modal opens with email/password form + OAuth buttons
-3. **OAuth Flow**: Click Google/GitHub → redirect → callback → authenticated
-4. **Protected Features**: Charity tracker & favorites show login prompt if not authenticated
-5. **User Menu**: When authenticated, user icon opens dropdown with favorites, profile, theme, logout
-6. **Profile Management**: `/profile` page for updating user preferences
+3. **OAuth Flow**: Click Google → redirect → callback → authenticated
+4. **Apple Sign-In (iOS only)**: Click Continue with Apple → native sheet → authenticated
+5. **Protected Features**: Charity tracker & favorites show login prompt if not authenticated
+6. **User Menu**: When authenticated, user icon opens dropdown with favorites, profile, theme, logout
+7. **Profile Management**: `/profile` page for updating user preferences
 
 ### Data Security
 
@@ -150,6 +179,7 @@ npm run test:ci     # CI mode
 - [ ] User can sign up with email/password
 - [ ] User can log in with email/password
 - [ ] User can log in with Google OAuth (see Google logo)
+- [ ] User can log in with Apple on iOS native app (see Apple button above Google)
 - [ ] User can log out
 - [ ] Anonymous users can view dashboard
 - [ ] Charity card shows login prompt when not authenticated
