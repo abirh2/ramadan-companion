@@ -26,7 +26,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="com.deencompanion.app" />
+                <data android:scheme="com.deencompanion.lite" />
             </intent-filter>
 
         </activity>
@@ -85,7 +85,7 @@
             android:name=".widgets.ZikrIncrementReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.deencompanion.app.ZIKR_INCREMENT" />
+                <action android:name="com.deencompanion.lite.ZIKR_INCREMENT" />
             </intent-filter>
         </receiver>
 

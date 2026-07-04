@@ -13,7 +13,13 @@ import {
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const NATIVE_REDIRECT = 'com.deencompanion.app://login-callback';
+/** iOS TestFlight uses com.deencompanion.app; Android Play uses com.deencompanion.lite */
+function getNativeOAuthRedirect(): string {
+  if (Capacitor.getPlatform() === 'android') {
+    return 'com.deencompanion.lite://login-callback';
+  }
+  return 'com.deencompanion.app://login-callback';
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -155,7 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: NATIVE_REDIRECT,
+        redirectTo: getNativeOAuthRedirect(),
         skipBrowserRedirect: true,
       },
     });

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deen Companion — Android Beta Guide</title>
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text: #1a1a2e;
+      --muted: #5c6370;
+      --accent: #0f3d3e;
+      --accent-light: #e8f4f4;
+      --border: #dde3ea;
+      --warn-bg: #fff8e6;
+      --danger-bg: #fdecea;
+      --code-bg: #eef1f5;
+      --radius: 8px;
+      --max-width: 820px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.65;
+      color: var(--text);
+      background: var(--bg);
+      margin: 0;
+      padding: 2rem 1rem 4rem;
+    }
+    .container { max-width: var(--max-width); margin: 0 auto; }
+    header {
+      background: var(--accent);
+      color: #fff;
+      padding: 2.5rem 2rem;
+      border-radius: var(--radius);
+      margin-bottom: 2rem;
+    }
+    header h1 { margin: 0 0 0.5rem; font-size: 1.75rem; font-weight: 600; }
+    header p { margin: 0; opacity: 0.9; font-size: 1rem; }
+    nav.toc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+    }
+    nav.toc h2 { margin: 0 0 0.75rem; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+    nav.toc ol { margin: 0; padding-left: 1.25rem; }
+    nav.toc li { margin: 0.35rem 0; }
+    nav.toc a { color: var(--accent); text-decoration: none; }
+    nav.toc a:hover { text-decoration: underline; }
+    section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+    h2 { color: var(--accent); font-size: 1.35rem; margin: 0 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent-light); }
+    h3 { font-size: 1.05rem; margin: 1.25rem 0 0.5rem; }
+    p, ul, ol { margin: 0.5rem 0 1rem; }
+    ul, ol { padding-left: 1.5rem; }
+    li { margin: 0.25rem 0; }
+    code {
+      background: var(--code-bg);
+      padding: 0.15em 0.4em;
+      border-radius: 4px;
+      font-size: 0.9em;
+      font-family: "SF Mono", Menlo, Consolas, monospace;
+    }
+    pre {
+      background: #1e2430;
+      color: #e6edf3;
+      padding: 1rem 1.25rem;
+      border-radius: var(--radius);
+      overflow-x: auto;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      margin: 1rem 0;
+    }
+    pre code { background: none; padding: 0; color: inherit; }
+    .callout {
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      border: 1px solid var(--border);
+    }
+    .callout-info { background: var(--accent-light); }
+    .callout-warn { background: var(--warn-bg); }
+    .callout-danger { background: var(--danger-bg); }
+    .callout strong { display: block; margin-bottom: 0.35rem; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      margin: 1rem 0;
+    }
+    th, td { border: 1px solid var(--border); padding: 0.6rem 0.75rem; text-align: left; }
+    th { background: var(--accent-light); font-weight: 600; }
+    .checklist label {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.4rem 0;
+      cursor: pointer;
+    }
+    .checklist input { margin-top: 0.35rem; flex-shrink: 0; }
+    .meta { color: var(--muted); font-size: 0.85rem; margin-top: 2rem; text-align: center; }
+    @media print {
+      body { background: #fff; padding: 0; }
+      section, nav.toc { break-inside: avoid; box-shadow: none; }
+      header { background: var(--accent); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Deen Companion: Android Beta Guide</h1>
+      <p>Setup, emulator testing, release builds, and Google Play internal testing. Updated July 2026.</p>
+    </header>
+
+    <nav class="toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#overview">Overview and architecture</a></li>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#install-android-studio">Install Android Studio</a></li>
+        <li><a href="#project-setup">Project setup</a></li>
+        <li><a href="#emulator">Run on emulator</a></li>
+        <li><a href="#physical-device">Run on physical device</a></li>
+        <li><a href="#parity-checklist">Feature parity checklist</a></li>
+        <li><a href="#firebase-sha1">Firebase SHA-1 (Google Sign-In)</a></li>
+        <li><a href="#release-keystore">Generate release keystore</a></li>
+        <li><a href="#configure-signing">Configure signing</a></li>
+        <li><a href="#build-aab">Build signed AAB</a></li>
+        <li><a href="#play-console">Google Play Console</a></li>
+        <li><a href="#internal-testing">Internal testing track</a></li>
+        <li><a href="#promote">Promote beyond internal</a></li>
+        <li><a href="#ios-comparison">iOS comparison</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <section id="overview">
+      <h2>Overview and architecture</h2>
+      <p>Deen Companion uses a <strong>hybrid Capacitor shell</strong>. The native Android app loads the live web app from Vercel. It does not bundle a local static export.</p>
+      <table>
+        <tr><th>Setting</th><th>Value</th></tr>
+        <tr><td>Package ID (Android)</td><td><code>com.deencompanion.lite</code></td></tr>
+        <tr><td>Package ID (iOS)</td><td><code>com.deencompanion.app</code> (unchanged)</td></tr>
+        <tr><td>App name</td><td>Deen Companion</td></tr>
+        <tr><td>Remote URL</td><td><code>https://ramadan-companion.vercel.app</code></td></tr>
+        <tr><td>OAuth deep link (Android)</td><td><code>com.deencompanion.lite://login-callback</code></td></tr>
+        <tr><td>Prayer notifications (native)</td><td>Local notifications on device; no Firebase or cron required</td></tr>
+      </table>
+      <div class="callout callout-info">
+        <strong>Hybrid deployment rule</strong>
+        Web changes do not appear in the native app until you push to GitHub and Vercel finishes deploying. Verify the live URL before testing native builds.
+      </div>
+      <p><strong>iOS-only features</strong> (expected on Android, not bugs): Sign in with Apple, WidgetKit App Group mirroring via AppDelegate.</p>
+    </section>
+
+    <section id="prerequisites">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><strong>macOS</strong> recommended (Android Studio also runs on Windows and Linux)</li>
+        <li><strong>Node.js 24</strong> via nvm: project includes <code>.nvmrc</code> and <code>.node-version</code></li>
+        <li><strong>Android Studio</strong> (latest stable) with SDK Platform 36, Build-Tools, and an emulator image (Pixel 6 / API 34+)</li>
+        <li><strong>JDK 21</strong> bundled with Android Studio at <code>/Applications/Android Studio.app/Contents/jbr/Contents/Home</code></li>
+        <li><strong>Google Play Developer account</strong> ($25 one-time): required for Play Store beta upload, not local testing</li>
+        <li><strong>Firebase project</strong> — register Android app as <code>com.deencompanion.lite</code>, then add <code>android/app/google-services.json</code></li>
+      </ul>
+    </section>
+
+    <section id="install-android-studio">
+      <h2>Install Android Studio</h2>
+      <ol>
+        <li>Download from <a href="https://developer.android.com/studio">developer.android.com/studio</a></li>
+        <li>Open Android Studio → Settings / Preferences → Languages &amp; Frameworks → Android SDK</li>
+        <li>SDK Platforms tab: install <strong>Android API 36</strong> (compile SDK)</li>
+        <li>SDK Tools tab: ensure Android SDK Build-Tools, Platform-Tools, and Android Emulator are installed</li>
+        <li>Device Manager → Create Virtual Device → Pixel 6 → API 34 or 35 system image → Finish</li>
+      </ol>
+      <div class="callout callout-warn">
+        <strong>JAVA_HOME</strong>
+        If Gradle reports "Cannot find Java 21", set JAVA_HOME before building:
+        <pre><code>export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"</code></pre>
+        Add this to your shell profile (<code>~/.zshrc</code>) for persistence.
+      </div>
+    </section>
+
+    <section id="project-setup">
+      <h2>Project setup</h2>
+      <pre><code>cd /Users/ahossain/Documents/GitHub/ramadan-companion
+nvm use 24
+npm install
+npx cap sync android</code></pre>
+      <p>Open the Android project in Android Studio:</p>
+      <pre><code>npm run cap:open:android</code></pre>
+      <p>Gradle sync may take a few minutes on first open. The Gradle project root is the <code>android/</code> folder.</p>
+    </section>
+
+    <section id="emulator">
+      <h2>Run on emulator</h2>
+      <ol>
+        <li>Start your virtual device from Android Studio Device Manager</li>
+        <li>In the toolbar, select the emulator from the device dropdown</li>
+        <li>Click Run (green play button) or press Ctrl+R</li>
+      </ol>
+      <p>From the command line:</p>
+      <pre><code>export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+nvm use 24
+npm run cap:run:android</code></pre>
+      <p><strong>Expected:</strong> Splash screen with #0f3d3e theme, then dashboard loads from Vercel.</p>
+    </section>
+
+    <section id="physical-device">
+      <h2>Run on physical device</h2>
+      <ol>
+        <li>On your Android phone: Settings → About → tap Build number 7 times to enable Developer options</li>
+        <li>Settings → Developer options → enable USB debugging</li>
+        <li>Connect via USB and accept the "Allow USB debugging?" prompt</li>
+        <li>Verify: <code>adb devices</code> should list your device</li>
+        <li>Select the physical device in Android Studio and click Run</li>
+      </ol>
+      <div class="callout callout-info">
+        <strong>Test on real hardware before beta</strong>
+        Compass (Qibla), haptics, exact alarm notifications, and widgets behave more reliably on a physical device than on emulators.
+      </div>
+    </section>
+
+    <section id="parity-checklist">
+      <h2>Feature parity checklist (Android vs iOS)</h2>
+      <p>Work through this list on emulator and at least one physical device before uploading to Play Console.</p>
+      <div class="checklist">
+        <label><input type="checkbox"> App launches without crash; splash shows #0f3d3e background</label>
+        <label><input type="checkbox"> Dashboard and main pages load (prayer times, Quran, hadith, calendar, zikr, charity, favorites, places, profile)</label>
+        <label><input type="checkbox"> Location permission works; prayer times update for current city</label>
+        <label><input type="checkbox"> Local prayer notifications: enable in settings, grant POST_NOTIFICATIONS, test notification fires</label>
+        <label><input type="checkbox"> Qibla compass shows direction (requires motion/orientation on device)</label>
+        <label><input type="checkbox"> Zikr counter haptic feedback on tap</label>
+        <label><input type="checkbox"> Home screen widget displays data after opening app and syncing location</label>
+        <label><input type="checkbox"> Google Sign-In opens in-app browser, returns via deep link, session persists</label>
+        <label><input type="checkbox"> Sign in with Apple button is hidden on Android (iOS only; correct behavior)</label>
+        <label><input type="checkbox"> Install/PWA banner is hidden in native app</label>
+        <label><input type="checkbox"> Android back button navigates WebView history correctly</label>
+      </div>
+    </section>
+
+    <section id="firebase-sha1">
+      <h2>Firebase SHA-1 for Google Sign-In</h2>
+      <p>Google OAuth on Android requires signing certificate fingerprints registered in Firebase. Without them, <code>google-services.json</code> has an empty <code>oauth_client</code> array and Google Sign-In fails.</p>
+
+      <h3>Get debug SHA-1</h3>
+      <pre><code>export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+cd /Users/ahossain/Documents/GitHub/ramadan-companion/android
+./gradlew signingReport</code></pre>
+      <p>Find the <strong>Variant: debug</strong> section and copy the <code>SHA1</code> fingerprint.</p>
+      <p>Alternative using the default debug keystore:</p>
+      <pre><code>keytool -list -v \
+  -keystore ~/.android/debug.keystore \
+  -alias androiddebugkey \
+  -storepass android -keypass android</code></pre>
+
+      <h3>Get release SHA-1 (after creating release keystore)</h3>
+      <pre><code>keytool -list -v \
+  -keystore android/keys/deen-companion-release.keystore \
+  -alias deen-companion</code></pre>
+
+      <h3>Add fingerprints to Firebase</h3>
+      <ol>
+        <li>Open <a href="https://console.firebase.google.com">Firebase Console</a> → project <strong>deen-companion-3434b</strong></li>
+        <li>Project settings → Your apps → Android app (<code>com.deencompanion.lite</code>)</li>
+        <li>Click Add fingerprint → paste debug SHA-1 → Save</li>
+        <li>Add release SHA-1 the same way after keystore is created</li>
+        <li>Download the updated <code>google-services.json</code></li>
+        <li>Replace <code>android/app/google-services.json</code> in the repo</li>
+        <li>Run <code>nvm use 24 &amp;&amp; npx cap sync android</code></li>
+      </ol>
+
+      <h3>Verify Supabase redirect URL</h3>
+      <p>In Supabase Dashboard → Authentication → URL Configuration, confirm this redirect URL is listed:</p>
+      <pre><code>com.deencompanion.lite://login-callback</code></pre>
+      <p>See <code>docs/auth-setup.md</code> for full OAuth configuration.</p>
+    </section>
+
+    <section id="release-keystore">
+      <h2>Generate release keystore</h2>
+      <div class="callout callout-danger">
+        <strong>Back up your keystore</strong>
+        If you lose the keystore or its password, you cannot publish updates to the same Play Store listing. Store copies in a password manager and encrypted backup.
+      </div>
+      <pre><code>cd /Users/ahossain/Documents/GitHub/ramadan-companion
+mkdir -p android/keys
+
+keytool -genkey -v \
+  -keystore android/keys/deen-companion-release.keystore \
+  -alias deen-companion \
+  -keyalg RSA \
+  -keysize 2048 \
+  -validity 10000</code></pre>
+      <p>Use a strong password and record it securely. Press Enter at the key password prompt to use the same password as the keystore.</p>
+    </section>
+
+    <section id="configure-signing">
+      <h2>Configure signing</h2>
+      <p>Release signing is wired in <code>android/app/build.gradle</code> and activates when <code>android/key.properties</code> exists. Create that file locally (never commit it):</p>
+      <pre><code># android/key.properties
+storePassword=YOUR_KEYSTORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=deen-companion
+storeFile=../keys/deen-companion-release.keystore</code></pre>
+      <p><code>android/key.properties</code> and <code>android/keys/</code> are listed in <code>.gitignore</code>.</p>
+    </section>
+
+    <section id="build-aab">
+      <h2>Build signed AAB</h2>
+      <p>Before each release, increment <code>versionCode</code> in <code>android/app/build.gradle</code> (required by Play Store for every upload).</p>
+      <pre><code>export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+cd /Users/ahossain/Documents/GitHub/ramadan-companion
+nvm use 24
+npx cap sync android
+cd android
+./gradlew bundleRelease</code></pre>
+      <p>Output AAB:</p>
+      <pre><code>android/app/build/outputs/bundle/release/app-release.aab</code></pre>
+      <p>Debug APK for sideload testing without Play Console:</p>
+      <pre><code>./gradlew assembleDebug
+# Output: android/app/build/outputs/apk/debug/app-debug.apk</code></pre>
+    </section>
+
+    <section id="play-console">
+      <h2>Google Play Console setup</h2>
+      <ol>
+        <li>Create account at <a href="https://play.google.com/console">play.google.com/console</a> ($25 one-time fee)</li>
+        <li>Create app: name <strong>Deen Companion</strong>, default language English, Free app</li>
+        <li>Complete required setup tasks:
+          <ul>
+            <li><strong>App access:</strong> all functionality available without restrictions</li>
+            <li><strong>Ads:</strong> No (unless you added ads)</li>
+            <li><strong>Content rating:</strong> complete questionnaire (expect "Everyone")</li>
+            <li><strong>Target audience:</strong> select appropriate age groups</li>
+            <li><strong>Data safety:</strong> declare location and account data per app behavior</li>
+            <li><strong>Privacy policy URL:</strong> link to your hosted privacy policy</li>
+          </ul>
+        </li>
+        <li>Store listing assets:
+          <ul>
+            <li>App icon 512×512 PNG</li>
+            <li>Feature graphic 1024×500</li>
+            <li>Phone screenshots (minimum 2, recommended 4 to 8)</li>
+            <li>Short description (80 chars) and full description (4000 chars max)</li>
+          </ul>
+        </li>
+      </ol>
+    </section>
+
+    <section id="internal-testing">
+      <h2>Internal testing track</h2>
+      <ol>
+        <li>Play Console → Testing → Internal testing → Create new release</li>
+        <li>Upload <code>app-release.aab</code></li>
+        <li>Add release notes (e.g. "Initial beta: prayer times, Quran, widgets, local notifications")</li>
+        <li>Review and roll out to internal testing</li>
+        <li>Testers tab → Create email list → add tester Gmail addresses (up to 100 for internal)</li>
+        <li>Share the opt-in link; testers accept invite and install from Play Store</li>
+      </ol>
+      <div class="callout callout-info">
+        <strong>Tester install steps</strong>
+        Open the opt-in link on Android, accept the invite, then install from Play Store. The app appears as a normal Play Store install, not a sideloaded APK.
+      </div>
+    </section>
+
+    <section id="promote">
+      <h2>Promote beyond internal testing</h2>
+      <table>
+        <tr><th>Track</th><th>Testers</th><th>Use when</th></tr>
+        <tr><td>Internal</td><td>Up to 100 (email list)</td><td>First builds, rapid iteration</td></tr>
+        <tr><td>Closed</td><td>Email list or Google Groups</td><td>Trusted beta group, still private</td></tr>
+        <tr><td>Open</td><td>Anyone with link</td><td>Public beta before production</td></tr>
+        <tr><td>Production</td><td>All users</td><td>Official launch</td></tr>
+      </table>
+      <p>Each promotion requires completing Play Console checklist items. Production releases may need additional review time (hours to several days).</p>
+    </section>
+
+    <section id="ios-comparison">
+      <h2>iOS comparison</h2>
+      <table>
+        <tr><th>Feature</th><th>Android</th><th>iOS</th></tr>
+        <tr><td>Web content source</td><td>Vercel URL</td><td>Same</td></tr>
+        <tr><td>Prayer notifications</td><td>Local (7-day schedule)</td><td>Same</td></tr>
+        <tr><td>Home widgets</td><td>9 Kotlin widgets</td><td>WidgetKit extension</td></tr>
+        <tr><td>Google OAuth</td><td>Browser + deep link; needs SHA-1</td><td>Same flow</td></tr>
+        <tr><td>Apple Sign-In</td><td>Not available</td><td>Available</td></tr>
+        <tr><td>FCM / server push</td><td>Optional (Phase 3)</td><td>Optional (Phase 3)</td></tr>
+        <tr><td>Beta distribution</td><td>Play Console internal testing</td><td>TestFlight</td></tr>
+        <tr><td>Beta guide</td><td>This document</td><td><code>phase-6-testflight.md</code></td></tr>
+      </table>
+    </section>
+
+    <section id="troubleshooting">
+      <h2>Troubleshooting</h2>
+
+      <h3>Gradle sync fails / Java not found</h3>
+      <pre><code>export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"</code></pre>
+
+      <h3>compileSdk / AAR metadata error (androidx.browser requires API 36)</h3>
+      <p>Ensure <code>android/variables.gradle</code> has <code>compileSdkVersion = 36</code>.</p>
+
+      <h3>White screen after launch</h3>
+      <ul>
+        <li>Check device has internet; app loads from Vercel</li>
+        <li>Verify <code>https://ramadan-companion.vercel.app</code> loads in mobile browser</li>
+        <li>Check Logcat in Android Studio for WebView errors</li>
+      </ul>
+
+      <h3>Google Sign-In fails or loops</h3>
+      <ul>
+        <li>Add debug SHA-1 to Firebase (see Firebase SHA-1 section above)</li>
+        <li>Re-download <code>google-services.json</code> after adding fingerprints</li>
+        <li>Confirm Supabase redirect URL: <code>com.deencompanion.lite://login-callback</code></li>
+      </ul>
+
+      <h3>Notifications not firing</h3>
+      <ul>
+        <li>Grant POST_NOTIFICATIONS permission (Android 13+)</li>
+        <li>Disable battery optimization for Deen Companion in system settings</li>
+        <li>On Android 12+, ensure exact alarm permission is granted if prompted</li>
+        <li>Test on physical device; emulators handle alarms inconsistently</li>
+      </ul>
+
+      <h3>Widget shows empty data</h3>
+      <ul>
+        <li>Open the app at least once after install; widgets read Capacitor Preferences (<code>CapacitorStorage</code>)</li>
+        <li>Set location and wait for prayer times to load, then re-add widget</li>
+      </ul>
+
+      <h3>Resource merge errors</h3>
+      <ul>
+        <li><code>res/raw/</code> filenames must be lowercase (a-z, 0-9, underscore only); no README.md</li>
+        <li>Do not have both <code>splash.xml</code> and <code>splash.png</code> in the same drawable folder</li>
+      </ul>
+
+      <h3>Release build unsigned</h3>
+      <p>Create <code>android/key.properties</code> (see Configure signing section). Without it, release builds compile but are not signed for Play Store upload.</p>
+
+      <h3>Notification sounds (optional)</h3>
+      <p>To add custom adhaan sounds, place <code>adhaan.wav</code> and <code>silent.wav</code> in <code>android/app/src/main/res/raw/</code> (lowercase filenames only). Same optional setup exists for iOS in <code>ios/App/App/Sounds/</code>.</p>
+    </section>
+
+    <p class="meta">Deen Companion · com.deencompanion.lite (Android) · Capacitor 8 hybrid architecture</p>
+  </div>
+</body>
+</html>

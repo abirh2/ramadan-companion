@@ -68,3 +68,5 @@ Help Muslims structure their Ramadan days with accurate prayer times, reminders,
 ### Implementation Guides
 - **[Authentication Setup](./auth-setup.md)** - Supabase auth configuration and usage
 - **[Quran Implementation](./quran-implementation.md)** - Complete Quran feature implementation guide
+- **[Android Beta Guide](./capacitor-migration/android-beta-guide.html)** - Android Studio setup, emulator, release builds, and Google Play internal testing
+- **[Capacitor Migration](./capacitor-migration/README.md)** - Native iOS/Android app roadmap (TestFlight, Play Console)

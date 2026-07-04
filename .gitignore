@@ -55,6 +55,8 @@ public/social-previews/
 /android/.gradle
 /android/.idea
 /android/local.properties
+/android/key.properties
+/android/keys/
 
 # Capacitor generated files (keep these in git for now)
 # Uncomment later if you want to exclude them:

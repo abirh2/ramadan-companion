@@ -28,6 +28,6 @@ class ZikrIncrementReceiver : BroadcastReceiver() {
     }
 
     companion object {
-        const val ACTION_INCREMENT = "com.deencompanion.app.ZIKR_INCREMENT"
+        const val ACTION_INCREMENT = "com.deencompanion.lite.ZIKR_INCREMENT"
     }
 }

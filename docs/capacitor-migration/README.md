@@ -140,6 +140,8 @@ This roadmap guides the migration of Deen Companion from a Progressive Web App (
 **Complexity:** Medium  
 **Prerequisites:** Phase 5 complete
 
+**Primary guide:** [Android Beta Guide (HTML)](./android-beta-guide.html) — step-by-step setup, emulator, release AAB, and Play Console internal testing.
+
 - Create Google Play Console account/app
 - Prepare app assets (icons, screenshots, descriptions)
 - Generate signed APK/AAB

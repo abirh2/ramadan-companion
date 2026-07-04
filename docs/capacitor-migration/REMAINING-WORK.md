@@ -508,6 +508,8 @@ This section documents all Android-specific configuration required before publis
 
 ### Signing Configuration (Required Before Release)
 
+Release signing is wired in `android/app/build.gradle` and activates when `android/key.properties` exists locally. See **[Android Beta Guide (HTML)](./android-beta-guide.html)** for keystore generation, SHA-1 setup, and AAB build steps.
+
 1. **Generate a release keystore** (if not already done):
 
 ```bash
@@ -521,31 +523,11 @@ keytool -genkey -v \
   -validity 10000
 ```
 
-2. **Add keystore to .gitignore** (already done if `android/keys/` is listed).
+2. **Keystore paths are in `.gitignore`** (`android/key.properties`, `android/keys/`).
 
-3. **Configure signing in `android/app/build.gradle`:**
+3. **Signing in `android/app/build.gradle`:** Conditional `signingConfigs.release` reads from `android/key.properties`. Debug builds work without a keystore.
 
-Add a `signingConfigs` block and reference it in `buildTypes.release`:
-
-```gradle
-android {
-    signingConfigs {
-        release {
-            storeFile file("../keys/deen-companion-release.keystore")
-            storePassword System.getenv("KEYSTORE_PASSWORD") ?: ""
-            keyAlias "deen-companion"
-            keyPassword System.getenv("KEY_PASSWORD") ?: ""
-        }
-    }
-    buildTypes {
-        release {
-            signingConfig signingConfigs.release
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
-}
-```
+**Build verified (July 2026):** `compileSdkVersion = 36`, branded launcher icons from iOS `LaunchIcon-rounded.png`, `./gradlew assembleDebug` succeeds with Android Studio JBR (Java 21).
 
 ### Google Play Store Assets
 
@@ -561,7 +543,7 @@ android {
 Use any image editor. Suggested content: app icon centered on #0f3d3e background with "Deen Companion" text. 1024x500 px.
 
 **Taking screenshots:**
-1. Build and run on emulator or device: `nvm use 22 && npx cap run android`
+1. Build and run on emulator or device: `nvm use 24 && npx cap run android`
 2. Navigate to each key screen (prayer times, Quran, Qibla, notifications)
 3. Capture screenshots via Android Studio or `adb exec-out screencap -p > screen.png`
 4. Crop status bar if desired
@@ -583,6 +565,8 @@ Complete these sections in Google Play Console before publishing:
 
 **Estimated Duration:** 1-2 days  
 **Prerequisites:** Phase 5 complete, Google Play Developer account ($25 one-time)
+
+**Start here:** [Android Beta Guide (HTML)](./android-beta-guide.html) — complete walkthrough for emulator setup through internal testing upload.
 
 ### 7.1 Google Play Console Setup
 
