@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -224,6 +224,22 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
         )}
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Delete Account</CardTitle>
+            <CardDescription>
+              Permanently delete your account and all associated cloud data
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/privacy/delete-account">
+              <Button variant="outline" size="sm">
+                Delete account and data
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Feedback Button */}

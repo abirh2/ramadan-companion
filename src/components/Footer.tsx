@@ -19,6 +19,20 @@ export function Footer() {
             >
               Acknowledgements
             </Link>
+            <span className="text-muted-foreground/50">•</span>
+            <Link 
+              href="/privacy" 
+              className="hover:text-foreground transition-colors"
+            >
+              Privacy
+            </Link>
+            <span className="text-muted-foreground/50">•</span>
+            <Link 
+              href="/privacy/delete-account" 
+              className="hover:text-foreground transition-colors"
+            >
+              Delete Account
+            </Link>
           </div>
           <p className="text-xs text-muted-foreground/70">
             © {new Date().getFullYear()} Deen Companion

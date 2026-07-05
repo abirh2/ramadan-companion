@@ -92,7 +92,7 @@ This phase prepares the Android app for internal testing via Google Play Console
 
 1. Dashboard → App content → Privacy policy
 2. **Privacy policy URL:**  
-   `https://deen-companion.vercel.app/privacy`
+   `https://ramadan-companion.vercel.app/privacy`
 3. Save
 
 ### 2.6 App Data Safety
@@ -104,7 +104,9 @@ This phase prepares the Android app for internal testing via Google Play Console
    - **Data usage:** Account creation, authentication
    - **Encryption:** In transit
    - **User control:** Can request deletion
-3. Save
+3. **Delete account URL:**  
+   `https://ramadan-companion.vercel.app/privacy/delete-account`
+4. Save
 
 ---
 
