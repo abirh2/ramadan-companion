@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope } from "next/font/google";
+import { Manrope, Noto_Naskh_Arabic } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/components/auth/AuthProvider";
@@ -17,12 +17,21 @@ const manrope = Manrope({
   display: "swap",
 });
 
+const notoNaskhArabic = Noto_Naskh_Arabic({
+  variable: "--font-noto-naskh-arabic",
+  subsets: ["arabic"],
+  display: "swap",
+});
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   viewportFit: "cover", // Required for safe area insets on iOS
-  themeColor: "#0f3d3e",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f9f5ec" },
+    { media: "(prefers-color-scheme: dark)", color: "#061116" },
+  ],
 };
 
 export const metadata: Metadata = {
@@ -51,7 +60,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${manrope.variable} font-sans antialiased min-h-screen flex flex-col`}
+        className={`${manrope.variable} ${notoNaskhArabic.variable} font-sans antialiased min-h-screen flex flex-col`}
       >
         <SkipLink />
         <ThemeProvider>

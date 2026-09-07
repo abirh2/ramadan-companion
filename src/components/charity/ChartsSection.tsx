@@ -61,17 +61,17 @@ export function ChartsSection({ donations, preferredCurrency }: ChartsSectionPro
               <XAxis
                 dataKey="month"
                 className="text-xs"
-                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                tick={{ fill: 'var(--muted-foreground)' }}
               />
               <YAxis
                 className="text-xs"
-                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                tick={{ fill: 'var(--muted-foreground)' }}
                 tickFormatter={(value) => formatCurrency(value, preferredCurrency).replace(/\.\d+$/, '')}
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: 'hsl(var(--background))',
-                  border: '1px solid hsl(var(--border))',
+                  backgroundColor: 'var(--background)',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px',
                 }}
                 formatter={(value: number | undefined) => [formatCurrency(value ?? 0, preferredCurrency), 'Amount']}
@@ -80,10 +80,10 @@ export function ChartsSection({ donations, preferredCurrency }: ChartsSectionPro
               <Line
                 type="monotone"
                 dataKey="amount"
-                stroke="hsl(var(--primary))"
+                stroke="var(--primary)"
                 strokeWidth={2}
                 name="Monthly Total"
-                dot={{ fill: 'hsl(var(--primary))', r: 4 }}
+                dot={{ fill: 'var(--primary)', r: 4 }}
                 activeDot={{ r: 6 }}
               />
             </LineChart>
@@ -104,22 +104,22 @@ export function ChartsSection({ donations, preferredCurrency }: ChartsSectionPro
                 <XAxis
                   dataKey="month"
                   className="text-xs"
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  tick={{ fill: 'var(--muted-foreground)' }}
                 />
                 <YAxis
                   className="text-xs"
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  tick={{ fill: 'var(--muted-foreground)' }}
                   tickFormatter={(value) => `$${value}`}
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'hsl(var(--background))',
-                    border: '1px solid hsl(var(--border))',
+                    backgroundColor: 'var(--background)',
+                    border: '1px solid var(--border)',
                     borderRadius: '8px',
                   }}
                   formatter={(value: number | undefined) => [`$${value?.toFixed(2) ?? 0}`, 'Amount']}
                 />
-                <Bar dataKey="amount" fill="hsl(var(--primary))" name="Monthly Total" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="amount" fill="var(--primary)" name="Monthly Total" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -149,8 +149,8 @@ export function ChartsSection({ donations, preferredCurrency }: ChartsSectionPro
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'hsl(var(--background))',
-                    border: '1px solid hsl(var(--border))',
+                    backgroundColor: 'var(--background)',
+                    border: '1px solid var(--border)',
                     borderRadius: '8px',
                   }}
                   formatter={(value: number | undefined) => `$${value?.toFixed(2) ?? 0}`}
@@ -172,10 +172,6 @@ function prepareMonthlyData(donations: DonationWithConversion[]) {
   donations.forEach((donation) => {
     const date = new Date(donation.date)
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-    const monthLabel = new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      year: '2-digit',
-    }).format(date)
 
     const current = monthlyMap.get(monthKey) || 0
     monthlyMap.set(monthKey, current + Number(donation.convertedAmount))
@@ -235,4 +231,3 @@ function renderCustomLabel(entry: { name?: string; percent?: number }) {
   const percent = (entry.percent * 100).toFixed(0)
   return `${entry.name} ${percent}%`
 }
-

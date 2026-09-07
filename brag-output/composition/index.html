@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>Deen Companion Lite — App Store Launch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #000;
+      }
+      body { font-family: "Manrope", system-ui, sans-serif; }
+
+      #root {
+        position: relative;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+      }
+
+      .clip { position: absolute; inset: 0; }
+
+      .scene-bg {
+        position: absolute;
+        inset: 0;
+        background: #f5f3f0;
+      }
+
+      .hook-inner {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 64px;
+        gap: 48px;
+      }
+
+      .phone-frame {
+        width: 420px;
+        height: 860px;
+        border-radius: 48px;
+        background: #fff;
+        border: 1px solid rgba(15, 61, 62, 0.08);
+        box-shadow: 0 24px 48px rgba(26, 26, 26, 0.08);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 48px;
+      }
+
+      .app-icon {
+        width: 160px;
+        height: 160px;
+        border-radius: 36px;
+        object-fit: cover;
+        box-shadow: 0 8px 24px rgba(26, 26, 26, 0.12);
+      }
+
+      .hook-title {
+        font-size: 64px;
+        font-weight: 800;
+        color: #0f3d3e;
+        text-align: center;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+      }
+
+      .hook-tagline {
+        font-size: 32px;
+        font-weight: 500;
+        color: #6b7280;
+        text-align: center;
+        line-height: 1.35;
+        max-width: 900px;
+      }
+
+      .feature-inner {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 64px;
+        gap: 40px;
+      }
+
+      .feature-label {
+        font-size: 28px;
+        font-weight: 700;
+        color: #0f3d3e;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+
+      .ui-card {
+        width: 100%;
+        max-width: 920px;
+        background: #fff;
+        border-radius: 48px;
+        padding: 48px;
+        border: 1px solid rgba(15, 61, 62, 0.06);
+        box-shadow: 0 8px 24px rgba(26, 26, 26, 0.06);
+      }
+
+      .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 32px;
+      }
+
+      .card-label {
+        font-size: 22px;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .location-pill {
+        font-size: 18px;
+        color: #6b7280;
+        background: #f0eeeb;
+        padding: 8px 20px;
+        border-radius: 999px;
+      }
+
+      .countdown {
+        font-size: 56px;
+        font-weight: 800;
+        color: #1a1a1a;
+        line-height: 1.1;
+        margin-bottom: 8px;
+      }
+
+      .countdown-sub {
+        font-size: 22px;
+        color: #6b7280;
+        margin-bottom: 36px;
+      }
+
+      .prayer-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+
+      .prayer-cell {
+        background: #f5f3f0;
+        border-radius: 20px;
+        padding: 20px 12px;
+        text-align: center;
+      }
+
+      .prayer-cell.active {
+        background: #0f3d3e;
+        color: #fff;
+      }
+
+      .prayer-cell.active .prayer-time { color: rgba(255,255,255,0.8); }
+
+      .prayer-name {
+        font-size: 18px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 6px;
+      }
+
+      .prayer-time {
+        font-size: 20px;
+        font-weight: 600;
+        color: #6b7280;
+      }
+
+      .arabic-text {
+        font-family: "Amiri", serif;
+        font-size: 44px;
+        font-weight: 700;
+        color: #0f3d3e;
+        text-align: right;
+        direction: rtl;
+        line-height: 1.6;
+        margin-bottom: 28px;
+      }
+
+      .translation {
+        font-size: 28px;
+        font-weight: 500;
+        color: #1a1a1a;
+        line-height: 1.45;
+        margin-bottom: 20px;
+      }
+
+      .surah-ref {
+        font-size: 20px;
+        color: #8a6d1a;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .zikr-row {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin-bottom: 32px;
+      }
+
+      .zikr-count {
+        font-size: 96px;
+        font-weight: 800;
+        color: #0f3d3e;
+        line-height: 1;
+      }
+
+      .zikr-target {
+        font-size: 40px;
+        color: #6b7280;
+        font-weight: 600;
+      }
+
+      .zikr-arabic {
+        font-family: "Amiri", serif;
+        font-size: 40px;
+        color: #0f3d3e;
+        direction: rtl;
+        text-align: right;
+      }
+
+      .zikr-translit {
+        font-size: 20px;
+        color: #6b7280;
+        margin-top: 8px;
+      }
+
+      .progress-track {
+        width: 100%;
+        height: 12px;
+        background: #f0eeeb;
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        width: 0%;
+        background: #0f3d3e;
+        border-radius: 999px;
+      }
+
+      .outro-inner {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 64px;
+        gap: 36px;
+        background: #0f3d3e;
+      }
+
+      .outro-icon {
+        width: 180px;
+        height: 180px;
+        border-radius: 40px;
+        object-fit: cover;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+      }
+
+      .outro-title {
+        font-size: 72px;
+        font-weight: 800;
+        color: #fff;
+        text-align: center;
+      }
+
+      .outro-platforms {
+        font-size: 32px;
+        font-weight: 600;
+        color: #d4af37;
+        letter-spacing: 0.04em;
+      }
+
+      .outro-tagline {
+        font-size: 26px;
+        font-weight: 500;
+        color: rgba(255,255,255,0.72);
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="20"
+      data-width="1080"
+      data-height="1920"
+    >
+      <audio id="bg-music" data-start="0" data-duration="20" data-track-index="10" data-volume="0.35" src="assets/music/happy-beats-business-moves-vol-1-by-ende-dot-app.mp3"></audio>
+      <audio id="sfx-icon" data-start="0.15" data-duration="0.11" data-track-index="11" data-volume="0.7" src="assets/sfx/interface/drop_001.ogg"></audio>
+      <audio id="sfx-prayer" data-start="3.35" data-duration="0.19" data-track-index="12" data-volume="0.65" src="assets/sfx/interface/drop_002.ogg"></audio>
+      <audio id="sfx-quran" data-start="7.35" data-duration="0.11" data-track-index="13" data-volume="0.65" src="assets/sfx/interface/drop_001.ogg"></audio>
+      <audio id="sfx-zikr" data-start="11.35" data-duration="0.19" data-track-index="14" data-volume="0.65" src="assets/sfx/interface/drop_002.ogg"></audio>
+      <audio id="sfx-outro" data-start="15.2" data-duration="1.48" data-track-index="15" data-volume="0.75" src="assets/sfx/impact/impactBell_heavy_000.ogg"></audio>
+
+      <section id="scene-hook" class="clip" data-start="0" data-duration="3" data-track-index="1">
+        <div class="scene-bg"></div>
+        <div class="hook-inner">
+          <div id="phone-frame" class="phone-frame">
+            <img id="hook-icon" class="app-icon" src="assets/icons/app-icon.png" alt="" />
+          </div>
+          <h1 id="hook-title" class="hook-title">Deen Companion Lite</h1>
+          <p id="hook-tagline" class="hook-tagline">Your complete Islamic worship assistant</p>
+        </div>
+      </section>
+
+      <section id="scene-prayer" class="clip" data-start="3" data-duration="4" data-track-index="2">
+        <div class="scene-bg"></div>
+        <div class="feature-inner">
+          <p id="prayer-label" class="feature-label">Prayer Times &amp; Qibla</p>
+          <div id="prayer-card" class="ui-card">
+            <div class="card-header">
+              <span class="card-label">Next Prayer</span>
+              <span class="location-pill">New York</span>
+            </div>
+            <p class="countdown">Maghrib in 2h 14m</p>
+            <p class="countdown-sub">Jul 9 · 8:12 PM · ISNA</p>
+            <div class="prayer-grid">
+              <div id="pg-fajr" class="prayer-cell"><div class="prayer-name">Fajr</div><div class="prayer-time">4:42 AM</div></div>
+              <div id="pg-sun" class="prayer-cell"><div class="prayer-name">Sunrise</div><div class="prayer-time">6:02 AM</div></div>
+              <div id="pg-dhuhr" class="prayer-cell"><div class="prayer-name">Dhuhr</div><div class="prayer-time">12:58 PM</div></div>
+              <div id="pg-asr" class="prayer-cell"><div class="prayer-name">Asr</div><div class="prayer-time">5:14 PM</div></div>
+              <div id="pg-maghrib" class="prayer-cell active"><div class="prayer-name">Maghrib</div><div class="prayer-time">8:12 PM</div></div>
+              <div id="pg-isha" class="prayer-cell"><div class="prayer-name">Isha</div><div class="prayer-time">9:28 PM</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="scene-quran" class="clip" data-start="7" data-duration="4" data-track-index="3">
+        <div class="scene-bg"></div>
+        <div class="feature-inner">
+          <p id="quran-label" class="feature-label">Quran &amp; Hadith</p>
+          <div id="quran-card" class="ui-card">
+            <div class="card-header">
+              <span class="card-label">Quran of the Day</span>
+            </div>
+            <p id="quran-arabic" class="arabic-text">إِنَّ الصَّلَاةَ تَنْهَىٰ عَنِ الْفَحْشَاءِ وَالْمُنكَرِ</p>
+            <p id="quran-translation" class="translation">Indeed, prayer prohibits immorality and wrongdoing.</p>
+            <p id="quran-ref" class="surah-ref">Al-Ankabut · Verse 45</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="scene-zikr" class="clip" data-start="11" data-duration="4" data-track-index="4">
+        <div class="scene-bg"></div>
+        <div class="feature-inner">
+          <p id="zikr-label" class="feature-label">Zikr Counter</p>
+          <div id="zikr-card" class="ui-card">
+            <div class="card-header">
+              <span class="card-label">Zikr Counter</span>
+            </div>
+            <div class="zikr-row">
+              <div>
+                <p class="zikr-translit">SubhanAllah</p>
+                <p id="zikr-count" class="zikr-count">0<span class="zikr-target"> / 33</span></p>
+              </div>
+              <div>
+                <p class="zikr-arabic">سُبْحَانَ اللَّهِ</p>
+                <p class="zikr-translit">Glory be to Allah</p>
+              </div>
+            </div>
+            <div class="progress-track">
+              <div id="zikr-progress" class="progress-fill"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="scene-outro" class="clip" data-start="15" data-duration="5" data-track-index="5">
+        <div class="outro-inner">
+          <img id="outro-icon" class="outro-icon" src="assets/icons/app-icon.png" alt="" />
+          <h2 id="outro-title" class="outro-title">Available now</h2>
+          <p id="outro-platforms" class="outro-platforms">iOS · Android · Desktop</p>
+          <p id="outro-tagline" class="outro-tagline">Privacy-first. Offline-capable.</p>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      tl.from("#phone-frame", { scale: 0.85, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.1);
+      tl.from("#hook-icon", { scale: 0, duration: 0.45, ease: "back.out(1.6)" }, 0.2);
+      tl.from("#hook-title", { y: 40, opacity: 0, duration: 0.45, ease: "power3.out" }, 0.55);
+      tl.from("#hook-tagline", { y: 24, opacity: 0, duration: 0.4, ease: "power2.out" }, 0.95);
+
+      tl.from("#scene-prayer", { x: 80, opacity: 0, duration: 0.4, ease: "power2.out" }, 3.0);
+      tl.from("#prayer-label", { y: 20, opacity: 0, duration: 0.35, ease: "power2.out" }, 3.15);
+      tl.from("#prayer-card", { y: 50, opacity: 0, duration: 0.45, ease: "power3.out" }, 3.35);
+      ["#pg-fajr", "#pg-sun", "#pg-dhuhr", "#pg-asr", "#pg-isha"].forEach((sel, i) => {
+        tl.to(sel, { scale: 1.04, duration: 0.15, ease: "power1.out" }, 4.0 + i * 0.35);
+        tl.to(sel, { scale: 1, duration: 0.15, ease: "power1.in" }, 4.15 + i * 0.35);
+      });
+      tl.to("#pg-maghrib", { boxShadow: "0 0 0 3px #d4af37", duration: 0.3, ease: "power2.out" }, 5.8);
+
+      tl.from("#scene-quran", { x: 80, opacity: 0, duration: 0.4, ease: "power2.out" }, 7.0);
+      tl.from("#quran-label", { y: 20, opacity: 0, duration: 0.35, ease: "power2.out" }, 7.15);
+      tl.from("#quran-card", { y: 50, opacity: 0, duration: 0.45, ease: "power3.out" }, 7.35);
+      tl.from("#quran-arabic", { opacity: 0, y: 20, duration: 0.5, ease: "power2.out" }, 8.0);
+      tl.from("#quran-translation", { opacity: 0, y: 16, duration: 0.45, ease: "power2.out" }, 8.95);
+      tl.from("#quran-ref", { opacity: 0, duration: 0.35, ease: "power2.out" }, 9.5);
+
+      tl.from("#scene-zikr", { x: 80, opacity: 0, duration: 0.4, ease: "power2.out" }, 11.0);
+      tl.from("#zikr-label", { y: 20, opacity: 0, duration: 0.35, ease: "power2.out" }, 11.15);
+      tl.from("#zikr-card", { y: 50, opacity: 0, duration: 0.45, ease: "power3.out" }, 11.35);
+      tl.to("#zikr-progress", { width: "100%", duration: 2.2, ease: "power1.inOut" }, 11.8);
+      const countObj = { val: 0 };
+      tl.to(countObj, {
+        val: 33,
+        duration: 2.2,
+        ease: "power1.inOut",
+        onUpdate: function () {
+          const el = document.getElementById("zikr-count");
+          if (el) el.innerHTML = Math.round(countObj.val) + '<span class="zikr-target"> / 33</span>';
+        }
+      }, 11.8);
+
+      tl.from("#scene-outro", { opacity: 0, duration: 0.5, ease: "power2.inOut" }, 15.0);
+      tl.from("#outro-icon", { scale: 0.6, opacity: 0, duration: 0.5, ease: "back.out(1.4)" }, 15.2);
+      tl.from("#outro-title", { y: 30, opacity: 0, duration: 0.45, ease: "power3.out" }, 16.95);
+      tl.from("#outro-platforms", { y: 20, opacity: 0, duration: 0.4, ease: "power2.out" }, 17.5);
+      tl.from("#outro-tagline", { y: 16, opacity: 0, duration: 0.35, ease: "power2.out" }, 18.0);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

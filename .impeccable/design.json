@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-07T19:47:03Z",
+  "title": "Design System: Deen Companion",
+  "extensions": {
+    "colorMeta": {
+      "canvas-light": { "role": "neutral", "displayName": "Warm Ivory", "canonical": "oklch(0.97 0.012 82)", "tonalRamp": ["oklch(0.992 0.006 82)", "oklch(0.97 0.012 82)", "oklch(0.95 0.014 80)"] },
+      "canvas-dark": { "role": "neutral", "displayName": "Tinted Midnight", "canonical": "oklch(0.17 0.02 230)", "tonalRamp": ["oklch(0.17 0.02 230)", "oklch(0.205 0.021 225)", "oklch(0.235 0.022 225)", "oklch(0.27 0.024 225)"] },
+      "teal": { "role": "primary", "displayName": "Courtyard Teal", "canonical": "oklch(0.32 0.065 190)", "tonalRamp": ["oklch(0.26 0.055 190)", "oklch(0.32 0.065 190)", "oklch(0.90 0.028 190)"] },
+      "brass": { "role": "secondary", "displayName": "Aged Brass", "canonical": "oklch(0.56 0.08 75)", "tonalRamp": ["oklch(0.48 0.075 75)", "oklch(0.56 0.08 75)", "oklch(0.92 0.03 78)"] }
+    },
+    "typographyMeta": {
+      "page-title": { "displayName": "Page Title", "purpose": "Top-level app screen identity." },
+      "body": { "displayName": "Body", "purpose": "Primary UI and reading copy." },
+      "body-secondary": { "displayName": "Secondary Body", "purpose": "Supporting UI context." },
+      "label": { "displayName": "Navigation / Label", "purpose": "Compact navigation and control labels." },
+      "eyebrow": { "displayName": "Section Label", "purpose": "Compact labels within grouped content, not decorative heading kickers." },
+      "caption": { "displayName": "Caption", "purpose": "Metadata and concise supporting context." },
+      "feature-number": { "displayName": "Feature Number", "purpose": "Countdowns and high-priority measurements." },
+      "quran-translation": { "displayName": "Quran Translation", "purpose": "Comfortable sustained translation reading." },
+      "arabic-body": { "displayName": "Arabic Body", "purpose": "Hadith, dua, and general Arabic text." },
+      "quran-arabic": { "displayName": "Quran Arabic", "purpose": "Diacritic-rich Quran text with generous RTL leading." }
+    },
+    "shadows": [
+      { "name": "hairline", "value": "inset 0 -1px 0 rgb(22 47 46 / 0.08)", "purpose": "Subtle separation between adjacent surfaces." },
+      { "name": "low", "value": "0 1px 2px rgb(22 47 46 / 0.06), 0 8px 24px -18px rgb(22 47 46 / 0.28)", "purpose": "Floating controls and overlays only." },
+      { "name": "feature", "value": "0 2px 4px rgb(17 45 44 / 0.08), 0 18px 42px -24px rgb(17 45 44 / 0.38)", "purpose": "Genuinely important feature surfaces." }
+    ],
+    "motion": [
+      { "name": "duration-fast", "value": "150ms", "purpose": "Pressed and focus feedback." },
+      { "name": "duration-standard", "value": "200ms", "purpose": "Standard UI state transitions." },
+      { "name": "ease-standard", "value": "cubic-bezier(0.2, 0, 0, 1)", "purpose": "Responsive, restrained state changes." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The default high-emphasis action.",
+      "html": "<button class=\"ds-button-primary\">Continue</button>",
+      "css": ".ds-button-primary { min-height: 44px; padding: 0 16px; border: 0; border-radius: 12px; background: var(--primary); color: var(--primary-foreground); font: 650 0.875rem/1 var(--font-manrope, system-ui, sans-serif); transition: background-color 150ms cubic-bezier(0.2, 0, 0, 1); } .ds-button-primary:hover { background: var(--primary-hover); } .ds-button-primary:active { background: var(--primary-pressed); } .ds-button-primary:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "description": "A quiet secondary action without default elevation.",
+      "html": "<button class=\"ds-button-outline\">Other dates</button>",
+      "css": ".ds-button-outline { min-height: 44px; padding: 0 16px; border: 1px solid var(--border-strong); border-radius: 12px; background: var(--surface-primary); color: var(--text-primary); font: 650 0.875rem/1 var(--font-manrope, system-ui, sans-serif); transition: background-color 150ms cubic-bezier(0.2, 0, 0, 1), border-color 150ms cubic-bezier(0.2, 0, 0, 1); } .ds-button-outline:hover { background: var(--surface-grouped); } .ds-button-outline:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }"
+    },
+    {
+      "name": "Grouped Surface",
+      "kind": "card",
+      "refersTo": "surface-grouped",
+      "description": "A quiet tonal container for related rows or settings.",
+      "html": "<section class=\"ds-surface-grouped\"><strong>Prayer settings</strong><p>Calculation method and notifications</p></section>",
+      "css": ".ds-surface-grouped { padding: 16px; border: 1px solid var(--border-subtle); border-radius: 16px; background: var(--surface-grouped); color: var(--text-primary); font-family: var(--font-manrope, system-ui, sans-serif); } .ds-surface-grouped p { margin: 6px 0 0; color: var(--text-secondary); font-size: 0.9375rem; line-height: 1.55; }"
+    },
+    {
+      "name": "Feature Surface",
+      "kind": "card",
+      "refersTo": "surface-feature",
+      "description": "Reserved for the single most important content block in a context.",
+      "html": "<section class=\"ds-surface-feature\"><span>Next prayer</span><strong>Asr in 52m</strong></section>",
+      "css": ".ds-surface-feature { display: grid; gap: 12px; padding: 24px; border-radius: 24px; background: var(--surface-feature); color: var(--surface-feature-foreground); box-shadow: var(--shadow-feature); font-family: var(--font-manrope, system-ui, sans-serif); } .ds-surface-feature span { color: var(--surface-feature-muted); font-size: 0.8125rem; font-weight: 650; } .ds-surface-feature strong { font-size: 2rem; letter-spacing: -0.025em; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "A comfortable mobile field with a visible focus state.",
+      "html": "<input class=\"ds-input\" placeholder=\"Search surahs\" />",
+      "css": ".ds-input { width: 100%; min-height: 44px; padding: 0 12px; border: 1px solid var(--border-strong); border-radius: 12px; background: var(--surface-primary); color: var(--text-primary); caret-color: var(--primary); font: 400 1rem/1.5 var(--font-manrope, system-ui, sans-serif); } .ds-input::placeholder { color: var(--text-tertiary); } .ds-input:focus-visible { border-color: var(--ring); outline: 2px solid color-mix(in oklab, var(--ring) 35%, transparent); outline-offset: 2px; }"
+    },
+    {
+      "name": "Quran Arabic",
+      "kind": "custom",
+      "description": "The foundational Quran reading treatment.",
+      "html": "<p class=\"ds-quran-arabic\" lang=\"ar\" dir=\"rtl\">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>",
+      "css": ".ds-quran-arabic { margin: 0; direction: rtl; text-align: right; color: var(--text-primary); font: 500 1.875rem/2 var(--font-noto-naskh-arabic, 'Noto Naskh Arabic', serif); font-synthesis: none; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Quiet Courtyard",
+    "overview": "A warm, composed, mobile-first system balancing modern iOS restraint with contemporary Islamic editorial craft. Brand character comes from mineral color, careful Arabic typography, and disciplined rhythm rather than ornament.",
+    "keyCharacteristics": ["Warm ivory and tinted midnight", "Tonal depth before shadow", "Dedicated Latin and Arabic type roles", "Teal action with restrained brass emphasis", "Deliberate radius hierarchy"],
+    "rules": [
+      { "name": "Reserved Accent", "body": "Teal communicates action, selection, or importance; brass marks rare editorial emphasis.", "section": "colors" },
+      { "name": "Script Integrity", "body": "Arabic uses a dedicated Naskh face, correct language metadata, RTL direction, and generous leading.", "section": "typography" },
+      { "name": "Flat by Default", "body": "Tonal shifts and hairlines establish groups; elevation is earned by floating or feature-level importance.", "section": "elevation" }
+    ],
+    "dos": ["Use semantic roles across both themes.", "Let content sit directly on canvas when grouping is already clear.", "Reserve larger radius and elevation for more important surfaces."],
+    "donts": ["Do not use pure black, cold gray canvases, or bright gold.", "Do not stack cards within cards.", "Do not decorate with generic religious motifs or calligraphy.", "Do not rely on color alone for state."]
+  }
+}

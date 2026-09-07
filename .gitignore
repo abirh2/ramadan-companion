@@ -57,6 +57,13 @@ public/social-previews/
 /android/key.properties
 /android/keys/
 
+# AI
+.agents/*
+.codex/
+.cursor/*
+.gemini/*
+
+
 # Capacitor generated files (keep these in git for now)
 # Uncomment later if you want to exclude them:
 # /ios

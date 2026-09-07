@@ -245,7 +245,7 @@ export function PrayerStatistics({
                     <XAxis
                       dataKey="date"
                       className="text-xs"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      tick={{ fill: 'var(--muted-foreground)' }}
                       tickFormatter={(value) => {
                         const date = new Date(value)
                         return `${date.getMonth() + 1}/${date.getDate()}`
@@ -253,14 +253,14 @@ export function PrayerStatistics({
                     />
                     <YAxis
                       className="text-xs"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      tick={{ fill: 'var(--muted-foreground)' }}
                       domain={[0, 5]}
                       ticks={[0, 1, 2, 3, 4, 5]}
                     />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: 'hsl(var(--background))',
-                        border: '1px solid hsl(var(--border))',
+                        backgroundColor: 'var(--background)',
+                        border: '1px solid var(--border)',
                         borderRadius: '8px',
                       }}
                       formatter={(value: number | undefined) => [`${value?.toFixed(0) ?? 0}/5`, 'Prayers Completed']}
@@ -273,10 +273,10 @@ export function PrayerStatistics({
                     <Line
                       type="monotone"
                       dataKey="totalCompleted"
-                      stroke="hsl(var(--primary))"
+                      stroke="var(--primary)"
                       strokeWidth={2}
                       name="Prayers Completed"
-                      dot={{ fill: 'hsl(var(--primary))', r: 3 }}
+                      dot={{ fill: 'var(--primary)', r: 3 }}
                       activeDot={{ r: 5 }}
                     />
                   </LineChart>
@@ -312,8 +312,8 @@ export function PrayerStatistics({
                       </Pie>
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: 'hsl(var(--background))',
-                          border: '1px solid hsl(var(--border))',
+                          backgroundColor: 'var(--background)',
+                          border: '1px solid var(--border)',
                           borderRadius: '8px',
                         }}
                       />
@@ -382,4 +382,3 @@ export function PrayerStatistics({
     </Card>
   )
 }
-

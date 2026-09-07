@@ -179,7 +179,7 @@ export function NextPrayerCard() {
 
           {/* Mini prayer times grid */}
           {prayerTimes && (
-            <div className="grid grid-cols-6 gap-1.5 pt-2">
+            <div className="grid min-w-0 grid-cols-6 gap-1.5 pt-2">
               {gridEntries.map((name) => {
                 const isSunrise = name === 'Sunrise'
                 const isCurrent = !isSunrise && currentPrayer?.name === name
@@ -189,7 +189,7 @@ export function NextPrayerCard() {
                 return (
                   <div
                     key={name}
-                    className={`flex flex-col items-center gap-1 py-2 rounded-xl transition-colors ${
+                    className={`flex min-w-0 flex-col items-center gap-1 rounded-xl py-2 transition-colors ${
                       isCurrent
                         ? 'bg-green-100 dark:bg-green-900/40 ring-1 ring-green-500/30'
                         : isNext
@@ -200,14 +200,14 @@ export function NextPrayerCard() {
                     }`}
                   >
                     <span
-                      className={`text-[10px] font-bold uppercase ${
+                      className={`text-[10px] font-bold uppercase leading-none ${
                         isCurrent ? 'text-green-700 dark:text-green-400' : isNext ? 'text-primary' : isSunrise ? 'text-muted-foreground/70' : 'text-muted-foreground'
                       }`}
                     >
                       {isCurrent ? 'Now' : isSunrise ? 'Rise' : name}
                     </span>
                     <span
-                      className={`text-xs font-semibold ${
+                      className={`whitespace-nowrap text-[11px] font-semibold leading-tight tracking-[-0.01em] sm:text-xs ${
                         isCurrent ? 'text-green-700 dark:text-green-300' : isNext ? 'text-primary' : isSunrise ? 'text-muted-foreground' : 'text-foreground'
                       }`}
                     >
@@ -223,4 +223,3 @@ export function NextPrayerCard() {
     </Link>
   )
 }
-

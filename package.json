@@ -59,7 +59,7 @@
     "geo-tz": "^8.1.4",
     "lucide-react": "^0.553.0",
     "maplibre-gl": "^5.12.0",
-    "next": "^16.2.4",
+    "next": "^16.3.4",
     "next-themes": "^0.4.6",
     "praytime": "^3.2.0",
     "react": "19.2.0",
