@@ -1,225 +1,155 @@
 'use client'
 
-import { useMemo } from 'react'
 import Link from 'next/link'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Clock, Loader2, MapPin } from 'lucide-react'
+import { ArrowRight, Clock3, MapPin, Sunrise } from 'lucide-react'
 import { usePrayerTimes } from '@/hooks/usePrayerTimes'
-import { CALCULATION_METHODS } from '@/types/ramadan.types'
-import type { PrayerTime } from '@/types/ramadan.types'
 
 const PRAYER_ORDER = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const
-const NOW_WINDOW_MS = 45 * 60 * 1000
-const NEXT_PRAYER_BUFFER_MS = 15 * 60 * 1000
 
-function getCurrentPrayer(
-  prayerTimes: PrayerTime,
-  nextPrayerName: string | undefined,
-  isNextTomorrow: boolean | undefined
-): { name: string; time: string } | null {
-  const now = new Date()
-  const currentMs = now.getTime()
+function formatTime(timeString: string, includePeriod = true) {
+  const [hours, minutes] = timeString.split(':').map(Number)
+  const period = hours >= 12 ? 'PM' : 'AM'
+  const hour12 = hours % 12 || 12
+  return `${hour12}:${minutes.toString().padStart(2, '0')}${includePeriod ? ` ${period}` : ''}`
+}
 
-  const schedule = PRAYER_ORDER.map((name) => {
-    const [h, m] = prayerTimes[name].split(':').map(Number)
-    const d = new Date(now)
-    d.setHours(h, m, 0, 0)
-    return { name, time: d, timeString: prayerTimes[name] }
-  })
+function formatCountdown(countdown: string) {
+  const hours = countdown.match(/(\d+)h/)?.[1]
+  const minutes = countdown.match(/(\d+)m/)?.[1]
 
-  // Find the most recent prayer that has passed
-  let current: (typeof schedule)[number] | null = null
-  let nextPrayerTime: Date | null = null
-
-  for (let i = schedule.length - 1; i >= 0; i--) {
-    if (schedule[i].time.getTime() <= currentMs) {
-      current = schedule[i]
-      nextPrayerTime = i < schedule.length - 1 ? schedule[i + 1].time : null
-      break
-    }
-  }
-
-  if (!current) return null
-
-  const elapsed = currentMs - current.time.getTime()
-  if (elapsed > NOW_WINDOW_MS) return null
-
-  // End "Now" window early if next prayer is within buffer
-  if (nextPrayerTime) {
-    const untilNext = nextPrayerTime.getTime() - currentMs
-    if (untilNext <= NEXT_PRAYER_BUFFER_MS) return null
-  }
-
-  return { name: current.name, time: current.timeString }
+  if (hours) return `${hours}h ${minutes ?? '0'}m`
+  if (minutes) return `${minutes}m`
+  return 'Less than a minute'
 }
 
 export function NextPrayerCard() {
-  const { nextPrayer, prayerTimes, location, calculationMethod, loading, error } = usePrayerTimes()
+  const { nextPrayer, prayerTimes, location, loading, error } = usePrayerTimes()
 
-  const currentPrayer = useMemo(() => {
-    if (!prayerTimes || !nextPrayer) return null
-    return getCurrentPrayer(prayerTimes, nextPrayer.name, nextPrayer.isTomorrow)
-  }, [prayerTimes, nextPrayer])
-
-  // Format time to 12-hour format
-  const formatTime = (timeString: string) => {
-    const [hours, minutes] = timeString.split(':').map(Number)
-    const period = hours >= 12 ? 'PM' : 'AM'
-    const hour12 = hours % 12 || 12
-    return `${hour12}:${minutes.toString().padStart(2, '0')} ${period}`
-  }
-
-  // Format today's date
-  const formatDate = () => {
-    const today = new Date()
-    return today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-  }
-
-  // Get method name
-  const methodName = CALCULATION_METHODS.find((m) => m.id === calculationMethod)?.name || 'Umm al-Qura'
-
-  // Loading state
   if (loading) {
     return (
-      <Link href="/times" className="block" aria-label="Loading next prayer time">
-        <Card className="rounded-3xl shadow-sm transition-shadow hover:shadow-md" role="article" aria-busy="true">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-              <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
-                Next Prayer
-              </CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-2 py-6">
-            <div className="flex items-center justify-center" role="status">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
-              <span className="sr-only">Loading prayer times...</span>
-            </div>
-          </CardContent>
-        </Card>
-      </Link>
+      <section className="surface-feature min-h-72 overflow-hidden p-6" aria-labelledby="next-prayer-heading" aria-busy="true">
+        <div className="flex items-center justify-between gap-4">
+          <h2 id="next-prayer-heading" className="type-nav text-surface-feature-muted">Next prayer</h2>
+          <Clock3 className="size-5 text-surface-feature-muted" aria-hidden="true" />
+        </div>
+        <div className="mt-12 space-y-3" role="status">
+          <div className="h-10 w-32 animate-pulse rounded-control bg-white/10" />
+          <div className="h-6 w-52 animate-pulse rounded-control bg-white/10" />
+          <span className="sr-only">Loading today&apos;s prayer times</span>
+        </div>
+      </section>
     )
   }
 
-  // Error state
-  if (error) {
+  if (error || !nextPrayer) {
     return (
-      <Link href="/times" className="block" aria-label="Unable to load prayer times. Tap to view settings.">
-        <Card className="rounded-3xl shadow-sm transition-shadow hover:shadow-md" role="article" aria-live="polite">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-              <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
-                Next Prayer
-              </CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-1">
-            <p className="text-lg font-semibold text-muted-foreground">Unable to load</p>
-            <p className="text-xs text-muted-foreground">Tap to view settings</p>
-          </CardContent>
-        </Card>
-      </Link>
+      <section className="surface-feature min-h-72 p-6" aria-labelledby="next-prayer-heading" aria-live="polite">
+        <Clock3 className="size-5 text-surface-feature-muted" aria-hidden="true" />
+        <h2 id="next-prayer-heading" className="type-section-title mt-6 text-surface-feature-foreground">
+          Prayer times need your attention
+        </h2>
+        <p className="type-body-secondary mt-2 max-w-[34ch] text-surface-feature-muted">
+          Check your location and calculation settings to load today&apos;s schedule.
+        </p>
+        <Link
+          href="/times"
+          className="type-nav mt-6 inline-flex min-h-touch items-center gap-2 rounded-control bg-white/10 px-4 text-surface-feature-foreground hover:bg-white/15"
+        >
+          Review prayer settings
+          <ArrowRight className="size-4" aria-hidden="true" />
+        </Link>
+      </section>
     )
   }
 
-  // Success state
-  const cardAriaLabel = currentPrayer
-    ? `Now: ${currentPrayer.name}. Next prayer: ${nextPrayer?.name} in ${nextPrayer?.countdown}. Click to view all prayer times.`
-    : `Next prayer: ${nextPrayer?.name}${nextPrayer?.isTomorrow ? ' tomorrow' : ''} in ${nextPrayer?.countdown}. Scheduled for ${nextPrayer?.time ? formatTime(nextPrayer.time) : ''}. Click to view all prayer times.`
-
-  // Prayer names for the grid (includes Sunrise as a non-prayer informational entry)
-  const gridEntries = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const
+  const compactCountdown = formatCountdown(nextPrayer.countdown)
+  const nextLabel = `${nextPrayer.name}${nextPrayer.isTomorrow ? ' tomorrow' : ''}`
 
   return (
-    <Link href="/times" className="block" aria-label={cardAriaLabel}>
-      <Card className="rounded-3xl shadow-sm cursor-pointer transition-shadow hover:shadow-md" role="article">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-              <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
-                Prayer Times
-              </CardTitle>
-            </div>
-            {location && (
-              <div className="flex items-center gap-1 text-[10px] text-muted-foreground bg-muted px-2 py-1 rounded-full">
-                <MapPin className="h-3 w-3" aria-hidden="true" />
-                <span className="truncate max-w-[100px]">{location.city}</span>
-              </div>
-            )}
+    <section
+      className="surface-feature home-prayer-pattern relative min-h-72 overflow-hidden p-5 sm:p-6"
+      aria-labelledby="next-prayer-heading"
+    >
+      <div className="relative z-10">
+        <div className="flex min-w-0 items-start justify-between gap-4">
+          <div>
+            <p className="type-nav text-surface-feature-muted">Next prayer</p>
+            <h2 id="next-prayer-heading" className="mt-1 text-[2rem] font-semibold leading-none tracking-[-0.025em] text-surface-feature-foreground">
+              {nextLabel}
+            </h2>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {currentPrayer ? (
-            <div className="space-y-2">
-              <div className="space-y-0.5">
-                <p className="text-3xl font-bold tracking-tight" aria-live="polite" aria-atomic="true">
-                  Now: {currentPrayer.name}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Started at {formatTime(currentPrayer.time)} • {methodName}
-                </p>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {nextPrayer?.name}{nextPrayer?.isTomorrow ? ' (tomorrow)' : ''} in {nextPrayer?.countdown}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-1">
-              <p className="text-3xl font-bold tracking-tight" aria-live="polite" aria-atomic="true">
-                {nextPrayer?.name}{nextPrayer?.isTomorrow ? ' (tomorrow)' : ''} in {nextPrayer?.countdown}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {formatDate()} • {nextPrayer?.time ? formatTime(nextPrayer.time) : ''} • {methodName}
-              </p>
+          {location && (
+            <div className="type-caption flex min-w-0 max-w-[42%] items-center gap-1.5 text-surface-feature-muted">
+              <MapPin className="size-4 shrink-0" aria-hidden="true" />
+              <span className="truncate">{location.city}</span>
             </div>
           )}
+        </div>
 
-          {/* Mini prayer times grid */}
-          {prayerTimes && (
-            <div className="grid min-w-0 grid-cols-6 gap-1.5 pt-2">
-              {gridEntries.map((name) => {
-                const isSunrise = name === 'Sunrise'
-                const isCurrent = !isSunrise && currentPrayer?.name === name
-                const isNext = !isSunrise && !isCurrent && nextPrayer?.name === name && !nextPrayer?.isTomorrow
-                const time = formatTime(prayerTimes[name])
-                
-                return (
-                  <div
-                    key={name}
-                    className={`flex min-w-0 flex-col items-center gap-1 rounded-xl py-2 transition-colors ${
-                      isCurrent
-                        ? 'bg-green-100 dark:bg-green-900/40 ring-1 ring-green-500/30'
-                        : isNext
-                        ? 'bg-primary/10 dark:bg-primary/20 ring-1 ring-primary/20'
-                        : isSunrise
-                        ? 'bg-muted/30'
-                        : 'bg-muted/50'
-                    }`}
-                  >
-                    <span
-                      className={`text-[10px] font-bold uppercase leading-none ${
-                        isCurrent ? 'text-green-700 dark:text-green-400' : isNext ? 'text-primary' : isSunrise ? 'text-muted-foreground/70' : 'text-muted-foreground'
-                      }`}
-                    >
-                      {isCurrent ? 'Now' : isSunrise ? 'Rise' : name}
-                    </span>
-                    <span
-                      className={`whitespace-nowrap text-[11px] font-semibold leading-tight tracking-[-0.01em] sm:text-xs ${
-                        isCurrent ? 'text-green-700 dark:text-green-300' : isNext ? 'text-primary' : isSunrise ? 'text-muted-foreground' : 'text-foreground'
-                      }`}
-                    >
-                      {time}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </Link>
+        <div className="mt-7 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+          <div>
+            <p className="type-feature-number text-surface-feature-foreground" aria-live="polite" aria-atomic="true">
+              {compactCountdown}
+            </p>
+            <p className="type-caption mt-1 text-surface-feature-muted">until prayer</p>
+          </div>
+          <div className="text-left sm:text-right">
+            <p className="type-section-title tabular-nums text-surface-feature-foreground">
+              {formatTime(nextPrayer.time)}
+            </p>
+            <p className="type-caption mt-1 text-surface-feature-muted">scheduled time</p>
+          </div>
+        </div>
+
+        {prayerTimes && (
+          <div className="mt-7 border-t border-white/12 pt-5">
+            <h3 className="sr-only">Today&apos;s prayer schedule</h3>
+            <ol className="grid grid-cols-5 gap-1" aria-label="Today's five daily prayers">
+            {PRAYER_ORDER.map((name) => {
+              const isNext = nextPrayer.name === name && !nextPrayer.isTomorrow
+
+              return (
+                <li
+                  key={name}
+                  aria-current={isNext ? 'true' : undefined}
+                  className={`relative min-w-0 rounded-control-sm px-0.5 py-2.5 text-center ${
+                    isNext ? 'bg-white/12 outline outline-1 outline-white/35' : ''
+                  }`}
+                >
+                  {isNext && (
+                    <span className="absolute inset-x-0 -top-1 mx-auto h-0.5 w-5 rounded-round bg-gold" aria-hidden="true" />
+                  )}
+                  <span className={`block text-xs font-semibold leading-tight ${isNext ? 'text-surface-feature-foreground' : 'text-surface-feature-muted'}`}>
+                    {name}
+                  </span>
+                  <span className="mt-1 block whitespace-nowrap text-[0.75rem] font-semibold leading-tight tabular-nums text-surface-feature-foreground sm:text-caption">
+                    {formatTime(prayerTimes[name], false)}
+                  </span>
+                  {isNext && <span className="sr-only">Next prayer</span>}
+                </li>
+              )
+            })}
+            </ol>
+          </div>
+        )}
+
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+          {prayerTimes ? (
+            <p className="type-caption flex min-w-0 items-center gap-1.5 text-surface-feature-muted">
+              <Sunrise className="size-4" aria-hidden="true" />
+              Sunrise {formatTime(prayerTimes.Sunrise)}
+            </p>
+          ) : <span />}
+          <Link
+            href="/times"
+            className="type-nav inline-flex min-h-touch shrink-0 items-center gap-1.5 rounded-control px-2 text-surface-feature-foreground underline decoration-white/30 underline-offset-4 hover:decoration-white/70"
+            aria-label="View full prayer times and settings"
+          >
+            View details
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
+        </div>
+      </div>
+    </section>
   )
 }

@@ -46,10 +46,8 @@ describe('NextPrayerCard', () => {
 
     render(<NextPrayerCard />)
     
-    expect(screen.getByText('Next Prayer')).toBeInTheDocument()
-    // Loader2 spinner should be present
-    const spinner = document.querySelector('.animate-spin')
-    expect(spinner).toBeInTheDocument()
+    expect(screen.getByText('Next prayer')).toBeInTheDocument()
+    expect(screen.getByText(/Loading today's prayer times/i)).toBeInTheDocument()
   })
 
   it('renders error state', () => {
@@ -63,8 +61,8 @@ describe('NextPrayerCard', () => {
 
     render(<NextPrayerCard />)
     
-    expect(screen.getByText('Next Prayer')).toBeInTheDocument()
-    expect(screen.getByText(/Unable to load/i)).toBeInTheDocument()
+    expect(screen.getByText(/Prayer times need your attention/i)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /review prayer settings/i })).toHaveAttribute('href', '/times')
   })
 
   it('displays prayer time and countdown', () => {
@@ -88,10 +86,11 @@ describe('NextPrayerCard', () => {
 
     render(<NextPrayerCard />)
     
-    expect(screen.getByText(/Asr in 2h 15m/i)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Asr' })).toBeInTheDocument()
+    expect(screen.getByText('2h 15m')).toBeInTheDocument()
   })
 
-  it('shows calculation method information', () => {
+  it('shows the next prayer as a semantic heading', () => {
     mockUsePrayerTimes.mockReturnValue(createPrayerTimesResult({
       nextPrayer: {
         name: 'Dhuhr',
@@ -112,7 +111,7 @@ describe('NextPrayerCard', () => {
 
     render(<NextPrayerCard />)
     
-    expect(screen.getByText(/Umm al-Qura/i)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Dhuhr' })).toBeInTheDocument()
   })
 
   it('displays location when available', () => {
@@ -139,13 +138,14 @@ describe('NextPrayerCard', () => {
     expect(screen.getByText(/New York, USA/i)).toBeInTheDocument()
   })
 
-  it('displays date', () => {
+  it('labels tomorrow prayers explicitly', () => {
     mockUsePrayerTimes.mockReturnValue(createPrayerTimesResult({
       nextPrayer: {
         name: 'Fajr',
         time: '05:30',
         countdown: '5h 45m',
         timeUntil: 20700000,
+        isTomorrow: true,
       },
       location: null,
       calculationMethod: '4',
@@ -155,9 +155,7 @@ describe('NextPrayerCard', () => {
 
     render(<NextPrayerCard />)
     
-    // Check that date is displayed (format: "Nov 12" or similar)
-    const dateRegex = /[A-Z][a-z]{2} \d{1,2}/
-    expect(screen.getByText(dateRegex)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Fajr tomorrow/i })).toBeInTheDocument()
   })
 
   it('formats time in 12-hour format', () => {

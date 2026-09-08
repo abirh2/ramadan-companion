@@ -1,53 +1,45 @@
-import { screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import Home from '../page'
-import { renderWithAuth } from '@/test-utils'
 
-// Component tests are in their respective __tests__ directories
-// This test focuses on page-level integration
+jest.mock('@/components/dashboard/HomeDateContext', () => ({
+  HomeDateContext: () => <header>Today&apos;s date</header>,
+}))
+jest.mock('@/components/dashboard/NextPrayerCard', () => ({
+  NextPrayerCard: () => <section>Next prayer</section>,
+}))
+jest.mock('@/components/dashboard/IslamicEventsCarousel', () => ({
+  IslamicEventsCarousel: () => <section>Upcoming events</section>,
+}))
+jest.mock('@/components/dashboard/DailyReflection', () => ({
+  DailyReflection: () => <section>Today&apos;s reflection</section>,
+}))
+jest.mock('@/components/dashboard/QuickActions', () => ({
+  QuickActions: () => <section>Tools</section>,
+}))
+jest.mock('@/components/FeedbackButton', () => ({
+  FeedbackButton: () => <button>Feedback</button>,
+}))
 
-describe('Dashboard Page', () => {
-  it('renders the dashboard page content', () => {
-    const { container } = renderWithAuth(<Home />)
-    
-    // Check that the main content container renders
-    expect(container.firstChild).toBeInTheDocument()
+describe('Home page', () => {
+  it('renders the redesigned daily hierarchy in order', () => {
+    const { container } = render(<Home />)
+    const content = container.textContent ?? ''
+
+    expect(content.indexOf("Today's date")).toBeLessThan(content.indexOf('Next prayer'))
+    expect(content.indexOf('Next prayer')).toBeLessThan(content.indexOf('Upcoming events'))
+    expect(content.indexOf('Upcoming events')).toBeLessThan(content.indexOf("Today's reflection"))
+    expect(content.indexOf("Today's reflection")).toBeLessThan(content.indexOf('Tools'))
   })
 
-  it('displays all dashboard cards', () => {
-    renderWithAuth(<Home />)
-    
-    // Check for card titles
-    expect(screen.getByText('Next Prayer')).toBeInTheDocument()
-    expect(screen.getByText(/Ramadan 1446/i)).toBeInTheDocument()
-    expect(screen.getByText('Quran of the Day')).toBeInTheDocument()
-    expect(screen.getByText('Hadith of the Day')).toBeInTheDocument()
-    expect(screen.getByText('Charity Tracker')).toBeInTheDocument()
-  })
-
-  it('renders cards in a grid layout', () => {
-    const { container } = renderWithAuth(<Home />)
-    
-    // Select the main grid container (not card internal grids)
-    const grid = container.querySelector('.grid.grid-cols-1')
-    expect(grid).toBeInTheDocument()
-    expect(grid).toHaveClass('grid-cols-1')
-    expect(grid).toHaveClass('md:grid-cols-2')
-  })
-
-  it('has proper mobile-first responsive classes', () => {
-    const { container } = renderWithAuth(<Home />)
-    
+  it('keeps the Home surface narrow and mobile-first', () => {
+    const { container } = render(<Home />)
     const wrapper = container.firstChild as HTMLElement
-    expect(wrapper).toHaveClass('max-w-4xl')
-    expect(wrapper).toHaveClass('mx-auto')
+
+    expect(wrapper).toHaveClass('mx-auto', 'w-full', 'max-w-3xl', 'px-4', 'pb-12', 'pt-6')
   })
 
-  it('applies proper spacing to content', () => {
-    const { container } = renderWithAuth(<Home />)
-    
-    const wrapper = container.firstChild as HTMLElement
-    expect(wrapper).toHaveClass('px-4')
-    expect(wrapper).toHaveClass('py-6')
+  it('preserves access to feedback', () => {
+    render(<Home />)
+    expect(screen.getByRole('button', { name: 'Feedback' })).toBeInTheDocument()
   })
 })
-

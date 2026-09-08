@@ -574,6 +574,18 @@
     color: var(--surface-feature-foreground);
     box-shadow: var(--shadow-feature);
   }
+
+  .home-prayer-pattern::before {
+    position: absolute;
+    inset: 0;
+    background-image: url("/patterns/eight-point.svg");
+    background-position: right -1.5rem top -1.5rem;
+    background-repeat: repeat;
+    background-size: 7rem 7rem;
+    content: "";
+    opacity: 0.025;
+    pointer-events: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
