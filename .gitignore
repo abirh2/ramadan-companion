@@ -62,7 +62,7 @@ public/social-previews/
 .codex/
 .cursor/*
 .gemini/*
-
+.kiro/*
 
 # Capacitor generated files (keep these in git for now)
 # Uncomment later if you want to exclude them:

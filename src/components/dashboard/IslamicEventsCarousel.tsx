@@ -1,168 +1,389 @@
 'use client'
 
-import { useState } from 'react'
-import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useState, useCallback } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  ChevronLeft,
+  ChevronRight,
+  Moon,
+  Star,
+  Gift,
+  Calendar,
+  Users,
+  Sparkles,
+  Loader2,
+  Music,
+} from 'lucide-react'
 import { useIslamicEvents } from '@/hooks/useIslamicEvents'
 import { useRamadanCountdown } from '@/hooks/useRamadanCountdown'
 import type { IslamicEventWithCountdown } from '@/hooks/useIslamicEvents'
 
-function formatDate(iso: string) {
-  return new Date(`${iso}T00:00:00`).toLocaleDateString('en-US', {
+// ── Icon resolver ──────────────────────────────────────────────────────────
+const ICON_MAP: Record<string, React.ReactNode> = {
+  Moon: <Moon className="h-4 w-4" aria-hidden="true" />,
+  Star: <Star className="h-4 w-4" aria-hidden="true" />,
+  Gift: <Gift className="h-4 w-4" aria-hidden="true" />,
+  Calendar: <Calendar className="h-4 w-4" aria-hidden="true" />,
+  Users: <Users className="h-4 w-4" aria-hidden="true" />,
+  Sparkles: <Sparkles className="h-4 w-4" aria-hidden="true" />,
+  Music: <Music className="h-4 w-4" aria-hidden="true" />,
+}
+
+function EventIcon({ name }: { name: string }) {
+  return <>{ICON_MAP[name] ?? <Calendar className="h-4 w-4" aria-hidden="true" />}</>
+}
+
+// ── Format helpers ─────────────────────────────────────────────────────────
+function formatDate(iso: string): string {
+  return new Date(iso + 'T00:00:00').toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
+    year: 'numeric',
   })
 }
 
-function prominenceFor(event: IslamicEventWithCountdown) {
-  if (event.isActive) return 'active'
-  if (event.flags?.isWeeklyJumua || event.daysUntil > 30) return 'compact'
-  if (event.daysUntil < 7) return 'elevated'
-  return 'moderate'
+function pluralDays(n: number): string {
+  return n === 1 ? '1 day' : `${n} days`
 }
 
-function EventContent({ event }: { event: IslamicEventWithCountdown }) {
-  const prominence = prominenceFor(event)
-  const isCompact = prominence === 'compact'
+// ── Daily motivational card ────────────────────────────────────────────────
+// One rotating quote per day, sourced from prayerQuotes
+const DAILY_REMINDERS = [
+  {
+    text: 'Whoever fears Allah, Allah will find a way out for him and provide for him from where he does not expect.',
+    source: 'Quran 65:2-3',
+  },
+  {
+    text: 'Verily, with hardship comes ease.',
+    source: 'Quran 94:6',
+  },
+  {
+    text: 'And He is with you wherever you are.',
+    source: 'Quran 57:4',
+  },
+  {
+    text: "The best of people are those most beneficial to others.",
+    source: "Al-Mu\u2019jam al-Awsat 6026",
+  },
+  {
+    text: 'Be in this world as if you are a stranger or a traveler.',
+    source: 'Sahih Bukhari 6416',
+  },
+  {
+    text: 'Allah does not burden a soul beyond that it can bear.',
+    source: 'Quran 2:286',
+  },
+  {
+    text: 'Indeed, Allah is with the patient.',
+    source: 'Quran 2:153',
+  },
+]
+
+function getDailyReminder() {
+  const dayOfYear = Math.floor(
+    (Date.now() - new Date(new Date().getFullYear(), 0, 1).getTime()) / 86_400_000
+  )
+  return DAILY_REMINDERS[dayOfYear % DAILY_REMINDERS.length]
+}
+
+// ── Generic event card ─────────────────────────────────────────────────────
+function GenericEventCard({ event }: { event: IslamicEventWithCountdown }) {
+  const isMultiDay = event.durationDays > 1
+  const isPast = event.daysUntil < 0
+  const isOngoing = event.isActive
 
   return (
-    <article
-      className={`min-h-28 ${
-        prominence === 'active'
-          ? 'surface-feature p-5'
-          : prominence === 'elevated'
-            ? 'rounded-surface bg-gold-muted p-5 text-text-primary'
-            : prominence === 'moderate'
-              ? 'surface-grouped p-5'
-              : 'rounded-grouped border border-border-subtle bg-surface-primary px-4 py-3.5'
-      }`}
-      aria-label={event.isActive ? `${event.name}, happening now` : `${event.name}, in ${event.daysUntil} days`}
+    <Card
+      className="rounded-3xl shadow-lg bg-primary text-primary-foreground border-0 relative overflow-hidden"
+      role="article"
+      aria-label={
+        isOngoing
+          ? `${event.name} — Day ${event.currentDay ?? 1} of ${event.durationDays}`
+          : `${event.name} — in ${pluralDays(event.daysUntil)}`
+      }
     >
-      <div className="flex min-w-0 items-center gap-4">
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-            <h3 className={`font-semibold tracking-[-0.01em] ${isCompact ? 'type-body' : 'text-lg leading-snug'}`}>
-              {event.name}
-            </h3>
-            <span
-              className={`${isCompact ? 'text-base' : 'text-lg'} ${prominence === 'active' ? 'text-surface-feature-muted' : 'text-gold'}`}
-              lang="ar"
-              dir="rtl"
-            >
-              {event.arabicName}
-            </span>
-          </div>
-          {!isCompact && (
-            <p className={`type-body-secondary mt-2 ${prominence === 'active' ? 'text-surface-feature-muted' : 'text-text-secondary'}`}>
-              {event.description}
-            </p>
-          )}
-          <p className={`type-caption mt-1.5 ${prominence === 'active' ? 'text-surface-feature-muted' : 'text-text-secondary'}`}>
-            {event.isActive
-              ? event.durationDays > 1
-                ? `Day ${event.currentDay ?? 1} of ${event.durationDays}`
-                : 'Today'
-              : `${formatDate(event.startDate)} · ${event.daysUntil === 1 ? 'Tomorrow' : `In ${event.daysUntil} days`}`}
-          </p>
+      {/* Decorative background icon */}
+      <div className="absolute top-0 right-0 p-4 opacity-10" aria-hidden="true">
+        <div className="h-16 w-16 flex items-center justify-center">
+          <EventIcon name={event.icon} />
         </div>
-        <CalendarDays
-          className={`size-5 shrink-0 ${prominence === 'active' ? 'text-surface-feature-muted' : 'text-text-tertiary'}`}
-          aria-hidden="true"
-        />
       </div>
-    </article>
+
+      <CardHeader className="pb-3 relative z-10">
+        <div className="flex items-center gap-2">
+          <EventIcon name={event.icon} />
+          <CardTitle className="text-xs font-semibold uppercase tracking-widest opacity-80">
+            {isOngoing && isMultiDay
+              ? `${event.name} — Day ${event.currentDay} of ${event.durationDays}`
+              : event.name}
+          </CardTitle>
+        </div>
+      </CardHeader>
+
+      <CardContent className="space-y-3 relative z-10">
+        {isOngoing ? (
+          <>
+            <p className="text-3xl font-bold">{event.arabicName}</p>
+            <p className="text-sm opacity-70">{event.description}</p>
+            {isMultiDay && (
+              <p className="text-xs opacity-50">Ends {formatDate(event.endDate)}</p>
+            )}
+          </>
+        ) : isPast ? (
+          <>
+            <p className="text-sm opacity-70">{event.description}</p>
+          </>
+        ) : (
+          <>
+            <div>
+              <p className="text-xs uppercase tracking-wider mb-1 opacity-70">Starts in</p>
+              <p className="text-3xl font-bold tabular-nums">{pluralDays(event.daysUntil)}</p>
+            </div>
+            <p className="text-xs opacity-60">{formatDate(event.startDate)}</p>
+          </>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 
-function ActiveRamadanContent({ event }: { event: IslamicEventWithCountdown }) {
+// ── Ramadan card (wraps useRamadanCountdown for iftar/suhoor timer) ─────────
+function RamadanEventCard() {
   const countdown = useRamadanCountdown()
 
-  return (
-    <article className="surface-feature p-5" aria-label={`${event.name}, active now`}>
-      <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-baseline gap-2">
-            <h3 className="text-lg font-semibold">Ramadan</h3>
-            <span className="text-lg text-surface-feature-muted" lang="ar" dir="rtl">{event.arabicName}</span>
+  if (countdown.loading) {
+    return (
+      <Card className="rounded-3xl shadow-md border-accent/30" aria-busy="true">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-2">
+            <Moon className="h-4 w-4 text-accent" aria-hidden="true" />
+            <CardTitle className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
+              Ramadan {countdown.ramadanYear}
+            </CardTitle>
           </div>
-          <p className="type-caption mt-1 text-surface-feature-muted">
-            Day {countdown.currentRamadanDay ?? event.currentDay ?? 1}
-          </p>
+        </CardHeader>
+        <CardContent className="py-8 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-hidden="true" />
+          <span className="sr-only">Loading Ramadan countdown…</span>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const bgClass = 'rounded-3xl shadow-lg bg-primary text-primary-foreground border-0 relative overflow-hidden'
+
+  // Before Ramadan
+  if (!countdown.isRamadan) {
+    return (
+      <Card className={bgClass} role="article">
+        <div className="absolute top-0 right-0 p-4 opacity-10" aria-hidden="true">
+          <Moon className="h-16 w-16" />
         </div>
-        {countdown.timeUntilEvent && (
-          <div className="text-right">
-            <p className="text-lg font-semibold tabular-nums">{countdown.timeUntilEvent}</p>
-            <p className="type-caption text-surface-feature-muted">
-              until {countdown.nextEvent === 'iftar' ? 'iftar' : 'suhoor ends'}
+        <CardHeader className="pb-3 relative z-10">
+          <div className="flex items-center gap-2">
+            <Moon className="h-4 w-4" aria-hidden="true" />
+            <CardTitle className="text-xs font-semibold uppercase tracking-widest opacity-80">
+              Ramadan {countdown.ramadanYear}
+            </CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3 relative z-10">
+          <div>
+            <p className="text-xs uppercase tracking-wider mb-1 opacity-70">Starts in</p>
+            <p className="text-3xl font-bold tabular-nums" aria-live="polite">
+              {countdown.timeUntilEvent ?? '—'}
             </p>
           </div>
-        )}
+          <p className="text-xs opacity-60">
+            {countdown.ramadanStartDate
+              ? `Expected: ${formatDate(countdown.ramadanStartDate)} · Adjust in Settings`
+              : 'Adjust in Settings'}
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // During Ramadan
+  return (
+    <Card className={bgClass} role="article">
+      <div className="absolute top-0 right-0 p-4 opacity-10" aria-hidden="true">
+        <Moon className="h-16 w-16" />
       </div>
-    </article>
+      <CardHeader className="pb-3 relative z-10">
+        <div className="flex items-center gap-2">
+          <Moon className="h-4 w-4" aria-hidden="true" />
+          <CardTitle className="text-xs font-semibold uppercase tracking-widest opacity-80">
+            Ramadan {countdown.ramadanYear} · Day {countdown.currentRamadanDay}
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-3 relative z-10">
+        {countdown.nextEvent && countdown.timeUntilEvent ? (
+          <>
+            <p className="text-4xl font-bold tabular-nums" aria-live="polite">
+              {countdown.timeUntilEvent}
+            </p>
+            <p className="text-sm opacity-70">
+              {countdown.nextEvent === 'iftar'
+                ? 'Until Iftar (Maghrib)'
+                : 'Until Suhoor ends (Fajr)'}
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="text-4xl font-bold">Ramadan Mubarak</p>
+            <p className="text-sm opacity-70">Day {countdown.currentRamadanDay} of 30</p>
+          </>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 
+// ── Daily motivational card ────────────────────────────────────────────────
+function DailyMotivationCard() {
+  const reminder = getDailyReminder()
+  return (
+    <Card
+      className="rounded-3xl shadow-md border-accent/30 relative overflow-hidden"
+      role="article"
+      aria-label="Daily reminder"
+    >
+      <div className="absolute top-0 right-0 p-4 opacity-5" aria-hidden="true">
+        <Star className="h-16 w-16" />
+      </div>
+      <CardHeader className="pb-3 relative z-10">
+        <div className="flex items-center gap-2">
+          <Star className="h-4 w-4 text-accent" aria-hidden="true" />
+          <CardTitle className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Daily Reminder
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-3 relative z-10">
+        <p className="text-sm leading-relaxed font-medium text-foreground">
+          &ldquo;{reminder.text}&rdquo;
+        </p>
+        <p className="text-xs text-muted-foreground">{reminder.source}</p>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ── Carousel ───────────────────────────────────────────────────────────────
 export function IslamicEventsCarousel() {
   const { events, loading, error } = useIslamicEvents()
   const [activeIndex, setActiveIndex] = useState(0)
 
+  // Build the slide list: Islamic events + daily motivation card at the end
+  // The daily motivation card is always included
+  const slides = [...events, { id: '__motivation__' }] as const
+
+  const totalSlides = slides.length
+
+  const prev = useCallback(() => {
+    setActiveIndex((i) => (i - 1 + totalSlides) % totalSlides)
+  }, [totalSlides])
+
+  const next = useCallback(() => {
+    setActiveIndex((i) => (i + 1) % totalSlides)
+  }, [totalSlides])
+
+  // Keep activeIndex in bounds if events change
+  const clampedIndex = Math.min(activeIndex, Math.max(0, totalSlides - 1))
+
   if (loading) {
     return (
-      <section aria-labelledby="events-heading" aria-busy="true">
-        <h2 id="events-heading" className="type-section-title">Upcoming</h2>
-        <div className="mt-3 h-20 animate-pulse rounded-grouped bg-surface-grouped" role="status">
-          <span className="sr-only">Loading upcoming Islamic events</span>
-        </div>
-      </section>
+      <Card className="rounded-3xl shadow-md border-accent/30" aria-busy="true">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-2">
+            <Moon className="h-4 w-4 text-accent" aria-hidden="true" />
+            <CardTitle className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
+              Islamic Events
+            </CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="py-8 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-hidden="true" />
+          <span className="sr-only">Loading Islamic events…</span>
+        </CardContent>
+      </Card>
     )
   }
 
-  if (error || events.length === 0) {
+  if (error) {
     return (
-      <section aria-labelledby="events-heading">
-        <h2 id="events-heading" className="type-section-title">Upcoming</h2>
-        <p className="type-body-secondary mt-2 text-text-secondary">
-          Event dates are unavailable right now. Your prayer schedule and daily reflection are still ready.
-        </p>
-      </section>
+      <Card className="rounded-3xl shadow-md border-accent/30" aria-live="polite">
+        <CardContent className="py-6 text-center space-y-2">
+          <p className="text-sm text-muted-foreground">Unable to load events</p>
+          <p className="text-xs text-muted-foreground">Check your connection and try refreshing</p>
+        </CardContent>
+      </Card>
     )
   }
 
-  const clampedIndex = Math.min(activeIndex, events.length - 1)
-  const event = events[clampedIndex]
-  const isActiveRamadan = Boolean(event.isActive && event.flags?.isRamadan)
+  const currentSlide = slides[clampedIndex]
+  const isMotivationSlide = 'id' in currentSlide && currentSlide.id === '__motivation__'
+  const isRamadanSlide = !isMotivationSlide && (currentSlide as IslamicEventWithCountdown).flags?.isRamadan
 
   return (
-    <section aria-labelledby="events-heading">
-      <div className="mb-3 flex items-center justify-between gap-4">
-        <div>
-          <h2 id="events-heading" className="type-section-title">Upcoming</h2>
-          <p className="type-caption mt-0.5 text-text-secondary">Islamic calendar</p>
-        </div>
-        {events.length > 1 && (
-          <div className="flex items-center gap-1" aria-label="Browse upcoming events">
-            <button
-              type="button"
-              onClick={() => setActiveIndex((index) => (index - 1 + events.length) % events.length)}
-              className="inline-flex size-touch items-center justify-center rounded-control text-text-secondary hover:bg-surface-grouped hover:text-text-primary"
-              aria-label="Previous event"
-            >
-              <ChevronLeft className="size-5" aria-hidden="true" />
-            </button>
-            <span className="type-caption min-w-10 text-center text-text-secondary" aria-live="polite">
-              {clampedIndex + 1} of {events.length}
-            </span>
-            <button
-              type="button"
-              onClick={() => setActiveIndex((index) => (index + 1) % events.length)}
-              className="inline-flex size-touch items-center justify-center rounded-control text-text-secondary hover:bg-surface-grouped hover:text-text-primary"
-              aria-label="Next event"
-            >
-              <ChevronRight className="size-5" aria-hidden="true" />
-            </button>
-          </div>
+    <div className="relative" role="region" aria-label="Islamic events carousel">
+      {/* Active card */}
+      <div className="mb-3">
+        {isMotivationSlide ? (
+          <DailyMotivationCard />
+        ) : isRamadanSlide ? (
+          <RamadanEventCard />
+        ) : (
+          <GenericEventCard event={currentSlide as IslamicEventWithCountdown} />
         )}
       </div>
-      {isActiveRamadan ? <ActiveRamadanContent event={event} /> : <EventContent event={event} />}
-    </section>
+
+      {/* Navigation row */}
+      {totalSlides > 1 && (
+        <div className="flex items-center justify-between px-1">
+          {/* Prev button */}
+          <button
+            onClick={prev}
+            className="rounded-full p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            aria-label="Previous event"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+
+          {/* Dot indicators */}
+          <div className="flex items-center gap-1.5" role="tablist" aria-label="Event slides">
+            {slides.map((s, i) => (
+              <button
+                key={'id' in s ? s.id : i}
+                role="tab"
+                aria-selected={i === clampedIndex}
+                aria-label={
+                  'id' in s && s.id === '__motivation__'
+                    ? 'Daily reminder'
+                    : `Slide ${i + 1}`
+                }
+                onClick={() => setActiveIndex(i)}
+                className={`h-1.5 rounded-full transition-all ${
+                  i === clampedIndex
+                    ? 'w-4 bg-primary'
+                    : 'w-1.5 bg-muted-foreground/40 hover:bg-muted-foreground/70'
+                }`}
+              />
+            ))}
+          </div>
+
+          {/* Next button */}
+          <button
+            onClick={next}
+            className="rounded-full p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            aria-label="Next event"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+    </div>
   )
 }
