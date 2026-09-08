@@ -39,6 +39,7 @@ export function UserMenu() {
         <Button 
           variant="outline" 
           size="sm"
+          className="size-touch px-0"
           aria-label={`User menu for ${displayName}`}
           title="Open user menu"
         >
@@ -75,4 +76,3 @@ export function UserMenu() {
     </DropdownMenu>
   );
 }
-

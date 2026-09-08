@@ -13,7 +13,7 @@ export function AuthButton() {
   if (loading) {
     return (
       <div 
-        className="h-10 w-20 animate-pulse rounded bg-muted" 
+        className="h-touch w-20 animate-pulse rounded-control bg-muted"
         role="status"
         aria-label="Loading authentication status"
       >
@@ -32,6 +32,7 @@ export function AuthButton() {
         onClick={() => setShowLoginModal(true)}
         variant="default"
         size="sm"
+        className="h-touch px-4"
         aria-label="Sign in to your account"
       >
         Login
@@ -43,4 +44,3 @@ export function AuthButton() {
     </>
   );
 }
-

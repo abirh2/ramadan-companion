@@ -8,6 +8,7 @@ import { Footer } from "@/components/Footer";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { SkipLink } from "@/components/SkipLink";
+import { BottomNavigation } from "@/components/BottomNavigation";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -60,16 +61,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${manrope.variable} ${notoNaskhArabic.variable} font-sans antialiased min-h-screen flex flex-col`}
+        className={`${manrope.variable} ${notoNaskhArabic.variable} app-shell font-sans antialiased min-h-screen flex flex-col`}
       >
         <SkipLink />
         <ThemeProvider>
           <AuthProvider>
             <Header />
-            <main id="main-content" className="flex-1" tabIndex={-1}>
+            <main id="main-content" className="app-main flex-1" tabIndex={-1}>
               {children}
             </main>
             <Footer />
+            <BottomNavigation />
           </AuthProvider>
         </ThemeProvider>
         <ServiceWorkerRegistration />

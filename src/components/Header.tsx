@@ -5,22 +5,21 @@ import { ThemeToggle } from '@/components/ThemeToggle'
 
 export function Header() {
   return (
-    <header className="border-b bg-background sticky top-0 z-50 pt-[env(safe-area-inset-top)]">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
+    <header className="app-header sticky top-0 z-40">
+      <div className="app-header-inner mx-auto flex min-h-14 max-w-7xl items-center justify-between gap-2 px-4">
         <Link 
           href="/" 
-          className="text-xl font-semibold hover:opacity-80 transition-opacity"
+          className="min-w-0 truncate text-[1.0625rem] font-semibold tracking-[-0.015em] transition-opacity hover:opacity-80 sm:text-xl"
           aria-label="Deen Companion - Go to homepage"
         >
           Deen Companion
         </Link>
-        <nav aria-label="Main navigation" className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <ThemeToggle />
           <NavMenu />
           <AuthButton />
-        </nav>
+        </div>
       </div>
     </header>
   )
 }
-

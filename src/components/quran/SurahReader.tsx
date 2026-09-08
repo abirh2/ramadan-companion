@@ -158,7 +158,7 @@ export function SurahReader({ surahNumber, surahMetadata, initialAyah }: SurahRe
         <Button
           onClick={scrollToTop}
           size="icon"
-          className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-40 h-12 w-12 rounded-full shadow-lg transition-opacity"
+          className="app-floating-control fixed z-30 h-12 w-12 rounded-full shadow-low transition-opacity"
           aria-label="Scroll to top"
         >
           <ArrowUp className="h-5 w-5" />
@@ -167,4 +167,3 @@ export function SurahReader({ surahNumber, surahMetadata, initialAyah }: SurahRe
     </div>
   )
 }
-

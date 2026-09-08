@@ -6,13 +6,7 @@ import { X, Download, Info, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { getIOSBrowser, getIOSBrowserPrefixed } from '@/lib/platform'
-import type { 
-  BeforeInstallPromptEvent, 
-  InstallPromptState,
-  PWA_STORAGE_KEYS,
-  INSTALL_PROMPT_DISMISSAL_DURATION,
-  MIN_PAGE_VIEWS_FOR_PROMPT,
-} from '@/types/pwa.types'
+import type { BeforeInstallPromptEvent } from '@/types/pwa.types'
 
 // Import constants with proper typing
 const STORAGE_KEYS = {
@@ -62,7 +56,7 @@ export function InstallPrompt() {
 
     // Check if already installed
     const isInstalled = window.matchMedia('(display-mode: standalone)').matches ||
-                       (window.navigator as any).standalone === true
+                       (window.navigator as Navigator & { standalone?: boolean }).standalone === true
 
     if (isInstalled) {
       console.log('[PWA] App is already installed')
@@ -199,10 +193,10 @@ export function InstallPrompt() {
   // Render iOS Safari banner - manual installation instructions
   if (iosBrowserType === 'ios-safari') {
     return (
-      <div className="fixed bottom-0 left-0 right-0 bg-primary text-primary-foreground p-3 flex items-center justify-between shadow-lg z-50">
+      <div className="app-install-prompt fixed left-0 right-0 bg-primary text-primary-foreground p-3 flex items-center justify-between shadow-lg z-50">
         <div className="flex items-center gap-2">
           <Info className="h-5 w-5" />
-          <p className="text-sm">Install Deen Companion: Tap Share (⬆︎) → "Add to Home Screen"</p>
+          <p className="text-sm">Install Deen Companion: Tap Share (⬆︎) → &quot;Add to Home Screen&quot;</p>
         </div>
         <div className="flex gap-2">
           <Button variant="ghost" size="sm" onClick={handleDismiss} className="text-primary-foreground hover:bg-primary/80">
@@ -221,7 +215,7 @@ export function InstallPrompt() {
   // Render iOS Chrome/Firefox/Edge banner - "Open in Safari" message
   if (iosBrowserType === 'ios-chrome' || iosBrowserType === 'ios-firefox' || iosBrowserType === 'ios-edge' || iosBrowserType === 'ios-other') {
     return (
-      <div className="fixed bottom-0 left-0 right-0 bg-primary text-primary-foreground p-3 flex items-center justify-between shadow-lg z-50">
+      <div className="app-install-prompt fixed left-0 right-0 bg-primary text-primary-foreground p-3 flex items-center justify-between shadow-lg z-50">
         <div className="flex items-center gap-2">
           <Info className="h-5 w-5" />
           <p className="text-sm">To install, please open this site in Safari</p>
@@ -249,7 +243,7 @@ export function InstallPrompt() {
   if (deferredPrompt) {
     return (
       <div 
-        className="fixed bottom-0 left-0 right-0 z-50 animate-in slide-in-from-bottom duration-300"
+        className="app-install-prompt fixed left-0 right-0 z-50 animate-in slide-in-from-bottom duration-300"
         role="dialog"
         aria-label="Install app prompt"
       >
@@ -374,4 +368,3 @@ function isPromptDismissed(): boolean {
 
   return true
 }
-

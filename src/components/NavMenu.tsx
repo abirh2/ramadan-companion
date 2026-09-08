@@ -14,17 +14,19 @@ import { Menu, BookOpen, BookOpenText, Clock, Heart, DollarSign, MessageCircle, 
 
 export function NavMenu() {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="icon"
-          aria-label="Open navigation menu"
-        >
-          <Menu className="h-5 w-5" aria-hidden="true" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56" aria-label="Features menu">
+    <div className="hidden md:block">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-touch"
+            aria-label="Open features menu"
+          >
+            <Menu className="h-5 w-5" aria-hidden="true" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56" aria-label="Features menu">
         <Link href="/">
           <DropdownMenuItem className="cursor-pointer" role="menuitem">
             <Home className="h-4 w-4 mr-2" aria-hidden="true" />
@@ -90,8 +92,8 @@ export function NavMenu() {
             Zikr & Duas
           </DropdownMenuItem>
         </Link>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   )
 }
-

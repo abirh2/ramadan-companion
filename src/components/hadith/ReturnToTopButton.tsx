@@ -39,11 +39,10 @@ export function ReturnToTopButton() {
     <Button
       onClick={scrollToTop}
       size="icon"
-      className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 rounded-full shadow-lg"
+      className="app-floating-control fixed z-30 size-touch rounded-full shadow-low"
       aria-label="Scroll to top"
     >
       <ArrowUp className="h-5 w-5" aria-hidden="true" />
     </Button>
   )
 }
-
