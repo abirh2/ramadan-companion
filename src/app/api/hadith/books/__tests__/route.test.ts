@@ -1,10 +1,13 @@
 import { GET } from '../route'
+import { NextRequest } from 'next/server'
 
 // Mock environment variable
 process.env.HADITH_API_KEY = 'test-api-key'
 
 // Mock fetch
 global.fetch = jest.fn()
+
+const createRequest = () => new NextRequest('http://localhost/api/hadith/books')
 
 describe('/api/hadith/books', () => {
   beforeEach(() => {
@@ -31,7 +34,7 @@ describe('/api/hadith/books', () => {
       }),
     })
 
-    const response = await GET()
+    const response = await GET(createRequest())
     const data = await response.json()
 
     expect(data.status).toBe(200)
@@ -43,7 +46,7 @@ describe('/api/hadith/books', () => {
     const originalKey = process.env.HADITH_API_KEY
     delete process.env.HADITH_API_KEY
 
-    const response = await GET()
+    const response = await GET(createRequest())
     const data = await response.json()
 
     expect(response.status).toBe(500)
@@ -58,11 +61,10 @@ describe('/api/hadith/books', () => {
       status: 500,
     })
 
-    const response = await GET()
+    const response = await GET(createRequest())
     const data = await response.json()
 
     expect(response.status).toBe(500)
     expect(data.error).toBe('Failed to fetch hadith collections')
   })
 })
-

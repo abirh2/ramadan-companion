@@ -6,6 +6,7 @@ import {
   MECCA_COORDS,
 } from '../location'
 import { createClient } from '@/lib/supabase/client'
+import type { Profile } from '@/types/auth.types'
 
 // Mock Supabase client
 jest.mock('@/lib/supabase/client', () => ({
@@ -100,7 +101,7 @@ describe('location utilities', () => {
 
   describe('getUserLocation', () => {
     it('should prioritize profile location over localStorage', () => {
-      const profile = {
+      const profile: Profile = {
         id: 'user-1',
         location_lat: 40.8784,
         location_lng: -73.8803,
@@ -270,4 +271,3 @@ describe('location utilities', () => {
     })
   })
 })
-

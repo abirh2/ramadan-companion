@@ -3,9 +3,12 @@
  */
 
 import { GET } from '../route'
+import { NextRequest } from 'next/server'
 
 // Mock fetch
 global.fetch = jest.fn()
+
+const createRequest = () => new NextRequest('http://localhost/api/currency/list')
 
 describe('/api/currency/list', () => {
   beforeEach(() => {
@@ -27,7 +30,7 @@ describe('/api/currency/list', () => {
       json: async () => mockResponse,
     })
 
-    const response = await GET()
+    const response = await GET(createRequest())
     const data = await response.json()
 
     expect(response.status).toBe(200)
@@ -52,7 +55,7 @@ describe('/api/currency/list', () => {
       json: async () => mockResponse,
     })
 
-    const response = await GET()
+    const response = await GET(createRequest())
     const data = await response.json()
 
     expect(response.status).toBe(200)
@@ -78,7 +81,7 @@ describe('/api/currency/list', () => {
       json: async () => mockResponse,
     })
 
-    const response = await GET()
+    const response = await GET(createRequest())
     const data = await response.json()
 
     expect(data.find((c: { code: string }) => c.code === 'ILS')).toBeUndefined()
@@ -101,7 +104,7 @@ describe('/api/currency/list', () => {
       json: async () => mockResponse,
     })
 
-    const response = await GET()
+    const response = await GET(createRequest())
     const data = await response.json()
 
     // Cryptocurrencies should be filtered out
@@ -129,7 +132,7 @@ describe('/api/currency/list', () => {
       json: async () => mockResponse,
     })
 
-    const response = await GET()
+    const response = await GET(createRequest())
     const data = await response.json()
 
     expect(data.find((c: { code: string }) => c.code === 'XAU')).toBeDefined()
@@ -148,7 +151,7 @@ describe('/api/currency/list', () => {
       json: async () => mockResponse,
     })
 
-    const response = await GET()
+    const response = await GET(createRequest())
     const data = await response.json()
 
     // Check if sorted alphabetically
@@ -165,7 +168,7 @@ describe('/api/currency/list', () => {
       status: 500,
     })
 
-    const response = await GET()
+    const response = await GET(createRequest())
     const data = await response.json()
 
     expect(response.status).toBe(500)
@@ -173,4 +176,3 @@ describe('/api/currency/list', () => {
     expect(global.fetch).toHaveBeenCalledTimes(2)
   })
 })
-

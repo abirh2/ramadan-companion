@@ -4,9 +4,11 @@ import { HadithCard } from '../HadithCard'
 
 // Mock next/link
 jest.mock('next/link', () => {
-  return ({ children, href }: { children: React.ReactNode; href: string }) => (
+  const MockLink = ({ children, href }: { children: React.ReactNode; href: string }) => (
     <a href={href}>{children}</a>
   )
+  MockLink.displayName = 'MockLink'
+  return MockLink
 })
 
 // Mock hooks
@@ -30,12 +32,16 @@ describe('HadithCard', () => {
     narrator: "Narrated 'Umar bin Al-Khattab",
     book: 'Sahih Bukhari',
     bookSlug: 'sahih-bukhari',
+    bookWriter: 'Imam Bukhari',
     chapter: 'Belief',
+    chapterArabic: 'الإيمان',
     hadithNumber: '1',
     status: 'Sahih' as const,
     selectedLanguage: 'english' as const,
     loading: false,
     error: null,
+    refetch: jest.fn(async () => {}),
+    setLanguage: jest.fn(async () => {}),
   }
 
   beforeEach(() => {
@@ -121,10 +127,10 @@ describe('HadithCard', () => {
     })
   })
 
-  it('should display Arabic text when language is set to Arabic', async () => {
+  it('should always display the Arabic text', async () => {
     mockUseHadithOfTheDay.mockReturnValue({
       ...mockHadithData,
-      selectedLanguage: 'arabic' as const,
+      selectedLanguage: 'urdu' as const,
     })
 
     render(<HadithCard />)

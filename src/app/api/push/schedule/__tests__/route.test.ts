@@ -29,8 +29,17 @@ const mockCreateServiceRoleClient = supabaseServerModule.createServiceRoleClient
 const mockWebpush = webpushModule as jest.Mocked<typeof webpushModule>
 const mockGetRandomPrayerQuote = prayerQuotesModule.getRandomPrayerQuote as jest.MockedFunction<typeof prayerQuotesModule.getRandomPrayerQuote>
 
+type MockSupabaseClient = {
+  from: jest.Mock
+  select: jest.Mock
+  eq: jest.Mock
+  not: jest.Mock
+  delete: jest.Mock
+}
+
 describe('POST /api/push/schedule - Timezone Handling', () => {
   let mockRequest: Partial<NextRequest>
+  let mockSupabase: MockSupabaseClient
   
   const mockProfile = {
     id: 'test-user-123',
@@ -76,7 +85,7 @@ describe('POST /api/push/schedule - Timezone Handling', () => {
     }
 
     // Mock Supabase client
-    const mockSupabase = {
+    mockSupabase = {
       from: jest.fn().mockReturnThis(),
       select: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
@@ -87,7 +96,9 @@ describe('POST /api/push/schedule - Timezone Handling', () => {
       delete: jest.fn().mockReturnThis(),
     }
 
-    mockCreateServiceRoleClient.mockReturnValue(mockSupabase as any)
+    mockCreateServiceRoleClient.mockReturnValue(
+      mockSupabase as unknown as ReturnType<typeof supabaseServerModule.createServiceRoleClient>
+    )
 
     // Configure Supabase mock for subscriptions
     mockSupabase.from.mockImplementation((table: string) => {
@@ -106,13 +117,18 @@ describe('POST /api/push/schedule - Timezone Handling', () => {
 
     // Mock web-push
     mockWebpush.setVapidDetails = jest.fn()
-    mockWebpush.sendNotification = jest.fn().mockResolvedValue({ statusCode: 201 } as any)
+    mockWebpush.sendNotification = jest.fn().mockResolvedValue({
+      statusCode: 201,
+      body: '',
+      headers: {},
+    })
 
     // Mock prayer quotes
     mockGetRandomPrayerQuote.mockReturnValue({
+      id: 'test-quote',
       text: 'Test hadith quote',
       source: 'Sahih Bukhari 123',
-      prayerName: 'Fajr',
+      prayer: 'Fajr',
     })
   })
 
@@ -142,7 +158,6 @@ describe('POST /api/push/schedule - Timezone Handling', () => {
         location_lng: -0.1278,
       }
 
-      const mockSupabase = mockCreateServiceRoleClient()
       mockSupabase.not.mockResolvedValue({
         data: [londonProfile],
         error: null,
@@ -171,7 +186,6 @@ describe('POST /api/push/schedule - Timezone Handling', () => {
         location_lng: 55.2708,
       }
 
-      const mockSupabase = mockCreateServiceRoleClient()
       mockSupabase.not.mockResolvedValue({
         data: [dubaiProfile],
         error: null,
@@ -236,7 +250,6 @@ describe('POST /api/push/schedule - Timezone Handling', () => {
         location_lng: -118.2437,
       }
 
-      const mockSupabase = mockCreateServiceRoleClient()
       mockSupabase.not.mockResolvedValue({
         data: [laProfile],
         error: null,
@@ -264,9 +277,9 @@ describe('POST /api/push/schedule - Timezone Handling', () => {
       const webpush = mockWebpush
       let capturedPayload: string | undefined
 
-      webpush.sendNotification.mockImplementation((_sub: any, payload: string) => {
-        capturedPayload = payload
-        return Promise.resolve({ statusCode: 201 })
+      webpush.sendNotification.mockImplementation((_sub, payload) => {
+        capturedPayload = typeof payload === 'string' ? payload : undefined
+        return Promise.resolve({ statusCode: 201, body: '', headers: {} })
       })
 
       await POST(mockRequest as NextRequest)
@@ -333,7 +346,6 @@ describe('POST /api/push/schedule - Timezone Handling', () => {
         location_lng: null,
       }
 
-      const mockSupabase = mockCreateServiceRoleClient()
       mockSupabase.not.mockResolvedValue({
         data: [profileWithoutLocation],
         error: null,
@@ -347,4 +359,3 @@ describe('POST /api/push/schedule - Timezone Handling', () => {
     })
   })
 })
-

@@ -7,8 +7,28 @@ jest.mock('@/hooks/usePrayerTimes', () => ({
 }))
 
 import * as usePrayerTimesModule from '@/hooks/usePrayerTimes'
+import type { UsePrayerTimesResult } from '@/types/ramadan.types'
 
 const mockUsePrayerTimes = usePrayerTimesModule.usePrayerTimes as jest.MockedFunction<typeof usePrayerTimesModule.usePrayerTimes>
+
+const createPrayerTimesResult = (
+  overrides: Partial<UsePrayerTimesResult> = {}
+): UsePrayerTimesResult => ({
+  prayerTimes: null,
+  nextPrayer: null,
+  qiblaDirection: null,
+  location: null,
+  calculationMethod: '4',
+  madhab: '0',
+  calculationSource: null,
+  loading: false,
+  error: null,
+  refetch: jest.fn(async () => {}),
+  updateLocation: jest.fn(async () => {}),
+  updateCalculationMethod: jest.fn(async () => {}),
+  updateMadhab: jest.fn(async () => {}),
+  ...overrides,
+})
 
 describe('NextPrayerCard', () => {
   beforeEach(() => {
@@ -16,13 +36,13 @@ describe('NextPrayerCard', () => {
   })
 
   it('renders loading state', () => {
-    mockUsePrayerTimes.mockReturnValue({
+    mockUsePrayerTimes.mockReturnValue(createPrayerTimesResult({
       nextPrayer: null,
       location: null,
       calculationMethod: '4',
       loading: true,
       error: null,
-    })
+    }))
 
     render(<NextPrayerCard />)
     
@@ -33,13 +53,13 @@ describe('NextPrayerCard', () => {
   })
 
   it('renders error state', () => {
-    mockUsePrayerTimes.mockReturnValue({
+    mockUsePrayerTimes.mockReturnValue(createPrayerTimesResult({
       nextPrayer: null,
       location: null,
       calculationMethod: '4',
       loading: false,
       error: 'Failed to load',
-    })
+    }))
 
     render(<NextPrayerCard />)
     
@@ -48,7 +68,7 @@ describe('NextPrayerCard', () => {
   })
 
   it('displays prayer time and countdown', () => {
-    mockUsePrayerTimes.mockReturnValue({
+    mockUsePrayerTimes.mockReturnValue(createPrayerTimesResult({
       nextPrayer: {
         name: 'Asr',
         time: '15:45',
@@ -64,7 +84,7 @@ describe('NextPrayerCard', () => {
       calculationMethod: '4',
       loading: false,
       error: null,
-    })
+    }))
 
     render(<NextPrayerCard />)
     
@@ -72,7 +92,7 @@ describe('NextPrayerCard', () => {
   })
 
   it('shows calculation method information', () => {
-    mockUsePrayerTimes.mockReturnValue({
+    mockUsePrayerTimes.mockReturnValue(createPrayerTimesResult({
       nextPrayer: {
         name: 'Dhuhr',
         time: '12:00',
@@ -88,7 +108,7 @@ describe('NextPrayerCard', () => {
       calculationMethod: '4',
       loading: false,
       error: null,
-    })
+    }))
 
     render(<NextPrayerCard />)
     
@@ -96,7 +116,7 @@ describe('NextPrayerCard', () => {
   })
 
   it('displays location when available', () => {
-    mockUsePrayerTimes.mockReturnValue({
+    mockUsePrayerTimes.mockReturnValue(createPrayerTimesResult({
       nextPrayer: {
         name: 'Maghrib',
         time: '18:00',
@@ -112,7 +132,7 @@ describe('NextPrayerCard', () => {
       calculationMethod: '4',
       loading: false,
       error: null,
-    })
+    }))
 
     render(<NextPrayerCard />)
     
@@ -120,7 +140,7 @@ describe('NextPrayerCard', () => {
   })
 
   it('displays date', () => {
-    mockUsePrayerTimes.mockReturnValue({
+    mockUsePrayerTimes.mockReturnValue(createPrayerTimesResult({
       nextPrayer: {
         name: 'Fajr',
         time: '05:30',
@@ -131,7 +151,7 @@ describe('NextPrayerCard', () => {
       calculationMethod: '4',
       loading: false,
       error: null,
-    })
+    }))
 
     render(<NextPrayerCard />)
     
@@ -141,7 +161,7 @@ describe('NextPrayerCard', () => {
   })
 
   it('formats time in 12-hour format', () => {
-    mockUsePrayerTimes.mockReturnValue({
+    mockUsePrayerTimes.mockReturnValue(createPrayerTimesResult({
       nextPrayer: {
         name: 'Asr',
         time: '15:45',
@@ -152,7 +172,7 @@ describe('NextPrayerCard', () => {
       calculationMethod: '4',
       loading: false,
       error: null,
-    })
+    }))
 
     render(<NextPrayerCard />)
     
@@ -160,7 +180,7 @@ describe('NextPrayerCard', () => {
   })
 
   it('renders clock icon', () => {
-    mockUsePrayerTimes.mockReturnValue({
+    mockUsePrayerTimes.mockReturnValue(createPrayerTimesResult({
       nextPrayer: {
         name: 'Isha',
         time: '19:30',
@@ -171,7 +191,7 @@ describe('NextPrayerCard', () => {
       calculationMethod: '4',
       loading: false,
       error: null,
-    })
+    }))
 
     const { container } = render(<NextPrayerCard />)
     
@@ -180,4 +200,3 @@ describe('NextPrayerCard', () => {
     expect(icon).toBeInTheDocument()
   })
 })
-
