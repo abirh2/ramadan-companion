@@ -13,7 +13,6 @@ import { PreferencesDetailModal } from '@/components/prayer-times/PreferencesDet
 import { NextPrayerHero } from '@/components/prayer-times/NextPrayerHero'
 import { PrayerSchedule } from '@/components/prayer-times/PrayerSchedule'
 import { NotificationEntry } from '@/components/prayer-times/NotificationEntry'
-import { PreservedSurface } from '@/components/prayer-times/PreservedSurface'
 import {
   PreferencesSection,
   deriveCalculationMethodLabel,
@@ -238,14 +237,14 @@ export default function TimesPage() {
             </section>
 
             {/* Qibla Compass */}
-            <PreservedSurface id="qibla" labelledBy="qibla-title">
-              <h2 id="qibla-title" className="sr-only">Qibla Compass</h2>
+            <section id="qibla" aria-label="Qibla compass" className="scroll-mt-6">
               <QiblaCompass
                 qiblaDirection={qiblaDirection}
+                locationLabel={locationLabel}
                 loading={loading}
                 error={!qiblaDirection && location ? 'Unable to determine direction' : error}
               />
-            </PreservedSurface>
+            </section>
           </aside>
         </div>
       )}

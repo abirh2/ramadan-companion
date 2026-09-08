@@ -1,29 +1,214 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Compass, Loader2, Navigation, AlertTriangle } from 'lucide-react'
-import type { QiblaData, CompassMode } from '@/types/ramadan.types'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
-  isMobileDevice,
+  AlertTriangle,
+  Check,
+  Compass,
+  Loader2,
+  LocateFixed,
+  MapPin,
+  Navigation,
+  RotateCw,
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import type { CompassMode, QiblaData } from '@/types/ramadan.types'
+import {
   hasOrientationSupport,
+  isLowAccuracy,
+  isMobileDevice,
   needsOrientationPermission,
   requestOrientationPermission,
   startOrientationTracking,
-  isLowAccuracy,
-  type OrientationPermission,
   type DeviceHeading,
+  type OrientationPermission,
 } from '@/lib/orientation'
+import { triggerQiblaAlignmentHaptic } from '@/lib/qiblaHaptics'
 
 interface QiblaCompassProps {
   qiblaDirection: QiblaData | null
+  locationLabel?: string | null
   loading?: boolean
   error?: string | null
 }
 
-export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassProps) {
-  // Dynamic compass state
+const ALIGNMENT_TOLERANCE = 5
+const ALIGNMENT_HAPTIC_COOLDOWN_MS = 2500
+const COMPASS_DIRECTIONS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
+
+function angularDistance(first: number, second: number): number {
+  const diff = Math.abs(first - second)
+  return Math.min(diff, 360 - diff)
+}
+
+function closestEquivalentAngle(target: number, previous: number): number {
+  let next = target
+  while (next - previous > 180) next -= 360
+  while (next - previous < -180) next += 360
+  return next
+}
+
+function CompassTexture() {
+  return (
+    <svg
+      className="pointer-events-none absolute inset-0 size-full opacity-[0.035]"
+      viewBox="0 0 360 620"
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden="true"
+    >
+      <defs>
+        <pattern id="qibla-eight-point" width="72" height="72" patternUnits="userSpaceOnUse">
+          <path
+            d="M36 3 45.7 26.3 69 36 45.7 45.7 36 69 26.3 45.7 3 36 26.3 26.3Z"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="0.8"
+          />
+          <rect
+            x="20.5"
+            y="20.5"
+            width="31"
+            height="31"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="0.55"
+            transform="rotate(45 36 36)"
+          />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#qibla-eight-point)" />
+    </svg>
+  )
+}
+
+function CompassDial({
+  bearing,
+  rotation,
+  deviceHeading,
+  dynamic,
+  aligned,
+}: {
+  bearing: number
+  rotation: number
+  deviceHeading: number | null
+  dynamic: boolean
+  aligned: boolean
+}) {
+  const dialRotation = dynamic && deviceHeading !== null ? -deviceHeading : 0
+
+  return (
+    <div className="relative aspect-square w-full max-w-[19rem] sm:max-w-[21rem]">
+      <div
+        className={`absolute left-1/2 top-0 z-10 -translate-x-1/2 transition-colors ${
+          aligned ? 'text-gold' : 'text-surface-feature-foreground'
+        }`}
+        aria-hidden="true"
+      >
+        <div className="h-0 w-0 border-x-[6px] border-b-[10px] border-x-transparent border-b-current" />
+      </div>
+
+      <svg
+        viewBox="0 0 320 320"
+        className="size-full overflow-visible"
+        role="img"
+        aria-labelledby="qibla-dial-title qibla-dial-description"
+      >
+        <title id="qibla-dial-title">Qibla compass</title>
+        <desc id="qibla-dial-description">
+          Qibla is {bearing.toFixed(1)} degrees from north
+          {dynamic && deviceHeading !== null
+            ? ` and the device is heading ${deviceHeading.toFixed(0)} degrees`
+            : ''}
+          .
+        </desc>
+
+        <circle cx="160" cy="160" r="151" fill="rgba(255,255,255,0.018)" />
+        <circle cx="160" cy="160" r="151" fill="none" stroke="currentColor" strokeOpacity="0.26" />
+        <circle cx="160" cy="160" r="137" fill="none" stroke="currentColor" strokeOpacity="0.12" />
+
+        <g
+          className="motion-reduce:transition-none"
+          style={{
+            transform: `rotate(${dialRotation}deg)`,
+            transformBox: 'view-box',
+            transformOrigin: 'center',
+            transition: dynamic ? 'transform 140ms cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
+          }}
+        >
+          {Array.from({ length: 72 }, (_, index) => {
+            const isCardinal = index % 18 === 0
+            const isMajor = index % 6 === 0
+            const isMedium = index % 2 === 0
+            const innerY = isCardinal ? 23 : isMajor ? 26 : isMedium ? 29 : 32
+            return (
+              <line
+                key={index}
+                x1="160"
+                y1="13"
+                x2="160"
+                y2={innerY}
+                transform={`rotate(${index * 5} 160 160)`}
+                stroke="currentColor"
+                strokeWidth={isCardinal ? 1.8 : isMajor ? 1.25 : 0.75}
+                strokeOpacity={isCardinal ? 0.82 : isMajor ? 0.52 : 0.22}
+              />
+            )
+          })}
+
+          <text x="160" y="51" textAnchor="middle" fill="currentColor" fontSize="16" fontWeight="700">N</text>
+          <text x="269" y="166" textAnchor="middle" fill="currentColor" fillOpacity="0.7" fontSize="14" fontWeight="600">E</text>
+          <text x="160" y="280" textAnchor="middle" fill="currentColor" fillOpacity="0.7" fontSize="14" fontWeight="600">S</text>
+          <text x="51" y="166" textAnchor="middle" fill="currentColor" fillOpacity="0.7" fontSize="14" fontWeight="600">W</text>
+        </g>
+
+        <g
+          className="motion-reduce:transition-none"
+          style={{
+            transform: `rotate(${rotation}deg)`,
+            transformBox: 'view-box',
+            transformOrigin: 'center',
+            transition: dynamic ? 'transform 140ms cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
+          }}
+          data-testid="qibla-indicator"
+        >
+          <path
+            d="M160 160V70"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={aligned ? 4 : 3}
+            strokeLinecap="round"
+            className="text-gold transition-[stroke-width]"
+          />
+          <path d="m160 49-12 24h24Z" fill="currentColor" className="text-gold" />
+          <g transform="translate(148 25)">
+            <rect width="24" height="24" rx="3" fill="currentColor" className="text-surface-feature-foreground" />
+            <path d="M0 7h24v4H0z" fill="currentColor" className="text-gold" />
+            <path d="M6 15h5v9H6z" fill="currentColor" className="text-surface-feature" />
+          </g>
+        </g>
+
+        <circle
+          cx="160"
+          cy="160"
+          r={aligned ? 14 : 11}
+          fill="currentColor"
+          className={aligned ? 'text-gold' : 'text-surface-feature-foreground'}
+        />
+        <circle cx="160" cy="160" r="4" fill="currentColor" className="text-surface-feature" />
+        {aligned && (
+          <circle cx="160" cy="160" r="22" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-gold" />
+        )}
+      </svg>
+    </div>
+  )
+}
+
+export function QiblaCompass({
+  qiblaDirection,
+  locationLabel,
+  loading,
+  error,
+}: QiblaCompassProps) {
   const [mode, setMode] = useState<CompassMode>('static')
   const [deviceHeading, setDeviceHeading] = useState<number | null>(null)
   const [accuracy, setAccuracy] = useState<number | null>(null)
@@ -31,382 +216,208 @@ export function QiblaCompass({ qiblaDirection, loading, error }: QiblaCompassPro
   const [isEnabling, setIsEnabling] = useState(false)
   const [isMobile] = useState(() => isMobileDevice())
   const [hasOrientation] = useState(() => hasOrientationSupport())
+  const [displayRotation, setDisplayRotation] = useState(qiblaDirection?.direction ?? 0)
+  const wasAlignedRef = useRef(false)
+  const lastHapticAtRef = useRef(0)
 
-  // Check if dynamic compass is available
   const canUseDynamicCompass = isMobile && hasOrientation
+  const bearing = qiblaDirection?.direction ?? 0
 
-  // Enable dynamic compass
   const handleEnableDynamic = useCallback(async () => {
     if (!canUseDynamicCompass) return
 
     setIsEnabling(true)
-
     try {
-      // iOS 13+ (both Safari and WKWebView/native) requires explicit permission for
-      // DeviceOrientationEvent. needsOrientationPermission() checks for this correctly
-      // on all platforms — native iOS WKWebView behaves identically to Safari here.
-      // Android and desktop never require this permission.
       if (needsOrientationPermission()) {
         const permissionStatus = await requestOrientationPermission()
         setPermission(permissionStatus)
-
-        if (permissionStatus !== 'granted') {
-          setIsEnabling(false)
-          return
-        }
+        if (permissionStatus !== 'granted') return
       } else {
         setPermission('not-required')
       }
-
-      // Enable dynamic mode
       setMode('dynamic')
-    } catch (error) {
-      console.error('[QiblaCompass] Failed to enable dynamic compass:', error)
+    } catch (enableError) {
+      console.error('[QiblaCompass] Failed to enable dynamic compass:', enableError)
       setPermission('denied')
     } finally {
       setIsEnabling(false)
     }
   }, [canUseDynamicCompass])
 
-  // Toggle between static and dynamic modes
   const handleToggleMode = useCallback(() => {
     if (mode === 'static') {
-      handleEnableDynamic()
+      void handleEnableDynamic()
     } else {
       setMode('static')
       setDeviceHeading(null)
       setAccuracy(null)
+      setDisplayRotation(bearing)
     }
-  }, [mode, handleEnableDynamic])
+  }, [bearing, handleEnableDynamic, mode])
 
-  // Handle keyboard events for mode toggle
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      handleToggleMode()
-    }
-  }, [handleToggleMode])
-
-  // Start/stop orientation tracking based on mode
   useEffect(() => {
-    if (mode === 'dynamic' && canUseDynamicCompass) {
-      const cleanup = startOrientationTracking((heading: DeviceHeading) => {
-        setDeviceHeading(heading.alpha)
-        setAccuracy(heading.accuracy)
-      })
+    if (mode !== 'dynamic' || !canUseDynamicCompass) return
 
-      return cleanup
+    return startOrientationTracking((heading: DeviceHeading) => {
+      setDeviceHeading(heading.alpha)
+      setAccuracy(heading.accuracy)
+      setDisplayRotation((previous) => closestEquivalentAngle(bearing - heading.alpha, previous))
+    })
+  }, [bearing, canUseDynamicCompass, mode])
+
+  const aligned =
+    mode === 'dynamic' &&
+    deviceHeading !== null &&
+    qiblaDirection !== null &&
+    angularDistance(qiblaDirection.direction, deviceHeading) <= ALIGNMENT_TOLERANCE
+
+  useEffect(() => {
+    if (aligned && !wasAlignedRef.current) {
+      const now = Date.now()
+      if (now - lastHapticAtRef.current >= ALIGNMENT_HAPTIC_COOLDOWN_MS) {
+        lastHapticAtRef.current = now
+        void triggerQiblaAlignmentHaptic()
+      }
     }
-  }, [mode, canUseDynamicCompass])
+    wasAlignedRef.current = aligned
+  }, [aligned])
 
-  // Calculate if compass is aligned with Qibla (±5 degrees)
-  const isAligned = useCallback((): boolean => {
-    if (mode !== 'dynamic' || deviceHeading === null || !qiblaDirection) {
-      return false
-    }
-
-    const diff = Math.abs(qiblaDirection.direction - deviceHeading)
-    const normalizedDiff = Math.min(diff, 360 - diff)
-    return normalizedDiff <= 5
-  }, [mode, deviceHeading, qiblaDirection])
-
-  // Calculate rotation angle for compass
-  const getRotation = useCallback((): number => {
-    if (!qiblaDirection) return 0
-
-    const qiblaBearing = qiblaDirection.direction
-
-    if (mode === 'dynamic' && deviceHeading !== null) {
-      // Dynamic mode: rotate based on device heading
-      // Compass rotates counter to device rotation to keep Qibla arrow pointing at fixed bearing
-      return qiblaBearing - deviceHeading
-    }
-
-    // Static mode: rotate to absolute bearing
-    return qiblaBearing
-  }, [mode, deviceHeading, qiblaDirection])
-
-  // Loading state
   if (loading) {
     return (
-      <Card className="rounded-3xl shadow-lg bg-slate-900 text-white border-slate-800">
-        <CardHeader className="pb-3">
-          <div>
-            <CardTitle className="text-lg font-bold text-white">
-              Qibla Direction
-            </CardTitle>
-            <p className="text-xs text-white/60 mt-0.5">
-              Loading...
-            </p>
-          </div>
-        </CardHeader>
-        <CardContent className="py-8">
-          <div className="flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-white/60" />
-          </div>
-        </CardContent>
-      </Card>
+      <section className="surface-feature relative isolate min-h-[31rem] overflow-hidden p-5 sm:p-6" aria-labelledby="qibla-heading" aria-busy="true">
+        <CompassTexture />
+        <div className="relative flex items-center justify-between">
+          <h2 id="qibla-heading" className="type-section-title text-surface-feature-foreground">Qibla</h2>
+          <Compass className="size-5 text-surface-feature-muted" aria-hidden="true" />
+        </div>
+        <div className="relative flex min-h-[24rem] flex-col items-center justify-center gap-4" role="status">
+          <Loader2 className="size-7 animate-spin text-surface-feature-muted" aria-hidden="true" />
+          <p className="type-body-secondary text-surface-feature-muted">Calculating direction…</p>
+        </div>
+      </section>
     )
   }
 
-  // Error state
   if (error || !qiblaDirection) {
     return (
-      <Card className="rounded-3xl shadow-lg bg-slate-900 text-white border-slate-800">
-        <CardHeader className="pb-3">
-          <div>
-            <CardTitle className="text-lg font-bold text-white">
-              Qibla Direction
-            </CardTitle>
-            <p className="text-xs text-white/60 mt-0.5">
-              Unable to load
-            </p>
+      <section className="surface-feature relative isolate min-h-[25rem] overflow-hidden p-5 sm:p-6" aria-labelledby="qibla-heading" aria-live="polite">
+        <CompassTexture />
+        <div className="relative flex items-center justify-between">
+          <h2 id="qibla-heading" className="type-section-title text-surface-feature-foreground">Qibla</h2>
+          <Compass className="size-5 text-surface-feature-muted" aria-hidden="true" />
+        </div>
+        <div className="relative flex min-h-[18rem] flex-col items-center justify-center text-center">
+          <div className="flex size-12 items-center justify-center rounded-grouped bg-white/[0.07]">
+            <LocateFixed className="size-5 text-surface-feature-muted" aria-hidden="true" />
           </div>
-        </CardHeader>
-        <CardContent className="py-8">
-          <div className="flex flex-col items-center justify-center gap-2">
-            <Compass className="h-12 w-12 text-white/40" />
-            <p className="text-sm text-white/60 text-center">
-              {error || 'Unable to determine direction'}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+          <h3 className="type-section-title mt-5 text-surface-feature-foreground">Direction unavailable</h3>
+          <p className="type-body-secondary mt-2 max-w-[30ch] text-surface-feature-muted">
+            {error || 'We couldn’t calculate the Qibla direction. Check your location settings and try again.'}
+          </p>
+        </div>
+      </section>
     )
   }
 
-  const bearing = qiblaDirection.direction
   const compassDirection =
-    (qiblaDirection as any).compassDirection ||
-    ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round(bearing / 45) % 8]
-
-  const rotation = getRotation()
-  const aligned = isAligned()
+    (qiblaDirection as QiblaData & { compassDirection?: string }).compassDirection ||
+    COMPASS_DIRECTIONS[Math.round(bearing / 45) % 8]
   const showLowAccuracy = accuracy !== null && isLowAccuracy(accuracy)
+  const rotation = mode === 'dynamic' ? displayRotation : bearing
+  const currentHeadingLabel = deviceHeading === null ? null : `${deviceHeading.toFixed(0)}°`
 
   return (
-    <Card className="rounded-3xl shadow-lg bg-slate-900 text-white border-slate-800 relative overflow-hidden">
-      {/* Background glow effect */}
-      <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full blur-3xl" />
-      
-      <CardHeader className="pb-3 relative z-10">
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-lg font-bold text-white">
-              Qibla Direction
-            </CardTitle>
-            <p className="text-xs text-white/60 mt-0.5">
-              Facing Kaaba: {bearing.toFixed(1)}° {compassDirection}
-            </p>
-          </div>
-          <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
-            <Compass className="h-6 w-6 text-white" />
-          </div>
+    <section
+      className={`surface-feature relative isolate overflow-hidden bg-[radial-gradient(circle_at_50%_38%,rgba(255,255,255,0.055),transparent_46%)] p-5 sm:p-6 ${aligned ? 'ring-1 ring-inset ring-gold/45' : ''}`}
+      aria-labelledby="qibla-heading"
+    >
+      <CompassTexture />
+
+      <div className="relative flex items-start justify-between gap-4">
+        <div>
+          <h2 id="qibla-heading" className="type-section-title text-surface-feature-foreground">Qibla</h2>
+          <p className="type-caption mt-1 text-surface-feature-muted">Direction to Makkah</p>
         </div>
-      </CardHeader>
-      <CardContent className="flex flex-col items-center py-6 relative z-10">
-        {/* Permission Denied Message */}
-        {canUseDynamicCompass && permission === 'denied' && mode === 'static' && (
-          <div className="mb-4 p-3 bg-white/10 border border-white/20 rounded-lg">
-            <p className="text-xs text-white/80 text-center">
-              Device orientation permission denied. Using static compass.
-            </p>
-          </div>
-        )}
-
-        {/* Low Accuracy Warning */}
-        {mode === 'dynamic' && showLowAccuracy && (
-          <div className="mb-4 flex items-center gap-2 p-2 bg-white/10 border border-white/20 rounded-lg">
-            <AlertTriangle className="h-4 w-4 text-yellow-400 flex-shrink-0" />
-            <p className="text-xs text-white/80">
-              Low compass accuracy ({accuracy?.toFixed(0)}°). Calibrate by moving phone in figure-8 motion.
-            </p>
-          </div>
-        )}
-
-        {/* Mode Indicator */}
-        {mode === 'dynamic' && (
-          <div className="mb-3 space-y-2">
-            <div className="flex items-center gap-2 text-xs text-white/60" role="status" aria-live="polite">
-              <div className={`w-2 h-2 rounded-full ${aligned ? 'bg-green-400 animate-pulse' : 'bg-blue-400'}`} aria-hidden="true" />
-              <span>{aligned ? 'Aligned with Qibla' : 'Tracking device orientation'}</span>
-            </div>
-            <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg" role="note">
-              <span className="text-base" aria-hidden="true">📱</span>
-              <span className="text-xs font-medium text-white/80">
-                Hold phone flat for best results
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Compass Container */}
-        <div className="relative w-48 h-48 md:w-56 md:h-56">
-          {/* Compass Circle */}
-          <svg
-            viewBox="0 0 200 200"
-            className="w-full h-full"
-          >
-            {/* Outer circle */}
-            <circle
-              cx="100"
-              cy="100"
-              r="95"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="text-white/30"
-            />
-
-            {/* Inner circle */}
-            <circle
-              cx="100"
-              cy="100"
-              r="85"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1"
-              className="text-white/20"
-            />
-
-            {/* Cardinal directions markers */}
-            {/* N */}
-            <line
-              x1="100"
-              y1="10"
-              x2="100"
-              y2="25"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="text-white"
-            />
-            {/* E */}
-            <line
-              x1="190"
-              y1="100"
-              x2="175"
-              y2="100"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="text-white/60"
-            />
-            {/* S */}
-            <line
-              x1="100"
-              y1="190"
-              x2="100"
-              y2="175"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="text-white/60"
-            />
-            {/* W */}
-            <line
-              x1="10"
-              y1="100"
-              x2="25"
-              y2="100"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="text-white/60"
-            />
-
-            {/* Qibla Arrow - rotated to bearing angle */}
-            <g 
-              transform={`rotate(${rotation}, 100, 100)`}
-              style={{ 
-                transition: mode === 'dynamic' ? 'transform 0.3s ease-out' : 'none',
-              }}
-            >
-              {/* Arrow shaft */}
-              <line
-                x1="100"
-                y1="100"
-                x2="100"
-                y2="35"
-                stroke="currentColor"
-                strokeWidth="3"
-                className={aligned ? 'text-green-400' : 'text-blue-400'}
-              />
-              {/* Arrow head */}
-              <polygon
-                points="100,25 90,45 110,45"
-                fill="currentColor"
-                className={aligned ? 'text-green-400' : 'text-blue-400'}
-              />
-              {/* Arrow tail (small circle) */}
-              <circle 
-                cx="100" 
-                cy="100" 
-                r="5" 
-                fill="currentColor" 
-                className={aligned ? 'text-green-400' : 'text-blue-400'}
-              />
-            </g>
-          </svg>
-
-          {/* Direction labels - different for static vs dynamic mode */}
-          {mode === 'static' ? (
-            <>
-              {/* Static mode: Show cardinal directions (N, E, S, W) */}
-              <div className="absolute top-1 left-1/2 -translate-x-1/2 text-xs font-semibold text-white">
-                N
-              </div>
-              <div className="absolute right-1 top-1/2 -translate-y-1/2 text-xs font-medium text-white/60">
-                E
-              </div>
-              <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-xs font-medium text-white/60">
-                S
-              </div>
-              <div className="absolute left-1 top-1/2 -translate-y-1/2 text-xs font-medium text-white/60">
-                W
-              </div>
-            </>
-          ) : (
-            <>
-              {/* Dynamic mode: Show Qibla icon at top (target to align with) */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 text-2xl">
-                🕋
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Bearing Information */}
-        <div className="mt-4 text-center space-y-1">
-          <p className="text-2xl font-bold text-white" aria-live="polite" aria-atomic="true">
-            {bearing.toFixed(1)}° {compassDirection}
+        <div className="text-right">
+          <p className="text-2xl font-semibold leading-none tracking-[-0.025em] tabular-nums text-surface-feature-foreground sm:text-[1.75rem]">
+            {bearing.toFixed(1)}° <span className="text-gold">{compassDirection}</span>
           </p>
-          <p className="text-xs text-white/60">Direction to Mecca</p>
+          {currentHeadingLabel && <p className="type-caption mt-1 text-surface-feature-muted">Heading {currentHeadingLabel}</p>}
         </div>
+      </div>
 
-        {/* Toggle Mode Button */}
+      <div className="relative mt-6 flex justify-center sm:mt-8">
+        <CompassDial bearing={bearing} rotation={rotation} deviceHeading={deviceHeading} dynamic={mode === 'dynamic'} aligned={aligned} />
+      </div>
+
+      <div className="relative mt-5 min-h-12 text-center" aria-live="polite" aria-atomic="true">
+        {aligned ? (
+          <div className="inline-flex items-center gap-2 text-surface-feature-foreground">
+            <span className="flex size-6 items-center justify-center rounded-full bg-gold text-surface-feature">
+              <Check className="size-4" strokeWidth={2.5} aria-hidden="true" />
+            </span>
+            <span className="font-semibold">Facing Qibla</span>
+          </div>
+        ) : mode === 'dynamic' ? (
+          <div className="space-y-1">
+            <p className="inline-flex items-center gap-2 font-medium text-surface-feature-foreground">
+              <Navigation className="size-4 text-gold" aria-hidden="true" />
+              Turn until the Qibla marker reaches the top
+            </p>
+            <p className="type-caption text-surface-feature-muted">Hold your phone flat and away from magnets</p>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center gap-5 type-caption text-surface-feature-muted">
+            <span className="inline-flex items-center gap-1.5"><span className="size-2 rotate-45 bg-gold" aria-hidden="true" />Qibla direction</span>
+            <span className="inline-flex items-center gap-1.5"><span className="h-0 w-0 border-x-4 border-b-[7px] border-x-transparent border-b-current" aria-hidden="true" />Device direction</span>
+          </div>
+        )}
+      </div>
+
+      {(permission === 'denied' || showLowAccuracy) && (
+        <div className="relative mt-4 flex items-start gap-3 border-t border-white/10 pt-4" role={showLowAccuracy ? 'status' : 'note'}>
+          {showLowAccuracy ? <RotateCw className="mt-0.5 size-4 shrink-0 text-gold" aria-hidden="true" /> : <AlertTriangle className="mt-0.5 size-4 shrink-0 text-gold" aria-hidden="true" />}
+          <p className="type-caption text-surface-feature-muted">
+            {showLowAccuracy
+              ? `Compass accuracy is low${accuracy === null ? '' : ` (${accuracy.toFixed(0)}°)`}. Move your phone in a figure-eight to calibrate.`
+              : 'Motion access was denied. The bearing remains available as a manual compass.'}
+          </p>
+        </div>
+      )}
+
+      {!canUseDynamicCompass && (
+        <div className="relative mt-4 flex items-start gap-3 border-t border-white/10 pt-4" role="note">
+          <Compass className="mt-0.5 size-4 shrink-0 text-gold" aria-hidden="true" />
+          <p className="type-caption text-surface-feature-muted">Live compass isn’t available on this device. Use the bearing with your device’s north direction.</p>
+        </div>
+      )}
+
+      <div className="relative mt-5 flex flex-col gap-3 border-t border-white/10 pt-5">
+        {locationLabel && (
+          <div className="flex min-w-0 items-center justify-center gap-2 type-caption text-surface-feature-muted">
+            <MapPin className="size-4 shrink-0" aria-hidden="true" />
+            <span>Calculated from <span className="font-semibold text-surface-feature-foreground">{locationLabel}</span></span>
+          </div>
+        )}
+
         {canUseDynamicCompass && (
           <Button
             onClick={handleToggleMode}
-            onKeyDown={handleKeyDown}
             disabled={isEnabling}
             variant="ghost"
-            className="w-full mt-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-sm font-bold transition-all backdrop-blur-sm"
-            aria-label={mode === 'dynamic' ? 'Switch to static compass mode' : 'Switch to dynamic compass mode'}
+            className="min-h-touch w-full rounded-control bg-white/[0.08] px-4 text-sm font-semibold text-surface-feature-foreground hover:bg-white/[0.14] hover:text-surface-feature-foreground focus-visible:ring-2 focus-visible:ring-gold disabled:text-surface-feature-muted"
+            aria-label={mode === 'dynamic' ? 'Switch to manual Qibla bearing' : 'Use live device compass'}
           >
             {isEnabling ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ENABLING...
-              </>
+              <><Loader2 className="size-4 animate-spin" aria-hidden="true" />Enabling compass…</>
             ) : mode === 'dynamic' ? (
-              'SWITCH TO STATIC MODE'
+              'Use manual bearing'
             ) : (
-              <>
-                <Navigation className="mr-2 h-4 w-4" />
-                ENABLE DYNAMIC COMPASS
-              </>
+              <><Navigation className="size-4" aria-hidden="true" />Use live compass</>
             )}
           </Button>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }
-
