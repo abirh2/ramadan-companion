@@ -23,14 +23,17 @@ export default async function SurahPage({ params, searchParams }: PageProps) {
     notFound()
   }
 
-  const initialAyah = resolvedSearchParams.ayah ? parseInt(resolvedSearchParams.ayah) : undefined
+  // Pass the raw `ayah` query param through so the reader can validate it
+  // against the surah's ayah count (deep-link out-of-range handling). Only an
+  // invalid surah triggers notFound(); a bad ayah opens the reader at ayah 1.
+  const ayahParam = resolvedSearchParams.ayah
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
       <SurahReader 
         surahNumber={surahNumber} 
         surahMetadata={surahMetadata}
-        initialAyah={initialAyah}
+        ayahParam={ayahParam}
       />
     </div>
   )

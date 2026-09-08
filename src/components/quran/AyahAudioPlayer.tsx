@@ -9,7 +9,8 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Play, Pause, Volume2, Loader2 } from 'lucide-react'
+import { Play, Pause, Loader2, AlertCircle, Loader } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { getAyahAudioUrl } from '@/lib/quranAudio'
 import type { QuranReciterId } from '@/types/quran.types'
 
@@ -101,47 +102,63 @@ export function AyahAudioPlayer({ globalAyahNumber, reciter, className }: AyahAu
     }
   }
 
+  // Shared visual treatment matching the ayah action group: an icon toggle
+  // with a 44x44 touch target. State is conveyed by icon plus accessible text,
+  // never by color alone, and never by flashing/high-motion animation.
+  const targetClasses = 'min-h-11 min-w-11'
+
   if (hasError) {
     return (
       <Button
-        variant="outline"
-        size="sm"
+        type="button"
+        variant="ghost"
+        size="icon"
         disabled
-        className={className}
+        className={cn(targetClasses, 'text-destructive', className)}
         title="Audio unavailable"
         aria-label="Audio unavailable"
       >
-        <Volume2 className="h-4 w-4 mr-2 text-muted-foreground" aria-hidden="true" />
-        Audio Error
+        <AlertCircle className="h-4 w-4" aria-hidden="true" />
+        <span className="sr-only">Audio unavailable</span>
       </Button>
     )
   }
 
+  const label = isLoading
+    ? 'Loading recitation'
+    : isPlaying
+      ? 'Pause recitation'
+      : 'Play recitation'
+
   return (
     <Button
-      variant="outline"
-      size="sm"
+      type="button"
+      variant="ghost"
+      size="icon"
       onClick={togglePlay}
       disabled={isLoading}
-      className={className}
-      aria-label={isPlaying ? 'Pause recitation' : 'Play recitation'}
+      className={cn(targetClasses, className)}
+      title={label}
+      aria-label={label}
     >
       {isLoading ? (
         <>
-          <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
-          Loading...
+          {/* Animated spinner for motion; static indicator under reduced-motion */}
+          <Loader2
+            className="h-4 w-4 animate-spin motion-reduce:hidden"
+            aria-hidden="true"
+          />
+          <Loader
+            className="hidden h-4 w-4 motion-reduce:block"
+            aria-hidden="true"
+          />
         </>
       ) : isPlaying ? (
-        <>
-          <Pause className="h-4 w-4 mr-2" aria-hidden="true" />
-          Pause
-        </>
+        <Pause className="h-4 w-4" aria-hidden="true" />
       ) : (
-        <>
-          <Play className="h-4 w-4 mr-2" aria-hidden="true" />
-          Listen
-        </>
+        <Play className="h-4 w-4" aria-hidden="true" />
       )}
+      <span className="sr-only">{label}</span>
     </Button>
   )
 }

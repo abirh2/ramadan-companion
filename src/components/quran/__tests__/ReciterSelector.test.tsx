@@ -1,7 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { userEvent } from '@testing-library/user-event'
 import { ReciterSelector } from '../ReciterSelector'
-import type { QuranReciterId } from '@/types/quran.types'
 
 describe('ReciterSelector', () => {
   const mockOnReciterChange = jest.fn()
