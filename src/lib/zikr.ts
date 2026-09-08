@@ -1,6 +1,6 @@
 import type { ZikrPhrase, ZikrState, ZikrFeedbackPreferences } from '@/types/zikr.types'
 import { Capacitor } from '@capacitor/core'
-import { Haptics, ImpactStyle } from '@capacitor/haptics'
+import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics'
 
 /**
  * Standard zikr phrases with default targets
@@ -254,15 +254,18 @@ export function playClickSound(): void {
  * - Native apps: Uses Capacitor Haptics plugin for native Taptic Engine/vibration
  * - Browser/PWA: Uses navigator.vibrate API
  */
-export async function triggerHapticFeedback(): Promise<void> {
+export async function triggerHapticFeedback(kind: 'increment' | 'completion' = 'increment'): Promise<void> {
   try {
     if (Capacitor.isNativePlatform()) {
-      // Native: Use Capacitor Haptics plugin for better tactile feedback
-      await Haptics.impact({ style: ImpactStyle.Light })
+      if (kind === 'completion') {
+        await Haptics.notification({ type: NotificationType.Success })
+      } else {
+        await Haptics.impact({ style: ImpactStyle.Light })
+      }
     } else {
       // Browser: Use Web Vibration API
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        navigator.vibrate(10) // 10ms pulse
+        navigator.vibrate(kind === 'completion' ? 24 : 8)
       }
     }
   } catch (error) {
@@ -270,4 +273,3 @@ export async function triggerHapticFeedback(): Promise<void> {
     console.debug('Haptic feedback failed:', error)
   }
 }
-

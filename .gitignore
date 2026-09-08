@@ -63,6 +63,7 @@ public/social-previews/
 .cursor/*
 .gemini/*
 .kiro/*
+/graphify-out/*
 
 # Capacitor generated files (keep these in git for now)
 # Uncomment later if you want to exclude them:

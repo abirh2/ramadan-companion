@@ -1,9 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowLeft, RotateCcw, Volume2, VolumeX, Smartphone } from 'lucide-react'
+import { ArrowLeft, Loader2, Moon, RotateCcw, Smartphone, Volume2, VolumeX } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { ZikrCounter } from '@/components/zikr/ZikrCounter'
 import { ZikrPhraseSelector } from '@/components/zikr/ZikrPhraseSelector'
 import { DuaList } from '@/components/zikr/DuaList'
@@ -28,52 +27,30 @@ export default function ZikrPage() {
     loading,
   } = useZikr()
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
-        <div className="mb-6">
-          <Link 
-            href="/" 
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-3"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span className="text-sm">Back to Home</span>
-          </Link>
-          <h1 className="text-3xl font-bold">Zikr & Duas</h1>
-        </div>
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center text-muted-foreground">Loading...</div>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="container mx-auto px-4 py-6 max-w-4xl space-y-8">
-      <div className="mb-6">
-        <Link 
-          href="/" 
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-3"
+    <div className="container mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-8">
+      <header className="mb-6">
+        <Link
+          href="/"
+          className="mb-3 inline-flex min-h-11 items-center gap-2 text-text-secondary transition-colors hover:text-text-primary"
+          aria-label="Navigate back to homepage"
         >
-          <ArrowLeft className="h-4 w-4" />
-          <span className="text-sm">Back to Home</span>
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          <span className="type-nav">Back to Home</span>
         </Link>
-        <h1 className="text-3xl font-bold">Zikr & Duas</h1>
-        <p className="text-muted-foreground mt-2">Keep count of your daily zikr and dhikr</p>
-      </div>
+        <h1 className="type-page-title text-text-primary">Zikr</h1>
+      </header>
 
-      {/* Content */}
-        {/* Zikr Counter Section */}
-        <section className="space-y-4">
-          <div className="text-center">
-            <h2 className="text-2xl font-semibold mb-2">Tasbeeh Counter</h2>
-            <p className="text-sm text-muted-foreground">
-              Keep count of your daily zikr and dhikr
-            </p>
+      {loading ? (
+        <div className="flex min-h-[32rem] items-center justify-center" role="status" aria-live="polite">
+          <div className="space-y-3 text-center">
+            <Loader2 className="mx-auto h-9 w-9 animate-spin text-teal" aria-hidden="true" />
+            <p className="type-body-secondary text-text-secondary">Preparing your counter…</p>
           </div>
-
-          {/* Counter */}
-          <div className="max-w-md mx-auto">
+        </div>
+      ) : (
+        <>
+          <section className="mx-auto max-w-2xl" aria-label="Zikr counter">
             <ZikrCounter
               count={state.count}
               target={state.target}
@@ -82,114 +59,77 @@ export default function ZikrPage() {
               currentPhrase={currentPhrase}
               onIncrement={increment}
             />
-          </div>
 
-          {/* Phrase Selector */}
-          <div className="max-w-md mx-auto">
-            <ZikrPhraseSelector
-              phrases={phrases}
-              currentPhraseId={state.phraseId}
-              currentTarget={state.target}
-              onSelectPhrase={selectPhrase}
-              onSetTarget={setTarget}
-            />
-          </div>
+            <div className="mt-4">
+              <ZikrPhraseSelector
+                phrases={phrases}
+                currentPhraseId={state.phraseId}
+                currentTarget={state.target}
+                onSelectPhrase={selectPhrase}
+                onSetTarget={setTarget}
+              />
+            </div>
 
-          {/* Controls */}
-          <div className="max-w-md mx-auto">
-            <Card className="rounded-2xl border shadow-sm p-4">
-              <div className="space-y-3">
-                {/* Reset Button */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={reset}
-                  disabled={state.count === 0}
-                  className="w-full"
-                >
-                  <RotateCcw className="w-4 h-4 mr-2" />
-                  Reset Counter
-                </Button>
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-1" aria-label="Counter preferences">
+              <Button variant="ghost" onClick={reset} disabled={state.count === 0} className="min-h-11 text-text-secondary">
+                <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                Reset
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={toggleAudioFeedback}
+                aria-pressed={feedbackPrefs.audioEnabled}
+                className="min-h-11 text-text-secondary"
+              >
+                {feedbackPrefs.audioEnabled ? (
+                  <Volume2 className="h-4 w-4" aria-hidden="true" />
+                ) : (
+                  <VolumeX className="h-4 w-4" aria-hidden="true" />
+                )}
+                Sound {feedbackPrefs.audioEnabled ? 'on' : 'off'}
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={toggleHapticFeedback}
+                aria-pressed={feedbackPrefs.hapticEnabled}
+                className="min-h-11 text-text-secondary"
+              >
+                <Smartphone className="h-4 w-4" aria-hidden="true" />
+                Haptics {feedbackPrefs.hapticEnabled ? 'on' : 'off'}
+              </Button>
+            </div>
 
-                {/* Feedback Toggles */}
-                <div className="flex gap-2">
-                  <Button
-                    variant={feedbackPrefs.audioEnabled ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={toggleAudioFeedback}
-                    className="flex-1"
-                  >
-                    {feedbackPrefs.audioEnabled ? (
-                      <Volume2 className="w-4 h-4 mr-2" />
-                    ) : (
-                      <VolumeX className="w-4 h-4 mr-2" />
-                    )}
-                    Sound
-                  </Button>
-                  <Button
-                    variant={feedbackPrefs.hapticEnabled ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={toggleHapticFeedback}
-                    className="flex-1"
-                  >
-                    <Smartphone className="w-4 h-4 mr-2" />
-                    Vibration
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          </div>
+            <div className="mt-4 flex items-start justify-center gap-2 px-3 text-text-tertiary">
+              <Moon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              <p className="type-caption max-w-md text-center">
+                Your count resets at Fajr, marking the start of a new Islamic day.
+              </p>
+            </div>
+          </section>
 
-          {/* Fajr Reset Explanation */}
-          <div className="max-w-md mx-auto">
-            <Card className="rounded-xl border border-muted bg-muted/20 p-4">
-              <div className="flex gap-3">
-                <div className="text-2xl">🌙</div>
-                <div className="flex-1 space-y-1">
-                  <h3 className="text-sm font-medium">Daily Reset at Fajr</h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Your counter automatically resets at Fajr prayer time, marking the beginning
-                    of a new Islamic day. This follows the traditional Islamic day boundary.
-                  </p>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </section>
+          <div className="my-10 border-t border-border-subtle" />
 
-        {/* Divider */}
-        <div className="border-t" />
+          <section className="space-y-6" aria-labelledby="duas-title">
+            <div className="text-center">
+              <h2 id="duas-title" className="type-section-title mx-auto text-text-primary">Essential Duas</h2>
+              <p className="type-body-secondary mt-2 text-text-secondary">Daily supplications for various occasions</p>
+            </div>
+            <DuaList />
+          </section>
 
-        {/* Duas Section */}
-        <section className="space-y-6">
-          <div className="text-center">
-            <h2 className="text-2xl font-semibold mb-2">Essential Duas</h2>
-            <p className="text-sm text-muted-foreground">
-              Daily supplications for various occasions
-            </p>
-          </div>
+          <div className="my-10 border-t border-border-subtle" />
 
-          <DuaList />
-        </section>
+          <section className="space-y-6" aria-labelledby="names-title">
+            <div className="text-center">
+              <h2 id="names-title" className="type-section-title mx-auto text-text-primary">99 Names of Allah</h2>
+              <p className="type-body-secondary mt-2 text-text-secondary">Asma ul-Husna — The Most Beautiful Names</p>
+            </div>
+            <AsmaAlHusnaList />
+          </section>
+        </>
+      )}
 
-        {/* Divider */}
-        <div className="border-t" />
-
-        {/* 99 Names of Allah Section */}
-        <section className="space-y-6">
-          <div className="text-center">
-            <h2 className="text-2xl font-semibold mb-2">99 Names of Allah</h2>
-            <p className="text-sm text-muted-foreground">
-              Asma ul-Husna — The Most Beautiful Names
-            </p>
-          </div>
-
-          <AsmaAlHusnaList />
-        </section>
-
-      {/* Feedback Button */}
       <FeedbackButton pagePath="/zikr" />
     </div>
   )
 }
-

@@ -40,12 +40,12 @@ interface UseZikrResult {
 }
 
 export function useZikr(): UseZikrResult {
-  const { prayerTimes } = usePrayerTimes()
+  const { prayerTimes, loading: prayerTimesLoading } = usePrayerTimes()
   const [state, setState] = useState<ZikrState>(() => {
     const initialState = loadZikrState()
-    // Check for Fajr reset on initial load
-    const fajrTime = null // Will be checked after prayer times load
-    if (fajrTime && shouldResetForFajr(initialState.lastResetDate, fajrTime)) {
+    // Keep the counter local-first. The date fallback prevents a stale count
+    // offline; the exact Fajr boundary is reconciled when prayer times arrive.
+    if (shouldResetForFajr(initialState.lastResetDate, null)) {
       const resetState = resetZikrCounter(initialState)
       saveZikrState(resetState)
       return resetState
@@ -53,7 +53,7 @@ export function useZikr(): UseZikrResult {
     return initialState
   })
   const [feedbackPrefs, setFeedbackPrefs] = useState<ZikrFeedbackPreferences>(() => loadFeedbackPreferences())
-  const [loading, setLoading] = useState(true)
+  const loading = false
   const hasCheckedResetRef = useRef(false)
 
   // Get current phrase details
@@ -66,21 +66,24 @@ export function useZikr(): UseZikrResult {
 
   // Check for Fajr reset when prayer times become available
   useEffect(() => {
-    if (hasCheckedResetRef.current || !prayerTimes) {
+    if (hasCheckedResetRef.current || prayerTimesLoading) {
       return
     }
 
-    const fajrTime = prayerTimes.Fajr || null
+    // A missing prayer-time result must not block this local-first feature.
+    // shouldResetForFajr intentionally falls back to the calendar date.
+    const fajrTime = prayerTimes?.Fajr || null
     
     if (shouldResetForFajr(state.lastResetDate, fajrTime)) {
       const resetState = resetZikrCounter(state)
+      // This effect reconciles persisted state after async prayer times arrive.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setState(resetState)
       saveZikrState(resetState)
     }
 
     hasCheckedResetRef.current = true
-    setLoading(false)
-  }, [prayerTimes, state, state.lastResetDate])
+  }, [prayerTimes, prayerTimesLoading, state, state.lastResetDate])
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
@@ -125,6 +128,9 @@ export function useZikr(): UseZikrResult {
 
   // Increment counter
   const increment = useCallback(() => {
+    const completesTarget =
+      state.target !== null && state.count < state.target && state.count + 1 >= state.target
+
     setState((prev) => ({
       ...prev,
       count: prev.count + 1,
@@ -135,9 +141,9 @@ export function useZikr(): UseZikrResult {
       playClickSound()
     }
     if (feedbackPrefs.hapticEnabled) {
-      triggerHapticFeedback()
+      triggerHapticFeedback(completesTarget ? 'completion' : 'increment')
     }
-  }, [feedbackPrefs])
+  }, [feedbackPrefs, state.count, state.target])
 
   // Reset counter
   const reset = useCallback(() => {
@@ -205,4 +211,3 @@ export function useZikr(): UseZikrResult {
     loading,
   }
 }
-
