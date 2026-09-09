@@ -24,7 +24,7 @@ export function ReaderHeader({ bookSlug, chapterNumber, bookNameDisplay }: Reade
     <header className="mb-4 border-b border-border-subtle pb-4">
       <Link
         href={`/hadith/${bookSlug}`}
-        className="mb-3 inline-flex items-center gap-2 text-secondary transition-colors hover:text-primary"
+        className="mb-3 inline-flex items-center gap-2 text-text-secondary transition-colors hover:text-teal"
         aria-label="Navigate back to chapters"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
@@ -33,9 +33,9 @@ export function ReaderHeader({ bookSlug, chapterNumber, bookNameDisplay }: Reade
 
       {/* Breadcrumb — activatable links to the Hadith Browser and Chapter Browser */}
       <nav aria-label="Breadcrumb" className="mb-3">
-        <ol className="type-eyebrow flex items-center gap-2 text-tertiary">
+        <ol className="type-eyebrow flex items-center gap-2 text-text-tertiary">
           <li>
-            <Link href="/hadith" className="transition-colors hover:text-primary">
+            <Link href="/hadith" className="transition-colors hover:text-teal">
               Hadith
             </Link>
           </li>
@@ -43,7 +43,7 @@ export function ReaderHeader({ bookSlug, chapterNumber, bookNameDisplay }: Reade
           <li>
             <Link
               href={`/hadith/${bookSlug}`}
-              className="transition-colors hover:text-primary"
+              className="transition-colors hover:text-teal"
             >
               {collectionName || bookNameDisplay}
             </Link>
@@ -56,7 +56,7 @@ export function ReaderHeader({ bookSlug, chapterNumber, bookNameDisplay }: Reade
           omitted with no placeholder, error box, or layout gap. */}
       {collectionName && <h1 className="type-page-title">{collectionName}</h1>}
       {chapterTitle && (
-        <p className="mt-1 type-section-title text-secondary">{chapterTitle}</p>
+        <p className="mt-1 type-section-title text-text-secondary">{chapterTitle}</p>
       )}
     </header>
   )

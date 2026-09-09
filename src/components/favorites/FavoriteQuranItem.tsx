@@ -123,7 +123,7 @@ export function FavoriteQuranItem({ favorite, onRemove }: FavoriteQuranItemProps
               className="flex-shrink-0"
             >
               {copiedArabic ? (
-                <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <Check className="h-4 w-4 text-success" />
               ) : (
                 <Copy className="h-4 w-4" />
               )}
@@ -148,7 +148,7 @@ export function FavoriteQuranItem({ favorite, onRemove }: FavoriteQuranItemProps
                 className="flex-shrink-0"
               >
                 {copiedTranslation ? (
-                  <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  <Check className="h-4 w-4 text-success" />
                 ) : (
                   <Copy className="h-4 w-4" />
                 )}
@@ -190,4 +190,3 @@ export function FavoriteQuranItem({ favorite, onRemove }: FavoriteQuranItemProps
     </Card>
   )
 }
-

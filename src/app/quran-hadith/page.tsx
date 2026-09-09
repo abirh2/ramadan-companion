@@ -244,11 +244,11 @@ function QuranHadithContent() {
   const getStatusColor = (statusValue: string) => {
     switch (statusValue) {
       case 'Sahih':
-        return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20'
+        return 'bg-success-muted text-success'
       case 'Hasan':
-        return 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+        return 'bg-teal-muted text-teal'
       case "Da'eef":
-        return 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20'
+        return 'bg-warning-muted text-warning'
       default:
         return 'text-muted-foreground bg-muted'
     }
@@ -308,7 +308,7 @@ function QuranHadithContent() {
                   }}
                 >
                   <Heart 
-                    className={`h-4 w-4 ${isFavorited ? 'fill-current text-red-500' : ''}`} 
+                    className={`h-4 w-4 ${isFavorited ? 'fill-current text-destructive' : ''}`}
                   />
                 </Button>
               </div>
@@ -351,7 +351,7 @@ function QuranHadithContent() {
                       className="mt-1 flex-shrink-0"
                     >
                       {copiedQuranArabic ? (
-                        <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        <Check className="h-4 w-4 text-success" />
                       ) : (
                         <Copy className="h-4 w-4" />
                       )}
@@ -379,7 +379,7 @@ function QuranHadithContent() {
                       className="flex-shrink-0"
                     >
                       {copiedQuranTranslation ? (
-                        <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        <Check className="h-4 w-4 text-success" />
                       ) : (
                         <Copy className="h-4 w-4" />
                       )}
@@ -421,7 +421,7 @@ function QuranHadithContent() {
 
                 {/* Share Success Message */}
                 {shareSuccess && (
-                  <div className="text-center text-sm text-green-600 dark:text-green-400">
+                  <div className="text-center text-sm text-success">
                     ✓ Copied to clipboard
                   </div>
                 )}
@@ -469,7 +469,7 @@ function QuranHadithContent() {
                   }}
                 >
                   <Heart
-                    className={`h-4 w-4 ${isHadithFavorited ? 'fill-current text-red-500' : ''}`}
+                    className={`h-4 w-4 ${isHadithFavorited ? 'fill-current text-destructive' : ''}`}
                   />
                 </Button>
               </div>
@@ -512,7 +512,7 @@ function QuranHadithContent() {
                       className="mt-1 flex-shrink-0"
                     >
                       {copiedHadithArabic ? (
-                        <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        <Check className="h-4 w-4 text-success" />
                       ) : (
                         <Copy className="h-4 w-4" />
                       )}
@@ -540,7 +540,7 @@ function QuranHadithContent() {
                       className="flex-shrink-0"
                     >
                       {copiedHadithEnglish ? (
-                        <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        <Check className="h-4 w-4 text-success" />
                       ) : (
                         <Copy className="h-4 w-4" />
                       )}
@@ -600,7 +600,7 @@ function QuranHadithContent() {
 
                 {/* Share Success Message */}
                 {hadithShareSuccess && (
-                  <div className="text-center text-sm text-green-600 dark:text-green-400">
+                  <div className="text-center text-sm text-success">
                     ✓ Copied to clipboard
                   </div>
                 )}

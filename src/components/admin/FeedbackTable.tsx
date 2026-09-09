@@ -156,12 +156,12 @@ export function FeedbackTable({ feedback, onUpdate }: FeedbackTableProps) {
               {/* Type badge */}
               <div className="shrink-0">
                 {item.feedback_type === 'problem' ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs text-red-700">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-destructive-muted px-2 py-0.5 text-xs text-destructive">
                     <AlertCircle className="h-3 w-3" />
                     Problem
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-700">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-teal-muted px-2 py-0.5 text-xs text-teal">
                     <MessageSquare className="h-3 w-3" />
                     Suggestion
                   </span>
@@ -335,4 +335,3 @@ export function FeedbackTable({ feedback, onUpdate }: FeedbackTableProps) {
     </div>
   )
 }
-

@@ -68,13 +68,13 @@ export function WeeklyStatsCard({ statistics, loading, isAuthenticated }: Weekly
                 <span className="flex items-center text-xs font-normal">
                   {trendDiff > 0 ? (
                     <>
-                      <TrendingUp className="h-3 w-3 text-green-500 mr-0.5" />
-                      <span className="text-green-500">+{trendDiff.toFixed(0)}%</span>
+                      <TrendingUp className="mr-0.5 h-3 w-3 text-success" />
+                      <span className="text-success">+{trendDiff.toFixed(0)}%</span>
                     </>
                   ) : trendDiff < 0 ? (
                     <>
-                      <TrendingDown className="h-3 w-3 text-red-500 mr-0.5" />
-                      <span className="text-red-500">{trendDiff.toFixed(0)}%</span>
+                      <TrendingDown className="mr-0.5 h-3 w-3 text-destructive" />
+                      <span className="text-destructive">{trendDiff.toFixed(0)}%</span>
                     </>
                   ) : (
                     <>

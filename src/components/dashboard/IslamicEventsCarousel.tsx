@@ -94,7 +94,8 @@ function GenericEventCard({ event }: { event: IslamicEventWithCountdown }) {
 
   return (
     <Card
-      className="rounded-3xl shadow-lg bg-primary text-primary-foreground border-0 relative overflow-hidden"
+      variant="feature"
+      className="relative overflow-hidden"
       role="article"
       aria-label={
         isOngoing
@@ -170,12 +171,10 @@ function RamadanEventCard() {
     )
   }
 
-  const bgClass = 'rounded-3xl shadow-lg bg-primary text-primary-foreground border-0 relative overflow-hidden'
-
   // Before Ramadan
   if (!countdown.isRamadan) {
     return (
-      <Card className={bgClass} role="article">
+      <Card variant="feature" className="relative overflow-hidden" role="article">
         <div className="absolute top-0 right-0 p-4 opacity-10" aria-hidden="true">
           <Moon className="h-16 w-16" />
         </div>
@@ -206,7 +205,7 @@ function RamadanEventCard() {
 
   // During Ramadan
   return (
-    <Card className={bgClass} role="article">
+    <Card variant="feature" className="relative overflow-hidden" role="article">
       <div className="absolute top-0 right-0 p-4 opacity-10" aria-hidden="true">
         <Moon className="h-16 w-16" />
       </div>

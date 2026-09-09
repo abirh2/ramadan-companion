@@ -71,7 +71,7 @@ export function QuranCard() {
                 title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
               >
                 <Heart 
-                  className={`h-3.5 w-3.5 ${isFavorited ? 'fill-current text-red-500' : ''}`}
+                  className={`h-3.5 w-3.5 ${isFavorited ? 'fill-current text-destructive' : ''}`}
                   aria-hidden="true"
                 />
                 <span className="sr-only">
@@ -123,4 +123,3 @@ export function QuranCard() {
     </>
   )
 }
-

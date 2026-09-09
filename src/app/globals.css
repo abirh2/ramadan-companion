@@ -43,6 +43,7 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-destructive-muted: var(--destructive-muted);
+  --color-overlay-scrim: var(--overlay-scrim);
 
   /* shadcn compatibility: old roles now resolve through the semantic system */
   --color-background: var(--background);
@@ -179,7 +180,7 @@
   --teal-hover: oklch(0.29 0.06 190);
   --teal-pressed: oklch(0.26 0.055 190);
   --teal-muted: oklch(0.90 0.028 190);
-  --gold: oklch(0.56 0.08 75);
+  --gold: oklch(0.54 0.08 75);
   --gold-muted: oklch(0.92 0.03 78);
 
   /* Semantic status colors */
@@ -192,6 +193,7 @@
   --destructive: oklch(0.50 0.17 25);
   --destructive-foreground: oklch(0.985 0.006 82);
   --destructive-muted: oklch(0.93 0.035 25);
+  --overlay-scrim: rgb(22 31 30 / 0.44);
 
   /* Ambient shadows; most surfaces use none. */
   --elevation-hairline: inset 0 -1px 0 rgb(22 47 46 / 0.08);
@@ -249,11 +251,11 @@
   --surface-elevated: oklch(0.27 0.024 225);
   --surface-feature: oklch(0.30 0.045 195);
   --surface-feature-foreground: oklch(0.93 0.012 80);
-  --surface-feature-muted: oklch(0.76 0.014 80);
+  --surface-feature-muted: oklch(0.80 0.014 80);
 
   --text-primary: oklch(0.93 0.012 80);
-  --text-secondary: oklch(0.76 0.014 80);
-  --text-tertiary: oklch(0.67 0.014 80);
+  --text-secondary: oklch(0.79 0.014 80);
+  --text-tertiary: oklch(0.72 0.014 80);
 
   --border-subtle: oklch(0.31 0.022 225);
   --border-strong: oklch(0.42 0.025 225);
@@ -274,6 +276,7 @@
   --destructive: oklch(0.70 0.15 25);
   --destructive-foreground: var(--canvas);
   --destructive-muted: oklch(0.29 0.045 25);
+  --overlay-scrim: rgb(0 5 8 / 0.68);
 
   --elevation-hairline: inset 0 -1px 0 rgb(169 206 202 / 0.08);
   --elevation-low:

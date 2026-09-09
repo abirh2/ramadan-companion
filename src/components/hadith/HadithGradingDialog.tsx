@@ -28,7 +28,7 @@ export function HadithGradingDialog({ open, onOpenChange }: HadithGradingDialogP
           {/* Sahih - Authentic */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="text-xs px-2 py-1 rounded-full font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+              <span className="rounded-full bg-success-muted px-2 py-1 text-xs font-medium text-success">
                 Sahih
               </span>
               <span className="text-sm font-semibold">صحيح - Authentic</span>
@@ -43,7 +43,7 @@ export function HadithGradingDialog({ open, onOpenChange }: HadithGradingDialogP
           {/* Hasan - Good */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="text-xs px-2 py-1 rounded-full font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+              <span className="rounded-full bg-teal-muted px-2 py-1 text-xs font-medium text-teal">
                 Hasan
               </span>
               <span className="text-sm font-semibold">حسن - Good</span>
@@ -58,7 +58,7 @@ export function HadithGradingDialog({ open, onOpenChange }: HadithGradingDialogP
           {/* Da'eef - Weak */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="text-xs px-2 py-1 rounded-full font-medium bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300">
+              <span className="rounded-full bg-warning-muted px-2 py-1 text-xs font-medium text-warning">
                 Da&apos;eef
               </span>
               <span className="text-sm font-semibold">ضعيف - Weak</span>
@@ -84,4 +84,3 @@ export function HadithGradingDialog({ open, onOpenChange }: HadithGradingDialogP
     </Dialog>
   )
 }
-

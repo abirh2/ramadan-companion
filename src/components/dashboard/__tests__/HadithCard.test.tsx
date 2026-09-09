@@ -153,6 +153,6 @@ describe('HadithCard', () => {
     render(<HadithCard />)
 
     const statusBadge = screen.getByText('Sahih')
-    expect(statusBadge).toHaveClass('text-green-600')
+    expect(statusBadge).toHaveClass('text-success')
   })
 })

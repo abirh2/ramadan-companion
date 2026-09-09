@@ -37,13 +37,13 @@ const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
 ]
 
 const COLORS = {
-  completed: 'hsl(142 76% 36%)', // Green for completed
-  incomplete: 'hsl(240 5% 65%)', // Gray for incomplete
-  Fajr: 'hsl(217 91% 60%)', // Blue
-  Dhuhr: 'hsl(142 76% 36%)', // Green
-  Asr: 'hsl(38 92% 50%)', // Orange
-  Maghrib: 'hsl(0 84% 60%)', // Red
-  Isha: 'hsl(271 91% 65%)', // Purple
+  completed: 'var(--success)',
+  incomplete: 'var(--text-tertiary)',
+  Fajr: 'var(--chart-4)',
+  Dhuhr: 'var(--success)',
+  Asr: 'var(--gold)',
+  Maghrib: 'var(--destructive)',
+  Isha: 'var(--teal)',
 }
 
 // Helper function to calculate account age in days
@@ -171,25 +171,25 @@ export function PrayerStatistics({
 
           {/* Account Age Progress Indicator */}
           {showProgressIndicator && accountAgeDays !== null && accountAgeDays > 0 && (
-            <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 space-y-3">
+            <div className="space-y-3 rounded-grouped border border-border-subtle bg-teal-muted p-4">
               <div className="flex items-start gap-3">
-                <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                <TrendingUp className="mt-0.5 h-5 w-5 text-teal" />
                 <div className="flex-1 space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                    <p className="text-sm font-medium text-text-primary">
                       Building your history...
                     </p>
-                    <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+                    <span className="text-sm font-semibold text-teal">
                       {accountAgeDays}/{timeRangeDays} days
                     </span>
                   </div>
-                  <div className="w-full bg-blue-200 dark:bg-blue-900 rounded-full h-2">
+                  <div className="h-2 w-full rounded-full bg-surface-elevated">
                     <div
-                      className="bg-blue-600 dark:bg-blue-400 h-2 rounded-full transition-all"
+                      className="h-2 rounded-full bg-teal transition-all"
                       style={{ width: `${progressPercentage}%` }}
                     />
                   </div>
-                  <p className="text-xs text-blue-700 dark:text-blue-300">
+                  <p className="text-xs text-text-secondary">
                     Keep marking your prayers to unlock full {TIME_RANGE_OPTIONS.find(o => o.value === timeRange)?.label.toLowerCase()} insights! ({progressPercentage}% complete)
                   </p>
                 </div>

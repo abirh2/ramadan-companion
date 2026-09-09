@@ -136,7 +136,7 @@ export function SurahReader({ surahNumber, surahMetadata, ayahParam }: SurahRead
   if (loading) {
     return (
       <div className="text-center py-12">
-        <p className="type-body text-secondary">Loading surah...</p>
+        <p className="type-body text-text-secondary">Loading surah...</p>
       </div>
     )
   }

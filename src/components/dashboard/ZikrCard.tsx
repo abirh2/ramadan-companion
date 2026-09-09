@@ -46,7 +46,7 @@ export function ZikrCard() {
             <div>
               <p className="text-sm font-semibold text-muted-foreground mb-1">{currentPhrase.transliteration}</p>
               <div className="flex items-baseline gap-1">
-                <span className={`text-4xl font-bold ${isGoalReached ? 'text-green-600' : ''}`} aria-live="polite" aria-atomic="true">
+                <span className={`text-4xl font-bold ${isGoalReached ? 'text-success' : ''}`} aria-live="polite" aria-atomic="true">
                   {state.count}
                 </span>
                 {hasTarget && <span className="text-xl text-muted-foreground" aria-label={`of ${state.target}`}> / {state.target}</span>}
@@ -76,7 +76,7 @@ export function ZikrCard() {
               >
                 <div
                   className={`h-full transition-all duration-500 ${
-                    isGoalReached ? 'bg-green-500' : 'bg-primary'
+                    isGoalReached ? 'bg-success' : 'bg-primary'
                   }`}
                   style={{ width: `${Math.min(progress, 100)}%` }}
                 />
@@ -91,4 +91,3 @@ export function ZikrCard() {
     </Link>
   )
 }
-

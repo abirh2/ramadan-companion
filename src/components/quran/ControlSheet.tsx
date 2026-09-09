@@ -62,7 +62,7 @@ class ControlSheetBoundary extends Component<
   render() {
     if (this.state.hasError) {
       return (
-        <p role="alert" className="text-sm text-tertiary">
+        <p role="alert" className="text-sm text-text-tertiary">
           Reading settings could not be shown. Your current selections are
           unchanged.
         </p>

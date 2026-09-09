@@ -98,7 +98,7 @@ export function LocationSearch({ onLocationSelect, currentLocation }: LocationSe
               onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
               onBlur={handleBlur}
               placeholder="Search for a city or address..."
-              className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              className="h-11 w-full rounded-control border border-border-strong bg-surface-primary py-2 pl-10 pr-4 text-text-primary placeholder:text-text-tertiary focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/35"
             />
             {searching && (
               <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground animate-spin" />
@@ -107,12 +107,12 @@ export function LocationSearch({ onLocationSelect, currentLocation }: LocationSe
 
           {/* Suggestions dropdown */}
           {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border rounded-md shadow-lg max-h-60 overflow-y-auto">
+            <div className="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-grouped border border-border-subtle bg-surface-elevated text-text-primary shadow-low">
               {suggestions.map((suggestion, index) => (
                 <button
                   key={index}
                   onClick={() => handleSuggestionClick(suggestion)}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm border-b last:border-b-0"
+                  className="min-h-11 w-full border-b border-border-subtle px-4 py-2 text-left text-sm transition-colors last:border-b-0 hover:bg-teal-muted focus-visible:bg-teal-muted"
                 >
                   {suggestion.displayName}
                 </button>
@@ -144,4 +144,3 @@ export function LocationSearch({ onLocationSelect, currentLocation }: LocationSe
     </div>
   )
 }
-

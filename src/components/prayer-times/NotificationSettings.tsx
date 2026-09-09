@@ -123,7 +123,7 @@ export function NotificationSettings() {
     return (
       <Card className="p-6">
         <div className="flex items-start gap-3">
-          <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
+          <AlertCircle className="mt-0.5 h-5 w-5 text-warning" />
           <div className="flex-1">
             <h3 className="font-semibold text-sm">Notifications Blocked</h3>
             <p className="text-sm text-muted-foreground mt-1">
@@ -294,11 +294,11 @@ export function NotificationSettings() {
 
         {/* iOS PWA reminder - only for browser, not native app */}
         {isIOS() && !Capacitor.isNativePlatform() && preferences.enabled && (
-          <div className="flex items-start gap-2 text-xs text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/20 p-3 rounded-md border border-blue-200 dark:border-blue-900">
+          <div className="flex items-start gap-2 rounded-control border border-border-subtle bg-teal-muted p-3 text-xs text-teal">
             <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
             <div className="space-y-1">
               <p className="font-medium">iOS Tip</p>
-              <p className="text-blue-600 dark:text-blue-300">
+              <p className="text-teal">
                 For best results on iOS, <strong>install this app to your home screen</strong> using Safari's "Add to Home Screen" feature. Notifications will work even when the app is closed.
               </p>
             </div>
@@ -307,7 +307,7 @@ export function NotificationSettings() {
 
         {/* Error display */}
         {error && (
-          <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 dark:bg-red-950/20 p-3 rounded-md">
+          <div className="flex items-center gap-2 rounded-control bg-destructive-muted p-3 text-sm text-destructive">
             <AlertCircle className="h-4 w-4 flex-shrink-0" />
             <p>{error}</p>
           </div>
@@ -316,4 +316,3 @@ export function NotificationSettings() {
     </Card>
   )
 }
-

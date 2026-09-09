@@ -92,11 +92,11 @@ export function FavoriteHadithItem({ favorite, onRemove }: FavoriteHadithItemPro
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Sahih':
-        return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20'
+        return 'bg-success-muted text-success'
       case 'Hasan':
-        return 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+        return 'bg-teal-muted text-teal'
       case "Da'eef":
-        return 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20'
+        return 'bg-warning-muted text-warning'
       default:
         return 'text-muted-foreground bg-muted'
     }
@@ -131,7 +131,7 @@ export function FavoriteHadithItem({ favorite, onRemove }: FavoriteHadithItemPro
             className="flex-shrink-0"
           >
             {copiedArabic ? (
-              <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <Check className="h-4 w-4 text-success" />
             ) : (
               <Copy className="h-4 w-4" />
             )}
@@ -159,7 +159,7 @@ export function FavoriteHadithItem({ favorite, onRemove }: FavoriteHadithItemPro
               className="flex-shrink-0"
             >
               {copiedEnglish ? (
-                <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <Check className="h-4 w-4 text-success" />
               ) : (
                 <Copy className="h-4 w-4" />
               )}
@@ -206,4 +206,3 @@ export function FavoriteHadithItem({ favorite, onRemove }: FavoriteHadithItemPro
     </Card>
   )
 }
-

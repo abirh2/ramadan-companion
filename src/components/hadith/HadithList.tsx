@@ -57,7 +57,7 @@ export function HadithList({ bookSlug, chapterNumber }: HadithListProps) {
     return (
       <div className="py-12 text-center">
         <div className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-border-subtle border-t-primary" />
-        <p className="mt-4 text-secondary">Loading hadiths...</p>
+        <p className="mt-4 text-text-secondary">Loading hadiths...</p>
       </div>
     )
   }
@@ -78,7 +78,7 @@ export function HadithList({ bookSlug, chapterNumber }: HadithListProps) {
   if (hadiths.length === 0) {
     return (
       <div className="py-12 text-center">
-        <p className="text-secondary">No hadiths found in this chapter</p>
+        <p className="text-text-secondary">No hadiths found in this chapter</p>
       </div>
     )
   }

@@ -24,7 +24,7 @@ export function ChapterSelector({ bookSlug }: ChapterSelectorProps) {
     return (
       <div className="py-12 text-center">
         <div className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-border-subtle border-t-primary" />
-        <p className="mt-4 text-secondary">Loading chapters...</p>
+        <p className="mt-4 text-text-secondary">Loading chapters...</p>
       </div>
     )
   }
@@ -32,10 +32,10 @@ export function ChapterSelector({ bookSlug }: ChapterSelectorProps) {
   if (error) {
     return (
       <div className="py-12 text-center">
-        <p className="type-section-title mb-1 text-primary">
+        <p className="type-section-title mb-1 text-text-primary">
           Chapters could not be loaded
         </p>
-        <p className="mb-4 text-sm text-secondary">{error}</p>
+        <p className="mb-4 text-sm text-text-secondary">{error}</p>
         <Button variant="outline" onClick={() => refetch()}>
           Retry
         </Button>
@@ -49,7 +49,7 @@ export function ChapterSelector({ bookSlug }: ChapterSelectorProps) {
       <div className="sticky top-0 z-10 -mx-1 bg-canvas px-1 py-2">
         <div className="relative mx-auto w-full max-w-md">
           <Search
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-tertiary"
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary"
             aria-hidden="true"
           />
           <Input
@@ -66,7 +66,7 @@ export function ChapterSelector({ bookSlug }: ChapterSelectorProps) {
       {/* Chapter List */}
       {filteredChapters.length === 0 && searchQuery ? (
         <div className="py-12 text-center">
-          <p className="text-secondary">
+          <p className="text-text-secondary">
             No chapters found matching &quot;{searchQuery}&quot;
           </p>
         </div>

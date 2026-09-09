@@ -24,7 +24,7 @@ export function PrayerCheckbox({
       aria-label={`Mark ${prayerName} as ${completed ? 'incomplete' : 'completed'}`}
     >
       {completed ? (
-        <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-500" />
+        <CheckCircle2 className="h-5 w-5 text-success" />
       ) : (
         <Circle className="h-5 w-5 text-muted-foreground" />
       )}
@@ -56,4 +56,3 @@ export function PrayerCompletionSummary({ todayCompletion }: PrayerCompletionSum
     </div>
   )
 }
-

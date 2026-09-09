@@ -132,7 +132,7 @@ export default function ProfilePage() {
               {message && (
                 <p
                   className={`text-sm ${
-                    message.type === 'success' ? 'text-green-600' : 'text-destructive'
+                    message.type === 'success' ? 'text-success' : 'text-destructive'
                   }`}
                 >
                   {message.text}

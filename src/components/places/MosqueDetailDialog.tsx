@@ -76,7 +76,7 @@ export function MosqueDetailDialog({
                   title="Copy address"
                 >
                   {copied ? (
-                    <CheckCircle className="h-3.5 w-3.5 text-green-600" />
+                    <CheckCircle className="h-3.5 w-3.5 text-success" />
                   ) : (
                     <Copy className="h-3.5 w-3.5" />
                   )}
@@ -156,4 +156,3 @@ export function MosqueDetailDialog({
     </Dialog>
   )
 }
-

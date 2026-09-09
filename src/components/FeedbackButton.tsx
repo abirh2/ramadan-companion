@@ -122,7 +122,7 @@ export function FeedbackButton({ pagePath, presentation = 'footer' }: FeedbackBu
 
           {success ? (
             <div className="py-8 text-center space-y-4" role="status" aria-live="polite">
-              <CheckCircle className="h-12 w-12 mx-auto text-green-600 dark:text-green-400" aria-hidden="true" />
+              <CheckCircle className="mx-auto h-12 w-12 text-success" aria-hidden="true" />
               <div>
                 <p className="text-lg font-semibold">Thank you!</p>
                 <p className="text-sm text-muted-foreground">

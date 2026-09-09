@@ -32,12 +32,12 @@ export function CollectionRow({ book }: CollectionRowProps) {
     >
       {/* Collection name + writer + optional death year */}
       <span className="min-w-0 flex-1">
-        <span className="type-nav block text-primary">{book.bookName}</span>
-        <span className="mt-0.5 block text-sm text-secondary">
+        <span className="type-nav block text-teal">{book.bookName}</span>
+        <span className="mt-0.5 block text-sm text-text-secondary">
           {book.writerName}
         </span>
         {hasDeathYear && (
-          <span className="type-eyebrow mt-0.5 block text-tertiary">
+          <span className="type-eyebrow mt-0.5 block text-text-tertiary">
             d. {book.writerDeath}
           </span>
         )}
@@ -45,7 +45,7 @@ export function CollectionRow({ book }: CollectionRowProps) {
 
       {/* Trailing chevron — onward navigation affordance */}
       <ChevronRight
-        className="h-4 w-4 flex-shrink-0 text-tertiary"
+        className="h-4 w-4 flex-shrink-0 text-text-tertiary"
         aria-hidden="true"
       />
     </Link>

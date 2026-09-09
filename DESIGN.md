@@ -12,7 +12,7 @@ colors:
   feature-dark: "oklch(0.30 0.045 195)"
   teal: "oklch(0.32 0.065 190)"
   teal-dark: "oklch(0.72 0.085 185)"
-  brass: "oklch(0.56 0.08 75)"
+  brass: "oklch(0.54 0.08 75)"
   brass-dark: "oklch(0.73 0.075 80)"
   ink: "oklch(0.20 0.018 75)"
   warm-white: "oklch(0.93 0.012 80)"

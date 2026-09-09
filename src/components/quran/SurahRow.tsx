@@ -33,31 +33,31 @@ export function SurahRow({ surah, bookmark, isFavorited }: SurahRowProps) {
       )}
     >
       {/* Leading quiet Surah number — no filled circle */}
-      <span className="type-eyebrow w-8 flex-shrink-0 text-tertiary tabular-nums">
+      <span className="type-eyebrow w-8 flex-shrink-0 text-text-tertiary tabular-nums">
         {surah.number}
       </span>
 
       {/* Names + metadata */}
       <span className="min-w-0 flex-1">
         <span className="flex items-baseline gap-2 flex-wrap">
-          <span className="type-nav text-primary">{surah.englishName}</span>
-          <span className="text-sm text-secondary">
+          <span className="type-nav text-teal">{surah.englishName}</span>
+          <span className="text-sm text-text-secondary">
             {surah.englishNameTranslation}
           </span>
         </span>
-        <span className="mt-0.5 flex items-center gap-2 text-xs text-tertiary">
+        <span className="mt-0.5 flex items-center gap-2 text-xs text-text-tertiary">
           <span>
             {surah.revelationType} · {surah.numberOfAyahs} Ayahs
           </span>
           {isFavorited && (
             <Star
-              className="h-3 w-3 fill-current text-tertiary"
+              className="h-3 w-3 fill-current text-text-tertiary"
               aria-label="Favorited"
             />
           )}
           {bookmark && (
             <Bookmark
-              className="h-3 w-3 fill-current text-tertiary"
+              className="h-3 w-3 fill-current text-text-tertiary"
               aria-label="Bookmarked"
             />
           )}
@@ -67,7 +67,7 @@ export function SurahRow({ surah, bookmark, isFavorited }: SurahRowProps) {
       {/* Trailing Arabic name — omitted entirely (no reserved space) when empty */}
       {hasArabicName && (
         <span
-          className="type-arabic flex-shrink-0 text-primary"
+          className="type-arabic flex-shrink-0 text-teal"
           dir="rtl"
           lang="ar"
         >

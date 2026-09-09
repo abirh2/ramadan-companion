@@ -82,11 +82,11 @@ export function ListViewAccordion({ donations, onEdit, onDelete, viewMode, prefe
   const getTypeBadgeClass = (type: string) => {
     switch (type) {
       case 'zakat':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+        return 'bg-success-muted text-success'
       case 'sadaqah':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+        return 'bg-teal-muted text-teal'
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+        return 'bg-surface-grouped text-text-secondary'
     }
   }
 
@@ -219,4 +219,3 @@ export function ListViewAccordion({ donations, onEdit, onDelete, viewMode, prefe
     </div>
   )
 }
-

@@ -361,7 +361,7 @@ function AboutContent() {
                     <li>Tap <strong className="text-foreground">"Add"</strong> in the top right corner</li>
                     <li>The app icon will appear on your home screen</li>
                   </ol>
-                  <p className="text-xs text-amber-600 dark:text-amber-500 mt-3">
+                  <p className="mt-3 text-xs text-warning">
                     Note: Installation must be done through Safari browser. Other browsers on iOS don't support app installation.
                   </p>
                 </div>
@@ -462,7 +462,7 @@ function AboutContent() {
                       <p className="text-xs text-muted-foreground mb-1">
                         Prayer times, Hijri calendar, and Qibla direction calculations
                       </p>
-                      <p className="text-xs text-amber-600 dark:text-amber-500">
+                      <p className="text-xs text-warning">
                         ⚠ Community-driven. Accuracy varies by region. Always verify with local mosque.
                       </p>
                     </div>
@@ -471,7 +471,7 @@ function AboutContent() {
                       <p className="text-xs text-muted-foreground mb-1">
                         Quran text and translations in multiple languages
                       </p>
-                      <p className="text-xs text-amber-600 dark:text-amber-500">
+                      <p className="text-xs text-warning">
                         ⚠ Translations are interpretations. Consult qualified scholars for detailed understanding.
                       </p>
                     </div>
@@ -480,7 +480,7 @@ function AboutContent() {
                       <p className="text-xs text-muted-foreground mb-1">
                         Authentic hadith collections (Sahih Bukhari & Sahih Muslim) with English translations
                       </p>
-                      <p className="text-xs text-amber-600 dark:text-amber-500">
+                      <p className="text-xs text-warning">
                         ⚠ Check authentication grades and chains. Verify with Islamic scholars when needed.
                       </p>
                     </div>
@@ -489,7 +489,7 @@ function AboutContent() {
                       <p className="text-xs text-muted-foreground mb-1">
                         Mosque locations and facility information
                       </p>
-                      <p className="text-xs text-amber-600 dark:text-amber-500">
+                      <p className="text-xs text-warning">
                         ⚠ Community-contributed data. May be incomplete or outdated. Verify hours and locations.
                       </p>
                     </div>
@@ -498,7 +498,7 @@ function AboutContent() {
                       <p className="text-xs text-muted-foreground mb-1">
                         Geocoding and address search services
                       </p>
-                      <p className="text-xs text-amber-600 dark:text-amber-500">
+                      <p className="text-xs text-warning">
                         ⚠ Volunteer-run infrastructure with rate limits. Service availability may vary.
                       </p>
                     </div>
@@ -507,7 +507,7 @@ function AboutContent() {
                       <p className="text-xs text-muted-foreground mb-1">
                         Halal food and restaurant location data
                       </p>
-                      <p className="text-xs text-amber-600 dark:text-amber-500">
+                      <p className="text-xs text-warning">
                         ⚠ Community-contributed data. Always verify with the establishment before visiting.
                       </p>
                     </div>
@@ -516,7 +516,7 @@ function AboutContent() {
                       <p className="text-xs text-muted-foreground mb-1">
                         Tafsir commentary resources in multiple languages
                       </p>
-                      <p className="text-xs text-amber-600 dark:text-amber-500">
+                      <p className="text-xs text-warning">
                         ⚠ Tafsir interpretations vary by scholar and school of thought. Consult qualified scholars.
                       </p>
                     </div>
@@ -598,28 +598,28 @@ function AboutContent() {
                   <h3 className="font-semibold mb-3">Important Disclaimers</h3>
                   <div className="space-y-2 text-sm text-muted-foreground">
                     <p className="flex items-start gap-2">
-                      <span className="text-amber-600 dark:text-amber-500 mt-1">⚠</span>
+                      <span className="mt-1 text-warning">⚠</span>
                       <span>
                         <strong className="text-foreground">Prayer Times:</strong> Calculated mathematically using established methods. 
                         Always verify with your local mosque or Islamic center for the most accurate times.
                       </span>
                     </p>
                     <p className="flex items-start gap-2">
-                      <span className="text-amber-600 dark:text-amber-500 mt-1">⚠</span>
+                      <span className="mt-1 text-warning">⚠</span>
                       <span>
                         <strong className="text-foreground">Religious Content:</strong> Quran translations and hadith interpretations 
                         are provided for convenience. For detailed understanding and religious rulings, always consult qualified scholars.
                       </span>
                     </p>
                     <p className="flex items-start gap-2">
-                      <span className="text-amber-600 dark:text-amber-500 mt-1">⚠</span>
+                      <span className="mt-1 text-warning">⚠</span>
                       <span>
                         <strong className="text-foreground">Location Data:</strong> Mosque and restaurant information is community-contributed. 
                         Always verify operating hours, prayer times, and locations before visiting.
                       </span>
                     </p>
                     <p className="flex items-start gap-2">
-                      <span className="text-amber-600 dark:text-amber-500 mt-1">⚠</span>
+                      <span className="mt-1 text-warning">⚠</span>
                       <span>
                         <strong className="text-foreground">Use at Your Own Discretion:</strong> This app is provided as-is for 
                         informational and organizational purposes. The developer is not responsible for any decisions made based on 

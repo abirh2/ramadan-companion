@@ -21,7 +21,7 @@ export function ChapterList({ chapters, bookSlug }: ChapterListProps) {
   if (chapters.length === 0) {
     return (
       <div className="py-12 text-center">
-        <p className="text-secondary">No chapters found</p>
+        <p className="text-text-secondary">No chapters found</p>
       </div>
     )
   }

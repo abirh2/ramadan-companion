@@ -82,8 +82,8 @@ export function ReadingControlsBar({
             className="min-h-[44px]"
             aria-label={`Translation: ${translationName(translation)}. Change translation`}
           >
-            <span className="text-tertiary">Translation:</span>
-            <span className="font-medium text-primary">
+            <span className="text-text-tertiary">Translation:</span>
+            <span className="font-medium text-teal">
               {translationName(translation)}
             </span>
           </Button>
@@ -107,8 +107,8 @@ export function ReadingControlsBar({
             className="min-h-[44px]"
             aria-label={`Reciter: ${reciterName(reciter)}. Change reciter`}
           >
-            <span className="text-tertiary">Reciter:</span>
-            <span className="font-medium text-primary">
+            <span className="text-text-tertiary">Reciter:</span>
+            <span className="font-medium text-teal">
               {reciterName(reciter)}
             </span>
           </Button>

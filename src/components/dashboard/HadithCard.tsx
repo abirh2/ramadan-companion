@@ -86,11 +86,11 @@ export function HadithCard() {
   const getStatusColor = (statusValue: string) => {
     switch (statusValue) {
       case 'Sahih':
-        return 'text-green-600 dark:text-green-400'
+        return 'text-success'
       case 'Hasan':
-        return 'text-blue-600 dark:text-blue-400'
+        return 'text-teal'
       case "Da'eef":
-        return 'text-amber-600 dark:text-amber-400'
+        return 'text-warning'
       default:
         return 'text-muted-foreground'
     }
@@ -123,7 +123,7 @@ export function HadithCard() {
                 aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
                 title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
               >
-                <Heart className={`h-3.5 w-3.5 ${isFavorited ? 'fill-current text-red-500' : ''}`} aria-hidden="true" />
+                <Heart className={`h-3.5 w-3.5 ${isFavorited ? 'fill-current text-destructive' : ''}`} aria-hidden="true" />
                 <span className="sr-only">
                   {isFavorited ? 'Remove from favorites' : 'Add to favorites'}
                 </span>

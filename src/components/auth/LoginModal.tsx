@@ -203,7 +203,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
 
         {error && (
           <p 
-            className={`text-sm ${error.includes('Check your email') ? 'text-green-600' : 'text-destructive'}`}
+            className={`text-sm ${error.includes('Check your email') ? 'text-success' : 'text-destructive'}`}
             role={error.includes('Check your email') ? 'status' : 'alert'}
             aria-live="polite"
           >
@@ -216,7 +216,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
             <span className="w-full border-t" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
+            <span className="bg-surface-elevated px-2 text-text-secondary">
               Or continue with
             </span>
           </div>

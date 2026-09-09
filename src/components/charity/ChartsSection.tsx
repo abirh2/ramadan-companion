@@ -140,7 +140,7 @@ export function ChartsSection({ donations, preferredCurrency }: ChartsSectionPro
                   labelLine={false}
                   label={renderCustomLabel}
                   outerRadius={100}
-                  fill="#8884d8"
+                  fill="var(--teal)"
                   dataKey="value"
                 >
                   {typeData.map((entry, index) => (
@@ -211,9 +211,9 @@ function prepareTypeData(donations: DonationWithConversion[]) {
   })
 
   const colors: Record<string, string> = {
-    zakat: '#10b981', // green
-    sadaqah: '#3b82f6', // blue
-    other: '#6b7280', // gray
+    zakat: 'var(--success)',
+    sadaqah: 'var(--teal)',
+    other: 'var(--text-tertiary)',
   }
 
   return Array.from(typeMap.entries())
@@ -221,7 +221,7 @@ function prepareTypeData(donations: DonationWithConversion[]) {
     .map(([name, value]) => ({
       name: name.charAt(0).toUpperCase() + name.slice(1),
       value: parseFloat(value.toFixed(2)),
-      color: colors[name] || '#6b7280',
+      color: colors[name] || 'var(--text-tertiary)',
     }))
 }
 

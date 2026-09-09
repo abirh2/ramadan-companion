@@ -33,17 +33,17 @@ export function ChapterRow({ chapter, bookSlug }: ChapterRowProps) {
       )}
     >
       {/* Leading quiet Chapter number — no filled circle */}
-      <span className="type-eyebrow w-8 flex-shrink-0 text-tertiary tabular-nums">
+      <span className="type-eyebrow w-8 flex-shrink-0 text-text-tertiary tabular-nums">
         {chapter.chapterNumber}
       </span>
 
       {/* Titles */}
       <span className="min-w-0 flex-1">
-        <span className="type-nav block text-primary">
+        <span className="type-nav block text-teal">
           {chapter.chapterEnglish}
         </span>
         {hasUrduTitle && (
-          <span className="mt-0.5 block text-sm text-secondary">
+          <span className="mt-0.5 block text-sm text-text-secondary">
             {chapter.chapterUrdu}
           </span>
         )}
@@ -55,7 +55,7 @@ export function ChapterRow({ chapter, bookSlug }: ChapterRowProps) {
           the row, and broken across lines with `break-words` rather than clipped. */}
       {hasArabicTitle && (
         <span
-          className="type-arabic min-w-0 max-w-[45%] break-words text-right text-primary"
+          className="type-arabic min-w-0 max-w-[45%] break-words text-right text-teal"
           dir="rtl"
           lang="ar"
         >
@@ -64,7 +64,7 @@ export function ChapterRow({ chapter, bookSlug }: ChapterRowProps) {
       )}
 
       <ChevronRight
-        className="h-4 w-4 flex-shrink-0 text-tertiary"
+        className="h-4 w-4 flex-shrink-0 text-text-tertiary"
         aria-hidden="true"
       />
     </Link>

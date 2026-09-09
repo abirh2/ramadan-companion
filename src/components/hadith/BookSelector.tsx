@@ -18,7 +18,7 @@ export function BookSelector() {
     return (
       <div className="py-12 text-center">
         <div className="inline-block h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
-        <p className="mt-4 text-secondary">Loading hadith collections...</p>
+        <p className="mt-4 text-text-secondary">Loading hadith collections...</p>
       </div>
     )
   }
@@ -27,7 +27,7 @@ export function BookSelector() {
     return (
       <div className="py-12 text-center">
         <p className="mb-2 text-destructive">Error loading hadith collections</p>
-        <p className="mb-4 text-sm text-secondary">{error}</p>
+        <p className="mb-4 text-sm text-text-secondary">{error}</p>
         <Button variant="outline" onClick={() => refetch()}>
           Try again
         </Button>
@@ -44,7 +44,7 @@ export function BookSelector() {
       <div className="sticky top-0 z-10 -mx-4 bg-canvas px-4 py-2">
         <div className="relative mx-auto w-full max-w-md">
           <Search
-            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-tertiary"
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary"
             aria-hidden="true"
           />
           <Input

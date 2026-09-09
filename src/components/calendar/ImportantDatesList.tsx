@@ -64,9 +64,9 @@ export function ImportantDatesList({ dates, onDateClick }: ImportantDatesListPro
               <div className="flex items-center gap-2 mt-2">
                 <span className={cn(
                   'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium',
-                  date.significance === 'high' && 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-                  date.significance === 'medium' && 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-                  date.significance === 'low' && 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
+                  date.significance === 'high' && 'bg-gold-muted text-gold',
+                  date.significance === 'medium' && 'bg-teal-muted text-teal',
+                  date.significance === 'low' && 'bg-surface-elevated text-text-secondary'
                 )}>
                   {date.significance === 'high' && 'High'}
                   {date.significance === 'medium' && 'Medium'}
@@ -80,4 +80,3 @@ export function ImportantDatesList({ dates, onDateClick }: ImportantDatesListPro
     </div>
   )
 }
-

@@ -68,7 +68,7 @@ export function IslamicCalendar({ dates, onDateSelect }: IslamicCalendarProps) {
                 'focus:outline-none focus:ring-2 focus:ring-accent',
                 date.isToday && 'border-accent bg-accent/20 font-bold',
                 date.isSelected && 'border-accent bg-accent text-accent-foreground',
-                date.isImportant && !date.isSelected && 'border-orange-300 dark:border-orange-700'
+                date.isImportant && !date.isSelected && 'border-gold'
               )}
               aria-label={`${date.hijri.weekday}, ${date.hijri.day} ${date.hijri.monthName} ${date.hijri.year}. Gregorian: ${date.gregorian.day} ${date.gregorian.monthName} ${date.gregorian.year}`}
               aria-pressed={date.isSelected}
@@ -98,4 +98,3 @@ export function IslamicCalendar({ dates, onDateSelect }: IslamicCalendarProps) {
     </div>
   )
 }
-
