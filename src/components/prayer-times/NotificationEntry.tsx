@@ -36,6 +36,7 @@ export function NotificationEntry() {
   if (signInRequired) {
     return (
       <Link
+        id="notifications"
         href="/profile"
         className="group flex min-h-touch w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-surface-grouped focus-visible:relative focus-visible:z-10 active:bg-teal-muted"
       >
@@ -66,7 +67,7 @@ export function NotificationEntry() {
   // Logged in (or native): render the existing NotificationSettings compactly
   // within the settings hierarchy. Its internal logic is untouched.
   return (
-    <div className="px-4 py-3">
+    <div id="notifications" className="scroll-mt-6 px-4 py-3">
       <NotificationSettings />
     </div>
   )

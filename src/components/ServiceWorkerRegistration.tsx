@@ -27,8 +27,12 @@ export function ServiceWorkerRegistration() {
   })
 
   useEffect(() => {
+    // Development bundles change frequently; a persistent worker can serve stale
+    // client chunks and mask the current UI during local testing.
+    if (process.env.NODE_ENV !== 'production') return
+
     // Check if service workers are supported
-    if (!swState.isSupported) {
+    if (!('serviceWorker' in navigator)) {
       console.log('[PWA] Service Workers not supported in this browser')
       return
     }
@@ -100,4 +104,3 @@ export function ServiceWorkerRegistration() {
   // This component has no UI
   return null
 }
-

@@ -4,21 +4,20 @@ import { BookSelector } from '@/components/hadith/BookSelector'
 
 export default function HadithBrowserPage() {
   return (
-    <div className="container mx-auto px-4 py-6 max-w-6xl">
-      <div className="mb-6">
+    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <header className="mb-8">
         <Link 
-          href="/" 
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-3"
-          aria-label="Navigate back to homepage"
+          href="/more"
+          className="type-nav mb-3 inline-flex items-center gap-2 text-text-secondary transition-colors hover:text-text-primary"
+          aria-label="Navigate back to More"
         >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          <span className="text-sm">Back to Home</span>
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          Back to More
         </Link>
-        <h1 className="type-page-title">Hadith</h1>
-      </div>
+        <h1 className="type-page-title text-text-primary">Hadith</h1>
+      </header>
 
       <BookSelector />
     </div>
   )
 }
-

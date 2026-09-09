@@ -13,19 +13,19 @@ const CONTACT_EMAIL = 'abirh@alumni.upenn.edu'
 
 export default function PrivacyPage() {
   return (
-    <div className="container mx-auto px-4 py-6 max-w-4xl">
-      <div className="mb-6">
+    <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-8">
+      <header className="mb-8">
         <Button variant="ghost" size="sm" asChild className="mb-3 -ml-2">
-          <Link href="/">
+          <Link href="/more">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
+            Back to More
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold">Privacy Policy</h1>
-        <p className="text-muted-foreground mt-2">
+        <h1 className="type-page-title text-text-primary">Privacy Policy</h1>
+        <p className="type-body-secondary mt-2 text-text-secondary">
           Last updated: July 4, 2026
         </p>
-      </div>
+      </header>
 
       <div className="space-y-6">
         <Card>

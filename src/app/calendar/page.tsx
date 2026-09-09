@@ -6,7 +6,7 @@ import { CalendarControls } from '@/components/calendar/CalendarControls'
 import { GregorianCalendar } from '@/components/calendar/GregorianCalendar'
 import { IslamicCalendar } from '@/components/calendar/IslamicCalendar'
 import { CalendarSidebar } from '@/components/calendar/CalendarSidebar'
-import { Loader2, Calendar as CalendarIcon, ArrowLeft } from 'lucide-react'
+import { Loader2, ArrowLeft } from 'lucide-react'
 import { FeedbackButton } from '@/components/FeedbackButton'
 
 export default function CalendarPage() {
@@ -35,25 +35,22 @@ export default function CalendarPage() {
   const displayYear = view === 'islamic' ? currentHijriYear : currentYear
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6">
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
       {/* Header */}
-      <div className="mb-6">
+      <header className="mb-8">
         <Link 
-          href="/" 
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-3"
-          aria-label="Navigate back to homepage"
+          href="/more"
+          className="type-nav mb-3 inline-flex items-center gap-2 text-text-secondary transition-colors hover:text-text-primary"
+          aria-label="Navigate back to More"
         >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          <span className="text-sm">Back to Home</span>
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          Back to More
         </Link>
-        <div className="flex items-center gap-2 mb-2">
-          <CalendarIcon className="h-6 w-6 text-accent" aria-hidden="true" />
-          <h1 className="text-2xl font-bold">Islamic Calendar</h1>
-        </div>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="type-page-title text-text-primary">Islamic Calendar</h1>
+        <p className="type-body-secondary mt-2 text-text-secondary">
           View and explore the Islamic (Hijri) calendar with important dates and events
         </p>
-      </div>
+      </header>
 
       {/* Calendar Controls */}
       <div className="mb-6">
@@ -95,7 +92,7 @@ export default function CalendarPage() {
           )}
 
           {!loading && !error && (
-            <div className="bg-card border rounded-lg p-4 sm:p-6">
+            <div className="rounded-surface border border-border-subtle bg-surface-primary p-4 sm:p-6">
               {view === 'gregorian' ? (
                 <GregorianCalendar dates={calendarDates} onDateSelect={selectDate} />
               ) : (
@@ -122,4 +119,3 @@ export default function CalendarPage() {
     </div>
   )
 }
-

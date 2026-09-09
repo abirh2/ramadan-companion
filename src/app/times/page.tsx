@@ -223,7 +223,7 @@ export default function TimesPage() {
           {/* Right Column - Sidebar */}
           <aside className="space-y-6" aria-label="Settings and Qibla compass">
             {/* Preferences (with notifications entry) */}
-            <section aria-labelledby="preferences-title">
+            <section id="preferences" aria-labelledby="preferences-title" className="scroll-mt-6">
               <h2 id="preferences-title" className="sr-only">Prayer Preferences</h2>
               <PreferencesSection
                 calculationMethodLabel={calculationMethodLabel}

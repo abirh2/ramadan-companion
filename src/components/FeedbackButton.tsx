@@ -18,9 +18,10 @@ import type { FeedbackType } from '@/types/feedback.types'
 
 interface FeedbackButtonProps {
   pagePath: string
+  presentation?: 'footer' | 'row'
 }
 
-export function FeedbackButton({ pagePath }: FeedbackButtonProps) {
+export function FeedbackButton({ pagePath, presentation = 'footer' }: FeedbackButtonProps) {
   const { user } = useAuth()
   const [open, setOpen] = useState(false)
   const [feedbackType, setFeedbackType] = useState<FeedbackType>('problem')
@@ -62,7 +63,7 @@ export function FeedbackButton({ pagePath }: FeedbackButtonProps) {
       } else {
         setError(result.error || 'Failed to submit feedback')
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred. Please try again.')
     } finally {
       setSubmitting(false)
@@ -84,7 +85,8 @@ export function FeedbackButton({ pagePath }: FeedbackButtonProps) {
 
   return (
     <>
-      <div className="mt-8 pt-6 border-t">
+      {presentation === 'footer' ? (
+      <div className="mt-8 border-t border-border-subtle pt-6">
         <div className="flex justify-center">
           <Button
             variant="outline"
@@ -97,6 +99,16 @@ export function FeedbackButton({ pagePath }: FeedbackButtonProps) {
           </Button>
         </div>
       </div>
+      ) : (
+        <button type="button" className="more-row group w-full text-left" onClick={() => setOpen(true)}>
+          <MessageSquare className="size-5 shrink-0 text-text-secondary" strokeWidth={1.8} aria-hidden="true" />
+          <span className="min-w-0 flex-1">
+            <span className="type-body block text-text-primary">Feedback</span>
+            <span className="type-caption mt-0.5 block text-text-secondary">Report a problem or suggest an improvement</span>
+          </span>
+          <span className="type-caption text-text-secondary">Anonymous</span>
+        </button>
+      )}
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-[500px]" aria-labelledby="feedback-title" aria-describedby="feedback-description">
@@ -222,4 +234,3 @@ export function FeedbackButton({ pagePath }: FeedbackButtonProps) {
     </>
   )
 }
-

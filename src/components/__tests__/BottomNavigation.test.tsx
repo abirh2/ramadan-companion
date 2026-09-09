@@ -32,6 +32,12 @@ describe('BottomNavigation', () => {
     ['/hadith/bukhari/1', 'More'],
     ['/quran-hadith', 'More'],
     ['/places/mosques', 'More'],
+    ['/calendar', 'More'],
+    ['/charity', 'More'],
+    ['/favorites', 'More'],
+    ['/profile', 'More'],
+    ['/about', 'More'],
+    ['/privacy', 'More'],
   ])('marks %s with the %s tab active', (pathname, activeLabel) => {
     mockPathname = pathname
     render(<BottomNavigation />)

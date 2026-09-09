@@ -46,24 +46,24 @@ function AboutContent() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-4xl">
-      <div className="mb-6">
+    <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-8">
+      <header className="mb-8">
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => router.push('/')}
+          onClick={() => router.push('/more')}
           className="mb-3 -ml-2"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Home
+          Back to More
         </Button>
-        <h1 className="text-3xl font-bold">About</h1>
-        <p className="text-muted-foreground mt-2">Learn more about Deen Companion and its creator</p>
-      </div>
+        <h1 className="type-page-title text-text-primary">About</h1>
+        <p className="type-body-secondary mt-2 text-text-secondary">The project, its sources, and the people behind it</p>
+      </header>
 
       {/* Content */}
         <Tabs value={activeTab} onValueChange={handleTabChange}>
-          <TabsList className="w-full justify-start mb-6">
+          <TabsList className="mb-6 grid h-auto w-full grid-cols-2 gap-1 sm:grid-cols-4">
             <TabsTrigger value="creator">Creator</TabsTrigger>
             <TabsTrigger value="app">About App</TabsTrigger>
             <TabsTrigger value="install">Install Guide</TabsTrigger>
@@ -80,6 +80,7 @@ function AboutContent() {
                       src="/creator-profile.jpg"
                       alt="Abir Hossain"
                       fill
+                      sizes="128px"
                       className="object-cover"
                       priority
                     />
@@ -647,7 +648,7 @@ function AboutContent() {
 export default function AboutPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex min-h-[50vh] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     }>
@@ -655,4 +656,3 @@ export default function AboutPage() {
     </Suspense>
   )
 }
-

@@ -38,7 +38,7 @@ export function CalendarControls({
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       {/* Month/Year Display & Navigation */}
-      <div className="flex items-center gap-2">
+      <div className="grid w-full grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-2 sm:flex sm:w-auto">
         <Button
           variant="outline"
           size="icon"
@@ -48,9 +48,9 @@ export function CalendarControls({
           <ChevronLeft className="h-4 w-4" />
         </Button>
 
-        <div className="flex items-center gap-2 min-w-[200px] justify-center">
+        <div className="flex min-w-0 items-center justify-center gap-2 sm:min-w-[200px]">
           <CalendarIcon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-          <h2 className="text-lg font-semibold">
+          <h2 className="truncate text-base font-semibold sm:text-lg">
             {getMonthName()} {currentYear}
           </h2>
         </div>
@@ -64,13 +64,13 @@ export function CalendarControls({
           <ChevronRight className="h-4 w-4" />
         </Button>
 
-        <Button variant="outline" onClick={onToday} className="ml-2">
+        <Button variant="outline" onClick={onToday} className="col-span-3 sm:ml-2">
           Today
         </Button>
       </div>
 
       {/* View Toggle */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 self-start sm:self-auto">
         <span className="text-sm text-muted-foreground">View:</span>
         <div className="flex rounded-lg border border-border p-1">
           <Button
@@ -96,4 +96,3 @@ export function CalendarControls({
     </div>
   )
 }
-

@@ -34,7 +34,6 @@ type ViewMode = 'calendar' | 'list'
 export default function CharityPage() {
   const { user } = useAuth()
   const {
-    donations,
     displayDonations,
     loading,
     error,
@@ -127,22 +126,19 @@ export default function CharityPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-6xl">
-      <div className="mb-6">
+    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <header className="mb-8">
         <Link 
-          href="/" 
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-3"
-          aria-label="Navigate back to homepage"
+          href="/more"
+          className="type-nav mb-3 inline-flex items-center gap-2 text-text-secondary transition-colors hover:text-text-primary"
+          aria-label="Navigate back to More"
         >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          <span className="text-sm">Back to Home</span>
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          Back to More
         </Link>
-        <div className="flex items-center gap-2">
-          <Heart className="h-8 w-8 text-primary" aria-hidden="true" />
-          <h1 className="text-3xl font-bold">Charity Tracker</h1>
-        </div>
-        <p className="text-muted-foreground mt-2">Track your sadaqah, zakat, and charitable contributions</p>
-      </div>
+        <h1 className="type-page-title text-text-primary">Charity Tracker</h1>
+        <p className="type-body-secondary mt-2 text-text-secondary">Track your sadaqah, zakat, and charitable contributions</p>
+      </header>
 
       <ProtectedFeature
           title="Charity Tracker"
@@ -158,7 +154,7 @@ export default function CharityPage() {
 
           {/* Error State */}
           {error && !loading && (
-            <Card className="rounded-xl" role="alert" aria-live="assertive">
+            <Card role="alert" aria-live="assertive">
               <CardContent className="p-6 text-center">
                 <p className="text-destructive mb-2">Failed to load donations</p>
                 <p className="text-sm text-muted-foreground mb-4">{error}</p>
@@ -175,7 +171,7 @@ export default function CharityPage() {
               {/* Currency Controls */}
               <section aria-labelledby="currency-controls-title">
                 <h2 id="currency-controls-title" className="sr-only">Currency Options</h2>
-                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between p-4 bg-muted/50 rounded-xl">
+                <div className="flex flex-col items-start justify-between gap-4 rounded-grouped border border-border-subtle bg-surface-grouped p-4 sm:flex-row sm:items-center">
                 <CurrencyViewToggle
                   value={currencyViewMode}
                   onChange={setCurrencyViewMode}
@@ -192,7 +188,7 @@ export default function CharityPage() {
               <section aria-labelledby="donation-summary-title">
                 <h2 id="donation-summary-title" className="sr-only">Donation Summary</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="rounded-xl">
+                <Card>
                   <CardContent className="p-6">
                     <p className="text-sm text-muted-foreground mb-1">This Ramadan</p>
                     <p className="text-3xl font-bold">
@@ -203,7 +199,7 @@ export default function CharityPage() {
                     )}
                   </CardContent>
                 </Card>
-                <Card className="rounded-xl">
+                <Card>
                   <CardContent className="p-6">
                     <p className="text-sm text-muted-foreground mb-1">This Year</p>
                     <p className="text-3xl font-bold">
@@ -214,7 +210,7 @@ export default function CharityPage() {
                     )}
                   </CardContent>
                 </Card>
-                <Card className="rounded-xl">
+                <Card>
                   <CardContent className="p-6">
                     <p className="text-sm text-muted-foreground mb-1">All Time</p>
                     <p className="text-3xl font-bold">
@@ -263,7 +259,7 @@ export default function CharityPage() {
 
               {/* Empty State */}
               {isEmpty && (
-                <Card className="rounded-xl">
+                <Card>
                   <CardContent className="p-12 text-center space-y-4">
                     <Heart className="h-12 w-12 mx-auto text-muted-foreground/50" />
                     <div>
@@ -377,4 +373,3 @@ export default function CharityPage() {
     </div>
   )
 }
-

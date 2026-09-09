@@ -29,21 +29,18 @@ export default function FavoritesPage() {
   } = useFavoritesList('hadith')
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-4xl">
-      <div className="mb-6">
+    <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-8">
+      <header className="mb-8">
         <Link 
-          href="/" 
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-3"
+          href="/more"
+          className="type-nav mb-3 inline-flex items-center gap-2 text-text-secondary transition-colors hover:text-text-primary"
         >
-          <ArrowLeft className="h-4 w-4" />
-          <span className="text-sm">Back to Home</span>
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          Back to More
         </Link>
-        <div className="flex items-center gap-2">
-          <Heart className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">Favorites</h1>
-        </div>
-        <p className="text-muted-foreground mt-2">Your saved Quran verses and Hadiths</p>
-      </div>
+        <h1 className="type-page-title text-text-primary">Favorites</h1>
+        <p className="type-body-secondary mt-2 text-text-secondary">Your saved Quran verses and hadith</p>
+      </header>
 
       <ProtectedFeature
           title="Favorites"
@@ -79,7 +76,7 @@ export default function FavoritesPage() {
               )}
 
               {quranError && (
-                <Card className="rounded-xl">
+                <Card>
                   <CardContent className="p-6 text-center">
                     <p className="text-destructive mb-2">Failed to load favorites</p>
                     <p className="text-sm text-muted-foreground mb-4">{quranError}</p>
@@ -91,7 +88,7 @@ export default function FavoritesPage() {
               )}
 
               {!quranLoading && !quranError && quranEmpty && (
-                <Card className="rounded-xl">
+                <Card>
                   <CardContent className="p-12 text-center space-y-4">
                     <Heart className="h-12 w-12 mx-auto text-muted-foreground/50" />
                     <div>
@@ -135,7 +132,7 @@ export default function FavoritesPage() {
               )}
 
               {hadithError && (
-                <Card className="rounded-xl">
+                <Card>
                   <CardContent className="p-6 text-center">
                     <p className="text-destructive mb-2">Failed to load favorites</p>
                     <p className="text-sm text-muted-foreground mb-4">{hadithError}</p>
@@ -147,7 +144,7 @@ export default function FavoritesPage() {
               )}
 
               {!hadithLoading && !hadithError && hadithEmpty && (
-                <Card className="rounded-xl">
+                <Card>
                   <CardContent className="p-12 text-center space-y-4">
                     <Heart className="h-12 w-12 mx-auto text-muted-foreground/50" />
                     <div>
@@ -188,4 +185,3 @@ export default function FavoritesPage() {
     </div>
   )
 }
-

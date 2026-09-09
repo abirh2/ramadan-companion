@@ -255,22 +255,22 @@ function QuranHadithContent() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-4xl space-y-6">
-      <div className="mb-6">
+    <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
+      <header className="mb-8">
         <Link 
-          href="/" 
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-3"
+          href="/more"
+          className="type-nav mb-3 inline-flex items-center gap-2 text-text-secondary transition-colors hover:text-text-primary"
         >
-          <ArrowLeft className="h-4 w-4" />
-          <span className="text-sm">Back to Home</span>
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          Back to More
         </Link>
-        <h1 className="text-3xl font-bold">Daily Reminders</h1>
-        <p className="text-muted-foreground mt-2">Quran and Hadith of the Day</p>
-      </div>
+        <h1 className="type-page-title text-text-primary">Daily Quran &amp; Hadith</h1>
+        <p className="type-body-secondary mt-2 text-text-secondary">Today’s selected ayah and hadith</p>
+      </header>
 
       {/* Content */}
         {/* Quran of the Day Section */}
-        <Card className="rounded-2xl shadow-sm">
+        <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -431,7 +431,7 @@ function QuranHadithContent() {
         </Card>
 
         {/* Hadith of the Day Section */}
-        <Card className="rounded-2xl shadow-sm">
+        <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -630,4 +630,3 @@ export default function QuranHadithPage() {
     </Suspense>
   )
 }
-

@@ -1,99 +1,48 @@
 'use client'
 
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Menu, BookOpen, BookOpenText, Clock, Heart, DollarSign, MessageCircle, Sparkles, Compass, Home } from 'lucide-react'
+import { usePathname } from 'next/navigation'
+import { cn } from '@/lib/utils'
+
+const desktopTabs = [
+  { label: 'Home', href: '/', matches: ['/'] },
+  { label: 'Quran', href: '/quran', matches: ['/quran'] },
+  { label: 'Prayer', href: '/times', matches: ['/times'] },
+  { label: 'Zikr', href: '/zikr', matches: ['/zikr'] },
+  {
+    label: 'More',
+    href: '/more',
+    matches: ['/more', '/hadith', '/quran-hadith', '/charity', '/favorites', '/calendar', '/places', '/profile', '/about', '/privacy'],
+  },
+] as const
+
+function matchesRoute(pathname: string, route: string) {
+  if (route === '/') return pathname === route
+  return pathname === route || pathname.startsWith(`${route}/`)
+}
 
 export function NavMenu() {
+  const pathname = usePathname()
+
   return (
-    <div className="hidden md:block">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-touch"
-            aria-label="Open features menu"
+    <nav className="hidden items-center gap-1 md:flex" aria-label="Primary navigation">
+      {desktopTabs.map(({ label, href, matches }) => {
+        const active = matches.some((route) => matchesRoute(pathname, route))
+
+        return (
+          <Link
+            key={href}
+            href={href}
+            aria-current={active ? 'page' : undefined}
+            className={cn(
+              'type-nav rounded-control px-3 py-2 text-text-secondary transition-colors hover:bg-surface-grouped hover:text-text-primary',
+              active && 'bg-teal-muted text-teal',
+            )}
           >
-            <Menu className="h-5 w-5" aria-hidden="true" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56" aria-label="Features menu">
-        <Link href="/">
-          <DropdownMenuItem className="cursor-pointer" role="menuitem">
-            <Home className="h-4 w-4 mr-2" aria-hidden="true" />
-            Dashboard
-          </DropdownMenuItem>
-        </Link>
-        <DropdownMenuSeparator />
-        <DropdownMenuLabel>Features</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        
-        <Link href="/quran">
-          <DropdownMenuItem className="cursor-pointer" role="menuitem">
-            <BookOpen className="h-4 w-4 mr-2" aria-hidden="true" />
-            Quran Browser
-          </DropdownMenuItem>
-        </Link>
-        
-        <Link href="/hadith">
-          <DropdownMenuItem className="cursor-pointer" role="menuitem">
-            <BookOpenText className="h-4 w-4 mr-2" aria-hidden="true" />
-            Hadith Browser
-          </DropdownMenuItem>
-        </Link>
-        
-        <Link href="/times">
-          <DropdownMenuItem className="cursor-pointer" role="menuitem">
-            <Clock className="h-4 w-4 mr-2" aria-hidden="true" />
-            Prayer Times
-          </DropdownMenuItem>
-        </Link>
-        
-        <Link href="/times#qibla">
-          <DropdownMenuItem className="cursor-pointer" role="menuitem">
-            <Compass className="h-4 w-4 mr-2" aria-hidden="true" />
-            Qibla Finder
-          </DropdownMenuItem>
-        </Link>
-        
-        <Link href="/quran-hadith">
-          <DropdownMenuItem className="cursor-pointer" role="menuitem">
-            <Sparkles className="h-4 w-4 mr-2" aria-hidden="true" />
-            Daily Quran & Hadith
-          </DropdownMenuItem>
-        </Link>
-        
-        <Link href="/charity">
-          <DropdownMenuItem className="cursor-pointer" role="menuitem">
-            <DollarSign className="h-4 w-4 mr-2" aria-hidden="true" />
-            Charity Tracker
-          </DropdownMenuItem>
-        </Link>
-        
-        <Link href="/favorites">
-          <DropdownMenuItem className="cursor-pointer" role="menuitem">
-            <Heart className="h-4 w-4 mr-2" aria-hidden="true" />
-            Favorites
-          </DropdownMenuItem>
-        </Link>
-        
-        <Link href="/zikr">
-          <DropdownMenuItem className="cursor-pointer" role="menuitem">
-            <MessageCircle className="h-4 w-4 mr-2" aria-hidden="true" />
-            Zikr & Duas
-          </DropdownMenuItem>
-        </Link>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+            {label}
+          </Link>
+        )
+      })}
+    </nav>
   )
 }

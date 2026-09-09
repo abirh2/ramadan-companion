@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Lock } from 'lucide-react';
 import { useState } from 'react';
 import { LoginModal } from './LoginModal';
@@ -23,7 +23,7 @@ export function ProtectedFeature({
 
   if (loading) {
     return (
-      <Card>
+      <Card variant="grouped">
         <CardContent className="flex items-center justify-center py-12">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         </CardContent>
@@ -34,16 +34,14 @@ export function ProtectedFeature({
   if (!user) {
     return (
       <>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5" />
-              {title}
-            </CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={() => setShowLoginModal(true)}>
+        <Card variant="grouped" className="gap-0 py-0">
+          <CardContent className="flex flex-col items-start gap-4 p-5 sm:flex-row sm:items-center">
+            <Lock className="size-5 shrink-0 text-text-secondary" strokeWidth={1.8} aria-hidden="true" />
+            <div className="min-w-0 flex-1">
+              <h2 className="type-body font-semibold text-text-primary">{title}</h2>
+              <p className="type-body-secondary mt-1 text-text-secondary">{description}</p>
+            </div>
+            <Button onClick={() => setShowLoginModal(true)} size="sm" className="shrink-0">
               Sign In
             </Button>
           </CardContent>
@@ -58,4 +56,3 @@ export function ProtectedFeature({
 
   return <>{children}</>;
 }
-

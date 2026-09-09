@@ -81,20 +81,20 @@ export default function MosquesPage() {
       ]
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-4xl space-y-6">
-      <div className="mb-6">
+    <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
+      <header className="mb-8">
         <Link 
-          href="/" 
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-3"
+          href="/more"
+          className="type-nav mb-3 inline-flex items-center gap-2 text-text-secondary transition-colors hover:text-text-primary"
         >
-          <ArrowLeft className="h-4 w-4" />
-          <span className="text-sm">Back to Home</span>
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          Back to More
         </Link>
-        <h1 className="text-3xl font-bold">Nearby Mosques</h1>
-        <p className="text-muted-foreground mt-2">Find mosques near you</p>
-      </div>
+        <h1 className="type-page-title text-text-primary">Nearby Mosques</h1>
+        <p className="type-body-secondary mt-2 text-text-secondary">Find mosques near you</p>
+      </header>
 
-      <Card className="rounded-3xl p-6 space-y-6">
+      <Card className="space-y-6 p-5 sm:p-6">
         {/* Location Search */}
         <div>
           <LocationSearch onLocationSelect={handleLocationSelect} currentLocation={location} />
@@ -198,7 +198,7 @@ export default function MosquesPage() {
 
         {/* Data Source Notice */}
         {!loading && !error && (
-          <div className="bg-muted/50 border rounded-lg px-4 py-3">
+          <div className="rounded-grouped border border-border-subtle bg-surface-grouped px-4 py-3">
             <p className="text-xs text-muted-foreground">
               Data provided by{' '}
               <a
@@ -236,4 +236,3 @@ export default function MosquesPage() {
     </div>
   )
 }
-
