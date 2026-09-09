@@ -87,7 +87,7 @@ describe('NextPrayerCard', () => {
     render(<NextPrayerCard />)
     
     expect(screen.getByRole('heading', { name: 'Asr' })).toBeInTheDocument()
-    expect(screen.getByText('2h 15m')).toBeInTheDocument()
+    expect(screen.getByText('2h 15m')).toHaveClass('min-w-[7ch]', 'tabular-nums')
   })
 
   it('shows the next prayer as a semantic heading', () => {

@@ -35,7 +35,7 @@ export function QuickActions() {
             <Link
               key={href}
               href={href}
-              className="group relative flex min-h-20 min-w-0 flex-col items-center justify-center gap-2 rounded-grouped bg-surface-grouped px-1.5 py-3 text-center transition-colors hover:bg-teal-muted active:bg-teal-muted"
+              className="group relative flex min-h-20 min-w-0 touch-manipulation flex-col items-center justify-center gap-2 rounded-grouped bg-surface-grouped px-1.5 py-3 text-center transition-[background-color,transform] duration-150 hover:bg-teal-muted active:scale-[0.98] active:bg-teal-muted motion-reduce:active:scale-100"
               aria-label={`${label}${isLocked ? ', sign in required' : ''}`}
             >
               <Icon className="size-5 text-text-secondary transition-colors group-hover:text-teal" aria-hidden="true" />

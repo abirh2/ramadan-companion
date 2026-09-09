@@ -33,6 +33,7 @@ interface QiblaCompassProps {
 }
 
 const ALIGNMENT_TOLERANCE = 5
+const ALIGNMENT_EXIT_TOLERANCE = 10
 const ALIGNMENT_HAPTIC_COOLDOWN_MS = 2500
 const COMPASS_DIRECTIONS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
 
@@ -217,7 +218,7 @@ export function QiblaCompass({
   const [isMobile] = useState(() => isMobileDevice())
   const [hasOrientation] = useState(() => hasOrientationSupport())
   const [displayRotation, setDisplayRotation] = useState(qiblaDirection?.direction ?? 0)
-  const wasAlignedRef = useRef(false)
+  const alignmentHapticLatchedRef = useRef(false)
   const lastHapticAtRef = useRef(0)
 
   const canUseDynamicCompass = isMobile && hasOrientation
@@ -265,22 +266,34 @@ export function QiblaCompass({
     })
   }, [bearing, canUseDynamicCompass, mode])
 
-  const aligned =
+  const alignmentDistance =
     mode === 'dynamic' &&
     deviceHeading !== null &&
-    qiblaDirection !== null &&
-    angularDistance(qiblaDirection.direction, deviceHeading) <= ALIGNMENT_TOLERANCE
+    qiblaDirection !== null
+      ? angularDistance(qiblaDirection.direction, deviceHeading)
+      : null
+  const aligned = alignmentDistance !== null && alignmentDistance <= ALIGNMENT_TOLERANCE
 
   useEffect(() => {
-    if (aligned && !wasAlignedRef.current) {
+    if (alignmentDistance === null) {
+      alignmentHapticLatchedRef.current = false
+      return
+    }
+
+    if (alignmentDistance >= ALIGNMENT_EXIT_TOLERANCE) {
+      alignmentHapticLatchedRef.current = false
+      return
+    }
+
+    if (alignmentDistance <= ALIGNMENT_TOLERANCE && !alignmentHapticLatchedRef.current) {
+      alignmentHapticLatchedRef.current = true
       const now = Date.now()
       if (now - lastHapticAtRef.current >= ALIGNMENT_HAPTIC_COOLDOWN_MS) {
         lastHapticAtRef.current = now
         void triggerQiblaAlignmentHaptic()
       }
     }
-    wasAlignedRef.current = aligned
-  }, [aligned])
+  }, [alignmentDistance])
 
   if (loading) {
     return (

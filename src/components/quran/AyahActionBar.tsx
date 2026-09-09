@@ -179,7 +179,7 @@ export function AyahActionBar({
       aria-label={favoriteLabel}
       aria-pressed={isFav}
     >
-      <Heart className={cn('h-4 w-4', isFav && 'fill-current')} aria-hidden="true" />
+      <Heart className={cn('h-4 w-4 transition-transform duration-150', isFav && 'scale-105 fill-current motion-reduce:scale-100')} aria-hidden="true" />
       <span className="sr-only">{favoriteLabel}</span>
     </Button>
   )
@@ -215,7 +215,7 @@ export function AyahActionBar({
       aria-pressed={isBookmarked}
     >
       <Bookmark
-        className={cn('h-4 w-4', isBookmarked && 'fill-current')}
+        className={cn('h-4 w-4 transition-transform duration-150', isBookmarked && 'scale-105 fill-current motion-reduce:scale-100')}
         aria-hidden="true"
       />
       <span className="sr-only">{bookmarkLabel}</span>

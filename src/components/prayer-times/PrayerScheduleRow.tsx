@@ -82,7 +82,7 @@ export function PrayerScheduleRow({
 
   return (
     <div
-      className={`flex min-h-touch items-center gap-3 px-4 py-4 sm:px-5 ${rowTint} ${divider}`}
+      className={`flex min-h-touch items-center gap-3 px-4 py-4 transition-colors duration-200 sm:px-5 ${rowTint} ${divider}`}
     >
       {showCompletion ? (
         <button
@@ -94,14 +94,14 @@ export function PrayerScheduleRow({
               ? `${row.name} marked complete`
               : `Mark ${row.name} complete`
           }
-          className={`flex min-h-touch min-w-touch shrink-0 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal ${
+          className={`flex min-h-touch min-w-touch shrink-0 touch-manipulation items-center justify-center rounded-full transition-[color,transform] duration-150 active:scale-[0.97] motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal ${
             row.completed
               ? 'text-success'
               : 'text-text-tertiary hover:text-teal'
           }`}
         >
           {row.completed ? (
-            <Check className="size-5" aria-hidden="true" />
+            <Check className="size-5 scale-105 transition-transform duration-150 motion-reduce:scale-100" aria-hidden="true" />
           ) : (
             <Circle className="size-5" aria-hidden="true" />
           )}

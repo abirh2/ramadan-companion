@@ -30,7 +30,7 @@ export function JuzRow({ juz, startSurah, endSurah, bookmark }: JuzRowProps) {
   return (
     <Link
       href={`/quran/${juz.startSurah}?ayah=${juz.startAyah}`}
-      className="flex min-h-touch items-center gap-4 px-4 py-3 transition-colors hover:bg-surface-grouped active:bg-teal-muted focus-visible:relative focus-visible:z-10 focus-visible:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="flex min-h-touch touch-manipulation items-center gap-4 px-4 py-3 transition-[background-color,transform] duration-150 hover:bg-surface-grouped active:scale-[0.99] active:bg-teal-muted motion-reduce:active:scale-100 focus-visible:relative focus-visible:z-10 focus-visible:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       {/* Leading quiet Juz number */}
       <span className="type-eyebrow shrink-0 tabular-nums text-text-tertiary">

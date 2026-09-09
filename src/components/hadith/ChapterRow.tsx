@@ -28,7 +28,7 @@ export function ChapterRow({ chapter, bookSlug }: ChapterRowProps) {
       className={cn(
         'flex items-center gap-4 px-4 py-3',
         'min-h-[var(--spacing-touch)]',
-        'transition-colors hover:bg-accent focus-visible:bg-accent',
+        'touch-manipulation transition-[background-color,transform] duration-150 hover:bg-accent active:scale-[0.99] active:bg-teal-muted motion-reduce:active:scale-100 focus-visible:bg-accent',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
       )}
     >

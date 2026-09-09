@@ -22,6 +22,15 @@ describe('BottomNavigation', () => {
     expect(screen.getByRole('link', { name: 'More' })).toHaveAttribute('href', '/more')
   })
 
+  it('positions a single presentation-only selection indicator for the active tab', () => {
+    mockPathname = '/times'
+    const { container } = render(<BottomNavigation />)
+
+    const indicator = container.querySelector('[data-testid="mobile-tab-indicator"]')
+    expect(indicator).toHaveAttribute('aria-hidden', 'true')
+    expect(indicator).toHaveStyle({ '--active-tab-index': '2' })
+  })
+
   it.each([
     ['/', 'Home'],
     ['/quran', 'Quran'],

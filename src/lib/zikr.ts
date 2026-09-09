@@ -273,3 +273,18 @@ export async function triggerHapticFeedback(kind: 'increment' | 'completion' = '
     console.debug('Haptic feedback failed:', error)
   }
 }
+
+export const ZIKR_HAPTIC_MIN_INTERVAL_MS = 80
+
+/**
+ * Keep ordinary count feedback from overwhelming the native haptics engine
+ * during very rapid tapping. Target completion always gets through because it
+ * communicates a distinct state change rather than another increment.
+ */
+export function shouldTriggerZikrHaptic(
+  kind: 'increment' | 'completion',
+  lastFeedbackAt: number,
+  now: number
+): boolean {
+  return kind === 'completion' || now - lastFeedbackAt >= ZIKR_HAPTIC_MIN_INTERVAL_MS
+}

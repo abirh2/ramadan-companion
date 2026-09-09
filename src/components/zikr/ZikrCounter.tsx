@@ -47,7 +47,7 @@ export function ZikrCounter({
         </span>
 
         <span className="flex flex-col items-center" aria-hidden="true">
-          <span className={`text-[4.75rem] font-semibold leading-none tracking-[-0.04em] tabular-nums sm:text-[5.5rem] ${isGoalReached ? 'text-gold' : 'text-surface-feature-foreground'}`}>
+          <span className={`text-[4.75rem] font-semibold leading-none tracking-[-0.04em] tabular-nums transition-[transform,color] duration-100 group-active:scale-[0.97] motion-reduce:group-active:scale-100 sm:text-[5.5rem] ${isGoalReached ? 'scale-[1.02] text-gold motion-reduce:scale-100' : 'text-surface-feature-foreground'}`}>
             {count}
           </span>
           <span className="my-3 h-px w-16 bg-surface-feature-muted/45" />

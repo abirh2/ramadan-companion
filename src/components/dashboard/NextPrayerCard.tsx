@@ -70,7 +70,7 @@ export function NextPrayerCard() {
       className="surface-feature home-prayer-pattern relative min-h-72 overflow-hidden p-5 sm:p-6"
       aria-labelledby="next-prayer-heading"
     >
-      <div className="relative z-10">
+      <div key={nextLabel} className="state-change-enter relative z-10">
         <div className="flex min-w-0 items-start justify-between gap-4">
           <div>
             <p className="type-nav text-surface-feature-muted">Next prayer</p>
@@ -88,7 +88,7 @@ export function NextPrayerCard() {
 
         <div className="mt-7 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
           <div>
-            <p className="type-feature-number text-surface-feature-foreground" aria-live="polite" aria-atomic="true">
+            <p className="type-feature-number inline-block min-w-[7ch] whitespace-nowrap tabular-nums text-surface-feature-foreground" aria-live="polite" aria-atomic="true">
               {compactCountdown}
             </p>
             <p className="type-caption mt-1 text-surface-feature-muted">until prayer</p>

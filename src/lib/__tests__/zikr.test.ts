@@ -1,6 +1,6 @@
 import { Capacitor } from '@capacitor/core'
 import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics'
-import { triggerHapticFeedback } from '../zikr'
+import { shouldTriggerZikrHaptic, triggerHapticFeedback } from '../zikr'
 
 describe('zikr haptic feedback', () => {
   beforeEach(() => {
@@ -23,5 +23,11 @@ describe('zikr haptic feedback', () => {
 
     expect(Haptics.notification).toHaveBeenCalledWith({ type: NotificationType.Success })
     expect(Haptics.impact).not.toHaveBeenCalled()
+  })
+
+  it('throttles only rapid increment feedback while preserving target completion', () => {
+    expect(shouldTriggerZikrHaptic('increment', 1_000, 1_030)).toBe(false)
+    expect(shouldTriggerZikrHaptic('increment', 1_000, 1_080)).toBe(true)
+    expect(shouldTriggerZikrHaptic('completion', 1_000, 1_001)).toBe(true)
   })
 })

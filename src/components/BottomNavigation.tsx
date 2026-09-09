@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import type { CSSProperties } from 'react'
 import { BookOpen, Clock3, Ellipsis, Home, MessageCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -43,9 +44,21 @@ export function BottomNavigation() {
     return null
   }
 
+  const activeTabIndex = primaryTabs.findIndex(({ matches }) =>
+    matches.some((route) => matchesRoute(pathname, route))
+  )
+
   return (
     <nav className="mobile-tab-bar md:hidden" aria-label="Primary navigation">
       <div className="mobile-tab-list">
+        {activeTabIndex >= 0 && (
+          <span
+            data-testid="mobile-tab-indicator"
+            className="mobile-tab-indicator"
+            style={{ '--active-tab-index': activeTabIndex } as CSSProperties}
+            aria-hidden="true"
+          />
+        )}
         {primaryTabs.map(({ label, href, icon: Icon, matches }) => {
           const isActive = matches.some((route) => matchesRoute(pathname, route))
 

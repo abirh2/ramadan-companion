@@ -159,6 +159,34 @@ describe('QiblaCompass', () => {
       expect(qiblaHaptics.triggerQiblaAlignmentHaptic).toHaveBeenCalledTimes(1)
     })
 
+    it('re-arms alignment feedback only after moving clearly outside tolerance', async () => {
+      const user = userEvent.setup()
+      let headingCallback: ((heading: orientation.DeviceHeading) => void) | undefined
+      const now = jest.spyOn(Date, 'now')
+      jest.mocked(orientation.startOrientationTracking).mockImplementation((callback) => {
+        headingCallback = callback
+        return jest.fn()
+      })
+
+      now.mockReturnValue(10_000)
+      render(<QiblaCompass qiblaDirection={qiblaDirection} />)
+      await user.click(screen.getByRole('button', { name: /live device compass/i }))
+      await waitFor(() => expect(headingCallback).toBeDefined())
+      act(() => headingCallback?.({ alpha: 58, accuracy: 5, timestamp: 10_000 }))
+      expect(qiblaHaptics.triggerQiblaAlignmentHaptic).toHaveBeenCalledTimes(1)
+
+      now.mockReturnValue(13_000)
+      act(() => headingCallback?.({ alpha: 64, accuracy: 5, timestamp: 13_000 }))
+      act(() => headingCallback?.({ alpha: 59, accuracy: 5, timestamp: 13_010 }))
+      expect(qiblaHaptics.triggerQiblaAlignmentHaptic).toHaveBeenCalledTimes(1)
+
+      act(() => headingCallback?.({ alpha: 70, accuracy: 5, timestamp: 13_020 }))
+      act(() => headingCallback?.({ alpha: 59, accuracy: 5, timestamp: 13_030 }))
+      expect(qiblaHaptics.triggerQiblaAlignmentHaptic).toHaveBeenCalledTimes(2)
+
+      now.mockRestore()
+    })
+
     it('stops tracking when returning to the manual bearing', async () => {
       const user = userEvent.setup()
       const cleanup = jest.fn()

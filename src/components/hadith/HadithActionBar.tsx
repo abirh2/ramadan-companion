@@ -106,7 +106,7 @@ export function HadithActionBar({ hadith, selectedLanguage }: HadithActionBarPro
         aria-pressed={isFavorited}
       >
         <Heart
-          className={cn('h-4 w-4', isFavorited && 'fill-current')}
+          className={cn('h-4 w-4 transition-transform duration-150', isFavorited && 'scale-105 fill-current motion-reduce:scale-100')}
           aria-hidden="true"
         />
         <span className="sr-only">{favoriteLabel}</span>

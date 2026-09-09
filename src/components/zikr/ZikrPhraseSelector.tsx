@@ -60,7 +60,7 @@ export function ZikrPhraseSelector({
       <DialogTrigger asChild>
         <button
           type="button"
-          className="surface-grouped flex min-h-14 w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-surface-elevated active:bg-surface-grouped/70"
+          className="surface-grouped flex min-h-14 w-full touch-manipulation items-center gap-3 px-4 py-3 text-left transition-[background-color,transform] duration-100 hover:bg-surface-elevated active:scale-[0.99] active:bg-surface-grouped/70 motion-reduce:active:scale-100"
           aria-label={`Change zikr or target. Selected: ${currentPhrase.transliteration}. ${hasTarget ? `Target ${currentTarget}` : 'Free count'}.`}
         >
           <Settings2 className="h-5 w-5 shrink-0 text-teal" aria-hidden="true" />
@@ -94,7 +94,7 @@ export function ZikrPhraseSelector({
                   onSelectPhrase(phrase.id)
                   setOpen(false)
                 }}
-                className={`flex min-h-[4.75rem] w-full items-center gap-3 rounded-grouped border px-4 py-3 text-left transition-colors ${selected ? 'border-teal bg-teal-muted' : 'border-border-subtle bg-surface-primary hover:bg-surface-grouped'}`}
+                className={`flex min-h-[4.75rem] w-full touch-manipulation items-center gap-3 rounded-grouped border px-4 py-3 text-left transition-[background-color,border-color,transform] duration-100 active:scale-[0.99] motion-reduce:active:scale-100 ${selected ? 'border-teal bg-teal-muted' : 'border-border-subtle bg-surface-primary hover:bg-surface-grouped'}`}
                 aria-pressed={selected}
               >
                 <span className="min-w-0 flex-1">

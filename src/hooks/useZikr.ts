@@ -9,6 +9,7 @@ import {
   STANDARD_PHRASES,
   playClickSound,
   triggerHapticFeedback,
+  shouldTriggerZikrHaptic,
   loadFeedbackPreferences,
   saveFeedbackPreferences,
 } from '@/lib/zikr'
@@ -55,6 +56,7 @@ export function useZikr(): UseZikrResult {
   const [feedbackPrefs, setFeedbackPrefs] = useState<ZikrFeedbackPreferences>(() => loadFeedbackPreferences())
   const loading = false
   const hasCheckedResetRef = useRef(false)
+  const lastHapticAtRef = useRef(0)
 
   // Get current phrase details
   const currentPhrase = getZikrPhraseById(state.phraseId) || STANDARD_PHRASES[0]
@@ -141,7 +143,12 @@ export function useZikr(): UseZikrResult {
       playClickSound()
     }
     if (feedbackPrefs.hapticEnabled) {
-      triggerHapticFeedback(completesTarget ? 'completion' : 'increment')
+      const kind = completesTarget ? 'completion' : 'increment'
+      const now = Date.now()
+      if (shouldTriggerZikrHaptic(kind, lastHapticAtRef.current, now)) {
+        lastHapticAtRef.current = now
+        void triggerHapticFeedback(kind)
+      }
     }
   }, [feedbackPrefs, state.count, state.target])
 
