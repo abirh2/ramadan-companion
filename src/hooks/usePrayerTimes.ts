@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { Capacitor } from '@capacitor/core'
 import { useAuth } from '@/hooks/useAuth'
 import type {
   PrayerTime,
@@ -29,13 +30,126 @@ import {
   updatePrayerWidget,
   updateAllPrayersWidget,
   updateQiblaWidget,
-  updateWidgetConfig,
   updatePrayerSchedule,
+  updatePrayerWidgetSnapshot,
   to12Hour,
 } from '@/lib/widgetBridge'
+import {
+  createPrayerOccurrences,
+  createPrayerWidgetSnapshot,
+  type WidgetPrayerDay,
+} from '@/lib/widgetSnapshot'
 
 // Prayer names in order (excluding Sunrise for next prayer calculation)
 const PRAYER_NAMES = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const
+
+function prayerDayFromTimes(prayerTimes: PrayerTime): WidgetPrayerDay {
+  return {
+    fajr: prayerTimes.Fajr,
+    dhuhr: prayerTimes.Dhuhr,
+    asr: prayerTimes.Asr,
+    maghrib: prayerTimes.Maghrib,
+    isha: prayerTimes.Isha,
+  }
+}
+
+function formatWidgetDate(
+  date: Date,
+  timezone: string,
+  calendar?: 'islamic-umalqura'
+): string {
+  try {
+    const locale = calendar ? `en-US-u-ca-${calendar}` : 'en-US'
+    return new Intl.DateTimeFormat(locale, {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: timezone,
+    }).format(date)
+  } catch {
+    return ''
+  }
+}
+
+async function syncNativePrayerCache(
+  prayerTimes: PrayerTime,
+  location: LocationData,
+  method: CalculationMethodId,
+  madhab: MadhabId,
+  timezone: string
+): Promise<void> {
+  if (!Capacitor.isNativePlatform()) return
+
+  const now = new Date()
+  const schedule: Record<string, WidgetPrayerDay> = {}
+
+  for (let dayOffset = 0; dayOffset < 14; dayOffset++) {
+    const date = new Date(now)
+    date.setDate(date.getDate() + dayOffset)
+    const key = date.toLocaleDateString('sv-SE')
+
+    if (dayOffset === 0) {
+      schedule[key] = prayerDayFromTimes(prayerTimes)
+      continue
+    }
+
+    try {
+      const times = calculatePrayerTimesLocal(
+        location.lat,
+        location.lng,
+        method,
+        madhab,
+        timezone,
+        date
+      )
+      if (validatePrayerTimes(times)) schedule[key] = prayerDayFromTimes(times)
+    } catch {
+      // A shorter valid cache is safer than writing a malformed day.
+    }
+  }
+
+  const snapshot = createPrayerWidgetSnapshot({
+    generatedAt: now.toISOString(),
+    locationLabel: location.city || '',
+    timezone,
+    gregorianDate: formatWidgetDate(now, timezone),
+    hijriDate: formatWidgetDate(now, timezone, 'islamic-umalqura'),
+    prayers: createPrayerOccurrences(schedule),
+  })
+
+  if (!snapshot) return
+
+  const today = schedule[now.toLocaleDateString('sv-SE')]
+  const writes: Promise<void>[] = [
+    updatePrayerWidget({
+      name: snapshot.nextPrayer.name,
+      time: snapshot.nextPrayer.time,
+      targetTime: snapshot.nextPrayer.timestamp,
+      updatedAt: snapshot.generatedAt,
+    }),
+    updatePrayerWidgetSnapshot(snapshot),
+    updatePrayerSchedule({ schedule, updatedAt: snapshot.generatedAt }),
+  ]
+
+  if (today) {
+    writes.push(updateAllPrayersWidget({
+      fajr: to12Hour(today.fajr),
+      dhuhr: to12Hour(today.dhuhr),
+      asr: to12Hour(today.asr),
+      maghrib: to12Hour(today.maghrib),
+      isha: to12Hour(today.isha),
+      fajr24: today.fajr,
+      dhuhr24: today.dhuhr,
+      asr24: today.asr,
+      maghrib24: today.maghrib,
+      isha24: today.isha,
+      nextPrayer: snapshot.nextPrayer.name,
+      updatedAt: snapshot.generatedAt,
+    }))
+  }
+
+  await Promise.all(writes)
+}
 
 export function usePrayerTimes(): UsePrayerTimesResult {
   const { profile } = useAuth()
@@ -364,76 +478,10 @@ export function usePrayerTimes(): UsePrayerTimesResult {
         error: null,
       })
 
-      // Push prayer data to native widgets (once per fetch, not every second)
-      if (nextPrayer && prayerTimes) {
-        const now = new Date()
-        const [th, tm] = nextPrayer.time.split(':').map(Number)
-        const targetDate = new Date(now)
-        targetDate.setHours(th, tm, 0, 0)
-        if (nextPrayer.isTomorrow) {
-          targetDate.setDate(targetDate.getDate() + 1)
-        }
-
-        updatePrayerWidget({
-          name: nextPrayer.name,
-          time: to12Hour(nextPrayer.time),
-          targetTime: targetDate.toISOString(),
-          updatedAt: now.toISOString(),
-        }).catch(() => {/* non-critical */})
-
-        updateAllPrayersWidget({
-          fajr: to12Hour(prayerTimes.Fajr),
-          dhuhr: to12Hour(prayerTimes.Dhuhr),
-          asr: to12Hour(prayerTimes.Asr),
-          maghrib: to12Hour(prayerTimes.Maghrib),
-          isha: to12Hour(prayerTimes.Isha),
-          fajr24: prayerTimes.Fajr,
-          dhuhr24: prayerTimes.Dhuhr,
-          asr24: prayerTimes.Asr,
-          maghrib24: prayerTimes.Maghrib,
-          isha24: prayerTimes.Isha,
-          nextPrayer: nextPrayer.name,
-          updatedAt: now.toISOString(),
-        }).catch(() => {/* non-critical */})
-      }
-
-      // Write config + 14-day schedule so widget extensions can self-compute prayer times
-      if (location) {
-        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-        updateWidgetConfig({
-          lat: String(location.lat),
-          lng: String(location.lng),
-          calculationMethod: method,
-          madhab,
-          timezone,
-          updatedAt: new Date().toISOString(),
-        }).catch(() => {/* non-critical */})
-
-        // Compute and store next 14 days as Strategy A fallback
-        const schedule: Record<string, { fajr: string; dhuhr: string; asr: string; maghrib: string; isha: string }> = {}
-        const scheduleNow = new Date()
-        for (let i = 0; i < 14; i++) {
-          const date = new Date(scheduleNow.getTime() + i * 24 * 60 * 60 * 1000)
-          try {
-            const times = calculatePrayerTimesLocal(location.lat, location.lng, method, madhab, timezone, date)
-            if (validatePrayerTimes(times)) {
-              const key = date.toLocaleDateString('sv-SE')  // YYYY-MM-DD in local time
-              schedule[key] = {
-                fajr: times.Fajr,
-                dhuhr: times.Dhuhr,
-                asr: times.Asr,
-                maghrib: times.Maghrib,
-                isha: times.Isha,
-              }
-            }
-          } catch {
-            // skip this day
-          }
-        }
-        if (Object.keys(schedule).length > 0) {
-          updatePrayerSchedule({ schedule, updatedAt: new Date().toISOString() }).catch(() => {/* non-critical */})
-        }
-      }
+      // Cache app-calculated prayer occurrences for native widgets. The native
+      // surfaces select by timestamp; they never receive precise coordinates.
+      syncNativePrayerCache(prayerTimes, location, method, madhab, timezone)
+        .catch(() => {/* non-critical */})
 
       if (qiblaData && location) {
         // compassDirection is added by our API route but not typed on QiblaData
@@ -600,6 +648,9 @@ export function usePrayerTimes(): UsePrayerTimesResult {
           error: null,
         }))
 
+        syncNativePrayerCache(prayerTimes, newLocation, method, madhab, timezone)
+          .catch(() => {/* non-critical */})
+
         if (qiblaData) {
           const compassDir = (qiblaData as unknown as { compassDirection?: string }).compassDirection || ''
           updateQiblaWidget({
@@ -752,4 +803,3 @@ export function usePrayerTimes(): UsePrayerTimesResult {
     updateMadhab,
   }
 }
-

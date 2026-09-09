@@ -15,6 +15,10 @@
  */
 
 import { Capacitor } from '@capacitor/core'
+import {
+  PRAYER_WIDGET_SNAPSHOT_KEY,
+  type PrayerWidgetSnapshot,
+} from '@/lib/widgetSnapshot'
 
 // --------------------------------------------------------------------------
 // Types
@@ -179,6 +183,11 @@ async function setAll(pairs: Record<string, string>): Promise<void> {
   await Promise.all(Object.entries(pairs).map(([key, value]) => set(key, value)))
 }
 
+async function removeAll(keys: string[]): Promise<void> {
+  const { Preferences } = await import('@capacitor/preferences')
+  await Promise.all(keys.map((key) => Preferences.remove({ key })))
+}
+
 /** Convert "HH:MM" (24hr) to "H:MM AM/PM" (12hr) */
 export function to12Hour(time24: string): string {
   const parts = time24.split(':')
@@ -226,6 +235,31 @@ export async function updatePrayerWidget(data: PrayerWidgetData): Promise<void> 
     })
   } catch (err) {
     console.warn('[widgetBridge] updatePrayerWidget failed:', err)
+  }
+}
+
+/**
+ * Write the versioned prayer cache used by both native widget implementations.
+ * Precise coordinates and account data are intentionally excluded. Removing the
+ * former config keys migrates existing Android installs away from native prayer
+ * calculation; iOS also purges its mirrored App Group copy in AppDelegate.
+ */
+export async function updatePrayerWidgetSnapshot(
+  snapshot: PrayerWidgetSnapshot
+): Promise<void> {
+  if (!isNative()) return
+  try {
+    await set(PRAYER_WIDGET_SNAPSHOT_KEY, JSON.stringify(snapshot))
+    await removeAll([
+      'widget_config_lat',
+      'widget_config_lng',
+      'widget_config_method',
+      'widget_config_madhab',
+      'widget_config_timezone',
+      'widget_config_update',
+    ])
+  } catch (err) {
+    console.warn('[widgetBridge] updatePrayerWidgetSnapshot failed:', err)
   }
 }
 
