@@ -50,9 +50,22 @@ export function HadithLanguageSelector({
 
   return (
     <div className="flex items-center gap-2">
-      <Languages className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+      {/* Visible text label so the control is not behind an unnamed affordance
+          (Requirement 8.7). The icon stays decorative alongside the label. */}
+      <label
+        htmlFor="hadith-reading-language"
+        className="type-caption flex items-center gap-1.5 text-text-secondary"
+      >
+        <Languages className="h-4 w-4" aria-hidden="true" />
+        Language
+      </label>
       <Select value={value} onValueChange={onValueChange} disabled={disabled}>
-        <SelectTrigger className="w-[200px]" aria-label="Select hadith translation language">
+        <SelectTrigger
+          id="hadith-reading-language"
+          className="w-[160px]"
+          aria-label="Select hadith translation language"
+        >
+          {/* Persistent visible active-selection state (Requirement 8.8) */}
           <SelectValue>{currentLanguage?.displayName || 'English'}</SelectValue>
         </SelectTrigger>
         <SelectContent>

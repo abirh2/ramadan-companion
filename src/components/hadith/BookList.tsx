@@ -1,8 +1,7 @@
 'use client'
 
-import Link from 'next/link'
-import { Card } from '@/components/ui/card'
 import type { HadithBook } from '@/types/hadith.types'
+import { CollectionRow } from './CollectionRow'
 
 interface BookListProps {
   books: HadithBook[]
@@ -10,10 +9,11 @@ interface BookListProps {
 }
 
 export function BookList({ books, searchQuery }: BookListProps) {
-  // Filter books based on search query
+  // Filter books based on search query (case-insensitive substring predicate,
+  // preserved verbatim from the pre-redesign implementation).
   const filteredBooks = books.filter(book => {
     if (!searchQuery.trim()) return true
-    
+
     const query = searchQuery.toLowerCase()
     return (
       book.bookName.toLowerCase().includes(query) ||
@@ -32,47 +32,19 @@ export function BookList({ books, searchQuery }: BookListProps) {
     )
   }
 
+  // One grouped surface of CollectionRow items. Rows are separated by hairline
+  // dividers, with no divider before the first row or after the last. Collections
+  // render in the order the data source returns.
   return (
-    <div className="space-y-3">
-      {filteredBooks.map((book) => (
-        <Link key={book.id} href={`/hadith/${book.bookSlug}`}>
-          <Card className="p-5 hover:bg-accent transition-colors cursor-pointer">
-            <div className="flex items-start justify-between gap-4">
-              {/* Left: Book Info */}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-lg mb-1">{book.bookName}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {book.writerName}
-                </p>
-                {book.writerDeath && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    d. {book.writerDeath}
-                  </p>
-                )}
-              </div>
-
-              {/* Right: Arrow indicator */}
-              <div className="flex-shrink-0 text-muted-foreground">
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </div>
-            </div>
-          </Card>
-        </Link>
+    <div className="surface-grouped overflow-hidden">
+      {filteredBooks.map((book, index) => (
+        <div
+          key={book.id}
+          className={index === 0 ? '' : 'border-t border-border-subtle'}
+        >
+          <CollectionRow book={book} />
+        </div>
       ))}
     </div>
   )
 }
-

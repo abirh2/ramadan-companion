@@ -34,6 +34,10 @@ export default async function BookChaptersPage({ params }: PageProps) {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ')
 
+  // Use a fixed fallback label when the derived name is empty rather than
+  // rendering an empty heading.
+  const headingLabel = bookNameDisplay.trim() || 'Collection'
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-6xl">
       <div className="mb-6">
@@ -45,10 +49,7 @@ export default async function BookChaptersPage({ params }: PageProps) {
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           <span className="text-sm">Back to Collections</span>
         </Link>
-        <h1 className="text-3xl font-bold mb-2">{bookNameDisplay}</h1>
-        <p className="text-muted-foreground">
-          Browse chapters and explore hadiths
-        </p>
+        <h1 className="type-page-title">{headingLabel}</h1>
       </div>
 
       <ChapterSelector bookSlug={bookSlug} />

@@ -14,10 +14,7 @@ export default function HadithBrowserPage() {
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           <span className="text-sm">Back to Home</span>
         </Link>
-        <h1 className="text-3xl font-bold mb-2">Hadith Browser</h1>
-        <p className="text-muted-foreground">
-          Explore authentic hadith collections from the major books
-        </p>
+        <h1 className="type-page-title">Hadith</h1>
       </div>
 
       <BookSelector />

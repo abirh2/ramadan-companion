@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { ArrowLeft, BookOpen, Heart, Share2, Loader2, ScrollText, Copy, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -14,9 +15,10 @@ import { TranslationSelector } from '@/components/quran/TranslationSelector'
 import { HadithLanguageSelector } from '@/components/hadith/HadithLanguageSelector'
 import { FeedbackButton } from '@/components/FeedbackButton'
 import type { QuranFavoriteData } from '@/types/quran.types'
-import type { HadithFavoriteData } from '@/types/hadith.types'
+import type { HadithFavoriteData, HadithLanguageId } from '@/types/hadith.types'
+import { HADITH_LANGUAGES } from '@/types/hadith.types'
 
-export default function QuranHadithPage() {
+function QuranHadithContent() {
   const { 
     arabic, 
     translation, 
@@ -46,6 +48,24 @@ export default function QuranHadithPage() {
     error: hadithError,
     setLanguage,
   } = useHadithOfTheDay()
+
+  // Reading-language consistency from the Daily Hadith surface (Requirement 11).
+  // When arriving via a link that carries the active reading-language as a
+  // `?lang=` query param, present hadith text in that same value using the
+  // hook's already-exposed `setLanguage`. An absent or invalid value is ignored,
+  // so the existing default/precedence applies with no error (Requirements 11.3, 11.4).
+  const searchParams = useSearchParams()
+  const langParam = searchParams.get('lang')
+  const appliedLangParamRef = useRef(false)
+  useEffect(() => {
+    if (appliedLangParamRef.current) return
+    const isValid = HADITH_LANGUAGES.some((language) => language.id === langParam)
+    if (!isValid) return
+    appliedLangParamRef.current = true
+    if (langParam !== selectedLanguage) {
+      void setLanguage(langParam as HadithLanguageId)
+    }
+  }, [langParam, selectedLanguage, setLanguage])
 
   const [shareSuccess, setShareSuccess] = useState(false)
   const [hadithShareSuccess, setHadithShareSuccess] = useState(false)
@@ -595,6 +615,19 @@ export default function QuranHadithPage() {
       {/* Login Modal */}
       <LoginModal open={showLoginModal} onOpenChange={setShowLoginModal} />
     </div>
+  )
+}
+
+export default function QuranHadithPage() {
+  // useSearchParams() must be wrapped in a Suspense boundary for the App Router.
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto flex justify-center px-4 py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    }>
+      <QuranHadithContent />
+    </Suspense>
   )
 }
 

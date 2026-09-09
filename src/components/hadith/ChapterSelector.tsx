@@ -1,6 +1,7 @@
 'use client'
 
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { Search } from 'lucide-react'
 import { ChapterList } from './ChapterList'
 import { useHadithChapters } from '@/hooks/useHadithChapters'
@@ -10,50 +11,62 @@ interface ChapterSelectorProps {
 }
 
 export function ChapterSelector({ bookSlug }: ChapterSelectorProps) {
-  const { 
-    filteredChapters, 
-    loading, 
-    error, 
-    searchQuery, 
-    setSearchQuery 
+  const {
+    filteredChapters,
+    loading,
+    error,
+    refetch,
+    searchQuery,
+    setSearchQuery,
   } = useHadithChapters({ bookSlug })
 
   if (loading) {
     return (
-      <div className="text-center py-12">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        <p className="mt-4 text-muted-foreground">Loading chapters...</p>
+      <div className="py-12 text-center">
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-border-subtle border-t-primary" />
+        <p className="mt-4 text-secondary">Loading chapters...</p>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <p className="text-destructive mb-2">Error loading chapters</p>
-        <p className="text-sm text-muted-foreground">{error}</p>
+      <div className="py-12 text-center">
+        <p className="type-section-title mb-1 text-primary">
+          Chapters could not be loaded
+        </p>
+        <p className="mb-4 text-sm text-secondary">{error}</p>
+        <Button variant="outline" onClick={() => refetch()}>
+          Retry
+        </Button>
       </div>
     )
   }
 
   return (
     <div className="space-y-4">
-      {/* Search */}
-      <div className="relative flex-1 w-full max-w-md mx-auto">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          type="text"
-          placeholder="Search chapters..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
-        />
+      {/* Chapter search — a single sticky row above the list, visible while scrolling */}
+      <div className="sticky top-0 z-10 -mx-1 bg-canvas px-1 py-2">
+        <div className="relative mx-auto w-full max-w-md">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-tertiary"
+            aria-hidden="true"
+          />
+          <Input
+            type="text"
+            placeholder="Search chapters..."
+            aria-label="Search chapters"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
       </div>
 
       {/* Chapter List */}
       {filteredChapters.length === 0 && searchQuery ? (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">
+        <div className="py-12 text-center">
+          <p className="text-secondary">
             No chapters found matching &quot;{searchQuery}&quot;
           </p>
         </div>
@@ -63,4 +76,3 @@ export function ChapterSelector({ bookSlug }: ChapterSelectorProps) {
     </div>
   )
 }
-

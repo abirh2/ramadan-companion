@@ -138,6 +138,9 @@ export function DailyReflection() {
           )}
 
           {!loading && !error && selected === 'hadith' && hadith.hadithArabic && hadithTranslation && (
+            /* The detailed-reading link carries the active reading-language so the
+               destination presents hadith text in the same value that was active
+               here at the moment of activation (Requirement 11.3). */
             <article aria-label="Hadith reflection of the day">
               <p className="type-arabic text-right text-text-primary" lang="ar" dir="rtl">
                 {hadith.hadithArabic}
@@ -149,7 +152,7 @@ export function DailyReflection() {
                   {hadith.book} {hadith.hadithNumber}
                   {hadith.status ? ` · ${hadith.status}` : ''}
                 </p>
-                <Link href="/quran-hadith" className="type-nav inline-flex min-h-touch items-center gap-1.5 rounded-control px-2 text-teal hover:bg-teal-muted">
+                <Link href={`/quran-hadith?lang=${hadith.selectedLanguage}`} className="type-nav inline-flex min-h-touch items-center gap-1.5 rounded-control px-2 text-teal hover:bg-teal-muted">
                   Continue reading
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
