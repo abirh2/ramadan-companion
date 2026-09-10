@@ -1,6 +1,7 @@
 package com.deencompanion.app.widgets
 
 import android.content.Context
+import org.json.JSONArray
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -14,9 +15,31 @@ import java.util.TimeZone
  */
 object WidgetPrefs {
     private const val PREFS_FILE = "CapacitorStorage"
+    private val deprecatedPrivateKeys = arrayOf(
+        "widget_config_lat",
+        "widget_config_lng",
+        "widget_config_method",
+        "widget_config_madhab",
+        "widget_config_timezone",
+        "widget_config_update",
+        "widget_charity_monthly",
+        "widget_charity_yearly",
+        "widget_charity_currency",
+        "widget_charity_update"
+    )
 
     private fun prefs(context: Context) =
         context.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE)
+
+    @JvmStatic
+    fun purgeDeprecatedPrivateData(context: Context) {
+        val store = prefs(context)
+        val presentKeys = deprecatedPrivateKeys.filter(store::contains)
+        if (presentKeys.isEmpty()) return
+        store.edit().apply {
+            presentKeys.forEach { remove(it) }
+        }.apply()
+    }
 
     // --- Verse (Quran only) ---
     fun verseArabic(context: Context): String =
@@ -115,7 +138,27 @@ object WidgetPrefs {
      * Native widgets intentionally never receive coordinates or calculation settings.
      */
     fun prayerSnapshot(context: Context): PrayerSnapshot? {
-        val raw = prefs(context).getString("widget_prayer_snapshot_v1", null) ?: return null
+        purgeDeprecatedPrivateData(context)
+        val now = System.currentTimeMillis()
+        val normalized = parseNormalizedSnapshot(
+            prefs(context).getString("widget_prayer_snapshot_v1", null)
+        )
+        val legacyRevision = parseIsoDate(
+            prefs(context).getString("widget_prayer_schedule_update", "") ?: ""
+        )
+
+        if (normalized != null && !normalized.isStale(now) &&
+            (legacyRevision == null || normalized.generatedAt >= legacyRevision)) {
+            return normalized
+        }
+
+        val migrated = legacyPrayerSnapshot(context, now, legacyRevision) ?: return normalized
+        persistMigratedSnapshot(context, migrated)
+        return migrated
+    }
+
+    private fun parseNormalizedSnapshot(raw: String?): PrayerSnapshot? {
+        raw ?: return null
         if (raw.length > 64 * 1024) return null
 
         return try {
@@ -154,6 +197,127 @@ object WidgetPrefs {
         } catch (_: Exception) {
             null
         }
+    }
+
+    /**
+     * Converts the deployed web bundle's app-computed schedule into the v1
+     * cache. This is data normalization only; native code never calculates
+     * prayer times or stores the legacy coordinate/config keys.
+     */
+    private fun legacyPrayerSnapshot(
+        context: Context,
+        now: Long,
+        legacyRevision: Long?
+    ): PrayerSnapshot? {
+        val store = prefs(context)
+        val rawSchedule = store.getString("widget_prayer_schedule", null)
+        val prayers = mutableListOf<CachedPrayer>()
+
+        if (!rawSchedule.isNullOrBlank() && rawSchedule.length <= 64 * 1024) {
+            try {
+                val schedule = JSONObject(rawSchedule)
+                if (schedule.length() <= 14) {
+                    val parser = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US).apply {
+                        timeZone = TimeZone.getDefault()
+                        isLenient = false
+                    }
+                    val display = SimpleDateFormat("h:mm a", Locale.US).apply {
+                        timeZone = TimeZone.getDefault()
+                    }
+                    val dayKeys = buildList {
+                        val keys = schedule.keys()
+                        while (keys.hasNext()) add(keys.next())
+                    }.sorted()
+                    val fields = arrayOf(
+                        "Fajr" to "fajr",
+                        "Dhuhr" to "dhuhr",
+                        "Asr" to "asr",
+                        "Maghrib" to "maghrib",
+                        "Isha" to "isha"
+                    )
+
+                    for (dayKey in dayKeys) {
+                        if (!dayKey.matches(Regex("\\d{4}-\\d{2}-\\d{2}"))) continue
+                        val day = schedule.optJSONObject(dayKey) ?: continue
+                        for ((name, field) in fields) {
+                            val time = day.optString(field)
+                            if (!time.matches(Regex("\\d{1,2}:\\d{2}"))) continue
+                            val timestamp = try {
+                                parser.parse("$dayKey $time")?.time
+                            } catch (_: Exception) {
+                                null
+                            } ?: continue
+                            if (timestamp > now) {
+                                prayers.add(CachedPrayer(name, display.format(Date(timestamp)), timestamp, dayKey))
+                            }
+                        }
+                    }
+                }
+            } catch (_: Exception) {
+                // Fall through to the single-next-prayer legacy cache.
+            }
+        }
+
+        if (prayers.isEmpty()) {
+            val name = store.getString("widget_prayer_name", "") ?: ""
+            val displayTime = store.getString("widget_prayer_time", "") ?: ""
+            val timestamp = parseIsoDate(store.getString("widget_prayer_target_time", "") ?: "")
+            if (name in setOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha") &&
+                displayTime.isNotBlank() && timestamp != null && timestamp > now) {
+                val dayKey = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
+                    timeZone = TimeZone.getDefault()
+                }.format(Date(timestamp))
+                prayers.add(CachedPrayer(name, displayTime.take(16), timestamp, dayKey))
+            }
+        }
+
+        val sorted = prayers.sortedBy { it.timestamp }.take(70)
+        if (sorted.isEmpty()) return null
+        val gregorianDate = SimpleDateFormat("MMMM d, yyyy", Locale.US).apply {
+            timeZone = TimeZone.getDefault()
+        }.format(Date(now))
+        return PrayerSnapshot(
+            generatedAt = legacyRevision ?: now,
+            expiresAt = sorted.last().timestamp + 6 * 60 * 60 * 1000,
+            gregorianDate = gregorianDate,
+            hijriDate = "",
+            prayers = sorted
+        )
+    }
+
+    private fun persistMigratedSnapshot(context: Context, snapshot: PrayerSnapshot) {
+        val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.US).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }
+        val prayerArray = JSONArray()
+        snapshot.prayers.forEach { prayer ->
+            prayerArray.put(JSONObject().apply {
+                put("name", prayer.name)
+                put("time", prayer.displayTime)
+                put("timestamp", formatter.format(Date(prayer.timestamp)))
+                put("dayKey", prayer.dayKey)
+            })
+        }
+        val next = snapshot.nextPrayer(System.currentTimeMillis()) ?: snapshot.prayers.first()
+        val nextObject = JSONObject().apply {
+            put("name", next.name)
+            put("time", next.displayTime)
+            put("timestamp", formatter.format(Date(next.timestamp)))
+            put("dayKey", next.dayKey)
+        }
+        val json = JSONObject().apply {
+            put("version", 1)
+            put("generatedAt", formatter.format(Date(snapshot.generatedAt)))
+            put("expiresAt", formatter.format(Date(snapshot.expiresAt)))
+            put("locationLabel", (prefs(context).getString("widget_qibla_city", "") ?: "").take(80))
+            put("timezone", TimeZone.getDefault().id)
+            put("gregorianDate", snapshot.gregorianDate)
+            put("hijriDate", snapshot.hijriDate)
+            put("prayers", prayerArray)
+            put("nextPrayer", nextObject)
+            put("deepLink", "/times")
+        }
+        prefs(context).edit().putString("widget_prayer_snapshot_v1", json.toString()).apply()
     }
 
     private fun parseIsoDate(value: String): Long? {

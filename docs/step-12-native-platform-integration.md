@@ -58,6 +58,8 @@ The app writes one bounded JSON object:
 
 The TypeScript app remains the sole prayer-calculation source. Native readers validate version, size, timestamps, prayer names, date keys, and expiry before display. The snapshot contains no latitude/longitude, account identifiers, credentials, or donation information. Old coordinate/config and charity-total keys are removed from Preferences and App Group storage on native launch and subsequent prayer writes.
 
+The native shells also include a temporary compatibility normalizer for the deployed web bundle, which still writes the earlier app-computed 14-day schedule keys. It converts those cached results into the same v1 snapshot without performing prayer calculation natively. This keeps store/simulator builds functional before the updated web bundle is deployed and can be removed after the deployment migration window.
+
 ## 5. Refresh behavior
 
 - App launch/location/method/madhab changes regenerate the multi-day snapshot.
@@ -99,4 +101,5 @@ Local notification `extra.url` and push notification `data.url` now use the same
 - Repository-wide ESLint: pre-existing baseline failure (it also scans vendored skill scripts and reports existing application/test debt); no Step 12 touched-file lint errors.
 - Capacitor Android copy/update and iOS CocoaPods sync: passed.
 - iOS CocoaPods workspace simulator build: passed; warnings are from existing Capacitor plugin deprecations/build phases.
-- Android debug APK build: passed after the final sync and manifest edits, using Java 21.
+- Android debug APK build and unit tests: passed using Java 21; the Kotlin Android plugin is enabled so the native widget providers are compiled into the app.
+- Simulator regression check: a legacy schedule was converted into a 69-entry v1 snapshot with a future next prayer/expiry and no private data. The app launched successfully after guarding the synchronous `UserDefaults.didChangeNotification` mirror against recursive entry.
