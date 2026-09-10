@@ -146,15 +146,27 @@ object WidgetPrefs {
         val legacyRevision = parseIsoDate(
             prefs(context).getString("widget_prayer_schedule_update", "") ?: ""
         )
+        val todayKey = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
+            timeZone = TimeZone.getDefault()
+        }.format(Date(now))
 
         if (normalized != null && !normalized.isStale(now) &&
-            (legacyRevision == null || normalized.generatedAt >= legacyRevision)) {
+            (legacyRevision == null || normalized.generatedAt >= legacyRevision) &&
+            !needsFullDayRemigration(normalized, now, todayKey)
+        ) {
             return normalized
         }
 
         val migrated = legacyPrayerSnapshot(context, now, legacyRevision) ?: return normalized
         persistMigratedSnapshot(context, migrated)
         return migrated
+    }
+
+    /** Future-only v1 caches can't fill Daily Prayers; remigrate while legacy schedule exists. */
+    private fun needsFullDayRemigration(snapshot: PrayerSnapshot, now: Long, todayKey: String): Boolean {
+        val next = snapshot.nextPrayer(now) ?: return false
+        if (next.dayKey != todayKey) return false
+        return snapshot.prayersFor(todayKey).size < 5
     }
 
     private fun parseNormalizedSnapshot(raw: String?): PrayerSnapshot? {
@@ -236,6 +248,14 @@ object WidgetPrefs {
                         "Isha" to "isha"
                     )
 
+                    val dayStart = java.util.Calendar.getInstance().apply {
+                        timeInMillis = now
+                        set(java.util.Calendar.HOUR_OF_DAY, 0)
+                        set(java.util.Calendar.MINUTE, 0)
+                        set(java.util.Calendar.SECOND, 0)
+                        set(java.util.Calendar.MILLISECOND, 0)
+                    }.timeInMillis
+
                     for (dayKey in dayKeys) {
                         if (!dayKey.matches(Regex("\\d{4}-\\d{2}-\\d{2}"))) continue
                         val day = schedule.optJSONObject(dayKey) ?: continue
@@ -247,7 +267,8 @@ object WidgetPrefs {
                             } catch (_: Exception) {
                                 null
                             } ?: continue
-                            if (timestamp > now) {
+                            // Keep full current day so Daily Prayers can show past times.
+                            if (timestamp >= dayStart) {
                                 prayers.add(CachedPrayer(name, display.format(Date(timestamp)), timestamp, dayKey))
                             }
                         }

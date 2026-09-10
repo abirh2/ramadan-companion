@@ -63,6 +63,12 @@ function format12Hour(hours: number, minutes: number): string {
   return `${hour12}:${String(minutes).padStart(2, '0')} ${period}`
 }
 
+/** Local calendar day containing `iso`, matching createPrayerOccurrences timestamps. */
+function startOfLocalDayMs(iso: string): number {
+  const date = new Date(iso)
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
+}
+
 /** Converts the app-owned local schedule into absolute occurrences for native readers. */
 export function createPrayerOccurrences(
   schedule: Record<string, WidgetPrayerDay>
@@ -111,12 +117,17 @@ export function createPrayerOccurrences(
  * Produces the privacy-minimal, versioned contract consumed by native widgets.
  * Prayer calculation stays in the web app; native code only selects entries by
  * timestamp and schedules platform-appropriate refreshes.
+ *
+ * Includes the full current local day (past + future) so daily-schedule widgets
+ * can render all five times, plus remaining future days for next-prayer timelines.
  */
 export function createPrayerWidgetSnapshot(
   input: CreatePrayerWidgetSnapshotInput
 ): PrayerWidgetSnapshot | null {
   const generatedAtMs = Date.parse(input.generatedAt)
   if (!Number.isFinite(generatedAtMs)) return null
+
+  const dayStartMs = startOfLocalDayMs(input.generatedAt)
 
   const prayers = input.prayers
     .filter((prayer) => {
@@ -126,13 +137,13 @@ export function createPrayerWidgetSnapshot(
         prayer.time.trim().length > 0 &&
         /^\d{4}-\d{2}-\d{2}$/.test(prayer.dayKey) &&
         Number.isFinite(timestamp) &&
-        timestamp > generatedAtMs
+        timestamp >= dayStartMs
       )
     })
     .map((prayer) => ({ ...prayer, time: prayer.time.trim() }))
     .sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))
 
-  const nextPrayer = prayers[0]
+  const nextPrayer = prayers.find((prayer) => Date.parse(prayer.timestamp) > generatedAtMs)
   const lastPrayer = prayers.at(-1)
   if (!nextPrayer || !lastPrayer) return null
 

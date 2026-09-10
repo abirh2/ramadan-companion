@@ -209,11 +209,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
            let generatedAt = parseISO8601(existing.generatedAt),
            let expiresAt = parseISO8601(existing.expiresAt),
            generatedAt >= legacyRevision,
-           expiresAt > now {
+           expiresAt > now,
+           !needsFullDayRemigration(existing, now: now) {
             return false
         }
 
-        var prayers = migratedLegacySchedule(from: standard, after: now)
+        var prayers = migratedLegacySchedule(from: standard, now: now)
         if prayers.isEmpty,
            let name = prefixedString(forKey: "widget_prayer_name", in: standard),
            let time = prefixedString(forKey: "widget_prayer_time", in: standard),
@@ -229,7 +230,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             )]
         }
 
-        guard let nextPrayer = prayers.first,
+        guard let nextPrayer = prayers.first(where: {
+                guard let date = parseISO8601($0.timestamp) else { return false }
+                return date > now
+              }),
               let lastTimestamp = prayers.last.flatMap({ parseISO8601($0.timestamp) })
         else { return false }
 
@@ -272,13 +276,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-    private func migratedLegacySchedule(from standard: UserDefaults, after now: Date) -> [MigratedPrayerOccurrence] {
+    /// Future-only v1 caches can't fill Daily Prayers; remigrate while legacy schedule exists.
+    private func needsFullDayRemigration(_ snapshot: MigratedPrayerSnapshot, now: Date) -> Bool {
+        let todayKey = dayKeyFormatter.string(from: now)
+        guard let next = snapshot.prayers
+            .compactMap({ prayer -> (MigratedPrayerOccurrence, Date)? in
+                guard let date = parseISO8601(prayer.timestamp) else { return nil }
+                return (prayer, date)
+            })
+            .sorted(by: { $0.1 < $1.1 })
+            .first(where: { $0.1 > now })
+        else { return false }
+
+        if next.0.dayKey != todayKey { return false }
+        return snapshot.prayers.filter { $0.dayKey == todayKey }.count < 5
+    }
+
+    private func migratedLegacySchedule(from standard: UserDefaults, now: Date) -> [MigratedPrayerOccurrence] {
         guard let json = prefixedString(forKey: "widget_prayer_schedule", in: standard),
               let data = json.data(using: .utf8),
               data.count <= 64 * 1024,
               let schedule = try? JSONDecoder().decode([String: LegacyPrayerDay].self, from: data),
               schedule.count <= 14
         else { return [] }
+
+        let dayStart = Calendar.current.startOfDay(for: now)
 
         let parser = DateFormatter()
         parser.locale = Locale(identifier: "en_US_POSIX")
@@ -306,9 +328,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 ("Isha", day.isha),
             ]
             for (name, time) in values {
+                // Keep full current day so Daily Prayers can show past times.
                 guard time.range(of: #"^\d{1,2}:\d{2}$"#, options: .regularExpression) != nil,
                       let date = parser.date(from: "\(dayKey) \(time)"),
-                      date > now
+                      date >= dayStart
                 else { continue }
                 result.append(MigratedPrayerOccurrence(
                     name: name,
@@ -318,7 +341,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 ))
             }
         }
-        return result.sorted { $0.timestamp < $1.timestamp }.prefix(70).map { $0 }
+        return result.sorted {
+            (parseISO8601($0.timestamp) ?? .distantPast) < (parseISO8601($1.timestamp) ?? .distantPast)
+        }.prefix(70).map { $0 }
     }
 
     private func prefixedString(forKey key: String, in defaults: UserDefaults) -> String? {
