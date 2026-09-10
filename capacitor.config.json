@@ -11,12 +11,14 @@
   },
   "plugins": {
     "SplashScreen": {
-      "launchShowDuration": 2000,
+      "launchShowDuration": 500,
       "backgroundColor": "#0f3d3e",
-      "androidScaleType": "CENTER_CROP",
+      "androidScaleType": "CENTER_INSIDE",
+      "launchFadeOutDuration": 150,
       "showSpinner": false
     },
     "LocalNotifications": {
+      "smallIcon": "ic_stat_deen",
       "iconColor": "#0f3d3e"
     },
     "Preferences": {
@@ -24,4 +26,3 @@
     }
   }
 }
-

@@ -11,6 +11,7 @@ import { SkipLink } from "@/components/SkipLink";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { NativePlatformIntegration } from "@/components/NativePlatformIntegration";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -66,6 +67,7 @@ export default function RootLayout({
         <SkipLink />
         <ThemeProvider>
           <AuthProvider>
+            <NativePlatformIntegration />
             <Header />
             <main id="main-content" className="app-main flex-1" tabIndex={-1}>
               {children}

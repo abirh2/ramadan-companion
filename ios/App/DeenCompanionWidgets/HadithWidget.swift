@@ -170,7 +170,7 @@ struct HadithWidgetEntryView: View {
                 HadithMediumView(entry: entry)
             }
         }
-        .widgetURL(URL(string: "deencompanion:///hadith"))
+        .widgetURL(URL(string: "com.deencompanion.app:///hadith"))
     }
 }
 

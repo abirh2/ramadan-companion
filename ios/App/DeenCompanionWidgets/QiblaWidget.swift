@@ -138,7 +138,7 @@ struct QiblaWidgetEntryView: View {
 
     var body: some View {
         QiblaSmallView(entry: entry)
-            .widgetURL(URL(string: "deencompanion:///qibla"))
+            .widgetURL(URL(string: "com.deencompanion.app:///times"))
     }
 }
 

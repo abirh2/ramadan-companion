@@ -27,12 +27,8 @@ import {
 import { calculatePrayerTimesLocal, validatePrayerTimes } from '@/lib/prayerTimes'
 import { getDefaultCalculationMethodByCountry, extractCountryFromCity } from '@/lib/calculationMethod'
 import {
-  updatePrayerWidget,
-  updateAllPrayersWidget,
   updateQiblaWidget,
-  updatePrayerSchedule,
   updatePrayerWidgetSnapshot,
-  to12Hour,
 } from '@/lib/widgetBridge'
 import {
   createPrayerOccurrences,
@@ -119,36 +115,7 @@ async function syncNativePrayerCache(
 
   if (!snapshot) return
 
-  const today = schedule[now.toLocaleDateString('sv-SE')]
-  const writes: Promise<void>[] = [
-    updatePrayerWidget({
-      name: snapshot.nextPrayer.name,
-      time: snapshot.nextPrayer.time,
-      targetTime: snapshot.nextPrayer.timestamp,
-      updatedAt: snapshot.generatedAt,
-    }),
-    updatePrayerWidgetSnapshot(snapshot),
-    updatePrayerSchedule({ schedule, updatedAt: snapshot.generatedAt }),
-  ]
-
-  if (today) {
-    writes.push(updateAllPrayersWidget({
-      fajr: to12Hour(today.fajr),
-      dhuhr: to12Hour(today.dhuhr),
-      asr: to12Hour(today.asr),
-      maghrib: to12Hour(today.maghrib),
-      isha: to12Hour(today.isha),
-      fajr24: today.fajr,
-      dhuhr24: today.dhuhr,
-      asr24: today.asr,
-      maghrib24: today.maghrib,
-      isha24: today.isha,
-      nextPrayer: snapshot.nextPrayer.name,
-      updatedAt: snapshot.generatedAt,
-    }))
-  }
-
-  await Promise.all(writes)
+  await updatePrayerWidgetSnapshot(snapshot)
 }
 
 export function usePrayerTimes(): UsePrayerTimesResult {
@@ -181,7 +148,6 @@ export function usePrayerTimes(): UsePrayerTimesResult {
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const mountedRef = useRef(true)
   const lastDateRef = useRef<string>(new Date().toDateString())
-  const lastPrayerNameRef = useRef<string | null>(null)
 
   // Calculate next prayer and countdown
   const calculateNextPrayer = useCallback((
@@ -462,8 +428,6 @@ export function usePrayerTimes(): UsePrayerTimesResult {
       // Calculate next prayer with tomorrow's times if available
       const nextPrayer = calculateNextPrayer(prayerTimes, tomorrowTimes)
       
-      // Initialize lastPrayerNameRef
-      lastPrayerNameRef.current = nextPrayer?.name || null
 
       setState({
         prayerTimes,
@@ -514,42 +478,6 @@ export function usePrayerTimes(): UsePrayerTimesResult {
         
         const updatedNextPrayer = calculateNextPrayer(prayerTimes!, tomorrowTimes)
         
-        const currentPrayerName = updatedNextPrayer?.name || null
-        
-        // Push widget data only on prayer transitions (not every second)
-        if (currentPrayerName !== lastPrayerNameRef.current && updatedNextPrayer && prayerTimes) {
-          const now = new Date()
-          const [th, tm] = updatedNextPrayer.time.split(':').map(Number)
-          const targetDate = new Date(now)
-          targetDate.setHours(th, tm, 0, 0)
-          if (updatedNextPrayer.isTomorrow) {
-            targetDate.setDate(targetDate.getDate() + 1)
-          }
-
-          updatePrayerWidget({
-            name: updatedNextPrayer.name,
-            time: to12Hour(updatedNextPrayer.time),
-            targetTime: targetDate.toISOString(),
-            updatedAt: now.toISOString(),
-          }).catch(() => {/* non-critical */})
-
-          updateAllPrayersWidget({
-            fajr: to12Hour(prayerTimes.Fajr),
-            dhuhr: to12Hour(prayerTimes.Dhuhr),
-            asr: to12Hour(prayerTimes.Asr),
-            maghrib: to12Hour(prayerTimes.Maghrib),
-            isha: to12Hour(prayerTimes.Isha),
-            fajr24: prayerTimes.Fajr,
-            dhuhr24: prayerTimes.Dhuhr,
-            asr24: prayerTimes.Asr,
-            maghrib24: prayerTimes.Maghrib,
-            isha24: prayerTimes.Isha,
-            nextPrayer: updatedNextPrayer.name,
-            updatedAt: now.toISOString(),
-          }).catch(() => {/* non-critical */})
-        }
-
-        lastPrayerNameRef.current = currentPrayerName
         setState((prev) => ({ ...prev, nextPrayer: updatedNextPrayer }))
       }, 1000)
     } catch (error) {
@@ -570,8 +498,11 @@ export function usePrayerTimes(): UsePrayerTimesResult {
   useEffect(() => {
     mountedRef.current = true
     fetchData()
+    const handleNativeForeground = () => void fetchData()
+    window.addEventListener('deen:native-foreground', handleNativeForeground)
 
     return () => {
+      window.removeEventListener('deen:native-foreground', handleNativeForeground)
       mountedRef.current = false
       if (intervalRef.current) {
         clearInterval(intervalRef.current)

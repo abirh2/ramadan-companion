@@ -6,6 +6,7 @@ export interface WidgetPrayerOccurrence {
   name: WidgetPrayerName
   time: string
   timestamp: string
+  dayKey: string
 }
 
 export interface WidgetPrayerDay {
@@ -98,6 +99,7 @@ export function createPrayerOccurrences(
         name,
         time: format12Hour(hours, minutes),
         timestamp: timestamp.toISOString(),
+        dayKey: dateKey,
       })
     }
   }
@@ -122,6 +124,7 @@ export function createPrayerWidgetSnapshot(
       return (
         PRAYER_NAMES.has(prayer.name) &&
         prayer.time.trim().length > 0 &&
+        /^\d{4}-\d{2}-\d{2}$/.test(prayer.dayKey) &&
         Number.isFinite(timestamp) &&
         timestamp > generatedAtMs
       )

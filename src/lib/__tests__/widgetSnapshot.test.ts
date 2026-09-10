@@ -20,6 +20,7 @@ describe('createPrayerWidgetSnapshot', () => {
       name: 'Asr',
       time: '4:36 PM',
       timestamp: new Date(2026, 8, 9, 16, 36, 0, 0).toISOString(),
+      dayKey: '2026-09-09',
     })
   })
 
@@ -31,9 +32,9 @@ describe('createPrayerWidgetSnapshot', () => {
       gregorianDate: 'September 9, 2026',
       hijriDate: '27 Rabi al-Awwal 1448',
       prayers: [
-        { name: 'Maghrib', time: '7:12 PM', timestamp: '2026-09-09T23:12:00.000Z' },
-        { name: 'Asr', time: '4:36 PM', timestamp: '2026-09-09T20:36:00.000Z' },
-        { name: 'Dhuhr', time: '12:54 PM', timestamp: '2026-09-09T16:54:00.000Z' },
+        { name: 'Maghrib', time: '7:12 PM', timestamp: '2026-09-09T23:12:00.000Z', dayKey: '2026-09-09' },
+        { name: 'Asr', time: '4:36 PM', timestamp: '2026-09-09T20:36:00.000Z', dayKey: '2026-09-09' },
+        { name: 'Dhuhr', time: '12:54 PM', timestamp: '2026-09-09T16:54:00.000Z', dayKey: '2026-09-09' },
       ],
     })
 
@@ -57,16 +58,16 @@ describe('createPrayerWidgetSnapshot', () => {
       gregorianDate: 'September 9, 2026',
       hijriDate: '',
       prayers: [
-        { name: 'Fajr', time: '5:30 AM', timestamp: '2026-09-09T05:30:00.000Z' },
-        { name: 'Asr', time: '4:36 PM', timestamp: 'not-a-date' },
+        { name: 'Fajr', time: '5:30 AM', timestamp: '2026-09-09T05:30:00.000Z', dayKey: '2026-09-09' },
+        { name: 'Asr', time: '4:36 PM', timestamp: 'not-a-date', dayKey: '2026-09-09' },
         // Runtime input can still arrive from loosely typed API data.
-        { name: 'Sunrise', time: '6:42 AM', timestamp: '2026-09-10T06:42:00.000Z' },
-        { name: 'Maghrib', time: '7:12 PM', timestamp: '2026-09-09T19:12:00.000Z' },
+        { name: 'Sunrise', time: '6:42 AM', timestamp: '2026-09-10T06:42:00.000Z', dayKey: '2026-09-10' },
+        { name: 'Maghrib', time: '7:12 PM', timestamp: '2026-09-09T19:12:00.000Z', dayKey: '2026-09-09' },
       ] as never,
     })
 
     expect(snapshot?.prayers).toEqual([
-      { name: 'Maghrib', time: '7:12 PM', timestamp: '2026-09-09T19:12:00.000Z' },
+      { name: 'Maghrib', time: '7:12 PM', timestamp: '2026-09-09T19:12:00.000Z', dayKey: '2026-09-09' },
     ])
   })
 
@@ -78,7 +79,7 @@ describe('createPrayerWidgetSnapshot', () => {
       gregorianDate: 'September 9, 2026',
       hijriDate: '27 Rabi al-Awwal 1448',
       prayers: [
-        { name: 'Fajr', time: '5:30 AM', timestamp: '2026-09-09T05:30:00.000Z' },
+        { name: 'Fajr', time: '5:30 AM', timestamp: '2026-09-09T05:30:00.000Z', dayKey: '2026-09-09' },
       ],
     })
 
@@ -93,7 +94,7 @@ describe('createPrayerWidgetSnapshot', () => {
       gregorianDate: 'September 9, 2026',
       hijriDate: '27 Rabi al-Awwal 1448',
       prayers: [
-        { name: 'Asr', time: '4:36 PM', timestamp: '2026-09-09T20:36:00.000Z' },
+        { name: 'Asr', time: '4:36 PM', timestamp: '2026-09-09T20:36:00.000Z', dayKey: '2026-09-09' },
       ],
     })
 

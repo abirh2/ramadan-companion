@@ -6,8 +6,6 @@ struct DeenCompanionWidgetsBundle: WidgetBundle {
     var body: some Widget {
         // Prayer widgets
         PrayerWidget()
-        AllPrayersWidget()
-        PrayerListWidget()
 
         // Content widgets
         VerseWidget()
@@ -16,7 +14,6 @@ struct DeenCompanionWidgetsBundle: WidgetBundle {
 
         // Info widgets
         HijriDateWidget()
-        CharityWidget()
         QiblaWidget()
         MosqueWidget()
     }

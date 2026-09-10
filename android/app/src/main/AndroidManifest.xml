@@ -29,6 +29,10 @@
                 <data android:scheme="com.deencompanion.lite" />
             </intent-filter>
 
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+
         </activity>
 
         <provider
@@ -48,6 +52,7 @@
             android:label="Prayer Times">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.deencompanion.lite.PRAYER_WIDGET_BOUNDARY" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -128,19 +133,6 @@
                 android:resource="@xml/widget_hijri_info" />
         </receiver>
 
-        <!-- Charity Widget -->
-        <receiver
-            android:name=".widgets.CharityWidget"
-            android:exported="true"
-            android:label="Charity Tracker">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_charity_info" />
-        </receiver>
-
         <!-- Qibla Widget -->
         <receiver
             android:name=".widgets.QiblaWidget"
@@ -174,6 +166,5 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 </manifest>

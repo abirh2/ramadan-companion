@@ -1,6 +1,11 @@
 package com.deencompanion.app.widgets
 
 import android.content.Context
+import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 /**
  * Reads widget data from the SharedPreferences file written by the
@@ -12,51 +17,6 @@ object WidgetPrefs {
 
     private fun prefs(context: Context) =
         context.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE)
-
-    // --- Prayer (single next prayer) ---
-    fun prayerName(context: Context): String =
-        prefs(context).getString("widget_prayer_name", "") ?: ""
-
-    fun prayerTime(context: Context): String =
-        prefs(context).getString("widget_prayer_time", "") ?: ""
-
-    fun prayerCountdown(context: Context): String =
-        prefs(context).getString("widget_prayer_countdown", "") ?: ""
-
-    // --- All Prayers (12hr display) ---
-    fun allPrayersFajr(context: Context): String =
-        prefs(context).getString("widget_all_prayers_fajr", "") ?: ""
-
-    fun allPrayersDhuhr(context: Context): String =
-        prefs(context).getString("widget_all_prayers_dhuhr", "") ?: ""
-
-    fun allPrayersAsr(context: Context): String =
-        prefs(context).getString("widget_all_prayers_asr", "") ?: ""
-
-    fun allPrayersMaghrib(context: Context): String =
-        prefs(context).getString("widget_all_prayers_maghrib", "") ?: ""
-
-    fun allPrayersIsha(context: Context): String =
-        prefs(context).getString("widget_all_prayers_isha", "") ?: ""
-
-    fun allPrayersNext(context: Context): String =
-        prefs(context).getString("widget_all_prayers_next", "") ?: ""
-
-    // --- All Prayers (24hr for self-computation) ---
-    fun allPrayersFajr24(context: Context): String =
-        prefs(context).getString("widget_all_prayers_fajr_24", "") ?: ""
-
-    fun allPrayersDhuhr24(context: Context): String =
-        prefs(context).getString("widget_all_prayers_dhuhr_24", "") ?: ""
-
-    fun allPrayersAsr24(context: Context): String =
-        prefs(context).getString("widget_all_prayers_asr_24", "") ?: ""
-
-    fun allPrayersMaghrib24(context: Context): String =
-        prefs(context).getString("widget_all_prayers_maghrib_24", "") ?: ""
-
-    fun allPrayersIsha24(context: Context): String =
-        prefs(context).getString("widget_all_prayers_isha_24", "") ?: ""
 
     // --- Verse (Quran only) ---
     fun verseArabic(context: Context): String =
@@ -111,16 +71,6 @@ object WidgetPrefs {
     fun hijriWeekday(context: Context): String =
         prefs(context).getString("widget_hijri_weekday", "") ?: ""
 
-    // --- Charity ---
-    fun charityMonthly(context: Context): String =
-        prefs(context).getString("widget_charity_monthly", "") ?: ""
-
-    fun charityYearly(context: Context): String =
-        prefs(context).getString("widget_charity_yearly", "") ?: ""
-
-    fun charityCurrency(context: Context): String =
-        prefs(context).getString("widget_charity_currency", "$") ?: "$"
-
     // --- Qibla ---
     fun qiblaDirection(context: Context): String =
         prefs(context).getString("widget_qibla_direction", "") ?: ""
@@ -141,31 +91,84 @@ object WidgetPrefs {
     fun mosqueAddress(context: Context): String =
         prefs(context).getString("widget_mosque_address", "") ?: ""
 
-    // --- Widget Config (for embedded prayer time calculator – Strategy B) ---
+    data class CachedPrayer(
+        val name: String,
+        val displayTime: String,
+        val timestamp: Long,
+        val dayKey: String
+    )
 
-    fun configLat(context: Context): Double =
-        (prefs(context).getString("widget_config_lat", "") ?: "").toDoubleOrNull() ?: 0.0
+    data class PrayerSnapshot(
+        val generatedAt: Long,
+        val expiresAt: Long,
+        val gregorianDate: String,
+        val hijriDate: String,
+        val prayers: List<CachedPrayer>
+    ) {
+        fun nextPrayer(now: Long): CachedPrayer? = prayers.firstOrNull { it.timestamp > now }
+        fun prayersFor(dayKey: String): List<CachedPrayer> = prayers.filter { it.dayKey == dayKey }
+        fun isStale(now: Long): Boolean = now >= expiresAt || nextPrayer(now) == null
+    }
 
-    fun configLng(context: Context): Double =
-        (prefs(context).getString("widget_config_lng", "") ?: "").toDoubleOrNull() ?: 0.0
+    /**
+     * Reads the normalized, privacy-safe cache produced by the web prayer engine.
+     * Native widgets intentionally never receive coordinates or calculation settings.
+     */
+    fun prayerSnapshot(context: Context): PrayerSnapshot? {
+        val raw = prefs(context).getString("widget_prayer_snapshot_v1", null) ?: return null
+        if (raw.length > 64 * 1024) return null
 
-    /** AlAdhan calculation method ID, e.g. "4" (Umm al-Qura) */
-    fun configMethod(context: Context): String =
-        prefs(context).getString("widget_config_method", "4") ?: "4"
+        return try {
+            val json = JSONObject(raw)
+            if (json.optInt("version") != 1) return null
 
-    /** AlAdhan madhab ID: "0" = Standard, "1" = Hanafi */
-    fun configMadhab(context: Context): String =
-        prefs(context).getString("widget_config_madhab", "0") ?: "0"
+            val generatedAt = parseIsoDate(json.optString("generatedAt")) ?: return null
+            val expiresAt = parseIsoDate(json.optString("expiresAt")) ?: return null
+            if (expiresAt <= generatedAt) return null
 
-    /** IANA timezone string, e.g. "America/New_York" */
-    fun configTimezone(context: Context): String =
-        prefs(context).getString("widget_config_timezone", java.util.TimeZone.getDefault().id) ?: java.util.TimeZone.getDefault().id
+            val allowedNames = setOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
+            val prayerArray = json.optJSONArray("prayers") ?: return null
+            if (prayerArray.length() > 70) return null
 
-    fun hasConfig(context: Context): Boolean = configLat(context) != 0.0 && configLng(context) != 0.0
+            val prayers = buildList {
+                for (index in 0 until prayerArray.length()) {
+                    val item = prayerArray.optJSONObject(index) ?: continue
+                    val name = item.optString("name")
+                    val displayTime = item.optString("time").take(16)
+                    val timestamp = parseIsoDate(item.optString("timestamp")) ?: continue
+                    val dayKey = item.optString("dayKey")
+                    if (name in allowedNames && displayTime.isNotBlank() && dayKey.matches(Regex("\\d{4}-\\d{2}-\\d{2}"))) {
+                        add(CachedPrayer(name, displayTime, timestamp, dayKey))
+                    }
+                }
+            }.sortedBy { it.timestamp }
 
-    // --- 14-Day Prayer Schedule (Strategy A fallback JSON blob) ---
+            if (prayers.isEmpty()) return null
+            PrayerSnapshot(
+                generatedAt = generatedAt,
+                expiresAt = expiresAt,
+                gregorianDate = json.optString("gregorianDate").take(80),
+                hijriDate = json.optString("hijriDate").take(80),
+                prayers = prayers
+            )
+        } catch (_: Exception) {
+            null
+        }
+    }
 
-    /** JSON-encoded map of "YYYY-MM-DD" → { fajr, dhuhr, asr, maghrib, isha } in HH:MM 24hr format. */
-    fun prayerScheduleJSON(context: Context): String =
-        prefs(context).getString("widget_prayer_schedule", "") ?: ""
+    private fun parseIsoDate(value: String): Long? {
+        val formats = arrayOf(
+            "yyyy-MM-dd'T'HH:mm:ss.SSSX",
+            "yyyy-MM-dd'T'HH:mm:ssX"
+        )
+        for (pattern in formats) {
+            val formatter = SimpleDateFormat(pattern, Locale.US).apply {
+                timeZone = TimeZone.getTimeZone("UTC")
+                isLenient = false
+            }
+            val parsed: Date = try { formatter.parse(value) } catch (_: Exception) { null } ?: continue
+            return parsed.time
+        }
+        return null
+    }
 }

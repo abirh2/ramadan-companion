@@ -102,7 +102,7 @@ struct MosqueWidgetEntryView: View {
 
     var body: some View {
         MosqueSmallView(entry: entry)
-            .widgetURL(URL(string: "deencompanion:///mosques"))
+            .widgetURL(URL(string: "com.deencompanion.app:///places/mosques"))
     }
 }
 

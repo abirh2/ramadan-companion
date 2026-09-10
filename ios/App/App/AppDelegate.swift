@@ -8,31 +8,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     private static let widgetKeys = [
-        "widget_prayer_name",
-        "widget_prayer_time",
-        "widget_prayer_target_time",
-        "widget_prayer_countdown",
-        "widget_prayer_update",
-        "widget_all_prayers_fajr",
-        "widget_all_prayers_dhuhr",
-        "widget_all_prayers_asr",
-        "widget_all_prayers_maghrib",
-        "widget_all_prayers_isha",
-        "widget_all_prayers_next",
-        "widget_all_prayers_update",
-        "widget_all_prayers_fajr_24",
-        "widget_all_prayers_dhuhr_24",
-        "widget_all_prayers_asr_24",
-        "widget_all_prayers_maghrib_24",
-        "widget_all_prayers_isha_24",
-        "widget_config_lat",
-        "widget_config_lng",
-        "widget_config_method",
-        "widget_config_madhab",
-        "widget_config_timezone",
-        "widget_config_update",
-        "widget_prayer_schedule",
-        "widget_prayer_schedule_update",
+        "widget_prayer_snapshot_v1",
         "widget_verse_type",
         "widget_verse_arabic",
         "widget_verse_translation",
@@ -53,10 +29,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "widget_hijri_gregorian_date",
         "widget_hijri_weekday",
         "widget_hijri_update",
-        "widget_charity_monthly",
-        "widget_charity_yearly",
-        "widget_charity_currency",
-        "widget_charity_update",
         "widget_qibla_direction",
         "widget_qibla_compass",
         "widget_qibla_city",
@@ -68,6 +40,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     ]
 
     private static let appGroupId = "group.com.deencompanion.app"
+
+    /// Removed from widget storage in Step 12. City-level labels are sufficient
+    /// for the UI; prayer timestamps now arrive in the normalized snapshot.
+    private static let deprecatedSensitiveWidgetKeys = [
+        "widget_config_lat",
+        "widget_config_lng",
+        "widget_config_method",
+        "widget_config_madhab",
+        "widget_config_timezone",
+        "widget_config_update",
+        "widget_charity_monthly",
+        "widget_charity_yearly",
+        "widget_charity_currency",
+        "widget_charity_update",
+    ]
 
     // Capacitor Preferences uses UserDefaults.standard with a prefix.
     // The prefix depends on whether configure() was called from JS.
@@ -111,12 +98,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     /// Preferences writes with a key prefix) into the App Group suite
     /// (where widget extensions read via SharedDefaults).
     ///
-    /// Only writes to the App Group suite when a newer value is found in
-    /// standard. Never deletes from the App Group suite -- if Capacitor
-    /// hasn't written a key yet, the existing App Group value is preserved.
+    /// Writes current widget values into the App Group suite and removes
+    /// deprecated sensitive keys. Missing current keys are preserved until
+    /// Capacitor supplies their replacements.
     private func syncWidgetData() {
         let standard = UserDefaults.standard
         guard let shared = UserDefaults(suiteName: Self.appGroupId) else { return }
+
+        for key in Self.deprecatedSensitiveWidgetKeys {
+            shared.removeObject(forKey: key)
+            for prefix in Self.possiblePrefixes {
+                standard.removeObject(forKey: prefix + key)
+            }
+        }
 
         var didChange = false
 

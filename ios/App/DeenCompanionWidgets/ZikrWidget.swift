@@ -185,7 +185,7 @@ struct ZikrSmallFallbackView: View {
 
     var body: some View {
         ZikrSmallContent(entry: entry)
-            .widgetURL(URL(string: "deencompanion:///zikr"))
+            .widgetURL(URL(string: "com.deencompanion.app:///zikr"))
     }
 }
 
@@ -194,7 +194,7 @@ struct ZikrMediumFallbackView: View {
 
     var body: some View {
         ZikrMediumContent(entry: entry)
-            .widgetURL(URL(string: "deencompanion:///zikr"))
+            .widgetURL(URL(string: "com.deencompanion.app:///zikr"))
     }
 }
 

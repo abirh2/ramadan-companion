@@ -162,7 +162,7 @@ struct VerseWidgetEntryView: View {
                 VerseMediumView(entry: entry)
             }
         }
-        .widgetURL(URL(string: "deencompanion:///quran"))
+        .widgetURL(URL(string: "com.deencompanion.app:///quran"))
     }
 }
 

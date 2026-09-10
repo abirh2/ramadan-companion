@@ -4,4 +4,8 @@
     <string name="title_activity_main">Deen Companion</string>
     <string name="package_name">com.deencompanion.lite</string>
     <string name="custom_url_scheme">com.deencompanion.lite</string>
+    <string name="shortcut_prayer_times">Prayer times</string>
+    <string name="shortcut_read_quran">Read Quran</string>
+    <string name="shortcut_qibla">Find Qibla</string>
+    <string name="shortcut_zikr">Start zikr</string>
 </resources>

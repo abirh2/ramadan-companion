@@ -24,35 +24,6 @@ import {
 // Types
 // --------------------------------------------------------------------------
 
-export interface PrayerWidgetData {
-  /** e.g. "Fajr", "Dhuhr" */
-  name: string
-  /** Human-readable time in 12hr format, e.g. "5:30 AM" */
-  time: string
-  /** ISO date string of when the next prayer occurs (widget computes countdown) */
-  targetTime: string
-  /** ISO timestamp of last update */
-  updatedAt: string
-}
-
-export interface AllPrayersWidgetData {
-  fajr: string
-  dhuhr: string
-  asr: string
-  maghrib: string
-  isha: string
-  /** 24hr times (HH:MM) for widget self-computation of next prayer */
-  fajr24: string
-  dhuhr24: string
-  asr24: string
-  maghrib24: string
-  isha24: string
-  /** Name of the next upcoming prayer, used for highlighting */
-  nextPrayer: string
-  /** ISO timestamp of last update */
-  updatedAt: string
-}
-
 export interface VerseWidgetData {
   /** Arabic text (RTL) */
   arabic: string
@@ -103,17 +74,6 @@ export interface HijriWidgetData {
   updatedAt: string
 }
 
-export interface CharityWidgetData {
-  /** Formatted monthly total, e.g. "$45.00" */
-  monthly: string
-  /** Formatted yearly total, e.g. "$540.00" */
-  yearly: string
-  /** Currency symbol, e.g. "$" */
-  currency: string
-  /** ISO timestamp of last update */
-  updatedAt: string
-}
-
 export interface QiblaWidgetData {
   /** Bearing in degrees, e.g. "58.5" */
   direction: string
@@ -136,42 +96,23 @@ export interface MosqueWidgetData {
   updatedAt: string
 }
 
-export interface WidgetConfigData {
-  /** Latitude, e.g. "40.7128" */
-  lat: string
-  /** Longitude, e.g. "-74.0060" */
-  lng: string
-  /** AlAdhan calculation method ID, e.g. "4" */
-  calculationMethod: string
-  /** AlAdhan madhab ID: "0" = Standard, "1" = Hanafi */
-  madhab: string
-  /** IANA timezone string, e.g. "America/New_York" */
-  timezone: string
-  /** ISO timestamp of last update */
-  updatedAt: string
-}
-
-export interface PrayerDaySchedule {
-  fajr: string    // HH:MM 24hr
-  dhuhr: string
-  asr: string
-  maghrib: string
-  isha: string
-}
-
-export interface PrayerScheduleData {
-  /** Map of ISO date string (YYYY-MM-DD) to prayer times for that day */
-  schedule: Record<string, PrayerDaySchedule>
-  /** ISO timestamp of last update */
-  updatedAt: string
-}
-
 // --------------------------------------------------------------------------
 // Internal helpers
 // --------------------------------------------------------------------------
 
 function isNative(): boolean {
   return Capacitor.isNativePlatform()
+}
+
+async function refreshAndroidPrayerWidgets(): Promise<void> {
+  if (Capacitor.getPlatform() !== 'android') return
+  try {
+    const { registerPlugin } = await import('@capacitor/core')
+    const WidgetRefresh = registerPlugin<{ refresh: () => Promise<void> }>('WidgetRefresh')
+    await WidgetRefresh.refresh()
+  } catch (err) {
+    console.warn('[widgetBridge] Android widget refresh failed:', err)
+  }
 }
 
 async function set(key: string, value: string): Promise<void> {
@@ -188,14 +129,26 @@ async function removeAll(keys: string[]): Promise<void> {
   await Promise.all(keys.map((key) => Preferences.remove({ key })))
 }
 
-/** Convert "HH:MM" (24hr) to "H:MM AM/PM" (12hr) */
-export function to12Hour(time24: string): string {
-  const parts = time24.split(':')
-  const h = parseInt(parts[0], 10)
-  const m = parts[1]?.padStart(2, '0') ?? '00'
-  const period = h >= 12 ? 'PM' : 'AM'
-  const hour12 = h === 0 ? 12 : h > 12 ? h - 12 : h
-  return `${hour12}:${m} ${period}`
+const DEPRECATED_PRIVATE_WIDGET_KEYS = [
+  'widget_config_lat',
+  'widget_config_lng',
+  'widget_config_method',
+  'widget_config_madhab',
+  'widget_config_timezone',
+  'widget_config_update',
+  'widget_charity_monthly',
+  'widget_charity_yearly',
+  'widget_charity_currency',
+  'widget_charity_update',
+]
+
+export async function purgeDeprecatedPrivateWidgetData(): Promise<void> {
+  if (!isNative()) return
+  try {
+    await removeAll(DEPRECATED_PRIVATE_WIDGET_KEYS)
+  } catch (err) {
+    console.warn('[widgetBridge] Private widget cache cleanup failed:', err)
+  }
 }
 
 const WIDGET_ARABIC_MAX = 300
@@ -211,34 +164,6 @@ function truncateForWidget(text: string, maxLength: number): string {
 // --------------------------------------------------------------------------
 
 /**
- * Write next-prayer widget data. Called once per prayer transition (not every second).
- * The widget generates its own countdown timeline entries from targetTime.
- */
-export async function updatePrayerWidget(data: PrayerWidgetData): Promise<void> {
-  if (!isNative()) return
-  try {
-    // Compute a static countdown string for Android backward compatibility
-    const diff = new Date(data.targetTime).getTime() - Date.now()
-    let countdown = '---'
-    if (diff > 0) {
-      const h = Math.floor(diff / 3_600_000)
-      const m = Math.floor((diff % 3_600_000) / 60_000)
-      countdown = h > 0 ? `${h}h ${m}m` : `${m}m`
-    }
-
-    await setAll({
-      widget_prayer_name: data.name,
-      widget_prayer_time: data.time,
-      widget_prayer_target_time: data.targetTime,
-      widget_prayer_countdown: countdown,
-      widget_prayer_update: data.updatedAt,
-    })
-  } catch (err) {
-    console.warn('[widgetBridge] updatePrayerWidget failed:', err)
-  }
-}
-
-/**
  * Write the versioned prayer cache used by both native widget implementations.
  * Precise coordinates and account data are intentionally excluded. Removing the
  * former config keys migrates existing Android installs away from native prayer
@@ -250,42 +175,10 @@ export async function updatePrayerWidgetSnapshot(
   if (!isNative()) return
   try {
     await set(PRAYER_WIDGET_SNAPSHOT_KEY, JSON.stringify(snapshot))
-    await removeAll([
-      'widget_config_lat',
-      'widget_config_lng',
-      'widget_config_method',
-      'widget_config_madhab',
-      'widget_config_timezone',
-      'widget_config_update',
-    ])
+    await removeAll(DEPRECATED_PRIVATE_WIDGET_KEYS)
+    await refreshAndroidPrayerWidgets()
   } catch (err) {
     console.warn('[widgetBridge] updatePrayerWidgetSnapshot failed:', err)
-  }
-}
-
-/**
- * Write all five daily prayer times for the All Prayers widget.
- * Times should already be in 12hr format.
- */
-export async function updateAllPrayersWidget(data: AllPrayersWidgetData): Promise<void> {
-  if (!isNative()) return
-  try {
-    await setAll({
-      widget_all_prayers_fajr: data.fajr,
-      widget_all_prayers_dhuhr: data.dhuhr,
-      widget_all_prayers_asr: data.asr,
-      widget_all_prayers_maghrib: data.maghrib,
-      widget_all_prayers_isha: data.isha,
-      widget_all_prayers_fajr_24: data.fajr24,
-      widget_all_prayers_dhuhr_24: data.dhuhr24,
-      widget_all_prayers_asr_24: data.asr24,
-      widget_all_prayers_maghrib_24: data.maghrib24,
-      widget_all_prayers_isha_24: data.isha24,
-      widget_all_prayers_next: data.nextPrayer,
-      widget_all_prayers_update: data.updatedAt,
-    })
-  } catch (err) {
-    console.warn('[widgetBridge] updateAllPrayersWidget failed:', err)
   }
 }
 
@@ -379,23 +272,6 @@ export async function updateHijriWidget(data: HijriWidgetData): Promise<void> {
 }
 
 /**
- * Write charity/donation tracker widget data.
- */
-export async function updateCharityWidget(data: CharityWidgetData): Promise<void> {
-  if (!isNative()) return
-  try {
-    await setAll({
-      widget_charity_monthly: data.monthly,
-      widget_charity_yearly: data.yearly,
-      widget_charity_currency: data.currency,
-      widget_charity_update: data.updatedAt,
-    })
-  } catch (err) {
-    console.warn('[widgetBridge] updateCharityWidget failed:', err)
-  }
-}
-
-/**
  * Write Qibla direction widget data.
  */
 export async function updateQiblaWidget(data: QiblaWidgetData): Promise<void> {
@@ -426,41 +302,5 @@ export async function updateMosqueWidget(data: MosqueWidgetData): Promise<void> 
     })
   } catch (err) {
     console.warn('[widgetBridge] updateMosqueWidget failed:', err)
-  }
-}
-
-/**
- * Write location + method config so widget extensions can self-compute prayer times.
- * This is the primary data source for Strategy B (embedded algorithm).
- */
-export async function updateWidgetConfig(data: WidgetConfigData): Promise<void> {
-  if (!isNative()) return
-  try {
-    await setAll({
-      widget_config_lat: data.lat,
-      widget_config_lng: data.lng,
-      widget_config_method: data.calculationMethod,
-      widget_config_madhab: data.madhab,
-      widget_config_timezone: data.timezone,
-      widget_config_update: data.updatedAt,
-    })
-  } catch (err) {
-    console.warn('[widgetBridge] updateWidgetConfig failed:', err)
-  }
-}
-
-/**
- * Write a 14-day prayer time schedule as a JSON blob.
- * Used as Strategy A fallback when the embedded algorithm has no config data.
- */
-export async function updatePrayerSchedule(data: PrayerScheduleData): Promise<void> {
-  if (!isNative()) return
-  try {
-    await setAll({
-      widget_prayer_schedule: JSON.stringify(data.schedule),
-      widget_prayer_schedule_update: data.updatedAt,
-    })
-  } catch (err) {
-    console.warn('[widgetBridge] updatePrayerSchedule failed:', err)
   }
 }
