@@ -128,6 +128,7 @@ export interface UseCalendarResult {
   currentMonth: number
   currentYear: number
   selectedDate: CalendarDate | null
+  todayDate: CalendarDate | null
   calendarDates: CalendarDate[]
   schoolFilters: SchoolFilter
   loading: boolean
@@ -177,4 +178,3 @@ export const GREGORIAN_MONTHS = [
   { number: 11, name: 'November' },
   { number: 12, name: 'December' },
 ] as const
-

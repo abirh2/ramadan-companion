@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useAuth } from '@/hooks/useAuth'
 import type {
   CalendarView,
   CalendarDate,
@@ -27,8 +26,6 @@ import {
  * - Persist preferences to localStorage + Supabase profile
  */
 export function useCalendar(): UseCalendarResult {
-  const { profile } = useAuth()
-
   // State
   const [view, setViewState] = useState<CalendarView>('gregorian')
   // Gregorian calendar state
@@ -39,6 +36,7 @@ export function useCalendar(): UseCalendarResult {
   const [hijriYear, setHijriYear] = useState<number | null>(null)
   
   const [selectedDate, setSelectedDate] = useState<CalendarDate | null>(null)
+  const [todayDate, setTodayDate] = useState<CalendarDate | null>(null)
   const [calendarDates, setCalendarDates] = useState<CalendarDate[]>([])
   const [schoolFilters, setSchoolFiltersState] = useState<SchoolFilter>(getDefaultSchoolFilter())
   const [loading, setLoading] = useState<boolean>(true)
@@ -153,6 +151,8 @@ export function useCalendar(): UseCalendarResult {
       })
 
       setCalendarDates(dates)
+      const loadedToday = dates.find((date) => date.isToday)
+      if (loadedToday) setTodayDate(loadedToday)
       setLoading(false)
     } catch (err) {
       console.error('Error fetching calendar data:', err)
@@ -289,6 +289,7 @@ export function useCalendar(): UseCalendarResult {
     currentMonth,
     currentYear,
     selectedDate,
+    todayDate,
     calendarDates,
     schoolFilters,
     loading,
@@ -301,4 +302,3 @@ export function useCalendar(): UseCalendarResult {
     setSchoolFilters,
   }
 }
-

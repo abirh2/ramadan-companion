@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { CalendarView } from '@/types/calendar.types'
 import { HIJRI_MONTHS, GREGORIAN_MONTHS } from '@/types/calendar.types'
@@ -13,6 +13,7 @@ interface CalendarControlsProps {
   onPreviousMonth: () => void
   onNextMonth: () => void
   onToday: () => void
+  secondaryLabel?: string
 }
 
 export function CalendarControls({
@@ -23,6 +24,7 @@ export function CalendarControls({
   onPreviousMonth,
   onNextMonth,
   onToday,
+  secondaryLabel,
 }: CalendarControlsProps) {
   // Get current month name based on view
   const getMonthName = () => {
@@ -36,11 +38,36 @@ export function CalendarControls({
   }
 
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      {/* Month/Year Display & Navigation */}
-      <div className="grid w-full grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-2 sm:flex sm:w-auto">
+    <div className="space-y-5">
+      <div className="flex items-center justify-between gap-4">
+        <div className="inline-grid grid-cols-2 rounded-control bg-surface-grouped p-1" aria-label="Calendar system">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onViewChange('gregorian')}
+            className={view === 'gregorian' ? 'bg-surface-primary text-text-primary shadow-hairline' : 'text-text-secondary'}
+            aria-pressed={view === 'gregorian'}
+          >
+            Gregorian
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onViewChange('islamic')}
+            className={view === 'islamic' ? 'bg-surface-primary text-text-primary shadow-hairline' : 'text-text-secondary'}
+            aria-pressed={view === 'islamic'}
+          >
+            Islamic
+          </Button>
+        </div>
+        <Button variant="ghost" size="sm" onClick={onToday} className="text-teal">
+          Today
+        </Button>
+      </div>
+
+      <div className="grid w-full grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-2">
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
           onClick={onPreviousMonth}
           aria-label="Previous month"
@@ -48,15 +75,15 @@ export function CalendarControls({
           <ChevronLeft className="h-4 w-4" />
         </Button>
 
-        <div className="flex min-w-0 items-center justify-center gap-2 sm:min-w-[200px]">
-          <CalendarIcon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-          <h2 className="truncate text-base font-semibold sm:text-lg">
+        <div className="min-w-0 text-center">
+          <h2 className="truncate text-lg font-semibold tracking-[-0.015em] text-text-primary sm:text-xl">
             {getMonthName()} {currentYear}
           </h2>
+          {secondaryLabel && <p className="mt-0.5 truncate type-caption text-text-tertiary">{secondaryLabel}</p>}
         </div>
 
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
           onClick={onNextMonth}
           aria-label="Next month"
@@ -64,34 +91,6 @@ export function CalendarControls({
           <ChevronRight className="h-4 w-4" />
         </Button>
 
-        <Button variant="outline" onClick={onToday} className="col-span-3 sm:ml-2">
-          Today
-        </Button>
-      </div>
-
-      {/* View Toggle */}
-      <div className="flex items-center gap-2 self-start sm:self-auto">
-        <span className="text-sm text-muted-foreground">View:</span>
-        <div className="flex rounded-lg border border-border p-1">
-          <Button
-            variant={view === 'gregorian' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => onViewChange('gregorian')}
-            className="rounded-md"
-            aria-pressed={view === 'gregorian'}
-          >
-            Gregorian
-          </Button>
-          <Button
-            variant={view === 'islamic' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => onViewChange('islamic')}
-            className="rounded-md"
-            aria-pressed={view === 'islamic'}
-          >
-            Islamic
-          </Button>
-        </div>
       </div>
     </div>
   )
