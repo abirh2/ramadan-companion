@@ -14,3 +14,10 @@ export function useAuth(): AuthContextType {
   return context;
 }
 
+/**
+ * Reads auth state when it is available without requiring an AuthProvider.
+ * Useful for reusable controls whose signed-out behavior is fully functional.
+ */
+export function useOptionalAuth(): AuthContextType | undefined {
+  return useContext(AuthContext);
+}

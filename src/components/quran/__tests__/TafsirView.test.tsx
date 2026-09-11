@@ -186,7 +186,7 @@ describe('TafsirView', () => {
     )
 
     const selector = screen.getByLabelText(/Select Tafsir/i)
-    expect(selector).toHaveAttribute('id', 'tafsir-select')
+    expect(selector).toHaveAttribute('aria-haspopup', 'dialog')
   })
 
   // Req 16.4: every dialog/sheet exposes a non-empty accessible name
@@ -350,4 +350,3 @@ describe('TafsirView - Loading, Error and Empty States', () => {
     expect(screen.getByText(/select a different tafsir/i)).toBeInTheDocument()
   })
 })
-

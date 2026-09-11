@@ -7,13 +7,7 @@ import { ArrowLeft, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { SelectionSheet } from '@/components/ui/selection-sheet'
 import { useHalalFood } from '@/hooks/useHalalFood'
 import { FoodList } from '@/components/places/FoodList'
 import { LocationSearch } from '@/components/places/LocationSearch'
@@ -104,28 +98,24 @@ export default function HalalFoodPage() {
         <div className="flex flex-wrap gap-4 items-center justify-between">
           {/* Search Radius */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Search radius:</span>
-            <Select
+            <SelectionSheet
+              label="Radius"
               value={searchRadiusMiles.toString()}
               onValueChange={(value) => updateRadius(parseFloat(value))}
-            >
-              <SelectTrigger className="w-[120px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {radiusOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              compact
+              triggerRole="button"
+              description="Choose how far to search for halal food."
+              options={radiusOptions.map((option) => ({
+                value: option.value,
+                title: option.label,
+              }))}
+            />
           </div>
 
           {/* Distance Unit Toggle */}
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Units:</span>
-            <div className="flex rounded-md border">
+            <div className="flex rounded-control border border-border-strong">
               <Button
                 variant={distanceUnit === 'mi' ? 'default' : 'ghost'}
                 size="sm"

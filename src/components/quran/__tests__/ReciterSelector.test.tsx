@@ -16,7 +16,7 @@ describe('ReciterSelector', () => {
       />
     )
     
-    expect(screen.getByText('Reciter:')).toBeInTheDocument()
+    expect(screen.getByText('Reciter')).toBeInTheDocument()
   })
 
   it('displays current reciter', () => {
@@ -39,8 +39,8 @@ describe('ReciterSelector', () => {
       />
     )
     
-    const trigger = screen.getByRole('combobox', { name: /select quran reciter/i })
-    expect(trigger).toHaveAttribute('aria-label', 'Select Quran reciter')
+    const trigger = screen.getByRole('combobox', { name: /reciter: alafasy/i })
+    expect(trigger).toHaveAttribute('aria-haspopup', 'dialog')
   })
 
   it('renders reciter selection combobox', () => {
@@ -111,11 +111,10 @@ describe('ReciterSelector', () => {
       />
     )
     
-    const label = screen.getByText('Reciter:')
+    const label = screen.getByText('Reciter')
     const trigger = screen.getByRole('combobox')
     
     expect(label).toBeInTheDocument()
-    expect(trigger).toHaveAttribute('id', 'reciter-select')
+    expect(trigger).toHaveAccessibleName(/reciter: alafasy/i)
   })
 })
-

@@ -58,7 +58,7 @@ function SheetContent({
       <SheetPrimitive.Content
         data-slot="sheet-content"
         className={cn(
-          "bg-surface-elevated data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 shadow-low transition ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:duration-180 data-[state=open]:duration-240",
+          "bg-surface-elevated text-text-primary data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 shadow-low transition ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:duration-180 data-[state=open]:duration-240 motion-reduce:transform-none motion-reduce:transition-none motion-reduce:duration-0",
           side === "right" &&
             "data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm",
           side === "left" &&
@@ -66,13 +66,19 @@ function SheetContent({
           side === "top" &&
             "data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top inset-x-0 top-0 h-auto border-b",
           side === "bottom" &&
-            "data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom inset-x-0 bottom-0 h-auto border-t",
+            "data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom bottom-0 left-1/2 h-auto max-h-[min(88dvh,760px)] w-full max-w-2xl -translate-x-1/2 rounded-t-surface border-t border-border-subtle pb-[max(env(safe-area-inset-bottom),0.5rem)]",
           className
         )}
         {...props}
       >
+        {side === "bottom" && (
+          <span
+            aria-hidden="true"
+            className="mx-auto mt-2 block h-1 w-9 shrink-0 rounded-full bg-text-tertiary/35"
+          />
+        )}
         {children}
-        <SheetPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-control-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none">
+        <SheetPrimitive.Close className="focus:ring-ring absolute top-2 right-2 flex size-11 items-center justify-center rounded-control-sm text-text-tertiary transition-colors hover:bg-surface-grouped hover:text-text-primary focus:ring-2 focus:outline-hidden disabled:pointer-events-none">
           <XIcon className="size-4" />
           <span className="sr-only">Close</span>
         </SheetPrimitive.Close>

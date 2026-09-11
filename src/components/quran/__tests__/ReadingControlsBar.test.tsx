@@ -31,6 +31,7 @@ const optionWithText = (text: string) => (_name: string, el: Element) =>
 const mockUser: { current: { id: string } | null } = { current: null }
 jest.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ user: mockUser.current }),
+  useOptionalAuth: () => ({ user: mockUser.current }),
 }))
 
 // --- Supabase client mock: captures profile writes ---------------------------
@@ -160,15 +161,15 @@ describe('ControlSheet — sheet from ui/sheet, accessible name, focus behavior'
     })
   })
 
-  it('renders the wrapped TranslationSelector inside the sheet (6.3)', async () => {
+  it('renders grouped translation options directly inside the sheet (6.3)', async () => {
     const user = userEvent.setup()
     renderBar()
 
     await user.click(screen.getByRole('button', { name: /translation:/i }))
     const dialog = await screen.findByRole('dialog')
 
-    // The existing selector (a combobox) is rendered as-is inside the sheet.
-    expect(within(dialog).getByRole('combobox')).toBeInTheDocument()
+    expect(within(dialog).getByRole('listbox', { name: /translation/i })).toBeInTheDocument()
+    expect(within(dialog).getAllByRole('option')).toHaveLength(QURAN_TRANSLATIONS.length)
   })
 })
 
@@ -282,8 +283,9 @@ describe('ReciterSelector — offered set, default, and no persistence (8.1, 8.3
     const options = await screen.findAllByRole('option')
     expect(options).toHaveLength(AVAILABLE_RECITERS.length)
     for (const r of AVAILABLE_RECITERS) {
-      // Reciter option accessible name is exactly the englishName.
-      expect(screen.getByRole('option', { name: r.englishName })).toBeInTheDocument()
+      expect(
+        screen.getByRole('option', { name: r.englishName })
+      ).toBeInTheDocument()
     }
   })
 
@@ -319,7 +321,11 @@ describe('ReciterSelector — offered set, default, and no persistence (8.1, 8.3
     )!
 
     await user.click(screen.getByRole('combobox'))
-    await user.click(await screen.findByRole('option', { name: target.englishName }))
+    await user.click(
+      await screen.findByRole('option', {
+        name: target.englishName,
+      })
+    )
 
     expect(onReciterChange).toHaveBeenCalledWith(target.identifier)
     // No persistence side effects for the reciter.

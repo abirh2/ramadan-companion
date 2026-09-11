@@ -7,40 +7,38 @@
 
 'use client'
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { SelectionSheet } from '@/components/ui/selection-sheet'
 import { AVAILABLE_RECITERS } from '@/lib/quranAudio'
 import type { QuranReciterId } from '@/types/quran.types'
 
 interface ReciterSelectorProps {
   currentReciter: QuranReciterId
   onReciterChange: (reciter: QuranReciterId) => void
+  compact?: boolean
 }
 
-export function ReciterSelector({ currentReciter, onReciterChange }: ReciterSelectorProps) {
+export function ReciterSelector({
+  currentReciter,
+  onReciterChange,
+  compact = false,
+}: ReciterSelectorProps) {
   return (
-    <div className="flex items-center gap-2">
-      <label htmlFor="reciter-select" className="text-sm font-medium">
-        Reciter:
-      </label>
-      <Select value={currentReciter} onValueChange={onReciterChange}>
-        <SelectTrigger id="reciter-select" className="w-[200px]" aria-label="Select Quran reciter">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {AVAILABLE_RECITERS.map((reciter) => (
-            <SelectItem key={reciter.identifier} value={reciter.identifier}>
-              {reciter.englishName}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+    <SelectionSheet
+      label="Reciter"
+      value={currentReciter}
+      onValueChange={onReciterChange}
+      compact={compact}
+      triggerRole={compact ? 'button' : 'combobox'}
+      searchable
+      searchPlaceholder="Search reciters…"
+      emptyText="No reciters found"
+      description="Choose the reciter used for ayah audio playback."
+      options={AVAILABLE_RECITERS.map((reciter) => ({
+        value: reciter.identifier as QuranReciterId,
+        title: reciter.englishName,
+        subtitle: reciter.name,
+        searchText: reciter.name,
+      }))}
+    />
   )
 }
-

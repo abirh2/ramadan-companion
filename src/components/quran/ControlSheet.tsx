@@ -4,6 +4,7 @@ import { Component, useEffect, useState, type ReactNode } from 'react'
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -102,6 +103,9 @@ export function ControlSheet({
       >
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
+          <SheetDescription className="sr-only">
+            Adjust {title.toLocaleLowerCase()} without leaving the reader.
+          </SheetDescription>
         </SheetHeader>
         <div className="flex flex-col gap-4 px-4 pb-4">
           <ControlSheetBoundary>{children}</ControlSheetBoundary>

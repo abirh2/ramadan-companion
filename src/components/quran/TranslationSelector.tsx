@@ -1,29 +1,25 @@
 'use client'
 
 import { useState } from 'react'
-import { useAuth } from '@/hooks/useAuth'
+import { useOptionalAuth } from '@/hooks/useAuth'
 import { createClient } from '@/lib/supabase/client'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { SelectionSheet } from '@/components/ui/selection-sheet'
 import { QURAN_TRANSLATIONS, QuranTranslationId } from '@/types/quran.types'
 
 interface TranslationSelectorProps {
   currentTranslation: QuranTranslationId
   onTranslationChange: (translation: QuranTranslationId) => void
   disabled?: boolean
+  compact?: boolean
 }
 
 export function TranslationSelector({
   currentTranslation,
   onTranslationChange,
   disabled = false,
+  compact = false,
 }: TranslationSelectorProps) {
-  const { user } = useAuth()
+  const user = useOptionalAuth()?.user
   const [isSaving, setIsSaving] = useState(false)
 
   const handleChange = async (newTranslation: string) => {
@@ -59,37 +55,30 @@ export function TranslationSelector({
   }
 
   return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-muted-foreground">
-        Translation
-      </label>
-      <Select
+    <div className={compact ? 'inline-flex max-w-full' : 'space-y-2'}>
+      <SelectionSheet
+        label="Translation"
         value={currentTranslation}
         onValueChange={handleChange}
         disabled={disabled || isSaving}
-      >
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Select translation" />
-        </SelectTrigger>
-        <SelectContent>
-          {QURAN_TRANSLATIONS.map((translation) => (
-            <SelectItem key={translation.id} value={translation.id}>
-              <div className="flex flex-col items-start">
-                <span className="font-medium">{translation.name}</span>
-                {translation.description && (
-                  <span className="text-xs text-muted-foreground">
-                    {translation.description}
-                  </span>
-                )}
-              </div>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        compact={compact}
+        triggerRole={compact ? 'button' : 'combobox'}
+        searchable
+        searchPlaceholder="Search translations…"
+        emptyText="No translations found"
+        description="Choose the English translation used throughout the reader."
+        options={QURAN_TRANSLATIONS.map((translation) => ({
+          value: translation.id,
+          title: translation.name,
+          subtitle: translation.description,
+          searchText: translation.translator,
+        }))}
+      />
       {isSaving && (
-        <p className="text-xs text-muted-foreground">Saving preference...</p>
+        <p role="status" className="type-caption text-text-secondary">
+          Saving preference…
+        </p>
       )}
     </div>
   )
 }
-

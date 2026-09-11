@@ -39,6 +39,7 @@ const optionWithText = (text: string) => (_name: string, el: Element) =>
 const mockUser: { current: { id: string } | null } = { current: null }
 jest.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ user: mockUser.current }),
+  useOptionalAuth: () => ({ user: mockUser.current }),
 }))
 
 // --- Supabase client mock: captures profile writes ---------------------------
@@ -180,7 +181,9 @@ describe('TranslationSelector / ReciterSelector — persistence & control-set pr
 
           await user.click(screen.getByRole('combobox'))
           await user.click(
-            await screen.findByRole('option', { name: target.englishName })
+            await screen.findByRole('option', {
+              name: target.englishName,
+            })
           )
 
           // Session-local update only.

@@ -2,22 +2,15 @@
 
 import { useState } from 'react'
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog'
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { SelectionSheet } from '@/components/ui/selection-sheet'
 import { Settings, MapPin, Loader2, Search } from 'lucide-react'
 import { CALCULATION_METHODS, MADHABS, type CalculationMethodId, type MadhabId } from '@/types/ramadan.types'
 import type { LocationData } from '@/types/ramadan.types'
@@ -157,37 +150,33 @@ export function PreferencesDetailModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+    <Sheet open={open} onOpenChange={handleOpenChange}>
+      <SheetContent side="bottom" className="max-h-[90dvh] gap-0 overflow-hidden p-0">
+        <SheetHeader className="border-b border-border-subtle px-5 pb-4 pt-2 text-left">
+          <SheetTitle className="flex items-center gap-2 pr-12">
             <Settings className="h-5 w-5" />
             Prayer Settings
-          </DialogTitle>
-          <DialogDescription>
+          </SheetTitle>
+          <SheetDescription>
             Configure your prayer time calculation preferences
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-5 py-5">
           {/* Calculation Method */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Calculation Method</label>
-            <Select value={tempMethod} onValueChange={(value) => setTempMethod(value as CalculationMethodId)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select method" />
-              </SelectTrigger>
-              <SelectContent>
-                {CALCULATION_METHODS.map((method) => (
-                  <SelectItem key={method.id} value={method.id}>
-                    {method.name}
-                    {method.description && (
-                      <span className="text-xs text-muted-foreground"> - {method.description}</span>
-                    )}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SelectionSheet
+              label="Calculation Method"
+              value={tempMethod}
+              onValueChange={setTempMethod}
+              searchable
+              description="Choose the convention used to calculate daily prayer times."
+              options={CALCULATION_METHODS.map((method) => ({
+                value: method.id,
+                title: method.name,
+                subtitle: method.description,
+              }))}
+            />
             <p className="text-xs text-muted-foreground">
               Different regions use different calculation methods
             </p>
@@ -195,20 +184,17 @@ export function PreferencesDetailModal({
 
           {/* Madhab/School */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Madhab (Asr Calculation)</label>
-            <Select value={tempMadhab} onValueChange={(value) => setTempMadhab(value as MadhabId)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select madhab" />
-              </SelectTrigger>
-              <SelectContent>
-                {MADHABS.map((madhabOption) => (
-                  <SelectItem key={madhabOption.id} value={madhabOption.id}>
-                    {madhabOption.name}
-                    <span className="text-xs text-muted-foreground"> - {madhabOption.description}</span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SelectionSheet
+              label="Madhab (Asr Calculation)"
+              value={tempMadhab}
+              onValueChange={setTempMadhab}
+              description="Choose the juristic method used for Asr prayer time."
+              options={MADHABS.map((madhabOption) => ({
+                value: madhabOption.id,
+                title: madhabOption.name,
+                subtitle: madhabOption.description,
+              }))}
+            />
             <p className="text-xs text-muted-foreground">
               Affects Asr prayer time only. Hanafi madhab uses a later Asr time.
             </p>
@@ -292,7 +278,7 @@ export function PreferencesDetailModal({
           </div>
         </div>
 
-        <DialogFooter>
+        <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-border-subtle px-5 pb-[max(env(safe-area-inset-bottom),1rem)] pt-4 sm:flex-row sm:justify-end">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>
             Cancel
           </Button>
@@ -306,8 +292,8 @@ export function PreferencesDetailModal({
               'Save Changes'
             )}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </SheetContent>
+    </Sheet>
   )
 }

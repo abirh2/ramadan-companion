@@ -72,7 +72,7 @@ describe('ZikrPhraseSelector', () => {
 
     expect(within(sheet).getByText(STANDARD_PHRASES[1].arabic)).toHaveAttribute('dir', 'rtl')
     expect(within(sheet).getByText(STANDARD_PHRASES[1].meaning)).toBeVisible()
-    const alhamdulillahOption = within(sheet).getByRole('button', { name: /alhamdulillah/i })
+    const alhamdulillahOption = within(sheet).getByRole('option', { name: /alhamdulillah/i })
     expect(within(alhamdulillahOption).getByText(`${STANDARD_PHRASES[1].defaultTarget}×`)).toBeVisible()
   })
 
@@ -92,7 +92,7 @@ describe('ZikrPhraseSelector', () => {
 
     const trigger = screen.getByRole('button', { name: /change zikr or target/i })
     await user.click(trigger)
-    await user.click(screen.getByRole('button', { name: /alhamdulillah/i }))
+    await user.click(screen.getByRole('option', { name: /alhamdulillah/i }))
     expect(onSelectPhrase).toHaveBeenCalledWith('alhamdulillah')
 
     await user.click(trigger)

@@ -2,12 +2,12 @@
 
 import { useState } from 'react'
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog'
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Calendar as CalendarIcon, Loader2, Clock } from 'lucide-react'
@@ -148,26 +148,26 @@ export function DateSelectorModal({
   const prayerNames = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="bottom" className="max-h-[90dvh] gap-0 overflow-hidden p-0">
+        <SheetHeader className="border-b border-border-subtle px-5 pb-4 pt-2 text-left">
+          <SheetTitle className="flex items-center gap-2 pr-12">
             <CalendarIcon className="h-5 w-5" />
             Prayer Times for Date
-          </DialogTitle>
-          <DialogDescription>
+          </SheetTitle>
+          <SheetDescription>
             Select a date to view prayer times for that day
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-5 py-4">
           {/* Calendar */}
           <div className="flex justify-center">
             <Calendar
               mode="single"
               selected={selectedDate}
               onSelect={handleDateSelect}
-              className="rounded-lg border"
+              className="rounded-grouped border border-border-subtle bg-surface-primary"
               disabled={(date) => {
                 // Disable dates more than 1 year in the future
                 const oneYearFromNow = new Date()
@@ -233,7 +233,7 @@ export function DateSelectorModal({
             Back to Today
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   )
 }
