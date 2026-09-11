@@ -1,9 +1,13 @@
 'use client'
 
-import { Card, CardContent } from '@/components/ui/card'
+import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Edit, Trash2, ChevronDown } from 'lucide-react'
-import { useState } from 'react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { formatCurrency } from '@/lib/currency'
 import type { DonationWithConversion, CurrencyViewMode } from '@/types/donation.types'
 import type { CurrencyCode } from '@/types/currency.types'
@@ -19,203 +23,127 @@ interface ListViewAccordionProps {
 interface MonthGroup {
   monthKey: string
   monthLabel: string
-  total: number
-  count: number
   donations: DonationWithConversion[]
 }
 
-export function ListViewAccordion({ donations, onEdit, onDelete, viewMode, preferredCurrency }: ListViewAccordionProps) {
-  const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set())
+function parseDonationDate(date: string) {
+  return new Date(`${date}T12:00:00`)
+}
 
-  // Group donations by month
-  const monthGroups: MonthGroup[] = []
+function getContributionName(donation: DonationWithConversion) {
+  if (donation.charity_name) return donation.charity_name
+  if (donation.category) return donation.category
+  if (donation.type === 'zakat') return 'Zakat'
+  if (donation.type === 'sadaqah') return 'Sadaqah'
+  return 'Other charity'
+}
+
+function getTypeLabel(type: DonationWithConversion['type']) {
+  if (type === 'zakat') return 'Zakat'
+  if (type === 'sadaqah') return 'Sadaqah'
+  return 'Other'
+}
+
+export function ListViewAccordion({ donations, onEdit, onDelete }: ListViewAccordionProps) {
   const monthMap = new Map<string, MonthGroup>()
 
   donations.forEach((donation) => {
-    const date = new Date(donation.date)
-    const year = date.getFullYear()
-    const month = date.getMonth()
-    const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`
-
+    const date = parseDonationDate(donation.date)
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
     const monthLabel = new Intl.DateTimeFormat('en-US', {
       month: 'long',
       year: 'numeric',
     }).format(date)
 
-    if (!monthMap.has(monthKey)) {
-      monthMap.set(monthKey, {
-        monthKey,
-        monthLabel,
-        total: 0,
-        count: 0,
-        donations: [],
-      })
-    }
-
-    const group = monthMap.get(monthKey)!
-    group.total += Number(donation.convertedAmount)
-    group.count += 1
+    const group = monthMap.get(monthKey) ?? { monthKey, monthLabel, donations: [] }
     group.donations.push(donation)
+    monthMap.set(monthKey, group)
   })
 
-  // Sort by month (most recent first)
-  monthGroups.push(...Array.from(monthMap.values()).sort((a, b) => b.monthKey.localeCompare(a.monthKey)))
-
-  const toggleMonth = (monthKey: string) => {
-    const newExpanded = new Set(expandedMonths)
-    if (newExpanded.has(monthKey)) {
-      newExpanded.delete(monthKey)
-    } else {
-      newExpanded.add(monthKey)
-    }
-    setExpandedMonths(newExpanded)
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    }).format(new Date(dateString))
-  }
-
-  const getTypeBadgeClass = (type: string) => {
-    switch (type) {
-      case 'zakat':
-        return 'bg-success-muted text-success'
-      case 'sadaqah':
-        return 'bg-teal-muted text-teal'
-      default:
-        return 'bg-surface-grouped text-text-secondary'
-    }
-  }
-
-  if (monthGroups.length === 0) {
-    return (
-      <Card className="rounded-xl">
-        <CardContent className="p-12 text-center">
-          <p className="text-muted-foreground">No donations to display</p>
-        </CardContent>
-      </Card>
-    )
-  }
+  const monthGroups = Array.from(monthMap.values())
+    .sort((a, b) => b.monthKey.localeCompare(a.monthKey))
+    .map((group) => ({
+      ...group,
+      donations: [...group.donations].sort(
+        (a, b) => parseDonationDate(b.date).getTime() - parseDonationDate(a.date).getTime()
+      ),
+    }))
 
   return (
-    <div className="space-y-3">
-      {monthGroups.map((group) => {
-        const isExpanded = expandedMonths.has(group.monthKey)
+    <div className="space-y-8">
+      {monthGroups.map((group) => (
+        <section key={group.monthKey} role="group" aria-labelledby={`month-${group.monthKey}`}>
+          <div className="mb-3 flex items-baseline justify-between gap-4">
+            <h3 id={`month-${group.monthKey}`} className="type-label text-text-primary">
+              {group.monthLabel}
+            </h3>
+            <p className="type-caption text-text-tertiary">
+              {group.donations.length} {group.donations.length === 1 ? 'contribution' : 'contributions'}
+            </p>
+          </div>
 
-        return (
-          <Card key={group.monthKey} className="rounded-xl overflow-hidden">
-            {/* Accordion Header */}
-            <button
-              onClick={() => toggleMonth(group.monthKey)}
-              className="w-full px-6 py-4 flex items-center justify-between hover:bg-muted/50 transition-colors"
-            >
-              <div className="flex items-center gap-4">
-                <ChevronDown
-                  className={`h-5 w-5 text-muted-foreground transition-transform ${
-                    isExpanded ? 'rotate-180' : ''
-                  }`}
-                />
-                <div className="text-left">
-                  <h3 className="font-semibold">{group.monthLabel}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {group.count} {group.count === 1 ? 'donation' : 'donations'}
+          <div className="overflow-hidden rounded-grouped border border-border-subtle bg-surface-primary">
+            {group.donations.map((donation) => {
+              const contributionName = getContributionName(donation)
+              const dateLabel = new Intl.DateTimeFormat('en-US', {
+                month: 'short',
+                day: 'numeric',
+              }).format(parseDonationDate(donation.date))
+              const amountLabel = formatCurrency(Number(donation.convertedAmount), donation.convertedCurrency)
+
+              return (
+                <article
+                  key={donation.id}
+                  className="grid grid-cols-[3.5rem_minmax(0,1fr)_auto_auto] items-center gap-3 border-b border-border-subtle px-3 py-3.5 last:border-b-0 sm:grid-cols-[4.5rem_minmax(0,1fr)_auto_auto] sm:px-4"
+                >
+                  <time dateTime={donation.date} className="type-caption tabular-nums text-text-secondary">
+                    {dateLabel}
+                  </time>
+
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-text-primary">{contributionName}</p>
+                    <p className="type-caption mt-0.5 truncate text-text-secondary">
+                      <span className={donation.type === 'zakat' ? 'font-semibold text-gold' : ''}>
+                        {getTypeLabel(donation.type)}
+                      </span>
+                      {donation.charity_name && donation.category ? ` · ${donation.category}` : ''}
+                      {donation.notes ? ` · ${donation.notes}` : ''}
+                    </p>
+                  </div>
+
+                  <p className="whitespace-nowrap text-right font-semibold tabular-nums text-text-primary">
+                    {amountLabel}
                   </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-xl font-bold">{formatCurrency(group.total, preferredCurrency)}</p>
-              </div>
-            </button>
 
-            {/* Accordion Content */}
-            {isExpanded && (
-              <CardContent className="px-6 pb-4 pt-0 border-t">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">
-                          Date
-                        </th>
-                        <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">
-                          Amount
-                        </th>
-                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">
-                          Type
-                        </th>
-                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">
-                          Charity
-                        </th>
-                        <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {group.donations
-                        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                        .map((donation) => (
-                          <tr key={donation.id} className="border-b last:border-0 hover:bg-muted/30">
-                            <td className="py-3 px-2 text-sm">{formatDate(donation.date)}</td>
-                            <td className="py-3 px-2 text-sm text-right font-semibold">
-                              {formatCurrency(Number(donation.convertedAmount), donation.convertedCurrency)}
-                            </td>
-                            <td className="py-3 px-2">
-                              <span
-                                className={`text-xs px-2 py-1 rounded-full capitalize ${getTypeBadgeClass(
-                                  donation.type
-                                )}`}
-                              >
-                                {donation.type}
-                              </span>
-                            </td>
-                            <td className="py-3 px-2 text-sm">
-                              <div>
-                                {donation.charity_name || <span className="text-muted-foreground">—</span>}
-                              </div>
-                              {donation.category && (
-                                <div className="text-xs text-muted-foreground">{donation.category}</div>
-                              )}
-                            </td>
-                            <td className="py-3 px-2">
-                              <div className="flex justify-end gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="icon-sm"
-                                  className="h-8 w-8"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    onEdit(donation)
-                                  }}
-                                >
-                                  <Edit className="h-3.5 w-3.5" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon-sm"
-                                  className="h-8 w-8 text-destructive hover:text-destructive"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    onDelete(donation)
-                                  }}
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            )}
-          </Card>
-        )
-      })}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="size-11 text-text-tertiary"
+                        aria-label={`Actions for ${contributionName}, ${amountLabel}, ${dateLabel}`}
+                      >
+                        <MoreHorizontal className="size-5" aria-hidden="true" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="min-w-48">
+                      <DropdownMenuItem onSelect={() => onEdit(donation)}>
+                        <Pencil aria-hidden="true" />
+                        Edit contribution
+                      </DropdownMenuItem>
+                      <DropdownMenuItem variant="destructive" onSelect={() => onDelete(donation)}>
+                        <Trash2 aria-hidden="true" />
+                        Delete contribution
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </article>
+              )
+            })}
+          </div>
+        </section>
+      ))}
     </div>
   )
 }

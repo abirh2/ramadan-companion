@@ -1,10 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Calculator, ChevronDown, Plus } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Calculator, Plus } from 'lucide-react'
 import { CurrencySelector } from './CurrencySelector'
 import { formatCurrency, getPreferredCurrency } from '@/lib/currency'
 import type { ZakatCalculationInputs, ZakatCalculation } from '@/types/donation.types'
@@ -13,6 +12,15 @@ import type { CurrencyCode } from '@/types/currency.types'
 interface ZakatCalculatorProps {
   onLogAsDonation: (amount: number, currency: string) => void
 }
+
+const inputFields: Array<{ key: keyof ZakatCalculationInputs; label: string }> = [
+  { key: 'cash', label: 'Cash on hand' },
+  { key: 'savings', label: 'Savings & investments' },
+  { key: 'gold', label: 'Gold (current value)' },
+  { key: 'silver', label: 'Silver (current value)' },
+  { key: 'businessAssets', label: 'Business assets' },
+  { key: 'debts', label: 'Outstanding debts' },
+]
 
 export function ZakatCalculator({ onLogAsDonation }: ZakatCalculatorProps) {
   const [isExpanded, setIsExpanded] = useState(false)
@@ -32,12 +40,7 @@ export function ZakatCalculator({ onLogAsDonation }: ZakatCalculatorProps) {
     const netAssets = totalAssets - totalDebts
     const zakatAmount = netAssets > 0 ? netAssets * 0.025 : 0
 
-    return {
-      totalAssets,
-      totalDebts,
-      netAssets,
-      zakatAmount,
-    }
+    return { totalAssets, totalDebts, netAssets, zakatAmount }
   }
 
   const calculation = calculateZakat()
@@ -48,177 +51,82 @@ export function ZakatCalculator({ onLogAsDonation }: ZakatCalculatorProps) {
   }
 
   return (
-    <Card className="rounded-xl">
-      <CardHeader>
-        <div
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full text-left flex items-center justify-between hover:opacity-80 transition-opacity cursor-pointer"
-        >
-          <div>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Calculator className="h-5 w-5" />
-              Zakat Calculator
-            </CardTitle>
-            <CardDescription className="mt-1">
-              Calculate your zakat (2.5% of eligible wealth)
-            </CardDescription>
-          </div>
-          <Button variant="ghost" size="sm" onClick={(e) => e.stopPropagation()}>
-            {isExpanded ? 'Collapse' : 'Expand'}
-          </Button>
-        </div>
-      </CardHeader>
+    <section className="overflow-hidden rounded-surface border border-border-subtle bg-surface-primary" aria-labelledby="zakat-calculator-title">
+      <button
+        type="button"
+        onClick={() => setIsExpanded((expanded) => !expanded)}
+        aria-expanded={isExpanded}
+        aria-controls="zakat-calculator-content"
+        className="flex min-h-20 w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-surface-grouped focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-6"
+      >
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-control bg-gold-muted text-gold">
+          <Calculator className="size-5" aria-hidden="true" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span id="zakat-calculator-title" className="block font-semibold text-text-primary">Zakat calculator</span>
+          <span className="type-caption mt-1 block text-text-secondary">Estimate 2.5% of the eligible wealth you enter.</span>
+        </span>
+        <ChevronDown className={`size-5 shrink-0 text-text-tertiary transition-transform ${isExpanded ? 'rotate-180' : ''}`} aria-hidden="true" />
+      </button>
 
       {isExpanded && (
-        <CardContent className="space-y-6">
-          {/* Currency Selector */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Currency</label>
-            <CurrencySelector
-              value={selectedCurrency}
-              onChange={setSelectedCurrency}
-            />
-            <p className="text-xs text-muted-foreground">
-              Enter all amounts in {selectedCurrency}
-            </p>
+        <div id="zakat-calculator-content" className="border-t border-border-subtle px-5 py-6 sm:px-6">
+          <div className="mb-6 max-w-48">
+            <CurrencySelector value={selectedCurrency} onChange={setSelectedCurrency} />
+            <p className="type-caption mt-2 text-text-secondary">Enter every amount in {selectedCurrency}.</p>
           </div>
 
-          {/* Input Fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label htmlFor="cash" className="text-sm font-medium">
-                Cash on Hand
-              </label>
-              <Input
-                id="cash"
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="0.00"
-                value={inputs.cash || ''}
-                onChange={(e) => handleInputChange('cash', e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="savings" className="text-sm font-medium">
-                Savings & Investments
-              </label>
-              <Input
-                id="savings"
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="0.00"
-                value={inputs.savings || ''}
-                onChange={(e) => handleInputChange('savings', e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="gold" className="text-sm font-medium">
-                Gold (Current Value)
-              </label>
-              <Input
-                id="gold"
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="0.00"
-                value={inputs.gold || ''}
-                onChange={(e) => handleInputChange('gold', e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="silver" className="text-sm font-medium">
-                Silver (Current Value)
-              </label>
-              <Input
-                id="silver"
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="0.00"
-                value={inputs.silver || ''}
-                onChange={(e) => handleInputChange('silver', e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="businessAssets" className="text-sm font-medium">
-                Business Assets
-              </label>
-              <Input
-                id="businessAssets"
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="0.00"
-                value={inputs.businessAssets || ''}
-                onChange={(e) => handleInputChange('businessAssets', e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="debts" className="text-sm font-medium">
-                Outstanding Debts
-              </label>
-              <Input
-                id="debts"
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="0.00"
-                value={inputs.debts || ''}
-                onChange={(e) => handleInputChange('debts', e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Calculation Summary */}
-          <div className="border-t pt-6 space-y-3">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Total Assets:</span>
-              <span className="font-medium">{formatCurrency(calculation.totalAssets, selectedCurrency)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Minus Debts:</span>
-              <span className="font-medium">- {formatCurrency(calculation.totalDebts, selectedCurrency)}</span>
-            </div>
-            <div className="flex justify-between text-sm border-t pt-3">
-              <span className="text-muted-foreground">Net Zakatable Wealth:</span>
-              <span className="font-semibold">{formatCurrency(calculation.netAssets, selectedCurrency)}</span>
-            </div>
-            <div className="flex justify-between items-center bg-primary/5 p-4 rounded-lg border-2 border-primary/20">
-              <div>
-                <p className="text-sm text-muted-foreground">Zakat Due (2.5%):</p>
-                <p className="text-2xl font-bold text-primary">
-                  {formatCurrency(calculation.zakatAmount, selectedCurrency)}
-                </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {inputFields.map((field) => (
+              <div key={field.key} className="space-y-2">
+                <label htmlFor={`zakat-${field.key}`} className="type-label text-text-secondary">{field.label}</label>
+                <Input
+                  id={`zakat-${field.key}`}
+                  type="number"
+                  inputMode="decimal"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
+                  value={inputs[field.key] || ''}
+                  onChange={(event) => handleInputChange(field.key, event.target.value)}
+                />
               </div>
-              <Button
-                onClick={() => onLogAsDonation(calculation.zakatAmount, selectedCurrency)}
-                disabled={calculation.zakatAmount <= 0}
-                size="sm"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Log as Donation
+            ))}
+          </div>
+
+          <div className="mt-6 border-t border-border-subtle pt-5">
+            <dl className="space-y-3">
+              <div className="flex justify-between gap-4 text-sm">
+                <dt className="text-text-secondary">Total assets</dt>
+                <dd className="font-medium tabular-nums text-text-primary">{formatCurrency(calculation.totalAssets, selectedCurrency)}</dd>
+              </div>
+              <div className="flex justify-between gap-4 text-sm">
+                <dt className="text-text-secondary">Minus debts</dt>
+                <dd className="font-medium tabular-nums text-text-primary">− {formatCurrency(calculation.totalDebts, selectedCurrency)}</dd>
+              </div>
+              <div className="flex justify-between gap-4 border-t border-border-subtle pt-3 text-sm">
+                <dt className="text-text-secondary">Net zakatable wealth</dt>
+                <dd className="font-semibold tabular-nums text-text-primary">{formatCurrency(calculation.netAssets, selectedCurrency)}</dd>
+              </div>
+            </dl>
+
+            <div className="mt-5 flex flex-col gap-4 rounded-grouped border border-gold/25 bg-gold-muted p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="type-caption text-text-secondary">Estimated Zakat due (2.5%)</p>
+                <p className="mt-1 text-2xl font-semibold tabular-nums text-gold">{formatCurrency(calculation.zakatAmount, selectedCurrency)}</p>
+              </div>
+              <Button onClick={() => onLogAsDonation(calculation.zakatAmount, selectedCurrency)} disabled={calculation.zakatAmount <= 0}>
+                <Plus className="size-4" aria-hidden="true" />
+                Add to giving history
               </Button>
             </div>
           </div>
 
-          {/* Info Note */}
-          <div className="bg-muted/50 p-4 rounded-lg text-sm text-muted-foreground">
-            <p className="font-medium mb-1">Note:</p>
-            <p>
-              Zakat is calculated at 2.5% of your net eligible wealth. This calculator provides an estimate. 
-              Please consult with a qualified Islamic scholar for specific guidance on your zakat obligations.
-            </p>
-          </div>
-        </CardContent>
+          <p className="type-caption mt-5 text-text-secondary">
+            This is an estimate based on the existing 2.5% calculation. Consult a qualified Islamic scholar for guidance specific to your circumstances.
+          </p>
+        </div>
       )}
-    </Card>
+    </section>
   )
 }
-

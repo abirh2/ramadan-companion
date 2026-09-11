@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { getViewMode, setViewMode } from '@/lib/currency'
 import type { CurrencyViewMode } from '@/types/donation.types'
@@ -30,24 +30,27 @@ export function CurrencyViewToggle({
   }
 
   return (
-    <div className="flex gap-2">
+    <div className="inline-flex rounded-control border border-border-subtle bg-surface-primary p-1" role="group" aria-label="Amount display currency">
       <Button
-        variant={value === 'original' ? 'default' : 'outline'}
+        variant="ghost"
         size="sm"
         onClick={() => handleToggle('original')}
         type="button"
+        aria-pressed={value === 'original'}
+        className={value === 'original' ? 'bg-teal-muted text-teal hover:bg-teal-muted' : 'text-text-secondary'}
       >
-        Original Currencies
+        Original
       </Button>
       <Button
-        variant={value === 'converted' ? 'default' : 'outline'}
+        variant="ghost"
         size="sm"
         onClick={() => handleToggle('converted')}
         type="button"
+        aria-pressed={value === 'converted'}
+        className={value === 'converted' ? 'bg-teal-muted text-teal hover:bg-teal-muted' : 'text-text-secondary'}
       >
-        Convert to {preferredCurrency}
+        In {preferredCurrency}
       </Button>
     </div>
   )
 }
-

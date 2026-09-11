@@ -26,8 +26,8 @@ describe('CurrencyViewToggle', () => {
       />
     )
 
-    expect(screen.getByText(/original currencies/i)).toBeInTheDocument()
-    expect(screen.getByText(/convert to usd/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Original' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'In USD' })).toBeInTheDocument()
   })
 
   it('should highlight active button', () => {
@@ -39,14 +39,11 @@ describe('CurrencyViewToggle', () => {
       />
     )
 
-    const originalButton = screen.getByText(/original currencies/i).closest('button')
-    const convertedButton = screen.getByText(/convert to usd/i).closest('button')
+    const originalButton = screen.getByRole('button', { name: 'Original' })
+    const convertedButton = screen.getByRole('button', { name: 'In USD' })
 
-    // Original button should have default variant
-    expect(originalButton?.getAttribute('data-variant')).toBeFalsy()
-    
-    // Converted button should have outline variant
-    expect(convertedButton?.getAttribute('data-variant')).toBeFalsy()
+    expect(originalButton).toHaveAttribute('aria-pressed', 'true')
+    expect(convertedButton).toHaveAttribute('aria-pressed', 'false')
   })
 
   it('should call onChange when button is clicked', () => {
@@ -59,7 +56,7 @@ describe('CurrencyViewToggle', () => {
       />
     )
 
-    const convertedButton = screen.getByText(/convert to usd/i)
+    const convertedButton = screen.getByRole('button', { name: 'In USD' })
     fireEvent.click(convertedButton)
 
     expect(onChange).toHaveBeenCalledWith('converted')
@@ -75,7 +72,7 @@ describe('CurrencyViewToggle', () => {
       />
     )
 
-    expect(screen.getByText(/convert to eur/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'In EUR' })).toBeInTheDocument()
   })
 
   it('should toggle between modes', () => {
@@ -89,7 +86,7 @@ describe('CurrencyViewToggle', () => {
     )
 
     // Click to convert
-    fireEvent.click(screen.getByText(/convert to usd/i))
+    fireEvent.click(screen.getByRole('button', { name: 'In USD' }))
     expect(onChange).toHaveBeenCalledWith('converted')
 
     // Rerender with new value
@@ -102,8 +99,7 @@ describe('CurrencyViewToggle', () => {
     )
 
     // Click to go back to original
-    fireEvent.click(screen.getByText(/original currencies/i))
+    fireEvent.click(screen.getByRole('button', { name: 'Original' }))
     expect(onChange).toHaveBeenCalledWith('original')
   })
 })
-

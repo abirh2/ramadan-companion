@@ -28,14 +28,8 @@ export function CurrencyPreferenceSelector({
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <label className="text-sm font-medium whitespace-nowrap">
-        Preferred Currency:
-      </label>
-      <div className="w-full max-w-xs">
-        <CurrencySelector value={value} onChange={handleChange} />
-      </div>
+    <div className="w-full sm:w-48">
+      <CurrencySelector value={value} onChange={handleChange} />
     </div>
   )
 }
-
