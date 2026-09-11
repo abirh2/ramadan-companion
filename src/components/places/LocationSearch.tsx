@@ -8,10 +8,9 @@ import { geocodeCity, requestGeolocation } from '@/lib/location'
 
 interface LocationSearchProps {
   onLocationSelect: (location: LocationData) => Promise<void>
-  currentLocation: LocationData | null
 }
 
-export function LocationSearch({ onLocationSelect, currentLocation }: LocationSearchProps) {
+export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
   const suggestionsId = useId()
   const [searchQuery, setSearchQuery] = useState('')
   const [suggestions, setSuggestions] = useState<
@@ -21,6 +20,8 @@ export function LocationSearch({ onLocationSelect, currentLocation }: LocationSe
   const [searching, setSearching] = useState(false)
   const [detectingLocation, setDetectingLocation] = useState(false)
   const [activeSuggestion, setActiveSuggestion] = useState(-1)
+  const [locationMessage, setLocationMessage] = useState<string | null>(null)
+  const [searchMessage, setSearchMessage] = useState<string | null>(null)
 
   // Debounced search
   useEffect(() => {
@@ -28,6 +29,7 @@ export function LocationSearch({ onLocationSelect, currentLocation }: LocationSe
       setSuggestions([])
       setShowSuggestions(false)
       setActiveSuggestion(-1)
+      setSearchMessage(null)
       return
     }
 
@@ -38,9 +40,14 @@ export function LocationSearch({ onLocationSelect, currentLocation }: LocationSe
         setSuggestions(results)
         setShowSuggestions(results.length > 0)
         setActiveSuggestion(-1)
+        setSearchMessage(
+          results.length === 0 ? 'No matching locations found. Try another city or address.' : null
+        )
       } catch (error) {
         console.error('Search error:', error)
         setSuggestions([])
+        setShowSuggestions(false)
+        setSearchMessage('Location search is unavailable right now. Try again.')
       } finally {
         setSearching(false)
       }
@@ -67,16 +74,19 @@ export function LocationSearch({ onLocationSelect, currentLocation }: LocationSe
 
   const handleUseCurrentLocation = useCallback(async () => {
     setDetectingLocation(true)
+    setLocationMessage(null)
     try {
       const location = await requestGeolocation()
       if (location) {
         await onLocationSelect(location)
       } else {
-        alert('Unable to detect your location. Please check browser permissions.')
+        setLocationMessage(
+          'We could not access your location. Search for a city or check location permission.'
+        )
       }
     } catch (error) {
       console.error('Location detection error:', error)
-      alert('Unable to detect your location. Please try manual search.')
+      setLocationMessage('Location is unavailable right now. Search for a city or try again.')
     } finally {
       setDetectingLocation(false)
     }
@@ -126,6 +136,7 @@ export function LocationSearch({ onLocationSelect, currentLocation }: LocationSe
               onChange={(e) => {
                 setSearchQuery(e.target.value)
                 setActiveSuggestion(-1)
+                setSearchMessage(null)
               }}
               onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
               onBlur={handleBlur}
@@ -175,6 +186,8 @@ export function LocationSearch({ onLocationSelect, currentLocation }: LocationSe
         {/* Use current location button */}
         <Button
           variant="outline"
+          size="icon-lg"
+          className="size-11"
           onClick={handleUseCurrentLocation}
           disabled={detectingLocation}
           aria-label={detectingLocation ? 'Detecting current location' : 'Use current location'}
@@ -188,9 +201,14 @@ export function LocationSearch({ onLocationSelect, currentLocation }: LocationSe
       </div>
 
       {/* Current location display */}
-      {currentLocation && (
-        <p className="text-xs text-muted-foreground">
-          Current search location: {currentLocation.city}
+      {locationMessage && (
+        <p className="type-caption text-text-secondary" role="status">
+          {locationMessage}
+        </p>
+      )}
+      {searchMessage && (
+        <p className="type-caption text-text-secondary" role="status">
+          {searchMessage}
         </p>
       )}
     </div>

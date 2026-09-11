@@ -1,228 +1,93 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import dynamic from 'next/dynamic'
-import { ArrowLeft, Loader2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { SelectionSheet } from '@/components/ui/selection-sheet'
-import { useMosques } from '@/hooks/useMosques'
+import { Loader2 } from 'lucide-react'
+import { NearbyExperience } from '@/components/places/NearbyExperience'
 import { MosqueList } from '@/components/places/MosqueList'
-import { LocationSearch } from '@/components/places/LocationSearch'
 import { MosqueDetailDialog } from '@/components/places/MosqueDetailDialog'
 import { FeedbackButton } from '@/components/FeedbackButton'
+import { useMosques } from '@/hooks/useMosques'
 import { saveDistanceUnit } from '@/lib/places'
 import type { MosqueData, DistanceUnit } from '@/types/places.types'
 import type { LocationData } from '@/types/ramadan.types'
 
-// Dynamically import MosqueMap to avoid SSR issues with maplibre-gl
-const MosqueMap = dynamic(() => import('@/components/places/MosqueMap').then(mod => ({ default: mod.MosqueMap })), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-[500px] rounded-lg border flex items-center justify-center">
-      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-    </div>
-  ),
-})
+const MosqueMap = dynamic(
+  () => import('@/components/places/MosqueMap').then((mod) => ({ default: mod.MosqueMap })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full w-full items-center justify-center" aria-label="Loading mosque map">
+        <Loader2 className="size-6 animate-spin text-text-tertiary motion-reduce:animate-none" />
+      </div>
+    ),
+  }
+)
 
 export default function MosquesPage() {
   const {
-    mosques,
-    loading,
-    error,
-    searchRadiusMiles,
-    distanceUnit,
-    location,
-    updateRadius,
-    setCustomLocation,
-    toggleDistanceUnit,
+    mosques, loading, error, searchRadiusMiles, distanceUnit, location,
+    updateRadius, setCustomLocation, toggleDistanceUnit, refetch,
   } = useMosques()
-
   const [selectedMosque, setSelectedMosque] = useState<MosqueData | null>(null)
-  const [dialogOpen, setDialogOpen] = useState(false)
+  const [detailOpen, setDetailOpen] = useState(false)
 
   const handleMosqueClick = (mosque: MosqueData) => {
     setSelectedMosque(mosque)
-    setDialogOpen(true)
+    setDetailOpen(true)
   }
 
   const handleLocationSelect = async (newLocation: LocationData) => {
     await setCustomLocation(newLocation)
   }
 
-  const handleDistanceUnitToggle = async (unit: DistanceUnit) => {
+  const handleDistanceUnitChange = async (unit: DistanceUnit) => {
     toggleDistanceUnit(unit)
     await saveDistanceUnit(unit)
   }
 
-  // Radius options based on distance unit
-  const radiusOptions = distanceUnit === 'mi'
-    ? [
-        { value: '1', label: '1 mi' },
-        { value: '2', label: '2 mi' },
-        { value: '3', label: '3 mi' },
-        { value: '5', label: '5 mi' },
-        { value: '10', label: '10 mi' },
-      ]
-    : [
-        { value: '1.6', label: '1.6 km' },
-        { value: '3.2', label: '3.2 km' },
-        { value: '4.8', label: '4.8 km' },
-        { value: '8', label: '8 km' },
-        { value: '16', label: '16 km' },
-      ]
-
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
-      <header className="mb-8">
-        <Link 
-          href="/more"
-          className="type-nav mb-3 inline-flex items-center gap-2 text-text-secondary transition-colors hover:text-text-primary"
-        >
-          <ArrowLeft className="size-4" aria-hidden="true" />
-          Back to More
-        </Link>
-        <h1 className="type-page-title text-text-primary">Nearby Mosques</h1>
-        <p className="type-body-secondary mt-2 text-text-secondary">Find mosques near you</p>
-      </header>
-
-      <Card className="space-y-6 p-5 sm:p-6">
-        {/* Location Search */}
-        <div>
-          <LocationSearch onLocationSelect={handleLocationSelect} currentLocation={location} />
-        </div>
-
-        {/* Controls */}
-        <div className="flex flex-wrap gap-4 items-center justify-between">
-          {/* Search Radius */}
-          <div className="flex items-center gap-2">
-            <SelectionSheet
-              label="Radius"
-              value={searchRadiusMiles.toString()}
-              onValueChange={(value) => updateRadius(parseFloat(value))}
-              compact
-              triggerRole="button"
-              description="Choose how far to search for nearby mosques."
-              options={radiusOptions.map((option) => ({
-                value: option.value,
-                title: option.label,
-              }))}
-            />
-          </div>
-
-          {/* Distance Unit Toggle */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Units:</span>
-            <div className="flex rounded-control border border-border-strong">
-              <Button
-                variant={distanceUnit === 'mi' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => handleDistanceUnitToggle('mi')}
-                className="rounded-r-none"
-              >
-                Miles
-              </Button>
-              <Button
-                variant={distanceUnit === 'km' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => handleDistanceUnitToggle('km')}
-                className="rounded-l-none"
-              >
-                Kilometers
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Results Count */}
-        {!loading && !error && (
-          <p className="text-sm text-muted-foreground">
-            Found {mosques.length} {mosques.length === 1 ? 'mosque' : 'mosques'} within{' '}
-            {searchRadiusMiles} {searchRadiusMiles === 1 ? 'mile' : 'miles'}
-          </p>
-        )}
-
-        {/* Loading State */}
-        {loading && (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        )}
-
-        {/* Error State */}
-        {error && !loading && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground mb-2">Unable to load mosques</p>
-            <p className="text-sm text-muted-foreground">{error}</p>
-          </div>
-        )}
-
-        {/* Tabs: List View / Map View */}
-        {!loading && !error && location && (
-          <Tabs defaultValue="list" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 max-w-md">
-              <TabsTrigger value="list">List View</TabsTrigger>
-              <TabsTrigger value="map">Map View</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="list" className="mt-6">
-              <MosqueList
-                mosques={mosques}
-                distanceUnit={distanceUnit}
-                onMosqueClick={handleMosqueClick}
-              />
-            </TabsContent>
-
-            <TabsContent value="map" className="mt-6">
-              <MosqueMap
-                mosques={mosques}
-                userLocation={{ lat: location.lat, lng: location.lng }}
-                onMosqueClick={handleMosqueClick}
-                searchRadiusMiles={searchRadiusMiles}
-              />
-            </TabsContent>
-          </Tabs>
-        )}
-
-        {/* Data Source Notice */}
-        {!loading && !error && (
-          <div className="rounded-grouped border border-border-subtle bg-surface-grouped px-4 py-3">
-            <p className="text-xs text-muted-foreground">
-              Data provided by{' '}
-              <a
-                href="https://www.openstreetmap.org"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:text-primary"
-              >
-                OpenStreetMap
-              </a>
-              , a community-driven map. Coverage may vary by area and may not include all locations.{' '}
-              <a
-                href="https://www.openstreetmap.org/fixthemap"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:text-primary"
-              >
-                Help improve the map
-              </a>
-            </p>
-          </div>
-        )}
-      </Card>
-
-      {/* Mosque Detail Dialog */}
-      <MosqueDetailDialog
-        mosque={selectedMosque}
+    <>
+      <NearbyExperience
+        mode="mosques"
+        loading={loading}
+        error={error}
+        itemCount={mosques.length}
+        searchRadiusMiles={searchRadiusMiles}
         distanceUnit={distanceUnit}
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        location={location}
+        onLocationSelect={handleLocationSelect}
+        onRadiusChange={updateRadius}
+        onDistanceUnitChange={handleDistanceUnitChange}
+        onRetry={refetch}
+        map={location ? (
+          <MosqueMap
+            mosques={mosques}
+            userLocation={{ lat: location.lat, lng: location.lng }}
+            onMosqueClick={handleMosqueClick}
+            searchRadiusMiles={searchRadiusMiles}
+          />
+        ) : null}
+        results={
+          <MosqueList mosques={mosques} distanceUnit={distanceUnit} onMosqueClick={handleMosqueClick} />
+        }
+        attribution={
+          <p>
+            Mosque data is provided by{' '}
+            <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-text-primary">
+              OpenStreetMap
+            </a>
+            . Community coverage varies and may not include every mosque.{' '}
+            <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-text-primary">
+              Help improve the map
+            </a>
+            .
+          </p>
+        }
       />
 
-      {/* Feedback Button */}
+      <MosqueDetailDialog mosque={selectedMosque} distanceUnit={distanceUnit} open={detailOpen} onOpenChange={setDetailOpen} />
       <FeedbackButton pagePath="/places/mosques" />
-    </div>
+    </>
   )
 }

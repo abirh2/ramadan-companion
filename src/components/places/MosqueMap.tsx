@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import Map, { Marker, NavigationControl } from 'react-map-gl/maplibre'
 import type { MapRef } from 'react-map-gl/maplibre'
 import type { MosqueData } from '@/types/places.types'
-import { MapPin, User } from 'lucide-react'
+import { Building2, LocateFixed } from 'lucide-react'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 interface MosqueMapProps {
@@ -12,6 +12,19 @@ interface MosqueMapProps {
   userLocation: { lat: number; lng: number }
   onMosqueClick: (mosque: MosqueData) => void
   searchRadiusMiles: number
+}
+
+const OSM_STYLE = {
+  version: 8 as const,
+  sources: {
+    osm: {
+      type: 'raster' as const,
+      tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+      tileSize: 256,
+      attribution: '© OpenStreetMap contributors',
+    },
+  },
+  layers: [{ id: 'osm', type: 'raster' as const, source: 'osm' }],
 }
 
 export function MosqueMap({
@@ -62,10 +75,18 @@ export function MosqueMap({
         }
       )
     }
-  }, [mosques, userLocation])
+  }, [mosques, userLocation.lat, userLocation.lng])
+
+  const recenterMap = () => {
+    mapRef.current?.flyTo({
+      center: [userLocation.lng, userLocation.lat],
+      zoom: getZoomLevel(searchRadiusMiles),
+      duration: 600,
+    })
+  }
 
   return (
-    <div className="w-full h-[500px] rounded-lg overflow-hidden border">
+    <div className="relative h-full w-full overflow-hidden">
       <Map
         ref={mapRef}
         initialViewState={{
@@ -73,50 +94,31 @@ export function MosqueMap({
           latitude: userLocation.lat,
           zoom: getZoomLevel(searchRadiusMiles),
         }}
-        mapStyle={{
-          version: 8,
-          sources: {
-            osm: {
-              type: 'raster',
-              tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-              tileSize: 256,
-              attribution: '© OpenStreetMap contributors',
-            },
-          },
-          layers: [
-            {
-              id: 'osm',
-              type: 'raster',
-              source: 'osm',
-            },
-          ],
-        }}
+        mapStyle={OSM_STYLE}
         mapLib={import('maplibre-gl')}
       >
-        <NavigationControl position="top-right" />
+        <NavigationControl position="top-right" showCompass={false} />
 
         {/* User location marker */}
         <Marker longitude={userLocation.lng} latitude={userLocation.lat}>
           <div className="relative">
-            <div className="absolute -translate-x-1/2 -translate-y-1/2">
-              <div className="bg-blue-500 rounded-full p-2 shadow-lg">
-                <User className="h-4 w-4 text-white" />
-              </div>
+            <div className="absolute size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-white bg-primary shadow-low" aria-label="Your search location">
             </div>
           </div>
         </Marker>
 
         {/* Mosque markers */}
         {mosques.map((mosque) => (
-          <Marker key={mosque.id} longitude={mosque.lng} latitude={mosque.lat}>
+          <Marker key={mosque.id} longitude={mosque.lng} latitude={mosque.lat} anchor="bottom">
             <button
+              type="button"
               onClick={() => onMosqueClick(mosque)}
-              className="relative group"
+              className="group relative flex size-11 items-end justify-center rounded-control focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
               aria-label={`View details for ${mosque.name}`}
             >
-              <div className="absolute -translate-x-1/2 -translate-y-full">
-                <div className="bg-green-600 rounded-full p-2 shadow-lg transition-transform group-hover:scale-110">
-                  <MapPin className="h-5 w-5 text-white fill-white" />
+              <div className="relative">
+                <div className="flex size-9 items-center justify-center rounded-control bg-primary text-primary-foreground shadow-low transition-transform group-hover:scale-105 motion-reduce:transition-none">
+                  <Building2 className="size-4" aria-hidden="true" />
                 </div>
                 {/* Tooltip on hover */}
                 <div className="absolute left-1/2 -translate-x-1/2 mt-1 bg-black/80 text-white text-xs py-1 px-2 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
@@ -127,7 +129,14 @@ export function MosqueMap({
           </Marker>
         ))}
       </Map>
+      <button
+        type="button"
+        onClick={recenterMap}
+        aria-label="Recenter map on search location"
+        className="absolute bottom-8 right-3 z-10 flex size-11 items-center justify-center rounded-control border border-border-subtle bg-surface-elevated text-text-primary shadow-low transition-colors hover:bg-surface-grouped focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
+      >
+        <LocateFixed className="size-4" aria-hidden="true" />
+      </button>
     </div>
   )
 }
-

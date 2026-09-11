@@ -1,229 +1,91 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import dynamic from 'next/dynamic'
-import { ArrowLeft, Loader2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { SelectionSheet } from '@/components/ui/selection-sheet'
-import { useHalalFood } from '@/hooks/useHalalFood'
+import { Loader2 } from 'lucide-react'
+import { NearbyExperience } from '@/components/places/NearbyExperience'
 import { FoodList } from '@/components/places/FoodList'
-import { LocationSearch } from '@/components/places/LocationSearch'
 import { FoodDetailDialog } from '@/components/places/FoodDetailDialog'
 import { FeedbackButton } from '@/components/FeedbackButton'
+import { useHalalFood } from '@/hooks/useHalalFood'
 import { saveDistanceUnit } from '@/lib/places'
 import type { HalalFoodData, DistanceUnit } from '@/types/places.types'
 import type { LocationData } from '@/types/ramadan.types'
 
-// Dynamically import FoodMap to avoid SSR issues with maplibre-gl
-const FoodMap = dynamic(() => import('@/components/places/FoodMap').then(mod => ({ default: mod.FoodMap })), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-[500px] rounded-lg border flex items-center justify-center">
-      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-    </div>
-  ),
-})
+const FoodMap = dynamic(
+  () => import('@/components/places/FoodMap').then((mod) => ({ default: mod.FoodMap })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full w-full items-center justify-center" aria-label="Loading halal food map">
+        <Loader2 className="size-6 animate-spin text-text-tertiary motion-reduce:animate-none" />
+      </div>
+    ),
+  }
+)
 
 export default function HalalFoodPage() {
   const {
-    foods,
-    loading,
-    error,
-    searchRadiusMiles,
-    distanceUnit,
-    location,
-    updateRadius,
-    setCustomLocation,
-    toggleDistanceUnit,
+    foods, loading, error, searchRadiusMiles, distanceUnit, location,
+    updateRadius, setCustomLocation, toggleDistanceUnit, refetch,
   } = useHalalFood()
-
   const [selectedFood, setSelectedFood] = useState<HalalFoodData | null>(null)
-  const [dialogOpen, setDialogOpen] = useState(false)
+  const [detailOpen, setDetailOpen] = useState(false)
 
   const handleFoodClick = (food: HalalFoodData) => {
     setSelectedFood(food)
-    setDialogOpen(true)
+    setDetailOpen(true)
   }
 
   const handleLocationSelect = async (newLocation: LocationData) => {
     await setCustomLocation(newLocation)
   }
 
-  const handleDistanceUnitToggle = async (unit: DistanceUnit) => {
+  const handleDistanceUnitChange = async (unit: DistanceUnit) => {
     toggleDistanceUnit(unit)
     await saveDistanceUnit(unit)
   }
 
-  // Radius options based on distance unit
-  const radiusOptions = distanceUnit === 'mi'
-    ? [
-        { value: '1', label: '1 mi' },
-        { value: '2', label: '2 mi' },
-        { value: '3', label: '3 mi' },
-        { value: '5', label: '5 mi' },
-        { value: '10', label: '10 mi' },
-      ]
-    : [
-        { value: '1.6', label: '1.6 km' },
-        { value: '3.2', label: '3.2 km' },
-        { value: '4.8', label: '4.8 km' },
-        { value: '8', label: '8 km' },
-        { value: '16', label: '16 km' },
-      ]
-
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
-      <header className="mb-8">
-        <Link 
-          href="/more"
-          className="type-nav mb-3 inline-flex items-center gap-2 text-text-secondary transition-colors hover:text-text-primary"
-        >
-          <ArrowLeft className="size-4" aria-hidden="true" />
-          Back to More
-        </Link>
-        <h1 className="type-page-title text-text-primary">Halal Food</h1>
-        <p className="type-body-secondary mt-2 text-text-secondary">Discover halal restaurants nearby</p>
-      </header>
-
-      <Card className="space-y-6 p-5 sm:p-6">
-        {/* Location Search */}
-        <div>
-          <LocationSearch onLocationSelect={handleLocationSelect} currentLocation={location} />
-        </div>
-
-        {/* Controls */}
-        <div className="flex flex-wrap gap-4 items-center justify-between">
-          {/* Search Radius */}
-          <div className="flex items-center gap-2">
-            <SelectionSheet
-              label="Radius"
-              value={searchRadiusMiles.toString()}
-              onValueChange={(value) => updateRadius(parseFloat(value))}
-              compact
-              triggerRole="button"
-              description="Choose how far to search for halal food."
-              options={radiusOptions.map((option) => ({
-                value: option.value,
-                title: option.label,
-              }))}
-            />
-          </div>
-
-          {/* Distance Unit Toggle */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Units:</span>
-            <div className="flex rounded-control border border-border-strong">
-              <Button
-                variant={distanceUnit === 'mi' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => handleDistanceUnitToggle('mi')}
-                className="rounded-r-none"
-              >
-                Miles
-              </Button>
-              <Button
-                variant={distanceUnit === 'km' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => handleDistanceUnitToggle('km')}
-                className="rounded-l-none"
-              >
-                Kilometers
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Results Count */}
-        {!loading && !error && (
-          <p className="text-sm text-muted-foreground">
-            Found {foods.length} halal {foods.length === 1 ? 'place' : 'places'} within{' '}
-            {searchRadiusMiles} {distanceUnit === 'mi' ? (searchRadiusMiles === 1 ? 'mile' : 'miles') : 'km'}
-          </p>
-        )}
-
-        {/* Loading State */}
-        {loading && (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        )}
-
-        {/* Error State */}
-        {error && !loading && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground mb-2">Unable to load halal food places</p>
-            <p className="text-sm text-muted-foreground">{error}</p>
-          </div>
-        )}
-
-        {/* Tabs: List View / Map View */}
-        {!loading && !error && location && (
-          <Tabs defaultValue="list" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 max-w-md">
-              <TabsTrigger value="list">List View</TabsTrigger>
-              <TabsTrigger value="map">Map View</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="list" className="mt-6">
-              <FoodList
-                foods={foods}
-                distanceUnit={distanceUnit}
-                onFoodClick={handleFoodClick}
-              />
-            </TabsContent>
-
-            <TabsContent value="map" className="mt-6">
-              <FoodMap
-                foods={foods}
-                userLocation={{ lat: location.lat, lng: location.lng }}
-                onFoodClick={handleFoodClick}
-                searchRadiusMiles={searchRadiusMiles}
-              />
-            </TabsContent>
-          </Tabs>
-        )}
-
-        {/* Data Source Notice */}
-        {!loading && !error && (
-          <div className="rounded-grouped border border-border-subtle bg-surface-grouped px-4 py-3">
-            <p className="text-xs text-muted-foreground">
-              Data provided by{' '}
-              <a
-                href="https://www.geoapify.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:text-primary"
-              >
-                Geoapify
-              </a>{' '}
-              and{' '}
-              <a
-                href="https://www.openstreetmap.org"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:text-primary"
-              >
-                OpenStreetMap
-              </a>
-              . Results include places with &quot;halal&quot; in their name, halal category, and cuisines traditionally halal (Pakistani, Turkish, Lebanese, Syrian, Arab, Kebab). Coverage may vary by area and halal certification should be verified with the establishment.
-            </p>
-          </div>
-        )}
-      </Card>
-
-      {/* Food Detail Dialog */}
-      <FoodDetailDialog
-        food={selectedFood}
+    <>
+      <NearbyExperience
+        mode="food"
+        loading={loading}
+        error={error}
+        itemCount={foods.length}
+        searchRadiusMiles={searchRadiusMiles}
         distanceUnit={distanceUnit}
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        location={location}
+        onLocationSelect={handleLocationSelect}
+        onRadiusChange={updateRadius}
+        onDistanceUnitChange={handleDistanceUnitChange}
+        onRetry={refetch}
+        map={location ? (
+          <FoodMap
+            foods={foods}
+            userLocation={{ lat: location.lat, lng: location.lng }}
+            onFoodClick={handleFoodClick}
+            searchRadiusMiles={searchRadiusMiles}
+          />
+        ) : null}
+        results={<FoodList foods={foods} distanceUnit={distanceUnit} onFoodClick={handleFoodClick} />}
+        attribution={
+          <p>
+            Results are provided by{' '}
+            <a href="https://www.geoapify.com" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-text-primary">
+              Geoapify
+            </a>{' '}
+            and{' '}
+            <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-text-primary">
+              OpenStreetMap
+            </a>
+            . Places are included from halal labels, names, and cuisine categories. Coverage varies; confirm dietary requirements with the business.
+          </p>
+        }
       />
 
-      {/* Feedback Button */}
+      <FoodDetailDialog food={selectedFood} distanceUnit={distanceUnit} open={detailOpen} onOpenChange={setDetailOpen} />
       <FeedbackButton pagePath="/places/food" />
-    </div>
+    </>
   )
 }
