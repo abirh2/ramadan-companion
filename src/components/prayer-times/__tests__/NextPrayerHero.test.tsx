@@ -64,7 +64,7 @@ describe('NextPrayerHero', () => {
     expect(screen.queryByText(/tomorrow/i)).not.toBeInTheDocument()
   })
 
-  it('renders the countdown with aria-live="polite" so updates are announced (R1.6)', () => {
+  it('exposes the countdown as a timer without announcing every second', () => {
     render(
       <NextPrayerHero
         nextPrayer={baseNextPrayer}
@@ -77,8 +77,9 @@ describe('NextPrayerHero', () => {
     )
 
     const countdown = screen.getByText('countdown:2h 14m')
-    expect(countdown).toHaveAttribute('aria-live', 'polite')
-    expect(countdown).toHaveAttribute('aria-atomic', 'true')
+    expect(countdown).toHaveAttribute('role', 'timer')
+    expect(countdown).toHaveAttribute('aria-live', 'off')
+    expect(countdown).toHaveAccessibleName(/Dhuhr, countdown:2h 14m until prayer at formatted:12:36/i)
   })
 
   it('renders location smaller than the name and countdown via type-caption tokens (R1.4, R1.6)', () => {

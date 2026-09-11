@@ -49,6 +49,13 @@ function closestEquivalentAngle(target: number, previous: number): number {
   return next
 }
 
+function getTurnGuidance(bearing: number, heading: number): string {
+  const clockwiseDistance = ((bearing - heading + 540) % 360) - 180
+  const degrees = Math.round(Math.abs(clockwiseDistance))
+  if (degrees <= ALIGNMENT_TOLERANCE) return 'Facing Qibla'
+  return `Turn ${degrees}° ${clockwiseDistance > 0 ? 'right' : 'left'}`
+}
+
 function CompassTexture() {
   return (
     <svg
@@ -218,6 +225,7 @@ export function QiblaCompass({
   const [isMobile] = useState(() => isMobileDevice())
   const [hasOrientation] = useState(() => hasOrientationSupport())
   const [displayRotation, setDisplayRotation] = useState(qiblaDirection?.direction ?? 0)
+  const [trackingSession, setTrackingSession] = useState(0)
   const alignmentHapticLatchedRef = useRef(false)
   const lastHapticAtRef = useRef(0)
 
@@ -264,7 +272,23 @@ export function QiblaCompass({
       setAccuracy(heading.accuracy)
       setDisplayRotation((previous) => closestEquivalentAngle(bearing - heading.alpha, previous))
     })
-  }, [bearing, canUseDynamicCompass, mode])
+  }, [bearing, canUseDynamicCompass, mode, trackingSession])
+
+  useEffect(() => {
+    if (mode !== 'dynamic' || !canUseDynamicCompass) return
+
+    const restartTracking = () => setTrackingSession((session) => session + 1)
+    const restartWhenVisible = () => {
+      if (document.visibilityState === 'visible') restartTracking()
+    }
+
+    window.addEventListener('deen:native-foreground', restartTracking)
+    document.addEventListener('visibilitychange', restartWhenVisible)
+    return () => {
+      window.removeEventListener('deen:native-foreground', restartTracking)
+      document.removeEventListener('visibilitychange', restartWhenVisible)
+    }
+  }, [canUseDynamicCompass, mode])
 
   const alignmentDistance =
     mode === 'dynamic' &&
@@ -338,6 +362,7 @@ export function QiblaCompass({
   const showLowAccuracy = accuracy !== null && isLowAccuracy(accuracy)
   const rotation = mode === 'dynamic' ? displayRotation : bearing
   const currentHeadingLabel = deviceHeading === null ? null : `${deviceHeading.toFixed(0)}°`
+  const turnGuidance = deviceHeading === null ? null : getTurnGuidance(bearing, deviceHeading)
 
   return (
     <section
@@ -363,7 +388,7 @@ export function QiblaCompass({
         <CompassDial bearing={bearing} rotation={rotation} deviceHeading={deviceHeading} dynamic={mode === 'dynamic'} aligned={aligned} />
       </div>
 
-      <div className="relative mt-5 min-h-12 text-center" aria-live="polite" aria-atomic="true">
+      <div className="relative mt-5 min-h-12 text-center">
         {aligned ? (
           <div className="inline-flex items-center gap-2 text-surface-feature-foreground">
             <span className="flex size-6 items-center justify-center rounded-full bg-gold text-surface-feature">
@@ -375,7 +400,7 @@ export function QiblaCompass({
           <div className="space-y-1">
             <p className="inline-flex items-center gap-2 font-medium text-surface-feature-foreground">
               <Navigation className="size-4 text-gold" aria-hidden="true" />
-              Turn until the Qibla marker reaches the top
+              {turnGuidance ?? 'Turn until the Qibla marker reaches the top'}
             </p>
             <p className="type-caption text-surface-feature-muted">Hold your phone flat and away from magnets</p>
           </div>
@@ -388,7 +413,7 @@ export function QiblaCompass({
       </div>
 
       {(permission === 'denied' || showLowAccuracy) && (
-        <div className="relative mt-4 flex items-start gap-3 border-t border-white/10 pt-4" role={showLowAccuracy ? 'status' : 'note'}>
+        <div className="relative mt-4 flex items-start gap-3 border-t border-white/10 pt-4" role="status" aria-live="polite">
           {showLowAccuracy ? <RotateCw className="mt-0.5 size-4 shrink-0 text-gold" aria-hidden="true" /> : <AlertTriangle className="mt-0.5 size-4 shrink-0 text-gold" aria-hidden="true" />}
           <p className="type-caption text-surface-feature-muted">
             {showLowAccuracy

@@ -345,14 +345,23 @@ export function IslamicEventsCarousel() {
           {/* Prev button */}
           <button
             onClick={prev}
-            className="rounded-full p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            className="flex size-touch shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
             aria-label="Previous event"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
 
           {/* Dot indicators */}
-          <div className="flex items-center gap-1.5" role="tablist" aria-label="Event slides">
+          <div className="flex items-center gap-1.5 sm:hidden" aria-hidden="true">
+            {slides.map((s, i) => (
+              <span
+                key={'id' in s ? s.id : i}
+                className={`h-1.5 rounded-full ${i === clampedIndex ? 'w-4 bg-primary' : 'w-1.5 bg-muted-foreground/40'}`}
+              />
+            ))}
+          </div>
+
+          <div className="hidden items-center gap-0.5 sm:flex" role="tablist" aria-label="Event slides">
             {slides.map((s, i) => (
               <button
                 key={'id' in s ? s.id : i}
@@ -364,10 +373,10 @@ export function IslamicEventsCarousel() {
                     : `Slide ${i + 1}`
                 }
                 onClick={() => setActiveIndex(i)}
-                className={`h-1.5 rounded-full transition-all ${
+                className={`relative size-touch rounded-full before:absolute before:left-1/2 before:top-1/2 before:h-1.5 before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:transition-all ${
                   i === clampedIndex
-                    ? 'w-4 bg-primary'
-                    : 'w-1.5 bg-muted-foreground/40 hover:bg-muted-foreground/70'
+                    ? 'before:w-4 before:bg-primary'
+                    : 'before:w-1.5 before:bg-muted-foreground/40 hover:before:bg-muted-foreground/70'
                 }`}
               />
             ))}
@@ -376,7 +385,7 @@ export function IslamicEventsCarousel() {
           {/* Next button */}
           <button
             onClick={next}
-            className="rounded-full p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            className="flex size-touch shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
             aria-label="Next event"
           >
             <ChevronRight className="h-4 w-4" />

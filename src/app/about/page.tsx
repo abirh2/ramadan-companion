@@ -349,7 +349,7 @@ function AboutContent() {
                 </div>
 
                 {/* iOS Instructions */}
-                <div className="border-l-4 border-primary/30 pl-4">
+                <div className="rounded-grouped bg-surface-grouped/45 p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Apple className="h-5 w-5" />
                     <h3 className="font-semibold">iOS (iPhone/iPad)</h3>
@@ -367,7 +367,7 @@ function AboutContent() {
                 </div>
 
                 {/* Android Instructions */}
-                <div className="border-l-4 border-primary/30 pl-4">
+                <div className="rounded-grouped bg-surface-grouped/45 p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Smartphone className="h-5 w-5" />
                     <h3 className="font-semibold">Android</h3>
@@ -385,7 +385,7 @@ function AboutContent() {
                 </div>
 
                 {/* Desktop Instructions */}
-                <div className="border-l-4 border-primary/30 pl-4">
+                <div className="rounded-grouped bg-surface-grouped/45 p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Monitor className="h-5 w-5" />
                     <h3 className="font-semibold">Desktop (Chrome, Edge, Brave)</h3>
@@ -418,7 +418,7 @@ function AboutContent() {
                 </div>
 
                 {/* Native App Section */}
-                <div className="border-l-4 border-primary/30 pl-4">
+                <div className="rounded-grouped bg-surface-grouped/45 p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Smartphone className="h-5 w-5" />
                     <h3 className="font-semibold">Native iOS & Android Apps</h3>

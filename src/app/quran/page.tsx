@@ -10,7 +10,7 @@ export default function QuranBrowserPage() {
       <div className="mb-6">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors mb-3"
+          className="mb-3 inline-flex min-h-touch items-center gap-2 rounded-control text-text-secondary transition-colors hover:text-text-primary"
           aria-label="Navigate back to homepage"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />

@@ -259,7 +259,8 @@ function QuranHadithContent() {
       <header className="mb-8">
         <Link 
           href="/more"
-          className="type-nav mb-3 inline-flex items-center gap-2 text-text-secondary transition-colors hover:text-text-primary"
+          className="type-nav mb-3 inline-flex min-h-touch items-center gap-2 rounded-control text-text-secondary transition-colors hover:text-text-primary"
+          aria-label="Navigate back to More"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           Back to More
@@ -291,6 +292,7 @@ function QuranHadithContent() {
                   onClick={handleShare}
                   disabled={loading || !!error}
                   title="Share ayah"
+                  aria-label="Share ayah"
                 >
                   <Share2 className="h-4 w-4" />
                 </Button>
@@ -299,6 +301,8 @@ function QuranHadithContent() {
                   size="icon"
                   disabled={loading || !!error || favLoading}
                   title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                  aria-label={isFavorited ? 'Remove ayah from favorites' : 'Add ayah to favorites'}
+                  aria-pressed={isFavorited}
                   onClick={async () => {
                     if (requiresAuth) {
                       setShowLoginModal(true)
@@ -317,12 +321,13 @@ function QuranHadithContent() {
           <CardContent className="space-y-6">
             {loading && (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-hidden="true" />
+                <span className="sr-only" role="status">Loading daily ayah</span>
               </div>
             )}
 
             {error && (
-              <div className="text-center py-12">
+              <div className="text-center py-12" role="alert">
                 <p className="text-destructive mb-4">Failed to load daily ayah.</p>
                 <p className="text-sm text-muted-foreground">
                   Please try again later or check your internet connection.
@@ -348,6 +353,7 @@ function QuranHadithContent() {
                       onClick={handleCopyQuranArabic}
                       disabled={loading}
                       title="Copy Arabic text"
+                      aria-label={copiedQuranArabic ? 'Arabic text copied' : 'Copy Quran Arabic text'}
                       className="mt-1 flex-shrink-0"
                     >
                       {copiedQuranArabic ? (
@@ -376,6 +382,7 @@ function QuranHadithContent() {
                       onClick={handleCopyQuranTranslation}
                       disabled={loading}
                       title="Copy translation"
+                      aria-label={copiedQuranTranslation ? 'Translation copied' : 'Copy Quran translation'}
                       className="flex-shrink-0"
                     >
                       {copiedQuranTranslation ? (
@@ -452,6 +459,7 @@ function QuranHadithContent() {
                   onClick={handleHadithShare}
                   disabled={hadithLoading || !!hadithError}
                   title="Share hadith"
+                  aria-label="Share hadith"
                 >
                   <Share2 className="h-4 w-4" />
                 </Button>
@@ -460,6 +468,8 @@ function QuranHadithContent() {
                   size="icon"
                   disabled={hadithLoading || !!hadithError || hadithFavLoading}
                   title={isHadithFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                  aria-label={isHadithFavorited ? 'Remove hadith from favorites' : 'Add hadith to favorites'}
+                  aria-pressed={isHadithFavorited}
                   onClick={async () => {
                     if (hadithRequiresAuth) {
                       setShowLoginModal(true)
@@ -478,12 +488,13 @@ function QuranHadithContent() {
           <CardContent className="space-y-6">
             {hadithLoading && (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-hidden="true" />
+                <span className="sr-only" role="status">Loading daily hadith</span>
               </div>
             )}
 
             {hadithError && (
-              <div className="text-center py-12">
+              <div className="text-center py-12" role="alert">
                 <p className="text-destructive mb-4">Failed to load daily hadith.</p>
                 <p className="text-sm text-muted-foreground">
                   Please try again later or check your internet connection.
@@ -509,6 +520,7 @@ function QuranHadithContent() {
                       onClick={handleCopyHadithArabic}
                       disabled={hadithLoading}
                       title="Copy Arabic text"
+                      aria-label={copiedHadithArabic ? 'Arabic text copied' : 'Copy hadith Arabic text'}
                       className="mt-1 flex-shrink-0"
                     >
                       {copiedHadithArabic ? (
@@ -537,6 +549,7 @@ function QuranHadithContent() {
                       onClick={handleCopyHadithEnglish}
                       disabled={hadithLoading || selectedLanguage !== 'english'}
                       title="Copy English translation"
+                      aria-label={copiedHadithEnglish ? 'English translation copied' : 'Copy hadith English translation'}
                       className="flex-shrink-0"
                     >
                       {copiedHadithEnglish ? (

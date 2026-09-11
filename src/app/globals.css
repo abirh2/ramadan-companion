@@ -298,8 +298,7 @@
   }
 
   html {
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
+    min-width: 0;
   }
 
   body {
@@ -312,6 +311,8 @@
   :lang(ar) {
     font-family: var(--font-noto-naskh-arabic), "Noto Naskh Arabic", "Arabic Typesetting", serif !important;
     font-synthesis: none;
+    letter-spacing: normal !important;
+    overflow-wrap: anywhere;
   }
 
   ::selection {
@@ -467,6 +468,7 @@
     .app-main {
       padding-right: var(--safe-area-right);
       padding-left: var(--safe-area-left);
+      scroll-padding-top: calc(var(--safe-area-top) + 4.5rem);
       scroll-padding-bottom: calc(var(--mobile-tab-bar-height) + var(--safe-area-bottom) + 1rem);
     }
 
@@ -616,6 +618,7 @@
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     unicode-bidi: plaintext;
+    overflow-wrap: anywhere;
   }
 
   .surface-grouped {

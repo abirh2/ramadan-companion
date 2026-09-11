@@ -60,13 +60,13 @@ function SheetContent({
         className={cn(
           "bg-surface-elevated text-text-primary data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 shadow-low transition ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:duration-180 data-[state=open]:duration-240 motion-reduce:transform-none motion-reduce:transition-none motion-reduce:duration-0",
           side === "right" &&
-            "data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm",
+            "data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right top-[var(--safe-area-top)] right-[var(--safe-area-right)] bottom-[var(--safe-area-bottom)] h-auto w-3/4 border-l sm:max-w-sm",
           side === "left" &&
-            "data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm",
+            "data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left top-[var(--safe-area-top)] bottom-[var(--safe-area-bottom)] left-[var(--safe-area-left)] h-auto w-3/4 border-r sm:max-w-sm",
           side === "top" &&
-            "data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top inset-x-0 top-0 h-auto border-b",
+            "data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top right-[var(--safe-area-right)] left-[var(--safe-area-left)] top-[var(--safe-area-top)] h-auto border-b",
           side === "bottom" &&
-            "data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom bottom-0 left-1/2 h-auto max-h-[min(88dvh,760px)] w-full max-w-2xl -translate-x-1/2 rounded-t-surface border-t border-border-subtle pb-[max(env(safe-area-inset-bottom),0.5rem)]",
+            "data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom bottom-0 left-[calc(50%+(var(--safe-area-left)-var(--safe-area-right))/2)] h-auto max-h-[calc(min(88dvh,760px)-var(--safe-area-top))] w-[calc(100%-var(--safe-area-left)-var(--safe-area-right))] max-w-2xl -translate-x-1/2 rounded-t-surface border-t border-border-subtle pb-[max(var(--safe-area-bottom),0.5rem)]",
           className
         )}
         {...props}

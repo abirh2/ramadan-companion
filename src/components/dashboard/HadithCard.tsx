@@ -172,7 +172,7 @@ export function HadithCard() {
                         <p className="text-xs text-muted-foreground/70 mt-0.5">
                           {chapter}
                           {chapterArabic && (
-                            <span className="block text-right font-serif text-[10px] mt-0.5" dir="rtl" lang="ar">
+                            <span className="mt-0.5 block text-right font-serif text-xs" dir="rtl" lang="ar">
                               {chapterArabic}
                             </span>
                           )}

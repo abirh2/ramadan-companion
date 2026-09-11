@@ -28,7 +28,6 @@ const notoNaskhArabic = Noto_Naskh_Arabic({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
   viewportFit: "cover", // Required for safe area insets on iOS
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#f9f5ec" },

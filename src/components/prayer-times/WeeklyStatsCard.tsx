@@ -101,7 +101,7 @@ export function WeeklyStatsCard({ statistics, loading, isAuthenticated }: Weekly
                 strokeLinecap="round"
               />
             </svg>
-            <span className="text-[10px] font-bold relative z-10">
+            <span className="text-xs font-bold relative z-10">
               {thisWeekRate.toFixed(0)}%
             </span>
           </div>
@@ -136,7 +136,7 @@ export function WeeklyStatsCard({ statistics, loading, isAuthenticated }: Weekly
         </div>
 
         {/* Day Labels */}
-        <div className="flex justify-between mt-2 text-[10px] font-medium text-muted-foreground px-1 uppercase">
+        <div className="flex justify-between mt-2 text-xs font-medium text-muted-foreground px-1 uppercase">
           {dayLabels.map((label, index) => (
             <span key={index} className={index === todayIndex ? 'text-primary font-bold' : ''}>
               {label}

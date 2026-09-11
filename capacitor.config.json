@@ -21,6 +21,10 @@
       "smallIcon": "ic_stat_deen",
       "iconColor": "#0f3d3e"
     },
+    "Keyboard": {
+      "resize": "native",
+      "resizeOnFullScreen": true
+    },
     "Preferences": {
       "group": "group.com.deencompanion.app"
     }

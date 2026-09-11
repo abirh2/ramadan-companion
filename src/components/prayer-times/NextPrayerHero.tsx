@@ -25,8 +25,8 @@ interface NextPrayerHeroProps {
  * - Prayer name as a large heading; a "tomorrow" indicator is appended when
  *   `nextPrayer.isTomorrow` (R1.8).
  * - Countdown in the `type-feature-number` band (>= the name font and <= 2x the
- *   name font — it must not be scaled larger), with `aria-live="polite"` /
- *   `aria-atomic="true"` so screen readers announce updates (R1.6).
+ *   name font — it must not be scaled larger). It uses the ARIA timer role with
+ *   live updates disabled so a once-per-second tick does not flood speech.
  * - Scheduled time in `type-section-title tabular-nums`, formatted "at 4:36 PM"
  *   (R1.3).
  * - Location de-emphasized in `type-caption text-surface-feature-muted` with a
@@ -123,8 +123,9 @@ export function NextPrayerHero({
         <div>
           <p
             className="type-feature-number text-surface-feature-foreground"
-            aria-live="polite"
-            aria-atomic="true"
+            role="timer"
+            aria-live="off"
+            aria-label={`${nextLabel}, ${compactCountdown} until prayer at ${formatTime(nextPrayer.time)}`}
           >
             {compactCountdown}
           </p>

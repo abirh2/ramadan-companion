@@ -34,7 +34,7 @@ export default function AdminPage() {
         <div className="mb-6">
           <Link 
             href="/" 
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-3"
+            className="mb-3 inline-flex min-h-touch items-center gap-2 rounded-control text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
             <span className="text-sm">Back to Home</span>
@@ -104,4 +104,3 @@ export default function AdminPage() {
     </ProtectedAdmin>
   )
 }
-

@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef, useState } from 'react'
 import { Check } from 'lucide-react'
 
 interface ZikrCounterProps {
@@ -24,7 +25,24 @@ export function ZikrCounter({
   onIncrement,
 }: ZikrCounterProps) {
   const hasTarget = target !== null && target > 0
-  const progressLabel = hasTarget ? `${count} of ${target}` : `${count}, free count`
+  const [announcement, setAnnouncement] = useState('')
+  const previousCountRef = useRef(count)
+  const liveAnnouncement = isGoalReached && hasTarget
+    ? `Target complete. Count ${count} of ${target}. Alhamdulillah.`
+    : announcement
+
+  useEffect(() => {
+    if (count === previousCountRef.current) return
+    previousCountRef.current = count
+
+    if (isGoalReached && hasTarget) return
+
+    const timer = window.setTimeout(() => {
+      setAnnouncement(hasTarget ? `Count ${count} of ${target}` : `Count ${count}`)
+    }, 650)
+
+    return () => window.clearTimeout(timer)
+  }, [count, hasTarget, isGoalReached, target])
 
   return (
     <div className="surface-feature relative isolate overflow-hidden">
@@ -32,7 +50,7 @@ export function ZikrCounter({
         type="button"
         onClick={onIncrement}
         className="group flex min-h-[29rem] w-full touch-manipulation select-none flex-col items-center justify-between px-6 py-8 text-center [-webkit-tap-highlight-color:transparent] transition-colors hover:bg-white/[0.025] active:bg-white/[0.06] focus-visible:outline-2 focus-visible:outline-offset-[-5px] focus-visible:outline-surface-feature-foreground sm:min-h-[32rem] sm:px-10 sm:py-10"
-        aria-label={`Count ${currentPhrase.transliteration}. Current count: ${progressLabel}. Tap to add one.`}
+        aria-label={`Increment ${currentPhrase.transliteration} zikr count`}
       >
         <span className="space-y-2">
           <span className="block text-lg font-semibold tracking-[-0.015em] text-surface-feature-foreground sm:text-xl">
@@ -85,11 +103,9 @@ export function ZikrCounter({
         </div>
       )}
 
-      {isGoalReached && (
-        <p className="sr-only" role="status" aria-live="polite">
-          Target complete. Alhamdulillah.
-        </p>
-      )}
+      <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {liveAnnouncement}
+      </p>
     </div>
   )
 }

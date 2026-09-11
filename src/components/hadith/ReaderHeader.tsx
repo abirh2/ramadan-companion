@@ -24,7 +24,7 @@ export function ReaderHeader({ bookSlug, chapterNumber, bookNameDisplay }: Reade
     <header className="mb-4 border-b border-border-subtle pb-4">
       <Link
         href={`/hadith/${bookSlug}`}
-        className="mb-3 inline-flex items-center gap-2 text-text-secondary transition-colors hover:text-teal"
+        className="mb-3 inline-flex min-h-touch items-center gap-2 rounded-control text-text-secondary transition-colors hover:text-teal"
         aria-label="Navigate back to chapters"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />

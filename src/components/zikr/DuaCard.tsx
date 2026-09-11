@@ -36,9 +36,9 @@ export function DuaCard({ dua }: DuaCardProps) {
           </div>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={handleCopy}
-            className="h-8 w-8 p-0"
+            className="min-w-touch"
             aria-label="Copy dua"
           >
             {copied ? (

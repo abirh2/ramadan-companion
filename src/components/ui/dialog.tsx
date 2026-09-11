@@ -60,7 +60,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "bg-surface-elevated text-text-primary data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=open]:duration-180 data-[state=closed]:duration-120 fixed top-[50%] left-[50%] z-50 grid max-h-[calc(100dvh-2rem)] w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 overflow-y-auto overscroll-contain rounded-surface border border-border-subtle p-5 shadow-low motion-reduce:animate-none motion-reduce:duration-0 sm:max-w-lg sm:p-6",
+          "bg-surface-elevated text-text-primary data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=open]:duration-180 data-[state=closed]:duration-120 fixed top-[50%] left-[50%] z-50 grid max-h-[calc(100dvh-var(--safe-area-top)-var(--safe-area-bottom)-2rem)] w-full max-w-[calc(100%-var(--safe-area-left)-var(--safe-area-right)-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 overflow-y-auto overscroll-contain rounded-surface border border-border-subtle p-5 shadow-low motion-reduce:animate-none motion-reduce:duration-0 sm:max-w-lg sm:p-6",
           className
         )}
         {...props}

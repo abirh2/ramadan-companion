@@ -147,7 +147,7 @@ export default function TimesPage() {
       <div className="mb-6">
         <Link
           href="/"
-          className="mb-3 inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
+          className="mb-3 inline-flex min-h-touch items-center gap-2 rounded-control text-muted-foreground transition-colors hover:text-foreground"
           aria-label="Navigate back to homepage"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />

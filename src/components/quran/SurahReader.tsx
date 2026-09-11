@@ -107,12 +107,20 @@ export function SurahReader({ surahNumber, surahMetadata, ayahParam }: SurahRead
 
   // Show/hide scroll-to-top button based on scroll position
   useEffect(() => {
+    let frame: number | null = null
     const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 400)
+      if (frame !== null) return
+      frame = window.requestAnimationFrame(() => {
+        frame = null
+        setShowScrollTop(window.scrollY > 400)
+      })
     }
     
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      if (frame !== null) window.cancelAnimationFrame(frame)
+    }
   }, [])
 
   // Handle Go to Bookmark button click

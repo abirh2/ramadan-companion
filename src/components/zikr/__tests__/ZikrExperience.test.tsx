@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { render, screen, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
 import { ZikrCounter } from '../ZikrCounter'
 import { ZikrPhraseSelector } from '../ZikrPhraseSelector'
@@ -28,7 +28,7 @@ describe('ZikrCounter', () => {
     const user = userEvent.setup()
     render(<CounterHarness target={10} />)
 
-    const counter = screen.getByRole('button', { name: /count subhanallah/i })
+    const counter = screen.getByRole('button', { name: /increment subhanallah/i })
     for (let tap = 0; tap < 10; tap += 1) await user.click(counter)
 
     expect(screen.getByRole('status')).toHaveTextContent(/target complete/i)
@@ -39,18 +39,34 @@ describe('ZikrCounter', () => {
     const user = userEvent.setup()
     render(<CounterHarness />)
 
-    const counter = screen.getByRole('button', { name: /current count: 0 of 3/i })
+    const counter = screen.getByRole('button', { name: /increment subhanallah/i })
     counter.focus()
     await user.keyboard('{Enter}')
 
-    expect(screen.getByRole('button', { name: /current count: 1 of 3/i })).toBeInTheDocument()
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '1')
   })
 
   it('communicates free-count mode without rendering a progress bar', () => {
     render(<CounterHarness target={null} />)
 
-    expect(screen.getByRole('button', { name: /free count/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /increment subhanallah/i })).toBeInTheDocument()
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
+  })
+
+  it('debounces count announcements so rapid taps produce one screen-reader update', () => {
+    jest.useFakeTimers()
+    render(<CounterHarness target={20} />)
+
+    const counter = screen.getByRole('button', { name: /increment subhanallah/i })
+    const status = screen.getByRole('status')
+    fireEvent.click(counter)
+    fireEvent.click(counter)
+    fireEvent.click(counter)
+
+    expect(status).toHaveTextContent('')
+    act(() => jest.advanceTimersByTime(700))
+    expect(status).toHaveTextContent('Count 3 of 20')
+    jest.useRealTimers()
   })
 })
 

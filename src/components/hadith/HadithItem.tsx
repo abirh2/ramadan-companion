@@ -90,7 +90,7 @@ export function HadithItem({ hadith, selectedLanguage }: HadithItemProps) {
         <button
           type="button"
           onClick={() => setGradingDialogOpen(true)}
-          className="type-eyebrow text-text-secondary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary cursor-pointer"
+          className="type-eyebrow inline-flex min-h-touch items-center rounded-control text-text-secondary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary cursor-pointer"
           aria-label={`Hadith grade: ${hadith.status}. Learn what this grade means.`}
         >
           {hadith.status}

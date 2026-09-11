@@ -48,9 +48,9 @@ export function HomeDateContext() {
     : null
 
   return (
-    <header className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center px-1">
+    <header className="grid min-w-0 grid-cols-1 items-center px-1 min-[24rem]:grid-cols-[minmax(0,1fr)_auto]">
       <p className="type-caption text-text-secondary">{year}</p>
-      <h1 className="type-section-title col-span-2 mt-0.5 text-text-primary">
+      <h1 className="type-section-title mt-0.5 text-text-primary min-[24rem]:col-span-2">
         {gregorian}
       </h1>
       <div className="mt-1.5 flex min-h-6 min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
@@ -71,7 +71,7 @@ export function HomeDateContext() {
       </div>
       <Link
         href="/calendar"
-        className="type-nav row-start-3 ml-2 inline-flex min-h-touch shrink-0 items-center gap-1 rounded-control px-2 text-teal hover:bg-teal-muted"
+        className="type-nav mt-1 inline-flex min-h-touch shrink-0 items-center gap-1 justify-self-start rounded-control px-2 text-teal hover:bg-teal-muted min-[24rem]:row-start-3 min-[24rem]:ml-2 min-[24rem]:mt-0 min-[24rem]:justify-self-auto"
         aria-label="Open Islamic calendar"
       >
         Calendar

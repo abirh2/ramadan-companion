@@ -8,7 +8,7 @@ export default function HadithBrowserPage() {
       <header className="mb-8">
         <Link 
           href="/more"
-          className="type-nav mb-3 inline-flex items-center gap-2 text-text-secondary transition-colors hover:text-text-primary"
+          className="type-nav mb-3 inline-flex min-h-touch items-center gap-2 rounded-control text-text-secondary transition-colors hover:text-text-primary"
           aria-label="Navigate back to More"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />

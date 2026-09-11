@@ -41,11 +41,14 @@ export function AyahBlock({
   // block's own top padding + hairline divider (suppressed on the first block).
   const dividerClasses = isFirst ? '' : 'border-t border-border-subtle pt-8 mt-8'
   const activeClasses = isActive
-    ? 'border-l-2 border-l-primary bg-surface-grouped/60 pl-4 -ml-4 rounded-r-sm'
+    ? 'bg-surface-grouped/60 px-4 -mx-4 rounded-grouped ring-1 ring-inset ring-border-subtle'
     : ''
 
   return (
-    <article className={`space-y-3 ${dividerClasses} ${activeClasses}`.trim()}>
+    <article
+      className={`space-y-3 ${dividerClasses} ${activeClasses}`.trim()}
+      data-active={isActive || undefined}
+    >
       {/* Quiet ayah number — smaller and lower-contrast than Arabic/translation */}
       <p className="type-eyebrow text-text-tertiary">
         {surahNumber}:{numberInSurah}

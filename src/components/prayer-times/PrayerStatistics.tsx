@@ -111,11 +111,11 @@ export function PrayerStatistics({
               <p className="text-muted-foreground">
                 Sign in to track your prayer history and view detailed statistics
               </p>
-              <Link href="/profile">
-                <Button size="sm" className="mt-2">
+              <Button asChild size="sm" className="mt-2">
+                <Link href="/profile">
                   Sign In to Track Progress
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
         </CardContent>

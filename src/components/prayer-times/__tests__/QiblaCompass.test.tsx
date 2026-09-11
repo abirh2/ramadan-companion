@@ -159,6 +159,37 @@ describe('QiblaCompass', () => {
       expect(qiblaHaptics.triggerQiblaAlignmentHaptic).toHaveBeenCalledTimes(1)
     })
 
+    it('gives a textual turn direction instead of relying on the visual dial', async () => {
+      const user = userEvent.setup()
+      let headingCallback: ((heading: orientation.DeviceHeading) => void) | undefined
+      jest.mocked(orientation.startOrientationTracking).mockImplementation((callback) => {
+        headingCallback = callback
+        return jest.fn()
+      })
+
+      render(<QiblaCompass qiblaDirection={qiblaDirection} />)
+      await user.click(screen.getByRole('button', { name: /live device compass/i }))
+      await waitFor(() => expect(headingCallback).toBeDefined())
+      act(() => headingCallback?.({ alpha: 45, accuracy: 5, timestamp: Date.now() }))
+
+      expect(screen.getByText(/Turn 13° right/i)).toBeInTheDocument()
+    })
+
+    it('restarts sensor tracking when the native app resumes', async () => {
+      const user = userEvent.setup()
+      const cleanup = jest.fn()
+      jest.mocked(orientation.startOrientationTracking).mockReturnValue(cleanup)
+
+      render(<QiblaCompass qiblaDirection={qiblaDirection} />)
+      await user.click(screen.getByRole('button', { name: /live device compass/i }))
+      await waitFor(() => expect(orientation.startOrientationTracking).toHaveBeenCalledTimes(1))
+
+      act(() => window.dispatchEvent(new Event('deen:native-foreground')))
+
+      await waitFor(() => expect(orientation.startOrientationTracking).toHaveBeenCalledTimes(2))
+      expect(cleanup).toHaveBeenCalledTimes(1)
+    })
+
     it('re-arms alignment feedback only after moving clearly outside tolerance', async () => {
       const user = userEvent.setup()
       let headingCallback: ((heading: orientation.DeviceHeading) => void) | undefined

@@ -16,8 +16,8 @@ export function BookSelector() {
 
   if (loading) {
     return (
-      <div className="py-12 text-center">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
+      <div className="py-12 text-center" role="status" aria-live="polite">
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-primary/25 border-t-primary motion-reduce:animate-none" aria-hidden="true" />
         <p className="mt-4 text-text-secondary">Loading hadith collections...</p>
       </div>
     )

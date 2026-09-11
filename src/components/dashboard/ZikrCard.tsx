@@ -57,7 +57,7 @@ export function ZikrCard() {
               <p className="text-2xl font-serif text-primary" dir="rtl" lang="ar" aria-label={`Arabic: ${currentPhrase.arabic}`}>
                 {currentPhrase.arabic}
               </p>
-              <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider">
+              <p className="mt-1 text-xs text-muted-foreground uppercase tracking-wider">
                 {currentPhrase.meaning}
               </p>
             </div>

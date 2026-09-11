@@ -145,7 +145,7 @@ function mockLoadedSurah(totalAyahs: number) {
 // The active AyahBlock renders its own `article` with a left-rule + tint.
 // Locate the active article by that primary left-border marker.
 function getActiveArticle(container: HTMLElement): HTMLElement | null {
-  return container.querySelector('article.border-l-primary')
+  return container.querySelector('article[data-active="true"]')
 }
 
 // --- Arbitraries -----------------------------------------------------------
@@ -299,7 +299,7 @@ describe('GoToAyah / SurahReader — go-to-ayah and deep-link range (property-ba
               expect(active).not.toBeNull()
               expect(active).toHaveTextContent(`${surahNumber}:${ayah}`)
               expect(
-                container.querySelectorAll('article.border-l-primary')
+                container.querySelectorAll('article[data-active="true"]')
               ).toHaveLength(1)
 
               // No out-of-range message for a valid deep link.

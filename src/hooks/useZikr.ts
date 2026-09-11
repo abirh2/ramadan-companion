@@ -124,8 +124,13 @@ export function useZikr(): UseZikrResult {
         return prev
       })
     }
+    const handleNativeForeground = () => void handleVisibilityChange()
     document.addEventListener('visibilitychange', handleVisibilityChange)
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('deen:native-foreground', handleNativeForeground)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('deen:native-foreground', handleNativeForeground)
+    }
   }, [])
 
   // Increment counter

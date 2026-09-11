@@ -51,7 +51,7 @@ export function CompactPreferencesCard({
         <div className="grid grid-cols-2 gap-3">
           {/* Calculation Method */}
           <div className="p-3 bg-muted/30 rounded-2xl border border-border/50">
-            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mb-1">
+            <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider mb-1">
               Method
             </p>
             <div className="flex items-center justify-between gap-1">
@@ -64,7 +64,7 @@ export function CompactPreferencesCard({
 
           {/* Madhab */}
           <div className="p-3 bg-muted/30 rounded-2xl border border-border/50">
-            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mb-1">
+            <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider mb-1">
               Madhab
             </p>
             <div className="flex items-center justify-between gap-1">
@@ -83,7 +83,7 @@ export function CompactPreferencesCard({
               <MapPin className="h-4 w-4 text-primary" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
+              <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">
                 Location
               </p>
               <p className="text-sm font-bold text-foreground truncate">

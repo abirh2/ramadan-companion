@@ -250,7 +250,7 @@ export function NotificationSettings() {
                           key={mins}
                           onClick={() => setPrayerMinutesBefore(prayerName, mins)}
                           disabled={loading}
-                          className={`rounded-md border px-2 py-1 text-[11px] font-medium transition-colors ${
+                          className={`min-h-touch rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
                             setting.minutesBefore === mins
                               ? 'border-primary bg-primary/10 text-primary'
                               : 'border-border bg-background text-muted-foreground hover:border-primary/50'

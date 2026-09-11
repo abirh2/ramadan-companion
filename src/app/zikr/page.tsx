@@ -71,7 +71,13 @@ export default function ZikrPage() {
             </div>
 
             <div className="mt-3 flex flex-wrap items-center justify-center gap-1" aria-label="Counter preferences">
-              <Button variant="ghost" onClick={reset} disabled={state.count === 0} className="min-h-11 text-text-secondary">
+              <Button
+                variant="ghost"
+                onClick={reset}
+                disabled={state.count === 0}
+                className="text-text-secondary"
+                aria-label={`Reset ${currentPhrase.transliteration} count from ${state.count} to zero`}
+              >
                 <RotateCcw className="h-4 w-4" aria-hidden="true" />
                 Reset
               </Button>

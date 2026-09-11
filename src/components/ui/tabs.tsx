@@ -26,7 +26,7 @@ function TabsList({
     <TabsPrimitive.List
       data-slot="tabs-list"
       className={cn(
-        "bg-surface-grouped text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-grouped border border-border-subtle p-[3px]",
+        "bg-surface-grouped text-muted-foreground inline-flex h-auto min-h-touch w-fit items-center justify-center rounded-grouped border border-border-subtle p-[3px]",
         className
       )}
       {...props}
@@ -42,7 +42,7 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "data-[state=active]:bg-surface-primary data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/35 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 touch-manipulation items-center justify-center gap-1.5 rounded-control border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[background-color,border-color,color,box-shadow,transform] duration-150 active:scale-[0.98] motion-reduce:active:scale-100 focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-border-subtle data-[state=active]:shadow-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "data-[state=active]:bg-surface-primary data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/35 text-foreground dark:text-muted-foreground inline-flex min-h-touch flex-1 touch-manipulation items-center justify-center gap-1.5 rounded-control border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[background-color,border-color,color,box-shadow,transform] duration-150 active:scale-[0.98] motion-reduce:active:scale-100 focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-border-subtle data-[state=active]:shadow-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props}

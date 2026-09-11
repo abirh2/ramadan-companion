@@ -149,7 +149,7 @@ function mockLoadedSurah() {
 // The active AyahBlock renders its own `article` with a left-rule + tint.
 // Locate the active article by that primary left-border marker.
 function getActiveArticle(container: HTMLElement): HTMLElement | null {
-  return container.querySelector('article.border-l-primary')
+  return container.querySelector('article[data-active="true"]')
 }
 
 let scrollIntoViewMock: jest.Mock
@@ -296,13 +296,13 @@ describe('SurahReader deep-link handling', () => {
       <SurahReader surahNumber={1} surahMetadata={metadata} ayahParam="4" />
     )
 
-    // The 4th ayah article carries the active (left-rule + tint) treatment.
+    // The 4th ayah article carries the active treatment.
     const active = getActiveArticle(container)
     expect(active).not.toBeNull()
     expect(active).toHaveTextContent('1:4')
 
     // Only one ayah is active.
-    expect(container.querySelectorAll('article.border-l-primary')).toHaveLength(1)
+    expect(container.querySelectorAll('article[data-active="true"]')).toHaveLength(1)
 
     // The scroll effect fires within 1000ms (component schedules at 300ms).
     expect(scrollIntoViewMock).not.toHaveBeenCalled()

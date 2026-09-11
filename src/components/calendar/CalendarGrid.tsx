@@ -46,7 +46,7 @@ export function CalendarGrid({ dates, onDateSelect, view }: CalendarGridProps) {
     <div className="w-full" data-calendar-view={view}>
       <div className="mb-1 grid grid-cols-7" aria-hidden="true">
         {weekdays.map((day) => (
-          <div key={day} className="py-2 text-center text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-text-tertiary sm:text-xs">
+          <div key={day} className="py-2 text-center text-xs font-semibold uppercase tracking-[0.08em] text-text-tertiary">
             {day}
           </div>
         ))}
@@ -87,7 +87,7 @@ export function CalendarGrid({ dates, onDateSelect, view }: CalendarGridProps) {
                 {primaryDay}
               </span>
               <span className={cn(
-                'mt-1 max-w-full truncate text-[0.625rem] font-medium leading-tight text-text-tertiary sm:text-xs',
+                'mt-1 max-w-full truncate text-xs font-medium leading-tight text-text-tertiary',
                 date.isSelected && 'text-white/75 dark:text-surface-feature-foreground/75'
               )}>
                 {secondaryDate}
