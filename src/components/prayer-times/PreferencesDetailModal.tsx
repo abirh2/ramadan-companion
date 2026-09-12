@@ -204,7 +204,7 @@ export function PreferencesDetailModal({
           <div className="space-y-2">
             <label className="text-sm font-medium">Current Location</label>
             {tempLocation && (
-              <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg text-sm">
+              <div className="type-body-secondary flex items-center gap-2 rounded-grouped bg-surface-grouped p-3">
                 <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <span className="truncate">{tempLocation.city}</span>
               </div>
@@ -263,7 +263,7 @@ export function PreferencesDetailModal({
 
             {/* City Results */}
             {cityResults.length > 0 && (
-              <div className="space-y-1 max-h-48 overflow-y-auto border rounded-lg">
+              <div className="max-h-48 space-y-1 overflow-y-auto rounded-grouped border border-border-subtle">
                 {cityResults.map((result, index) => (
                   <button
                     key={index}

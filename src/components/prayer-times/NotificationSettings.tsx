@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { Bell, BellOff, Check, AlertCircle, Smartphone, LogIn } from 'lucide-react'
-import Link from 'next/link'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { LoginModal } from '@/components/auth/LoginModal'
 import { Switch } from '@/components/ui/switch'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useAuth } from '@/hooks/useAuth'
@@ -41,6 +41,7 @@ const PRAYER_INFO: Record<
 export function NotificationSettings() {
   const { user } = useAuth()
   const [testStatus, setTestStatus] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle')
+  const [loginOpen, setLoginOpen] = useState(false)
   const {
     isSupported,
     permission,
@@ -60,7 +61,7 @@ export function NotificationSettings() {
     const iosBrowser = getIOSBrowser()
     
     return (
-      <Card className="p-6">
+      <Card variant="grouped" className="gap-0 p-6">
         <div className="flex items-start gap-3">
           <Smartphone className="h-5 w-5 text-muted-foreground mt-0.5" />
           <div className="flex-1">
@@ -70,8 +71,8 @@ export function NotificationSettings() {
               // iOS non-Safari browser
               <div className="text-sm text-muted-foreground mt-1 space-y-2">
                 <p>
-                  You're using {iosBrowser === 'chrome' ? 'Chrome' : iosBrowser === 'firefox' ? 'Firefox' : iosBrowser === 'edge' ? 'Edge' : 'a browser'} on iOS.
-                  Due to Apple's restrictions, notifications only work in <strong>Safari</strong> on iOS devices.
+                  You&apos;re using {iosBrowser === 'chrome' ? 'Chrome' : iosBrowser === 'firefox' ? 'Firefox' : iosBrowser === 'edge' ? 'Edge' : 'a browser'} on iOS.
+                  Due to Apple&apos;s restrictions, notifications only work in <strong>Safari</strong> on iOS devices.
                 </p>
                 <p>
                   <strong>To enable notifications:</strong>
@@ -98,30 +99,31 @@ export function NotificationSettings() {
   // Not logged in - require authentication for Web Push (not needed for native local notifications)
   if (!user && !Capacitor.isNativePlatform()) {
     return (
-      <Card className="p-6">
-        <div className="flex items-start gap-3">
-          <LogIn className="h-5 w-5 text-primary mt-0.5" />
-          <div className="flex-1">
-            <h3 className="font-semibold text-sm">Prayer Notifications</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Sign in to enable prayer time notifications. You'll receive notifications at exact prayer times, even when the app is closed.
-            </p>
-            <Link href="/profile">
-              <Button className="mt-4" size="sm">
-                <LogIn className="h-4 w-4 mr-2" />
+      <>
+        <Card variant="grouped" className="gap-0 p-6">
+          <div className="flex items-start gap-3">
+            <LogIn className="h-5 w-5 text-primary mt-0.5" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-sm">Prayer Notifications</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Sign in to enable prayer time notifications. You&apos;ll receive notifications at exact prayer times, even when the app is closed.
+              </p>
+              <Button className="mt-4" size="sm" onClick={() => setLoginOpen(true)}>
+                <LogIn className="size-4" aria-hidden="true" />
                 Sign In to Enable
               </Button>
-            </Link>
+            </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+        <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
+      </>
     )
   }
 
   // Permission denied
   if (permission === 'denied') {
     return (
-      <Card className="p-6">
+      <Card variant="grouped" className="gap-0 p-6">
         <div className="flex items-start gap-3">
           <AlertCircle className="mt-0.5 h-5 w-5 text-warning" />
           <div className="flex-1">
@@ -130,8 +132,8 @@ export function NotificationSettings() {
               You have blocked notifications for this site. To enable them:
             </p>
             <ol className="text-sm text-muted-foreground mt-2 ml-4 list-decimal space-y-1">
-              <li>Click the lock icon in your browser's address bar</li>
-              <li>Find "Notifications" and change to "Allow"</li>
+              <li>Click the lock icon in your browser&apos;s address bar</li>
+              <li>Find &quot;Notifications&quot; and change to &quot;Allow&quot;</li>
               <li>Refresh this page</li>
             </ol>
           </div>
@@ -143,7 +145,7 @@ export function NotificationSettings() {
   // Permission not yet granted - show CTA
   if (permission !== 'granted') {
     return (
-      <Card className="p-6">
+      <Card variant="grouped" className="gap-0 p-6">
         <div className="flex items-start gap-3">
           <Bell className="h-5 w-5 text-primary mt-0.5" />
           <div className="flex-1">
@@ -172,7 +174,7 @@ export function NotificationSettings() {
   const isNative = Capacitor.isNativePlatform()
 
   return (
-    <Card className="p-6">
+    <Card variant="grouped" className="gap-0 p-6">
       <div className="space-y-4">
         {/* Header with master toggle */}
         <div className="flex items-center justify-between">
@@ -250,7 +252,7 @@ export function NotificationSettings() {
                           key={mins}
                           onClick={() => setPrayerMinutesBefore(prayerName, mins)}
                           disabled={loading}
-                          className={`min-h-touch rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
+                          className={`min-h-touch rounded-control-sm border px-2 py-2 text-xs font-medium transition-colors ${
                             setting.minutesBefore === mins
                               ? 'border-primary bg-primary/10 text-primary'
                               : 'border-border bg-background text-muted-foreground hover:border-primary/50'
@@ -299,7 +301,7 @@ export function NotificationSettings() {
             <div className="space-y-1">
               <p className="font-medium">iOS Tip</p>
               <p className="text-teal">
-                For best results on iOS, <strong>install this app to your home screen</strong> using Safari's "Add to Home Screen" feature. Notifications will work even when the app is closed.
+                For best results on iOS, <strong>install this app to your home screen</strong> using Safari&apos;s &quot;Add to Home Screen&quot; feature. Notifications will work even when the app is closed.
               </p>
             </div>
           </div>

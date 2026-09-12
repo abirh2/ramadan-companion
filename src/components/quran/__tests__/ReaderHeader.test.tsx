@@ -62,7 +62,7 @@ describe('ReaderHeader', () => {
     expect(arabic).toBeInTheDocument()
     expect(arabic).toHaveAttribute('dir', 'rtl')
     expect(arabic).toHaveAttribute('lang', 'ar')
-    expect(arabic).toHaveClass('type-quran-arabic')
+    expect(arabic).toHaveClass('type-arabic')
   })
 
   it('provides a Back control that links to /quran (Requirement 4.4)', () => {
@@ -71,13 +71,12 @@ describe('ReaderHeader', () => {
     expect(backLink).toHaveAttribute('href', '/quran')
   })
 
-  it('exposes a non-empty accessible name on the Back control (Requirement 16.4)', () => {
+  it('exposes one touch-sized Back link without nesting another interactive control (Requirement 16.4)', () => {
     renderHeader()
-    // The Back control is a button rendered inside the link.
-    const backButton = screen.getByRole('button', { name: /back to quran/i })
-    expect(backButton).toBeInTheDocument()
-    expect(backButton).toHaveAccessibleName()
-    expect(backButton.textContent?.trim().length).toBeGreaterThan(0)
+    const backLink = screen.getByRole('link', { name: /back to quran/i })
+    expect(backLink).toHaveAccessibleName()
+    expect(backLink).toHaveClass('min-h-touch')
+    expect(screen.queryByRole('button', { name: /back to quran/i })).not.toBeInTheDocument()
   })
 
   it('renders a frameless header without gradient or boxed card wrapper classes (Requirement 4.2)', () => {

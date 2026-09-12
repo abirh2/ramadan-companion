@@ -103,13 +103,13 @@ export function FavoriteQuranItem({ favorite, onRemove }: FavoriteQuranItemProps
   }
 
   return (
-    <Card className="rounded-xl shadow-sm">
-      <CardContent className="p-6 space-y-4">
+    <Card variant="grouped" className="gap-0 py-0">
+      <CardContent className="space-y-4 p-5 sm:p-6">
         {/* Arabic Text with Copy Button */}
         {metadata.arabicText && (
           <div className="flex items-start justify-between gap-4">
             <p
-              className="text-xl md:text-2xl leading-relaxed text-right font-serif flex-1"
+              className="type-quran-arabic flex-1 text-text-primary"
               dir="rtl"
               lang="ar"
             >
@@ -120,12 +120,13 @@ export function FavoriteQuranItem({ favorite, onRemove }: FavoriteQuranItemProps
               size="icon-sm"
               onClick={handleCopyArabic}
               title="Copy Arabic text"
+              aria-label="Copy Arabic text"
               className="flex-shrink-0"
             >
               {copiedArabic ? (
-                <Check className="h-4 w-4 text-success" />
+                <Check className="size-4 text-success" aria-hidden="true" />
               ) : (
-                <Copy className="h-4 w-4" />
+                <Copy className="size-4" aria-hidden="true" />
               )}
             </Button>
           </div>
@@ -133,10 +134,10 @@ export function FavoriteQuranItem({ favorite, onRemove }: FavoriteQuranItemProps
 
         {/* Translation with Copy Button */}
         {metadata.translationText && (
-          <div className="border-t pt-4">
+          <div className="border-t border-border-subtle pt-4">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <p className="text-base leading-relaxed text-muted-foreground">
+                <p className="type-quran-translation text-text-secondary">
                   {metadata.translationText}
                 </p>
               </div>
@@ -145,12 +146,13 @@ export function FavoriteQuranItem({ favorite, onRemove }: FavoriteQuranItemProps
                 size="icon-sm"
                 onClick={handleCopyTranslation}
                 title="Copy translation"
+                aria-label="Copy translation"
                 className="flex-shrink-0"
               >
                 {copiedTranslation ? (
-                  <Check className="h-4 w-4 text-success" />
+                  <Check className="size-4 text-success" aria-hidden="true" />
                 ) : (
-                  <Copy className="h-4 w-4" />
+                  <Copy className="size-4" aria-hidden="true" />
                 )}
               </Button>
             </div>
@@ -158,7 +160,7 @@ export function FavoriteQuranItem({ favorite, onRemove }: FavoriteQuranItemProps
         )}
 
         {/* Metadata */}
-        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground pt-2 border-t">
+        <div className="type-caption flex flex-wrap items-center gap-2 border-t border-border-subtle pt-3 text-text-secondary">
           <span className="font-medium">{favorite.title}</span>
           <span>•</span>
           <span>Saved {formatDate(favorite.created_at)}</span>
@@ -170,9 +172,9 @@ export function FavoriteQuranItem({ favorite, onRemove }: FavoriteQuranItemProps
             variant="ghost"
             size="sm"
             onClick={handleShare}
-            className="text-muted-foreground"
+            className="text-text-secondary"
           >
-            <Share2 className="h-4 w-4 mr-2" />
+            <Share2 className="size-4" aria-hidden="true" />
             {shareSuccess ? 'Copied!' : 'Share'}
           </Button>
           <Button
@@ -180,9 +182,9 @@ export function FavoriteQuranItem({ favorite, onRemove }: FavoriteQuranItemProps
             size="sm"
             onClick={handleRemove}
             disabled={isRemoving}
-            className="text-destructive hover:text-destructive ml-auto"
+            className="ml-auto text-destructive hover:text-destructive"
           >
-            <Heart className="h-4 w-4 mr-2 fill-current" />
+            <Heart className="size-4 fill-current" aria-hidden="true" />
             {isRemoving ? 'Removing...' : 'Remove'}
           </Button>
         </div>

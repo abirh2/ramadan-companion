@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowLeft, Heart, BookOpen, Loader2 } from 'lucide-react'
 import { ProtectedFeature } from '@/components/auth/ProtectedFeature'
@@ -31,9 +30,10 @@ export default function FavoritesPage() {
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-8">
       <header className="mb-8">
-        <Link 
+        <Link
           href="/more"
           className="type-nav mb-3 inline-flex min-h-touch items-center gap-2 rounded-control text-text-secondary transition-colors hover:text-text-primary"
+          aria-label="Navigate back to More"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           Back to More
@@ -43,142 +43,136 @@ export default function FavoritesPage() {
       </header>
 
       <ProtectedFeature
-          title="Favorites"
-          description="Sign in to save and view your favorite Quran verses and hadiths."
-        >
-          <Tabs defaultValue="quran" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="quran">
-                <BookOpen className="h-4 w-4 mr-2" />
-                Quran
-                {!quranLoading && quranFavorites.length > 0 && (
-                  <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                    {quranFavorites.length}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="hadith">
-                Hadith
-                {!hadithLoading && hadithFavorites.length > 0 && (
-                  <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                    {hadithFavorites.length}
-                  </span>
-                )}
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Quran Tab */}
-            <TabsContent value="quran" className="space-y-4">
-              {quranLoading && (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
+        title="Sign in to view favorites"
+        description="Sign in to save and view your favorite Quran verses and hadiths."
+      >
+        <Tabs defaultValue="quran" className="w-full">
+          <TabsList className="mx-auto mb-6 grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="quran">
+              <BookOpen className="size-4" aria-hidden="true" />
+              Quran
+              {!quranLoading && quranFavorites.length > 0 && (
+                <span className="rounded-round bg-teal-muted px-2 py-0.5 text-xs text-teal">
+                  {quranFavorites.length}
+                </span>
               )}
-
-              {quranError && (
-                <Card>
-                  <CardContent className="p-6 text-center">
-                    <p className="text-destructive mb-2">Failed to load favorites</p>
-                    <p className="text-sm text-muted-foreground mb-4">{quranError}</p>
-                    <Button onClick={refetchQuran} variant="outline" size="sm">
-                      Try Again
-                    </Button>
-                  </CardContent>
-                </Card>
+            </TabsTrigger>
+            <TabsTrigger value="hadith">
+              Hadith
+              {!hadithLoading && hadithFavorites.length > 0 && (
+                <span className="rounded-round bg-teal-muted px-2 py-0.5 text-xs text-teal">
+                  {hadithFavorites.length}
+                </span>
               )}
+            </TabsTrigger>
+          </TabsList>
 
-              {!quranLoading && !quranError && quranEmpty && (
-                <Card>
-                  <CardContent className="p-12 text-center space-y-4">
-                    <Heart className="h-12 w-12 mx-auto text-muted-foreground/50" />
-                    <div>
-                      <h3 className="text-lg font-semibold mb-2">No Quran Favorites Yet</h3>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Start building your collection by clicking the heart icon on any ayah.
-                      </p>
-                      <Link href="/quran-hadith">
-                        <Button>
-                          <BookOpen className="h-4 w-4 mr-2" />
-                          View Daily Ayah
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+          {/* Quran Tab */}
+          <TabsContent value="quran" className="space-y-4">
+            {quranLoading && (
+              <div className="flex items-center justify-center gap-3 py-12" role="status" aria-live="polite">
+                <Loader2 className="size-5 animate-spin text-teal motion-reduce:animate-none" aria-hidden="true" />
+                <span className="type-body-secondary text-text-secondary">Loading saved verses…</span>
+              </div>
+            )}
 
-              {!quranLoading && !quranError && !quranEmpty && (
-                <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    {quranFavorites.length} {quranFavorites.length === 1 ? 'verse' : 'verses'} saved
+            {quranError && (
+              <div className="rounded-grouped border border-border-subtle bg-surface-grouped p-5" role="alert">
+                <p className="font-semibold text-text-primary">Saved verses could not be loaded.</p>
+                <p className="type-body-secondary mt-1 text-text-secondary">{quranError}</p>
+                <Button onClick={refetchQuran} variant="outline" size="sm" className="mt-4">
+                  Try again
+                </Button>
+              </div>
+            )}
+
+            {!quranLoading && !quranError && quranEmpty && (
+              <div className="rounded-grouped border border-border-subtle bg-surface-grouped px-5 py-8 text-center">
+                <Heart className="mx-auto size-8 text-text-tertiary" strokeWidth={1.6} aria-hidden="true" />
+                <div>
+                  <h3 className="mt-3 font-semibold text-text-primary">No saved Quran verses yet</h3>
+                  <p className="type-body-secondary mx-auto mt-1 max-w-md text-text-secondary">
+                    Use the heart action on any ayah to keep it here.
                   </p>
-                  {quranFavorites.map((favorite) => (
-                    <FavoriteQuranItem
-                      key={favorite.id}
-                      favorite={favorite}
-                      onRemove={refetchQuran}
-                    />
-                  ))}
+                  <Button asChild className="mt-5">
+                    <Link href="/quran-hadith">
+                      <BookOpen className="size-4" aria-hidden="true" />
+                      View Daily Ayah
+                    </Link>
+                  </Button>
                 </div>
-              )}
-            </TabsContent>
+              </div>
+            )}
 
-            {/* Hadith Tab */}
-            <TabsContent value="hadith" className="space-y-4">
-              {hadithLoading && (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-              )}
+            {!quranLoading && !quranError && !quranEmpty && (
+              <div className="space-y-4">
+                <p className="type-caption text-text-secondary">
+                  {quranFavorites.length} {quranFavorites.length === 1 ? 'verse' : 'verses'} saved
+                </p>
+                {quranFavorites.map((favorite) => (
+                  <FavoriteQuranItem
+                    key={favorite.id}
+                    favorite={favorite}
+                    onRemove={refetchQuran}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
 
-              {hadithError && (
-                <Card>
-                  <CardContent className="p-6 text-center">
-                    <p className="text-destructive mb-2">Failed to load favorites</p>
-                    <p className="text-sm text-muted-foreground mb-4">{hadithError}</p>
-                    <Button onClick={refetchHadith} variant="outline" size="sm">
-                      Try Again
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
+          {/* Hadith Tab */}
+          <TabsContent value="hadith" className="space-y-4">
+            {hadithLoading && (
+              <div className="flex items-center justify-center gap-3 py-12" role="status" aria-live="polite">
+                <Loader2 className="size-5 animate-spin text-teal motion-reduce:animate-none" aria-hidden="true" />
+                <span className="type-body-secondary text-text-secondary">Loading saved hadith…</span>
+              </div>
+            )}
 
-              {!hadithLoading && !hadithError && hadithEmpty && (
-                <Card>
-                  <CardContent className="p-12 text-center space-y-4">
-                    <Heart className="h-12 w-12 mx-auto text-muted-foreground/50" />
-                    <div>
-                      <h3 className="text-lg font-semibold mb-2">No Hadith Favorites Yet</h3>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Start building your collection by clicking the heart icon on any hadith.
-                      </p>
-                      <Link href="/quran-hadith">
-                        <Button>
-                          View Daily Hadith
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+            {hadithError && (
+              <div className="rounded-grouped border border-border-subtle bg-surface-grouped p-5" role="alert">
+                <p className="font-semibold text-text-primary">Saved hadith could not be loaded.</p>
+                <p className="type-body-secondary mt-1 text-text-secondary">{hadithError}</p>
+                <Button onClick={refetchHadith} variant="outline" size="sm" className="mt-4">
+                  Try again
+                </Button>
+              </div>
+            )}
 
-              {!hadithLoading && !hadithError && !hadithEmpty && (
-                <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    {hadithFavorites.length} {hadithFavorites.length === 1 ? 'hadith' : 'hadiths'} saved
+            {!hadithLoading && !hadithError && hadithEmpty && (
+              <div className="rounded-grouped border border-border-subtle bg-surface-grouped px-5 py-8 text-center">
+                <Heart className="mx-auto size-8 text-text-tertiary" strokeWidth={1.6} aria-hidden="true" />
+                <div>
+                  <h3 className="mt-3 font-semibold text-text-primary">No saved hadith yet</h3>
+                  <p className="type-body-secondary mx-auto mt-1 max-w-md text-text-secondary">
+                    Use the heart action on any hadith to keep it here.
                   </p>
-                  {hadithFavorites.map((favorite) => (
-                    <FavoriteHadithItem
-                      key={favorite.id}
-                      favorite={favorite}
-                      onRemove={refetchHadith}
-                    />
-                  ))}
+                  <Button asChild className="mt-5">
+                    <Link href="/quran-hadith">
+                      View Daily Hadith
+                    </Link>
+                  </Button>
                 </div>
-              )}
-            </TabsContent>
-          </Tabs>
-        </ProtectedFeature>
+              </div>
+            )}
+
+            {!hadithLoading && !hadithError && !hadithEmpty && (
+              <div className="space-y-4">
+                <p className="type-caption text-text-secondary">
+                  {hadithFavorites.length} {hadithFavorites.length === 1 ? 'hadith' : 'hadiths'} saved
+                </p>
+                {hadithFavorites.map((favorite) => (
+                  <FavoriteHadithItem
+                    key={favorite.id}
+                    favorite={favorite}
+                    onRemove={refetchHadith}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </ProtectedFeature>
 
       {/* Feedback Button */}
       <FeedbackButton pagePath="/favorites" />

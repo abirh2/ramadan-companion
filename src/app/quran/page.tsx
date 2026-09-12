@@ -6,7 +6,7 @@ import { JuzList } from '@/components/quran/JuzList'
 
 export default function QuranBrowserPage() {
   return (
-    <div className="container mx-auto px-4 py-6 max-w-6xl">
+    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6">
         <Link
           href="/"
@@ -20,7 +20,7 @@ export default function QuranBrowserPage() {
       </div>
 
       <Tabs defaultValue="surah" className="w-full">
-        <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-6" aria-label="Quran browsing options">
+        <TabsList className="mx-auto mb-6 grid w-full max-w-md grid-cols-2" aria-label="Quran browsing options">
           <TabsTrigger value="surah">Surahs</TabsTrigger>
           <TabsTrigger value="juz">Juz</TabsTrigger>
         </TabsList>

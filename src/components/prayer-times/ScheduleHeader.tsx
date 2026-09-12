@@ -43,7 +43,7 @@ export function ScheduleHeader({
       <button
         type="button"
         onClick={onOpenDatePicker}
-        className="flex min-h-touch shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-text-secondary transition-colors hover:bg-surface-grouped hover:text-teal active:bg-teal-muted"
+        className="flex min-h-touch shrink-0 items-center gap-2 rounded-control px-3 py-2 text-text-secondary transition-colors hover:bg-surface-grouped hover:text-teal active:bg-teal-muted"
       >
         <Calendar className="size-4 shrink-0" aria-hidden="true" />
         <span className="type-body-secondary">Other Dates</span>

@@ -52,7 +52,7 @@ export function GoToAyah({ surahNumber, totalAyahs }: GoToAyahProps) {
     <div className="space-y-1.5">
       <div
         className={cn(
-          'inline-flex items-center gap-1 rounded-full border bg-surface-primary pl-3 pr-1 py-1 transition-colors',
+          'inline-flex min-h-touch items-center gap-1 rounded-control border bg-surface-primary pl-3 pr-0.5 transition-colors',
           error
             ? 'border-destructive'
             : 'border-border-subtle focus-within:border-border-strong'
@@ -77,13 +77,13 @@ export function GoToAyah({ surahNumber, totalAyahs }: GoToAyahProps) {
           aria-label={`Go to ayah, from 1 to ${totalAyahs}`}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}
-          className="w-16 bg-transparent border-0 p-0 type-body text-text-primary placeholder:text-text-tertiary/70 focus:outline-none"
+          className="min-h-touch w-16 border-0 bg-transparent p-0 type-body text-text-primary placeholder:text-text-tertiary/70 focus:outline-none"
         />
         <button
           type="button"
           onClick={handleGo}
           aria-label="Go to ayah"
-          className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-teal-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+          className="inline-flex size-touch items-center justify-center rounded-control-sm bg-primary text-primary-foreground transition-colors hover:bg-teal-hover active:bg-teal-pressed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
         >
           <ArrowRight className="h-4 w-4" />
         </button>

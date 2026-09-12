@@ -112,12 +112,12 @@ export function FavoriteHadithItem({ favorite, onRemove }: FavoriteHadithItemPro
   }
 
   return (
-    <Card className="rounded-xl shadow-sm">
-      <CardContent className="p-6 space-y-4">
+    <Card variant="grouped" className="gap-0 py-0">
+      <CardContent className="space-y-4 p-5 sm:p-6">
         {/* Arabic Text with Copy Button */}
         <div className="flex items-start justify-between gap-4">
           <p
-            className="text-xl md:text-2xl leading-relaxed text-right font-serif flex-1"
+            className="type-arabic flex-1 text-right text-text-primary"
             dir="rtl"
             lang="ar"
           >
@@ -128,25 +128,26 @@ export function FavoriteHadithItem({ favorite, onRemove }: FavoriteHadithItemPro
             size="icon-sm"
             onClick={handleCopyArabic}
             title="Copy Arabic text"
+            aria-label="Copy Arabic text"
             className="flex-shrink-0"
           >
             {copiedArabic ? (
-              <Check className="h-4 w-4 text-success" />
+              <Check className="size-4 text-success" aria-hidden="true" />
             ) : (
-              <Copy className="h-4 w-4" />
+              <Copy className="size-4" aria-hidden="true" />
             )}
           </Button>
         </div>
 
         {/* English Translation with Copy Button */}
-        <div className="border-t pt-4">
+        <div className="border-t border-border-subtle pt-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
-              <p className="text-base leading-relaxed text-muted-foreground">
+              <p className="type-body text-text-secondary">
                 {metadata.hadithEnglish}
               </p>
               {metadata.narrator && (
-                <p className="text-sm text-muted-foreground italic mt-2">
+                <p className="type-body-secondary mt-2 italic text-text-secondary">
                   — {metadata.narrator}
                 </p>
               )}
@@ -156,24 +157,25 @@ export function FavoriteHadithItem({ favorite, onRemove }: FavoriteHadithItemPro
               size="icon-sm"
               onClick={handleCopyEnglish}
               title="Copy English translation"
+              aria-label="Copy English translation"
               className="flex-shrink-0"
             >
               {copiedEnglish ? (
-                <Check className="h-4 w-4 text-success" />
+                <Check className="size-4 text-success" aria-hidden="true" />
               ) : (
-                <Copy className="h-4 w-4" />
+                <Copy className="size-4" aria-hidden="true" />
               )}
             </Button>
           </div>
         </div>
 
         {/* Metadata */}
-        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground pt-2 border-t">
+        <div className="type-caption flex flex-wrap items-center gap-2 border-t border-border-subtle pt-3 text-text-secondary">
           <span className="font-medium">{metadata.book} {metadata.hadithNumber}</span>
           <span>•</span>
           <span>{metadata.chapter}</span>
           <span>•</span>
-          <span className={`inline-block px-2 py-0.5 rounded ${getStatusColor(metadata.status)}`}>
+          <span className={`inline-block rounded-control-sm px-2 py-0.5 ${getStatusColor(metadata.status)}`}>
             {metadata.status}
           </span>
           <span>•</span>
@@ -186,9 +188,9 @@ export function FavoriteHadithItem({ favorite, onRemove }: FavoriteHadithItemPro
             variant="ghost"
             size="sm"
             onClick={handleShare}
-            className="text-muted-foreground"
+            className="text-text-secondary"
           >
-            <Share2 className="h-4 w-4 mr-2" />
+            <Share2 className="size-4" aria-hidden="true" />
             {shareSuccess ? 'Copied!' : 'Share'}
           </Button>
           <Button
@@ -196,9 +198,9 @@ export function FavoriteHadithItem({ favorite, onRemove }: FavoriteHadithItemPro
             size="sm"
             onClick={handleRemove}
             disabled={removing}
-            className="text-destructive hover:text-destructive ml-auto"
+            className="ml-auto text-destructive hover:text-destructive"
           >
-            <Heart className="h-4 w-4 mr-2 fill-current" />
+            <Heart className="size-4 fill-current" aria-hidden="true" />
             {removing ? 'Removing...' : 'Remove'}
           </Button>
         </div>

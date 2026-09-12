@@ -656,6 +656,12 @@
   }
 }
 
+/* Keep third-party map controls aligned with the app's touch-target floor. */
+.maplibregl-map .maplibregl-ctrl-group button {
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html:focus-within {
     scroll-behavior: auto;

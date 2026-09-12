@@ -170,6 +170,13 @@ afterEach(() => {
 })
 
 describe('GoToAyah', () => {
+  it('keeps both direct controls at the mobile touch-target minimum', () => {
+    render(<GoToAyah surahNumber={1} totalAyahs={7} />)
+
+    expect(screen.getByLabelText(/go to ayah, from/i)).toHaveClass('min-h-touch')
+    expect(screen.getByRole('button', { name: /go to ayah/i })).toHaveClass('size-touch')
+  })
+
   it('navigates to /quran/{surah}?ayah={n} when a valid in-range integer is submitted (Req 13.1, 13.2)', () => {
     render(<GoToAyah surahNumber={1} totalAyahs={7} />)
 
@@ -280,10 +287,10 @@ describe('GoToAyah', () => {
     // The submit affordance is a rounded, token-colored button, not a form submit.
     const go = screen.getByRole('button', { name: /go to ayah/i })
     expect(go).toHaveAttribute('type', 'button')
-    expect(go.className).toMatch(/rounded-full/)
+    expect(go.className).toMatch(/rounded-control-sm/)
 
-    // The field wrapper uses the semantic surface + rounded-full pill treatment.
-    const wrapper = container.querySelector('.rounded-full')
+    // The field wrapper uses the semantic surface + control-radius treatment.
+    const wrapper = container.querySelector('.rounded-control')
     expect(wrapper).not.toBeNull()
   })
 })

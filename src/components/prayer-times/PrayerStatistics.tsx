@@ -95,21 +95,21 @@ export function PrayerStatistics({
   // Guest user prompt
   if (!isAuthenticated) {
     return (
-      <Card className="rounded-2xl shadow-sm border-accent/20">
-        <CardHeader className="pb-3">
+      <Card variant="grouped" className="gap-0 py-0">
+        <CardHeader className="px-5 pb-3 pt-5">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base font-medium flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-accent" />
+            <CardTitle className="type-body flex items-center gap-2 font-semibold">
+              <TrendingUp className="size-5 text-teal" aria-hidden="true" />
               Prayer Statistics
             </CardTitle>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 space-y-4">
-            <Calendar className="h-12 w-12 text-muted-foreground mx-auto" />
+        <CardContent className="px-5 pb-5">
+          <div className="space-y-4 py-3 text-center">
+            <Calendar className="mx-auto size-8 text-text-tertiary" strokeWidth={1.6} aria-hidden="true" />
             <div className="space-y-2">
-              <p className="text-muted-foreground">
-                Sign in to track your prayer history and view detailed statistics
+              <p className="type-body-secondary text-text-secondary">
+                Sign in to track prayer history and view your progress.
               </p>
               <Button asChild size="sm" className="mt-2">
                 <Link href="/profile">
@@ -124,11 +124,11 @@ export function PrayerStatistics({
   }
 
   return (
-    <Card className="rounded-2xl shadow-sm border-accent/20">
-      <CardHeader className="pb-3">
+    <Card variant="grouped" className="gap-0 py-0">
+      <CardHeader className="px-5 py-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-medium flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-accent" />
+          <CardTitle className="type-body flex items-center gap-2 font-semibold">
+            <TrendingUp className="size-5 text-teal" aria-hidden="true" />
             Prayer Statistics
           </CardTitle>
           <Button
@@ -140,12 +140,12 @@ export function PrayerStatistics({
             {isExpanded ? (
               <>
                 <span className="text-sm">Hide</span>
-                <ChevronUp className="h-4 w-4" />
+                <ChevronUp className="size-4" aria-hidden="true" />
               </>
             ) : (
               <>
                 <span className="text-sm">Show</span>
-                <ChevronDown className="h-4 w-4" />
+                <ChevronDown className="size-4" aria-hidden="true" />
               </>
             )}
           </Button>
@@ -153,7 +153,7 @@ export function PrayerStatistics({
       </CardHeader>
 
       {isExpanded && (
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 border-t border-border-subtle px-5 py-5">
           {/* Time Range Selector */}
           <div className="flex items-center gap-2 flex-wrap">
             {TIME_RANGE_OPTIONS.map((option) => (
@@ -198,14 +198,15 @@ export function PrayerStatistics({
           )}
 
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <div className="flex items-center justify-center gap-3 py-10" role="status" aria-live="polite">
+              <Loader2 className="size-5 animate-spin text-teal motion-reduce:animate-none" aria-hidden="true" />
+              <span className="type-body-secondary text-text-secondary">Loading prayer history…</span>
             </div>
           ) : !statistics || statistics.totalDays === 0 ? (
-            <div className="text-center py-12 space-y-3">
-              <Calendar className="h-12 w-12 text-muted-foreground mx-auto" />
-              <p className="text-muted-foreground">
-                No prayer tracking data yet. Start tracking your prayers to see statistics!
+            <div className="space-y-3 py-8 text-center" role="status">
+              <Calendar className="mx-auto size-8 text-text-tertiary" strokeWidth={1.6} aria-hidden="true" />
+              <p className="type-body-secondary text-text-secondary">
+                Your prayer history will appear after you begin marking prayers.
               </p>
             </div>
           ) : (
@@ -213,24 +214,24 @@ export function PrayerStatistics({
               {/* Statistics Summary */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Completion Rate</p>
-                  <p className="text-2xl font-bold text-foreground">
+                  <p className="type-caption text-text-secondary">Completion Rate</p>
+                  <p className="text-2xl font-semibold tabular-nums text-text-primary">
                     {statistics.overallCompletionRate.toFixed(0)}%
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Total Prayers</p>
-                  <p className="text-2xl font-bold text-foreground">
+                  <p className="type-caption text-text-secondary">Total Prayers</p>
+                  <p className="text-2xl font-semibold tabular-nums text-text-primary">
                     {statistics.completedPrayers}/{statistics.totalPrayers}
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Days Tracked</p>
-                  <p className="text-2xl font-bold text-foreground">{statistics.totalDays}</p>
+                  <p className="type-caption text-text-secondary">Days Tracked</p>
+                  <p className="text-2xl font-semibold tabular-nums text-text-primary">{statistics.totalDays}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Perfect Days</p>
-                  <p className="text-2xl font-bold text-foreground">
+                  <p className="type-caption text-text-secondary">Perfect Days</p>
+                  <p className="text-2xl font-semibold tabular-nums text-text-primary">
                     {statistics.dailyCompletions.filter((d) => d.totalCompleted === 5).length}
                   </p>
                 </div>
@@ -261,7 +262,7 @@ export function PrayerStatistics({
                       contentStyle={{
                         backgroundColor: 'var(--background)',
                         border: '1px solid var(--border)',
-                        borderRadius: '8px',
+                          borderRadius: 'var(--radius-control)',
                       }}
                       formatter={(value: number | undefined) => [`${value?.toFixed(0) ?? 0}/5`, 'Prayers Completed']}
                       labelFormatter={(label) => {
@@ -314,7 +315,7 @@ export function PrayerStatistics({
                         contentStyle={{
                           backgroundColor: 'var(--background)',
                           border: '1px solid var(--border)',
-                          borderRadius: '8px',
+                          borderRadius: 'var(--radius-control)',
                         }}
                       />
                       <Legend />
@@ -361,12 +362,12 @@ export function PrayerStatistics({
                   current[1].rate > best[1].rate ? current : best
                 )
                 return (
-                  <div className="bg-accent/10 rounded-lg p-4 border border-accent/20">
+                  <div className="rounded-grouped border border-border-subtle bg-teal-muted p-4">
                     <div className="flex items-center gap-2 mb-1">
-                      <Award className="h-5 w-5 text-accent" />
+                      <Award className="size-5 text-teal" aria-hidden="true" />
                       <p className="font-medium">Most Consistent Prayer</p>
                     </div>
-                    <p className="text-2xl font-bold text-foreground">
+                    <p className="text-2xl font-semibold text-text-primary">
                       {bestPrayer[0]}{' '}
                       <span className="text-lg text-muted-foreground">
                         ({bestPrayer[1].rate.toFixed(0)}% completion)

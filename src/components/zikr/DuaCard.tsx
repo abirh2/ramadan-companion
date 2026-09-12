@@ -26,11 +26,11 @@ export function DuaCard({ dua }: DuaCardProps) {
   }
 
   return (
-    <Card className="rounded-2xl border shadow-sm h-full flex flex-col">
+    <Card variant="grouped" className="h-full gap-0 py-0">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <p className="type-caption font-semibold text-text-secondary">
               {dua.category}
             </p>
           </div>
@@ -42,19 +42,19 @@ export function DuaCard({ dua }: DuaCardProps) {
             aria-label="Copy dua"
           >
             {copied ? (
-              <Check className="h-4 w-4 text-success" />
+              <Check className="size-4 text-success" aria-hidden="true" />
             ) : (
-              <Copy className="h-4 w-4" />
+              <Copy className="size-4" aria-hidden="true" />
             )}
           </Button>
         </div>
       </CardHeader>
       
-      <CardContent className="flex-1 space-y-4">
+      <CardContent className="flex-1 space-y-4 pb-5">
         {/* Arabic Text */}
         <div>
           <p
-            className="text-2xl leading-relaxed font-serif"
+            className="type-arabic text-text-primary"
             dir="rtl"
             lang="ar"
           >
@@ -64,21 +64,21 @@ export function DuaCard({ dua }: DuaCardProps) {
 
         {/* Transliteration */}
         <div>
-          <p className="text-sm font-medium text-foreground italic">
+          <p className="type-body-secondary font-medium italic text-text-primary">
             {dua.transliteration}
           </p>
         </div>
 
         {/* Translation */}
         <div>
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <p className="type-body-secondary text-text-secondary">
             {dua.translation}
           </p>
         </div>
 
         {/* Reference */}
-        <div className="pt-2 border-t">
-          <p className="text-xs text-muted-foreground">
+        <div className="border-t border-border-subtle pt-3">
+          <p className="type-caption text-text-secondary">
             <span className="font-medium">Reference:</span> {dua.reference}
           </p>
         </div>

@@ -97,10 +97,10 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" aria-labelledby="login-title" aria-describedby="login-description">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle id="login-title">Welcome</DialogTitle>
-          <DialogDescription id="login-description">
+          <DialogTitle>Welcome</DialogTitle>
+          <DialogDescription>
             Sign in to save your charity donations and favorite content
           </DialogDescription>
         </DialogHeader>

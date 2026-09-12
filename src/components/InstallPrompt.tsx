@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Capacitor } from '@capacitor/core'
 import { X, Download, Info, Copy } from 'lucide-react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { getIOSBrowser, getIOSBrowserPrefixed } from '@/lib/platform'
@@ -59,7 +60,6 @@ export function InstallPrompt() {
                        (window.navigator as Navigator & { standalone?: boolean }).standalone === true
 
     if (isInstalled) {
-      console.log('[PWA] App is already installed')
       return
     }
 
@@ -75,29 +75,17 @@ export function InstallPrompt() {
     // Check engagement criteria
     const isEngaged = pageViews >= MIN_PAGE_VIEWS || locationEnabled
 
-    console.log('[PWA] Engagement check:', { 
-      pageViews, 
-      locationEnabled, 
-      isDismissed, 
-      isEngaged 
-    })
-
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
       // Prevent the mini-infobar from appearing on mobile
       e.preventDefault()
       
       const promptEvent = e as BeforeInstallPromptEvent
-      console.log('[PWA] beforeinstallprompt event fired')
-      
       setDeferredPrompt(promptEvent)
 
       // Show prompt if conditions are met
       if (isEngaged && !isDismissed) {
-        console.log('[PWA] Showing install prompt')
         setShowPrompt(true)
-      } else {
-        console.log('[PWA] Not showing prompt:', { isEngaged, isDismissed })
       }
     }
 
@@ -106,13 +94,11 @@ export function InstallPrompt() {
     // For iOS Safari, we show a custom banner as it doesn't fire beforeinstallprompt
     if (getIOSBrowser() === 'safari' && isEngaged && !isDismissed) {
       setShowPrompt(true)
-      console.log('[PWA] Detected iOS Safari, showing custom install banner.')
     } else {
       // For other iOS browsers (Chrome, Firefox, Edge), show a different banner
       const iosBrowserType = getIOSBrowserPrefixed()
       if (iosBrowserType !== 'not-ios' && iosBrowserType !== 'ios-safari' && isEngaged && !isDismissed) {
         setShowPrompt(true)
-        console.log(`[PWA] Detected ${iosBrowserType}, showing 'Open in Safari' banner.`)
       }
     }
 
@@ -127,7 +113,6 @@ export function InstallPrompt() {
    */
   const handleInstall = async () => {
     if (!deferredPrompt) {
-      console.log('[PWA] No deferred prompt available')
       return
     }
 
@@ -138,15 +123,7 @@ export function InstallPrompt() {
       await deferredPrompt.prompt()
 
       // Wait for the user's choice
-      const choiceResult = await deferredPrompt.userChoice
-
-      console.log('[PWA] User choice:', choiceResult.outcome)
-
-      if (choiceResult.outcome === 'accepted') {
-        console.log('[PWA] User accepted the install prompt')
-      } else {
-        console.log('[PWA] User dismissed the install prompt')
-      }
+      await deferredPrompt.userChoice
 
       // Clear the deferred prompt
       setDeferredPrompt(null)
@@ -163,8 +140,6 @@ export function InstallPrompt() {
    * Handle dismiss button click
    */
   const handleDismiss = () => {
-    console.log('[PWA] User dismissed install prompt')
-    
     // Store dismissal in localStorage
     localStorage.setItem(STORAGE_KEYS.INSTALL_PROMPT_DISMISSED, 'true')
     localStorage.setItem(STORAGE_KEYS.INSTALL_PROMPT_DISMISSED_AT, Date.now().toString())
@@ -193,20 +168,18 @@ export function InstallPrompt() {
   // Render iOS Safari banner - manual installation instructions
   if (iosBrowserType === 'ios-safari') {
     return (
-      <div className="app-install-prompt fixed left-0 right-0 bg-primary text-primary-foreground p-3 flex items-center justify-between shadow-lg z-50">
-        <div className="flex items-center gap-2">
-          <Info className="h-5 w-5" />
-          <p className="text-sm">Install Deen Companion: Tap Share (⬆︎) → &quot;Add to Home Screen&quot;</p>
+      <div className="app-install-prompt fixed left-0 right-0 z-50 flex flex-wrap items-center justify-between gap-3 border-t border-border-subtle bg-surface-elevated px-4 py-3 shadow-low">
+        <div className="flex min-w-0 items-center gap-2">
+          <Info className="size-5 shrink-0 text-teal" aria-hidden="true" />
+          <p className="type-body-secondary text-text-primary">Install Deen Companion: Tap Share (⬆︎) → &quot;Add to Home Screen&quot;</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={handleDismiss} className="text-primary-foreground hover:bg-primary/80">
+          <Button variant="ghost" size="sm" onClick={handleDismiss}>
             Not Now
           </Button>
-          <Link href="/about?tab=install" passHref>
-            <Button size="sm" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
-              Show Me How
-            </Button>
-          </Link>
+          <Button asChild size="sm">
+            <Link href="/about?tab=install">Show Me How</Link>
+          </Button>
         </div>
       </div>
     )
@@ -215,21 +188,21 @@ export function InstallPrompt() {
   // Render iOS Chrome/Firefox/Edge banner - "Open in Safari" message
   if (iosBrowserType === 'ios-chrome' || iosBrowserType === 'ios-firefox' || iosBrowserType === 'ios-edge' || iosBrowserType === 'ios-other') {
     return (
-      <div className="app-install-prompt fixed left-0 right-0 bg-primary text-primary-foreground p-3 flex items-center justify-between shadow-lg z-50">
+      <div className="app-install-prompt fixed left-0 right-0 z-50 flex flex-wrap items-center justify-between gap-3 border-t border-border-subtle bg-surface-elevated px-4 py-3 shadow-low">
         <div className="flex items-center gap-2">
-          <Info className="h-5 w-5" />
-          <p className="text-sm">To install, please open this site in Safari</p>
+          <Info className="size-5 text-teal" aria-hidden="true" />
+          <p className="type-body-secondary text-text-primary">To install, please open this site in Safari</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={handleDismiss} className="text-primary-foreground hover:bg-primary/80">
+          <Button variant="ghost" size="sm" onClick={handleDismiss}>
             Not Now
           </Button>
-          <Button size="sm" onClick={handleCopyLink} className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
+          <Button size="sm" onClick={handleCopyLink}>
             {copied ? (
               <>Copied!</>
             ) : (
               <>
-                <Copy className="h-4 w-4 mr-2" />
+                <Copy className="size-4" aria-hidden="true" />
                 Copy Link
               </>
             )}
@@ -247,35 +220,36 @@ export function InstallPrompt() {
         role="dialog"
         aria-label="Install app prompt"
       >
-        <div className="bg-card border-t shadow-lg">
-          <div className="max-w-4xl mx-auto px-4 py-4">
+        <div className="border-t border-border-subtle bg-surface-elevated shadow-low">
+          <div className="mx-auto max-w-4xl px-4 py-4">
             <div className="flex items-center gap-4">
               {/* App Icon */}
-              <div className="flex-shrink-0">
-                <img 
+              <div className="shrink-0">
+                <Image
                   src="/icon-192.png" 
                   alt="Deen Companion" 
-                  className="w-12 h-12 rounded-lg"
+                  width={48}
+                  height={48}
+                  className="size-12 rounded-control"
                 />
               </div>
 
               {/* Message */}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-sm sm:text-base">
+              <div className="min-w-0 flex-1">
+                <h3 className="type-body font-semibold text-text-primary">
                   Install Deen Companion
                 </h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">
+                <p className="type-caption text-text-secondary">
                   Add to home screen for offline access and faster loading
                 </p>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex shrink-0 items-center gap-2">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleDismiss}
-                  className="text-xs sm:text-sm"
                   aria-label="Dismiss install prompt"
                 >
                   Not Now
@@ -285,10 +259,9 @@ export function InstallPrompt() {
                   size="sm"
                   onClick={handleInstall}
                   disabled={isInstalling}
-                  className="text-xs sm:text-sm"
                   aria-label="Install app"
                 >
-                  <Download className="w-4 h-4 mr-1" />
+                  <Download className="size-4" aria-hidden="true" />
                   Install
                 </Button>
               </div>
@@ -296,10 +269,10 @@ export function InstallPrompt() {
               {/* Close Button (mobile) */}
               <button
                 onClick={handleDismiss}
-                className="sm:hidden flex-shrink-0 p-1 rounded-full hover:bg-muted"
+                className="flex size-touch shrink-0 items-center justify-center rounded-control-sm text-text-secondary hover:bg-surface-grouped sm:hidden"
                 aria-label="Close install prompt"
               >
-                <X className="w-5 h-5" />
+                <X className="size-5" aria-hidden="true" />
               </button>
             </div>
           </div>

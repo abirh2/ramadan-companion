@@ -143,16 +143,17 @@ export default function TimesPage() {
   const locationLabel = deriveLocationLabel(location)
 
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-6">
+    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6">
         <Link
           href="/"
-          className="mb-3 inline-flex min-h-touch items-center gap-2 rounded-control text-muted-foreground transition-colors hover:text-foreground"
+          className="type-nav mb-3 inline-flex min-h-touch items-center gap-2 rounded-control text-text-secondary transition-colors hover:text-text-primary"
           aria-label="Navigate back to homepage"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          <span className="text-sm">Back to Home</span>
+          <span>Back to Home</span>
         </Link>
+        <h1 className="sr-only">Prayer</h1>
       </div>
 
       {loading ? (

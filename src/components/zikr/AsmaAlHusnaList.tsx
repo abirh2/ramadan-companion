@@ -26,11 +26,11 @@ export function AsmaAlHusnaList() {
   return (
     <div className="space-y-4">
       {/* Search */}
-      <div className="relative max-w-md mx-auto">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+      <div className="relative mx-auto max-w-md">
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-tertiary" aria-hidden="true" />
         <Input
           type="search"
-          placeholder="Search by name, transliteration, or meaning..."
+          placeholder="Search names or meanings…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="pl-9"
@@ -40,7 +40,7 @@ export function AsmaAlHusnaList() {
 
       {/* Result count when filtering */}
       {query.trim() && (
-        <p className="text-sm text-muted-foreground text-center">
+        <p className="type-caption text-center text-text-secondary" role="status">
           {filtered.length === 0
             ? 'No names found'
             : `${filtered.length} name${filtered.length !== 1 ? 's' : ''} found`}
@@ -48,20 +48,21 @@ export function AsmaAlHusnaList() {
       )}
 
       {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((n) => (
           <Card
             key={n.number}
-            className="rounded-2xl border shadow-sm hover:shadow-md transition-shadow"
+            variant="grouped"
+            className="gap-0 py-0"
           >
-            <CardContent className="p-4 space-y-2">
+            <CardContent className="space-y-2 p-4">
               {/* Number + Arabic */}
               <div className="flex items-start justify-between gap-2">
-                <span className="text-xs font-mono text-muted-foreground mt-1 shrink-0">
+                <span className="type-caption mt-1 shrink-0 tabular-nums text-text-tertiary">
                   {String(n.number).padStart(2, '0')}
                 </span>
                 <p
-                  className="text-2xl leading-relaxed font-serif text-right flex-1"
+                  className="type-arabic flex-1 text-right text-text-primary"
                   dir="rtl"
                   lang="ar"
                 >
@@ -70,12 +71,12 @@ export function AsmaAlHusnaList() {
               </div>
 
               {/* Transliteration */}
-              <p className="text-sm font-medium italic text-foreground">
+              <p className="type-body-secondary font-medium italic text-text-primary">
                 {n.transliteration}
               </p>
 
               {/* Meaning */}
-              <p className="text-sm text-muted-foreground">
+              <p className="type-body-secondary text-text-secondary">
                 {n.meaning}
               </p>
             </CardContent>

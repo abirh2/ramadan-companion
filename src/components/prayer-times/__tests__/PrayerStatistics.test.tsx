@@ -4,7 +4,7 @@ import type { PrayerStatistics as PrayerStatisticsType } from '@/types/prayer-tr
 
 // Mock Next.js Link
 jest.mock('next/link', () => {
-  return ({ children, href }: { children: React.ReactNode; href: string }) => {
+  return function MockLink({ children, href }: { children: React.ReactNode; href: string }) {
     return <a href={href}>{children}</a>
   }
 })
@@ -67,7 +67,7 @@ describe('PrayerStatistics', () => {
 
       expect(screen.getByText('Prayer Statistics')).toBeInTheDocument()
       expect(
-        screen.getByText(/Sign in to track your prayer history and view detailed statistics/i)
+        screen.getByText(/Sign in to track prayer history and view your progress/i)
       ).toBeInTheDocument()
       expect(screen.getByText('Sign In to Track Progress')).toBeInTheDocument()
     })
@@ -296,7 +296,7 @@ describe('PrayerStatistics', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText(/No prayer tracking data yet. Start tracking your prayers to see statistics!/i)
+          screen.getByText(/Your prayer history will appear after you begin marking prayers/i)
         ).toBeInTheDocument()
       })
     })
@@ -324,7 +324,7 @@ describe('PrayerStatistics', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText(/No prayer tracking data yet/i)
+          screen.getByText(/Your prayer history will appear after you begin marking prayers/i)
         ).toBeInTheDocument()
       })
     })
@@ -535,4 +535,3 @@ describe('PrayerStatistics', () => {
     })
   })
 })
-

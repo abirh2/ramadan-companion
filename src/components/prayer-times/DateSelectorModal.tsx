@@ -179,7 +179,7 @@ export function DateSelectorModal({
 
           {/* Date Information */}
           {dateTimes.gregorianDate && (
-            <div className="space-y-1 p-3 bg-muted/50 rounded-lg">
+            <div className="space-y-1 rounded-grouped bg-surface-grouped p-3">
               <p className="text-sm font-medium">{dateTimes.gregorianDate}</p>
               {dateTimes.hijriDate && (
                 <p className="text-xs text-muted-foreground">{dateTimes.hijriDate}</p>
@@ -196,7 +196,7 @@ export function DateSelectorModal({
 
           {/* Error State */}
           {dateTimes.error && (
-            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+            <div className="rounded-grouped border border-destructive/30 bg-destructive-muted p-3">
               <p className="text-sm text-destructive">{dateTimes.error}</p>
             </div>
           )}
@@ -205,7 +205,7 @@ export function DateSelectorModal({
           {dateTimes.times && !dateTimes.loading && (
             <div className="space-y-2">
               <p className="text-sm font-medium">Prayer Times</p>
-              <div className="space-y-1 border rounded-lg overflow-hidden">
+              <div className="space-y-1 overflow-hidden rounded-grouped border border-border-subtle">
                 {prayerNames.map((prayer) => (
                   <div
                     key={prayer}

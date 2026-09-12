@@ -94,7 +94,7 @@ export function FeedbackButton({ pagePath, presentation = 'footer' }: FeedbackBu
             onClick={() => setOpen(true)}
             className="gap-2"
           >
-            <MessageSquare className="h-4 w-4" />
+            <MessageSquare className="size-4" aria-hidden="true" />
             Feedback
           </Button>
         </div>
@@ -111,22 +111,22 @@ export function FeedbackButton({ pagePath, presentation = 'footer' }: FeedbackBu
       )}
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="sm:max-w-[500px]" aria-labelledby="feedback-title" aria-describedby="feedback-description">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle id="feedback-title">Share Your Feedback</DialogTitle>
-            <DialogDescription id="feedback-description">
+            <DialogTitle>Share Your Feedback</DialogTitle>
+            <DialogDescription>
               Help us improve by reporting issues or suggesting new features.
               Your feedback is anonymous.
             </DialogDescription>
           </DialogHeader>
 
           {success ? (
-            <div className="py-8 text-center space-y-4" role="status" aria-live="polite">
-              <CheckCircle className="mx-auto h-12 w-12 text-success" aria-hidden="true" />
+            <div className="space-y-4 py-8 text-center" role="status" aria-live="polite">
+              <CheckCircle className="mx-auto size-9 text-success" aria-hidden="true" />
               <div>
-                <p className="text-lg font-semibold">Thank you!</p>
-                <p className="text-sm text-muted-foreground">
-                  Your feedback has been submitted successfully.
+                <p className="type-section-title mx-auto text-text-primary">Thank you</p>
+                <p className="type-body-secondary mt-1 text-text-secondary">
+                  Your feedback was submitted.
                 </p>
               </div>
             </div>
@@ -134,9 +134,9 @@ export function FeedbackButton({ pagePath, presentation = 'footer' }: FeedbackBu
             <form onSubmit={handleSubmit} className="space-y-6" aria-label="Feedback form">
               {/* Feedback Type Selection */}
               <div className="space-y-3">
-                <label className="text-sm font-medium">
+                <span className="type-label text-text-primary">
                   What would you like to do?
-                </label>
+                </span>
                 <RadioGroup
                   value={feedbackType}
                   onValueChange={(value) => setFeedbackType(value as FeedbackType)}
@@ -145,18 +145,18 @@ export function FeedbackButton({ pagePath, presentation = 'footer' }: FeedbackBu
                     <RadioGroupItem value="problem" id="problem" />
                     <label
                       htmlFor="problem"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      className="type-body-secondary cursor-pointer font-medium text-text-primary peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
-                      Report a Problem
+                      Report a problem
                     </label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="suggestion" id="suggestion" />
                     <label
                       htmlFor="suggestion"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      className="type-body-secondary cursor-pointer font-medium text-text-primary peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
-                      Suggest an Improvement
+                      Suggest an improvement
                     </label>
                   </div>
                 </RadioGroup>
@@ -164,7 +164,7 @@ export function FeedbackButton({ pagePath, presentation = 'footer' }: FeedbackBu
 
               {/* Feedback Content */}
               <div className="space-y-2">
-                <label htmlFor="feedback-content" className="text-sm font-medium">
+                <label htmlFor="feedback-content" className="type-label text-text-primary">
                   {feedbackType === 'problem'
                     ? 'Describe the problem'
                     : 'Describe your suggestion'}
@@ -177,32 +177,32 @@ export function FeedbackButton({ pagePath, presentation = 'footer' }: FeedbackBu
                   onChange={(e) => setContent(e.target.value)}
                   placeholder={
                     feedbackType === 'problem'
-                      ? 'Please describe the issue you encountered...'
-                      : 'Please describe your suggestion...'
+                      ? 'Describe what happened…'
+                      : 'Describe your suggestion…'
                   }
-                  className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                  className="type-body-secondary flex min-h-[120px] w-full resize-none rounded-control border border-border-strong bg-surface-primary px-3 py-3 text-text-primary placeholder:text-text-tertiary focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35 disabled:cursor-not-allowed disabled:opacity-50"
                   disabled={submitting}
                   required
                   aria-required="true"
                   aria-invalid={error !== null}
-                  aria-describedby="feedback-help feedback-error"
+                  aria-describedby={error ? 'feedback-help feedback-error' : 'feedback-help'}
                   minLength={10}
                 />
-                <p id="feedback-help" className="text-xs text-muted-foreground">
+                <p id="feedback-help" className="type-caption text-text-secondary">
                   Minimum 10 characters
                 </p>
               </div>
 
               {/* Error Message */}
               {error && (
-                <div className="rounded-md bg-destructive/10 border border-destructive/20 p-3" role="alert" aria-live="polite">
-                  <p id="feedback-error" className="text-sm text-destructive">{error}</p>
+                <div className="rounded-grouped border border-destructive/30 bg-destructive-muted p-3" role="alert" aria-live="polite">
+                  <p id="feedback-error" className="type-body-secondary text-destructive">{error}</p>
                 </div>
               )}
 
               {/* Privacy Notice */}
-              <div className="rounded-md bg-muted/50 p-3">
-                <p className="text-xs text-muted-foreground">
+              <div className="rounded-grouped bg-surface-grouped p-3">
+                <p className="type-caption text-text-secondary">
                   Your feedback is anonymous and helps us improve the app. We do
                   not collect personal information.
                 </p>
@@ -223,7 +223,7 @@ export function FeedbackButton({ pagePath, presentation = 'footer' }: FeedbackBu
                   disabled={submitting || content.trim().length < 10}
                   aria-label={submitting ? 'Submitting feedback...' : 'Submit feedback'}
                 >
-                  {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
+                  {submitting && <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />}
                   Submit Feedback
                 </Button>
               </DialogFooter>
