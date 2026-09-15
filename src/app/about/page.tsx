@@ -514,6 +514,119 @@ function AboutContent() {
                   </div>
                 </div>
 
+                {/* Content Credits & Attributions — required licensing attributions for
+                    third-party religious and map content. Statements here are factual and
+                    do not assert any permission we do not hold. See THIRD_PARTY_CONTENT.md
+                    in the repository for the full release evidence record. */}
+                <div className="border-t pt-4">
+                  <h3 className="font-semibold mb-2">Content Credits &amp; Attributions</h3>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    We gratefully credit the sources of the religious texts, recitations, and map
+                    data used in this app. Content is retrieved and displayed live from these
+                    providers; each work remains the property of its respective author, translator,
+                    reciter, or curator.
+                  </p>
+
+                  <div className="space-y-4 text-sm">
+                    {/* Quran Arabic text */}
+                    <div className="border-l-2 border-primary/20 pl-3">
+                      <p className="font-medium text-foreground">Qur&apos;an — Arabic Text (Uthmani)</p>
+                      <p className="text-xs text-muted-foreground">
+                        Uthmani script (edition <span className="font-mono">quran-uthmani</span>) served via the
+                        AlQuran Cloud API, curated by Tanzil.net and Quran Academy. Delivered under
+                        AlQuran Cloud&apos;s terms with attribution to the text curators.
+                      </p>
+                    </div>
+
+                    {/* Translations */}
+                    <div className="border-l-2 border-primary/20 pl-3">
+                      <p className="font-medium text-foreground">Qur&apos;an — English Translations</p>
+                      <p className="text-xs text-muted-foreground">
+                        Retrieved and displayed live from the AlQuran Cloud API; attributed to each translator by name.
+                      </p>
+                      <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
+                        <li>
+                          <span className="text-foreground">Marmaduke Pickthall</span>, <em>The Meaning of the Glorious Qur&apos;an</em>
+                          {' '}— public domain (translator d. 1936).
+                        </li>
+                        <li>
+                          <span className="text-foreground">Abdullah Yusuf Ali</span>, <em>The Holy Qur&apos;an: Text, Translation and Commentary</em>
+                          {' '}— public domain in most jurisdictions (translator d. 1953; first published 1934–1937).
+                        </li>
+                        <li>
+                          <span className="text-foreground">Muhammad Asad</span>, <em>The Message of the Qur&apos;an</em>
+                          {' '}— © The Book Foundation. Provided via the AlQuran Cloud API.
+                        </li>
+                        <li>
+                          <span className="text-foreground">Saheeh International</span>, <em>The Qur&apos;an: English Meanings</em>
+                          {' '}— © the publisher (Dar Abul-Qasim / Saheeh International). Provided via the AlQuran Cloud API.
+                        </li>
+                        <li>
+                          English transliteration (edition <span className="font-mono">en.transliteration</span>) provided via the AlQuran Cloud API.
+                        </li>
+                      </ul>
+                    </div>
+
+                    {/* Recitations */}
+                    <div className="border-l-2 border-primary/20 pl-3">
+                      <p className="font-medium text-foreground">Qur&apos;an — Audio Recitations</p>
+                      <p className="text-xs text-muted-foreground">
+                        Recitations by Mishary Rashid Alafasy, Mahmoud Khalil Al-Husary (Murattal &amp; Mujawwad),
+                        Abu Bakr Ash-Shaatree, Maher Al-Muaiqly, and Muhammad Siddiq Al-Minshawi are streamed directly
+                        from the Islamic Network (islamic.network) CDN for personal and educational listening.
+                        Copyright in each recording remains with the reciter or their estate.
+                      </p>
+                    </div>
+
+                    {/* Tafsir */}
+                    <div className="border-l-2 border-primary/20 pl-3">
+                      <p className="font-medium text-foreground">Tafsir (Commentary)</p>
+                      <p className="text-xs text-muted-foreground">
+                        Tafsir commentary is retrieved and displayed live from the
+                        <span className="text-foreground"> Quran.com (Quran Foundation)</span> API under its
+                        Developer Terms. Each tafsir (including Tafsir Ibn Kathir) remains the copyright of its
+                        respective author and publisher.
+                      </p>
+                    </div>
+
+                    {/* Hadith */}
+                    <div className="border-l-2 border-primary/20 pl-3">
+                      <p className="font-medium text-foreground">Hadith Collections</p>
+                      <p className="text-xs text-muted-foreground">
+                        Hadith text and translations served via HadithAPI.com. The underlying collections and
+                        their translations remain the property of their respective authors and publishers.
+                      </p>
+                    </div>
+
+                    {/* Maps & location */}
+                    <div className="border-l-2 border-primary/20 pl-3">
+                      <p className="font-medium text-foreground">Maps &amp; Location Data</p>
+                      <p className="text-xs text-muted-foreground">
+                        Map data © OpenStreetMap contributors, available under the Open Database License (ODbL).
+                        Mosque data via the OpenStreetMap Overpass API; geocoding via Nominatim; halal-food places
+                        via Geoapify (data © OpenStreetMap contributors). Base map tiles © OpenStreetMap contributors.
+                      </p>
+                    </div>
+
+                    {/* Fonts */}
+                    <div className="border-l-2 border-primary/20 pl-3">
+                      <p className="font-medium text-foreground">Fonts</p>
+                      <p className="text-xs text-muted-foreground">
+                        Manrope and Noto Naskh Arabic, licensed under the SIL Open Font License 1.1.
+                      </p>
+                    </div>
+
+                    {/* Bundled content */}
+                    <div className="border-l-2 border-primary/20 pl-3">
+                      <p className="font-medium text-foreground">Duas, Adhkar &amp; 99 Names</p>
+                      <p className="text-xs text-muted-foreground">
+                        Arabic supplications and the Names of Allah are drawn from the Qur&apos;an and hadith;
+                        each dua cites its source. Transliterations and English renderings were compiled for this app.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 <div>
                   <h3 className="font-semibold mb-3">Open Source Libraries</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
