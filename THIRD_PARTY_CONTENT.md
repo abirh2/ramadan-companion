@@ -111,9 +111,9 @@ All served **dynamically** via the AlQuran Cloud API. AlQuran Cloud's current te
 ## 7. Maps — Base Tiles
 
 - **Exact source:** **OpenStreetMap standard raster tiles** — `https://tile.openstreetmap.org/{z}/{x}/{y}.png`.
-- **Where used:** `src/components/places/MosqueMap.tsx`, `src/components/places/FoodMap.tsx` (`OSM_STYLE` raster source).
+- **Where used:** `src/components/places/MosqueMap.tsx`, `src/components/places/FoodMap.tsx` (Leaflet `L.tileLayer`), shared config in `src/components/places/leafletMap.ts`.
 - **License/terms:** OSMF Tile Usage Policy — https://operations.osmfoundation.org/policies/tiles/ ; data © OpenStreetMap contributors under ODbL.
-- **Nature of the requirement:** This is an **operational / service-policy** matter, **not** a content-rights prohibition. The policy explicitly permits normal **interactive** viewing where the client requests only the tiles needed for the current viewport. Our maps are standard interactive MapLibre raster maps (`src/components/places/MosqueMap.tsx`, `src/components/places/FoodMap.tsx`) with no offline/bulk prefetch. What the policy requires for that permitted use: visible attribution, no bulk download / offline prefetch, honouring cache headers, and a distinct app-identifying HTTP `User-Agent` (or platform app-ID header).
+- **Nature of the requirement:** This is an **operational / service-policy** matter, **not** a content-rights prohibition. The policy explicitly permits normal **interactive** viewing where the client requests only the tiles needed for the current viewport. Our maps are standard interactive Leaflet raster maps (`src/components/places/MosqueMap.tsx`, `src/components/places/FoodMap.tsx`) with no offline/bulk prefetch. What the policy requires for that permitted use: visible attribution, no bulk download / offline prefetch, honouring cache headers, and a distinct app-identifying HTTP `User-Agent` (or platform app-ID header).
 - **Attribution required:** Yes — "© OpenStreetMap contributors" (present in the raster source and on the places pages). ✔
 - **Compliance status against the policy:**
   - Attribution shown — ✔
@@ -185,7 +185,7 @@ All served **dynamically** via the AlQuran Cloud API. AlQuran Cloud's current te
 ## 13. Icons & Core Libraries
 
 - **Lucide icons** — ISC License. **VERIFIED**
-- **MapLibre GL JS** — BSD-3-Clause. **VERIFIED**
+- **Leaflet** — BSD-2-Clause License. **VERIFIED**
 - Framework/libraries (Next.js MIT, React MIT, Supabase Apache-2.0, TailwindCSS MIT, Radix/shadcn MIT, Recharts MIT, Capacitor MIT, Firebase Admin Apache-2.0, web-push MIT, praytime MIT, geo-tz MIT) — permissive, credited in About. **VERIFIED**
 
 ## 14. Bundled Self-Authored Religious Content

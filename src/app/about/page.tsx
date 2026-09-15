@@ -256,7 +256,7 @@ function AboutContent() {
                     <div><span className="font-medium text-foreground">Backend:</span> Next.js API Routes, Supabase</div>
                     <div><span className="font-medium text-foreground">Database:</span> PostgreSQL (Supabase)</div>
                     <div><span className="font-medium text-foreground">Auth:</span> Supabase Auth (Email + OAuth)</div>
-                    <div><span className="font-medium text-foreground">Maps:</span> MapLibre GL, OpenStreetMap</div>
+                    <div><span className="font-medium text-foreground">Maps:</span> Leaflet, OpenStreetMap</div>
                     <div><span className="font-medium text-foreground">Native Apps:</span> Capacitor (iOS & Android)</div>
                     <div><span className="font-medium text-foreground">Push:</span> Web Push API, Firebase Cloud Messaging</div>
                   </div>
@@ -651,8 +651,8 @@ function AboutContent() {
                       <p className="text-muted-foreground">MIT License</p>
                     </div>
                     <div className="p-2 rounded bg-muted/30">
-                      <p className="font-medium text-foreground">MapLibre GL</p>
-                      <p className="text-muted-foreground">BSD 3-Clause License</p>
+                      <p className="font-medium text-foreground">Leaflet</p>
+                      <p className="text-muted-foreground">BSD 2-Clause License</p>
                     </div>
                     <div className="p-2 rounded bg-muted/30">
                       <p className="font-medium text-foreground">Recharts</p>

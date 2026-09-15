@@ -657,9 +657,32 @@
 }
 
 /* Keep third-party map controls aligned with the app's touch-target floor. */
-.maplibregl-map .maplibregl-ctrl-group button {
+.leaflet-container .leaflet-control-zoom a {
   width: var(--touch-target-min);
   height: var(--touch-target-min);
+  line-height: var(--touch-target-min);
+}
+
+/*
+ * Contain Leaflet's internal stacking context.
+ *
+ * Leaflet gives its panes and controls high z-index values (map panes up to
+ * ~700, zoom/attribution controls at 1000+). Without a boundary, those can
+ * paint on top of portalled UI such as the place-detail Sheet (z-50), so the
+ * map appears to bleed over the details. `isolation: isolate` creates a new
+ * stacking context and the low `z-index` keeps the whole map — and everything
+ * Leaflet renders inside it — beneath the app's overlays.
+ */
+.leaflet-map-shell {
+  isolation: isolate;
+  z-index: 0;
+}
+
+/* Custom DivIcon markers should not inherit Leaflet's default box styling. */
+.leaflet-container .place-marker,
+.leaflet-container .user-marker {
+  background: transparent;
+  border: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {

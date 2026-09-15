@@ -1,12 +1,18 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import Map, { Marker, NavigationControl } from 'react-map-gl/maplibre'
-import type { MapRef } from 'react-map-gl/maplibre'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+import { useTheme } from 'next-themes'
 import type { HalalFoodData } from '@/types/places.types'
-import { LocateFixed, UtensilsCrossed } from 'lucide-react'
-import 'maplibre-gl/dist/maplibre-gl.css'
-import { loadMapLibre } from '@/lib/mapLibre'
+import { LocateFixed } from 'lucide-react'
+import {
+  createTileLayer,
+  getZoomLevel,
+  createPlaceIcon,
+  createUserIcon,
+  fitToPoints,
+} from './leafletMap'
 
 interface FoodMapProps {
   foods: HalalFoodData[]
@@ -15,18 +21,8 @@ interface FoodMapProps {
   searchRadiusMiles: number
 }
 
-const OSM_STYLE = {
-  version: 8 as const,
-  sources: {
-    osm: {
-      type: 'raster' as const,
-      tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-      tileSize: 256,
-      attribution: '© OpenStreetMap contributors',
-    },
-  },
-  layers: [{ id: 'osm', type: 'raster' as const, source: 'osm' }],
-}
+// UtensilsCrossed (lucide) glyph, sized to match the previous marker icon.
+const FOOD_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 2-2.3 2.3a3 3 0 0 0 0 4.2l1.8 1.8a3 3 0 0 0 4.2 0L22 8"/><path d="M15 15 3.3 3.3a4.2 4.2 0 0 0 0 6l7.3 7.3c.7.7 2 .7 2.8 0L15 15Zm0 0 7 7"/><path d="m2.1 21.8 6.4-6.3"/><path d="m19 5-7 7"/></svg>`
 
 export function FoodMap({
   foods,
@@ -34,107 +30,106 @@ export function FoodMap({
   onFoodClick,
   searchRadiusMiles,
 }: FoodMapProps) {
-  const mapRef = useRef<MapRef>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const mapRef = useRef<L.Map | null>(null)
+  const tileLayerRef = useRef<L.TileLayer | null>(null)
+  const markersRef = useRef<L.Marker[]>([])
+  const userMarkerRef = useRef<L.Marker | null>(null)
+  const onFoodClickRef = useRef(onFoodClick)
+  onFoodClickRef.current = onFoodClick
 
-  // Calculate zoom level based on search radius
-  const getZoomLevel = (radiusMiles: number): number => {
-    if (radiusMiles <= 1) return 14
-    if (radiusMiles <= 2) return 13
-    if (radiusMiles <= 3) return 12
-    if (radiusMiles <= 5) return 11
-    return 10
-  }
+  const { resolvedTheme } = useTheme()
+  const theme: 'light' | 'dark' = resolvedTheme === 'dark' ? 'dark' : 'light'
 
-  // Fit map to show all food places when they change
+  // Initialize the map once.
   useEffect(() => {
-    if (mapRef.current && foods.length > 0) {
-      const bounds = foods.reduce(
-        (acc, food) => {
-          return {
-            minLat: Math.min(acc.minLat, food.lat),
-            maxLat: Math.max(acc.maxLat, food.lat),
-            minLng: Math.min(acc.minLng, food.lng),
-            maxLng: Math.max(acc.maxLng, food.lng),
-          }
-        },
-        {
-          minLat: userLocation.lat,
-          maxLat: userLocation.lat,
-          minLng: userLocation.lng,
-          maxLng: userLocation.lng,
-        }
-      )
+    if (mapRef.current || !containerRef.current) return
 
-      mapRef.current.fitBounds(
-        [
-          [bounds.minLng, bounds.minLat],
-          [bounds.maxLng, bounds.maxLat],
-        ],
-        {
-          padding: 50,
-          duration: 1000,
-        }
-      )
+    const map = L.map(containerRef.current, {
+      center: [userLocation.lat, userLocation.lng],
+      zoom: getZoomLevel(searchRadiusMiles),
+      zoomControl: true,
+      attributionControl: true,
+    })
+
+    tileLayerRef.current = createTileLayer(theme).addTo(map)
+
+    userMarkerRef.current = L.marker([userLocation.lat, userLocation.lng], {
+      icon: createUserIcon(),
+      interactive: false,
+      keyboard: false,
+    })
+      .addTo(map)
+      .bindTooltip('Your search location', { direction: 'top' })
+
+    mapRef.current = map
+
+    return () => {
+      map.remove()
+      mapRef.current = null
+      tileLayerRef.current = null
+      markersRef.current = []
+      userMarkerRef.current = null
     }
-  }, [foods, userLocation.lat, userLocation.lng])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Swap the base tile layer when the color theme changes.
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    if (tileLayerRef.current) tileLayerRef.current.remove()
+    tileLayerRef.current = createTileLayer(theme).addTo(map)
+    tileLayerRef.current.bringToBack()
+  }, [theme])
+
+  // Keep the user marker in sync with the search location.
+  useEffect(() => {
+    userMarkerRef.current?.setLatLng([userLocation.lat, userLocation.lng])
+  }, [userLocation.lat, userLocation.lng])
+
+  // Render food markers whenever the list changes.
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    markersRef.current.forEach((m) => m.remove())
+    markersRef.current = []
+
+    const icon = createPlaceIcon(FOOD_ICON_SVG, true)
+    for (const food of foods) {
+      const marker = L.marker([food.lat, food.lng], {
+        icon,
+        title: food.name,
+        alt: `View details for ${food.name}`,
+        keyboard: true,
+      })
+        .addTo(map)
+        .bindTooltip(food.name, { direction: 'top' })
+      marker.on('click', () => onFoodClickRef.current(food))
+      marker.on('keypress', () => onFoodClickRef.current(food))
+      markersRef.current.push(marker)
+    }
+
+    fitToPoints(map, userLocation, foods)
+  }, [foods, userLocation])
 
   const recenterMap = () => {
-    mapRef.current?.flyTo({
-      center: [userLocation.lng, userLocation.lat],
-      zoom: getZoomLevel(searchRadiusMiles),
-      duration: 600,
-    })
+    mapRef.current?.flyTo(
+      [userLocation.lat, userLocation.lng],
+      getZoomLevel(searchRadiusMiles),
+      { duration: 0.6 }
+    )
   }
 
   return (
-    <div className="relative h-full w-full overflow-hidden">
-      <Map
-        ref={mapRef}
-        initialViewState={{
-          longitude: userLocation.lng,
-          latitude: userLocation.lat,
-          zoom: getZoomLevel(searchRadiusMiles),
-        }}
-        mapStyle={OSM_STYLE}
-        mapLib={loadMapLibre()}
-      >
-        <NavigationControl position="top-right" showCompass={false} />
-
-        {/* User location marker */}
-        <Marker longitude={userLocation.lng} latitude={userLocation.lat}>
-          <div className="relative">
-            <div className="absolute size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-white bg-primary shadow-low" aria-label="Your search location">
-            </div>
-          </div>
-        </Marker>
-
-        {/* Food place markers */}
-        {foods.map((food) => (
-          <Marker key={food.id} longitude={food.lng} latitude={food.lat} anchor="bottom">
-            <button
-              type="button"
-              onClick={() => onFoodClick(food)}
-              className="group relative flex size-11 items-end justify-center rounded-control focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-              aria-label={`View details for ${food.name}`}
-            >
-              <div className="relative">
-                <div className="flex size-9 items-center justify-center rounded-control border border-white/70 bg-primary text-primary-foreground shadow-low transition-transform group-hover:scale-105 motion-reduce:transition-none">
-                  <UtensilsCrossed className="size-4" aria-hidden="true" />
-                </div>
-                {/* Tooltip on hover */}
-                <div className="absolute left-1/2 -translate-x-1/2 mt-1 bg-black/80 text-white text-xs py-1 px-2 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                  {food.name}
-                </div>
-              </div>
-            </button>
-          </Marker>
-        ))}
-      </Map>
+    <div className="leaflet-map-shell relative h-full w-full overflow-hidden">
+      <div ref={containerRef} className="h-full w-full" />
       <button
         type="button"
         onClick={recenterMap}
         aria-label="Recenter map on search location"
-        className="absolute bottom-8 right-3 z-10 flex size-11 items-center justify-center rounded-control border border-border-subtle bg-surface-elevated text-text-primary shadow-low transition-colors hover:bg-surface-grouped focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
+        className="absolute bottom-8 right-3 z-[500] flex size-11 items-center justify-center rounded-control border border-border-subtle bg-surface-elevated text-text-primary shadow-low transition-colors hover:bg-surface-grouped focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35"
       >
         <LocateFixed className="size-4" aria-hidden="true" />
       </button>
