@@ -654,7 +654,6 @@ BEGIN
       FOREIGN KEY (reviewed_by) REFERENCES public.profiles(id) ON DELETE SET NULL;
     RAISE NOTICE 'Rewrote feedback.reviewed_by FK (%) to ON DELETE SET NULL.', fk_name;
   END IF;
-END $$;F;
 END $$;
 
 -- ============================================
