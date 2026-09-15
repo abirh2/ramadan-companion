@@ -55,10 +55,10 @@ describe('InstallPrompt', () => {
 
   // Helper to trigger beforeinstallprompt event
   const triggerBeforeInstallPrompt = () => {
-    const event = new Event('beforeinstallprompt') as any
-    event.prompt = jest.fn().mockResolvedValue(undefined)
-    event.userChoice = Promise.resolve({ outcome: 'accepted', platform: 'web' })
-    event.preventDefault = jest.fn()
+    const event = Object.assign(new Event('beforeinstallprompt'), {
+      prompt: jest.fn().mockResolvedValue(undefined),
+      userChoice: Promise.resolve({ outcome: 'accepted' as const, platform: 'web' }),
+    })
     window.dispatchEvent(event)
     return event
   }
@@ -277,4 +277,3 @@ describe('InstallPrompt', () => {
     })
   })
 })
-

@@ -23,8 +23,8 @@ jest.mock('@/hooks/useDonations', () => ({
 }))
 
 const mockAuthContext: AuthContextType = {
-  user: { id: '123', email: 'test@example.com' } as any,
-  session: {} as any,
+  user: { id: '123', email: 'test@example.com' } as AuthContextType['user'],
+  session: {} as AuthContextType['session'],
   profile: null,
   loading: false,
   signIn: jest.fn(),
@@ -92,4 +92,3 @@ describe('CharityCard', () => {
     expect(grid).toBeInTheDocument()
   })
 })
-

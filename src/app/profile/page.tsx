@@ -194,7 +194,7 @@ export default function ProfilePage() {
                 </div>
 
                 <p className="text-xs text-muted-foreground mt-4">
-                  You'll receive notifications at exact prayer times with
+                  You&apos;ll receive notifications at exact prayer times with
                   motivational reminders from authentic hadith.
                 </p>
               </div>

@@ -38,7 +38,7 @@ describe('useHadithFavorites', () => {
   })
 
   it('should check favorite status on mount for authenticated user', async () => {
-    mockUseAuth.mockReturnValue({ user: mockUser } as any)
+    mockUseAuth.mockReturnValue({ user: mockUser } as ReturnType<typeof useAuthModule.useAuth>)
 
     const { result } = renderHook(() => useHadithFavorites(mockHadithData))
 
@@ -55,7 +55,7 @@ describe('useHadithFavorites', () => {
   })
 
   it('should not check favorite status for unauthenticated user', async () => {
-    mockUseAuth.mockReturnValue({ user: null } as any)
+    mockUseAuth.mockReturnValue({ user: null } as ReturnType<typeof useAuthModule.useAuth>)
 
     const { result } = renderHook(() => useHadithFavorites(mockHadithData))
 
@@ -68,7 +68,7 @@ describe('useHadithFavorites', () => {
   })
 
   it('should add hadith to favorites', async () => {
-    mockUseAuth.mockReturnValue({ user: mockUser } as any)
+    mockUseAuth.mockReturnValue({ user: mockUser } as ReturnType<typeof useAuthModule.useAuth>)
     mockAddHadithFavorite.mockResolvedValue({ success: true })
 
     const { result } = renderHook(() => useHadithFavorites(mockHadithData))
@@ -85,7 +85,7 @@ describe('useHadithFavorites', () => {
   })
 
   it('should remove hadith from favorites', async () => {
-    mockUseAuth.mockReturnValue({ user: mockUser } as any)
+    mockUseAuth.mockReturnValue({ user: mockUser } as ReturnType<typeof useAuthModule.useAuth>)
     mockCheckIsHadithFavorited.mockResolvedValue({ isFavorited: true })
     mockRemoveHadithFavorite.mockResolvedValue({ success: true })
 
@@ -107,7 +107,7 @@ describe('useHadithFavorites', () => {
   })
 
   it('should not toggle favorite when user is not authenticated', async () => {
-    mockUseAuth.mockReturnValue({ user: null } as any)
+    mockUseAuth.mockReturnValue({ user: null } as ReturnType<typeof useAuthModule.useAuth>)
 
     const { result } = renderHook(() => useHadithFavorites(mockHadithData))
 
@@ -117,4 +117,3 @@ describe('useHadithFavorites', () => {
     expect(mockRemoveHadithFavorite).not.toHaveBeenCalled()
   })
 })
-

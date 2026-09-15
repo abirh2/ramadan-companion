@@ -65,8 +65,8 @@ describe('ProtectedFeature', () => {
 
   it('shows protected content when user is authenticated', () => {
     mockUseAuth.mockReturnValue({
-      user: { id: '123', email: 'test@example.com' } as any,
-      session: {} as any,
+      user: { id: '123', email: 'test@example.com' } as ReturnType<typeof useAuth>['user'],
+      session: {} as ReturnType<typeof useAuth>['session'],
       profile: null,
       loading: false,
       signIn: jest.fn(),
@@ -87,4 +87,3 @@ describe('ProtectedFeature', () => {
     expect(screen.queryByRole('button', { name: /sign in/i })).not.toBeInTheDocument();
   });
 });
-

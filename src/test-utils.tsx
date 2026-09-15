@@ -3,8 +3,8 @@ import { AuthContext } from '@/components/auth/AuthProvider';
 import { AuthContextType } from '@/types/auth.types';
 
 export const mockAuthContext: AuthContextType = {
-  user: { id: '123', email: 'test@example.com' } as any,
-  session: {} as any,
+  user: { id: '123', email: 'test@example.com' } as AuthContextType['user'],
+  session: {} as AuthContextType['session'],
   profile: null,
   loading: false,
   signIn: jest.fn(),
@@ -26,4 +26,3 @@ export const renderWithAuth = (
     options
   );
 };
-

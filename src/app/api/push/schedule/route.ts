@@ -5,7 +5,8 @@ import * as admin from 'firebase-admin'
 import { getRandomPrayerQuote } from '@/lib/prayerQuotes'
 import { calculatePrayerTimesLocal } from '@/lib/prayerTimes'
 import { getTimezoneFromCoordinates } from '@/lib/timezone'
-import type { PrayerName } from '@/types/notification.types'
+import type { NotificationPreferences, PrayerName } from '@/types/notification.types'
+import type { CalculationMethodId, MadhabId } from '@/types/ramadan.types'
 
 // Configure web-push (for PWA/browser subscriptions)
 if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
@@ -123,7 +124,7 @@ export async function POST(request: NextRequest) {
       results.total++
 
       // Check if notifications enabled
-      const prefs = profile.notification_preferences as any
+      const prefs = profile.notification_preferences as NotificationPreferences | null
       if (!prefs?.enabled) {
         results.skipped++
         continue
@@ -144,8 +145,8 @@ export async function POST(request: NextRequest) {
       const prayerTimes = calculatePrayerTimesLocal(
         profile.location_lat,
         profile.location_lng,
-        (profile.calculation_method || '2') as any, // Fallback to ISNA
-        (profile.madhab || '0') as any,
+        (profile.calculation_method || '2') as CalculationMethodId, // Fallback to ISNA
+        (profile.madhab || '0') as MadhabId,
         userTimezone, // User's actual timezone from coordinates
         new Date() // date - today
       )
@@ -242,13 +243,14 @@ export async function POST(request: NextRequest) {
               )
             }
             results.success++
-          } catch (error: any) {
+          } catch (error) {
             // Handle subscription errors
+            const pushError = error as { code?: string; statusCode?: number }
             const isExpired =
               sub.fcm_token
-                ? error.code === 'messaging/registration-token-not-registered' ||
-                  error.code === 'messaging/invalid-registration-token'
-                : error.statusCode === 410 || error.statusCode === 404
+                ? pushError.code === 'messaging/registration-token-not-registered' ||
+                  pushError.code === 'messaging/invalid-registration-token'
+                : pushError.statusCode === 410 || pushError.statusCode === 404
             if (isExpired) {
               await supabase
                 .from('push_subscriptions')
@@ -270,4 +272,3 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-

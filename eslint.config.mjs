@@ -12,6 +12,14 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Copied native/web assets and agent-owned browser tooling are not app source.
+    "public/maplibre/**",
+    "ios/App/App/public/**",
+    "android/app/build/**",
+    ".agents/**",
+    ".cursor/**",
+    ".gemini/**",
+    ".kiro/**",
   ]),
 ]);
 

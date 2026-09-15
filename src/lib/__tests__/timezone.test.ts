@@ -63,13 +63,13 @@ describe('getTimezoneFromCoordinates', () => {
     })
 
     it('should return UTC for non-number latitude', () => {
-      const timezone = getTimezoneFromCoordinates('invalid' as any, -74.0060)
+      const timezone = getTimezoneFromCoordinates('invalid' as unknown as number, -74.0060)
       expect(timezone).toBe('UTC')
       expect(console.warn).toHaveBeenCalled()
     })
 
     it('should return UTC for non-number longitude', () => {
-      const timezone = getTimezoneFromCoordinates(40.7128, 'invalid' as any)
+      const timezone = getTimezoneFromCoordinates(40.7128, 'invalid' as unknown as number)
       expect(timezone).toBe('UTC')
       expect(console.warn).toHaveBeenCalled()
     })
@@ -221,16 +221,15 @@ describe('getTimezoneFromCoordinates', () => {
     })
 
     it('should handle undefined coordinates gracefully', () => {
-      const timezone = getTimezoneFromCoordinates(undefined as any, undefined as any)
+      const timezone = getTimezoneFromCoordinates(undefined as unknown as number, undefined as unknown as number)
       expect(timezone).toBe('UTC')
       expect(console.warn).toHaveBeenCalled()
     })
 
     it('should handle null coordinates gracefully', () => {
-      const timezone = getTimezoneFromCoordinates(null as any, null as any)
+      const timezone = getTimezoneFromCoordinates(null as unknown as number, null as unknown as number)
       expect(timezone).toBe('UTC')
       expect(console.warn).toHaveBeenCalled()
     })
   })
 })
-

@@ -49,7 +49,7 @@ declare module 'praytime' {
     Russia: { fajr: number; isha: number }
     Singapore: { fajr: number; isha: number }
     defaults: { isha: number; maghrib: string; midnight: string }
-    [key: string]: any
+    [key: string]: Record<string, number | string>
   }
 
   export type PrayTimeFormat = '24h' | '12h' | '12H' | 'x' | 'X'
@@ -57,7 +57,7 @@ declare module 'praytime' {
 
   export class PrayTime {
     methods: PrayTimeMethods
-    settings: any
+    settings: Record<string, unknown>
 
     constructor(method?: string)
 
@@ -69,7 +69,7 @@ declare module 'praytime' {
     tune(tune: PrayTimeTuneParams): this
     round(rounding?: PrayTimeRounding): this
     format(format: PrayTimeFormat): this
-    set(settings: any): this
+    set(settings: Record<string, unknown>): this
     utcOffset(utcOffset?: number | 'auto'): this
 
     // Getters
@@ -86,4 +86,3 @@ declare module 'praytime' {
     setMethod(method: string): void
   }
 }
-

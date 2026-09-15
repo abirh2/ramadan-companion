@@ -192,7 +192,7 @@ export function useNotifications(): UseNotificationsResult {
       }))
       return false
     }
-  }, [profile])
+  }, [profile, state.preferences])
 
   // Toggle individual prayer notification on/off
   const togglePrayer = useCallback(
@@ -362,4 +362,3 @@ export function useNotifications(): UseNotificationsResult {
     refetch,
   }
 }
-

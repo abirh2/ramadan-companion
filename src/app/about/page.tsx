@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -13,28 +13,13 @@ import { FeedbackButton } from '@/components/FeedbackButton'
 function AboutContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [activeTab, setActiveTab] = useState(() => {
-    const tab = searchParams.get('tab')
-    if (tab && ['creator', 'app', 'install', 'acknowledgements'].includes(tab)) {
-      return tab
-    }
-    return 'creator'
-  })
+  const tab = searchParams.get('tab')
+  const activeTab = tab && ['creator', 'app', 'install', 'acknowledgements'].includes(tab)
+    ? tab
+    : 'creator'
   const [copied, setCopied] = useState(false)
 
-  useEffect(() => {
-    const tab = searchParams.get('tab')
-    if (tab && ['creator', 'app', 'install', 'acknowledgements'].includes(tab)) {
-      if (tab !== activeTab) {
-        setActiveTab(tab)
-      }
-    } else if (activeTab !== 'creator') {
-      setActiveTab('creator')
-    }
-  }, [searchParams, activeTab])
-
   const handleTabChange = (value: string) => {
-    setActiveTab(value)
     const url = value === 'creator' ? '/about' : `/about?tab=${value}`
     router.push(url, { scroll: false })
   }
@@ -129,7 +114,7 @@ function AboutContent() {
                 <div>
                   <h3 className="font-semibold mb-2">About</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    I'm a software developer passionate about building meaningful technology that serves the Muslim community. 
+                    I&apos;m a software developer passionate about building meaningful technology that serves the Muslim community.
                     As a practicing Muslim, I understand the challenges of maintaining daily worship routines in our modern, 
                     fast-paced world. Deen Companion is my contribution to making Islamic practice more accessible and organized.
                   </p>
@@ -331,7 +316,7 @@ function AboutContent() {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">✓</span>
-                      <span><strong className="text-foreground">Home Screen Shortcut:</strong> Quick access from your device's home screen</span>
+                      <span><strong className="text-foreground">Home Screen Shortcut:</strong> Quick access from your device&apos;s home screen</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">✓</span>
@@ -357,12 +342,12 @@ function AboutContent() {
                   <ol className="space-y-2 text-sm text-muted-foreground list-decimal list-inside">
                     <li>Open this website in <strong className="text-foreground">Safari</strong></li>
                     <li>Tap the <strong className="text-foreground">Share button</strong> (square with up arrow) at the bottom of the screen</li>
-                    <li>Scroll down and tap <strong className="text-foreground">"Add to Home Screen"</strong></li>
-                    <li>Tap <strong className="text-foreground">"Add"</strong> in the top right corner</li>
+                    <li>Scroll down and tap <strong className="text-foreground">&quot;Add to Home Screen&quot;</strong></li>
+                    <li>Tap <strong className="text-foreground">&quot;Add&quot;</strong> in the top right corner</li>
                     <li>The app icon will appear on your home screen</li>
                   </ol>
                   <p className="mt-3 text-xs text-warning">
-                    Note: Installation must be done through Safari browser. Other browsers on iOS don't support app installation.
+                    Note: Installation must be done through Safari browser. Other browsers on iOS don&apos;t support app installation.
                   </p>
                 </div>
 
@@ -375,8 +360,8 @@ function AboutContent() {
                   <ol className="space-y-2 text-sm text-muted-foreground list-decimal list-inside">
                     <li>Open this website in <strong className="text-foreground">Chrome</strong> or <strong className="text-foreground">Edge</strong></li>
                     <li>Tap the <strong className="text-foreground">menu button</strong> (three dots) in the top right</li>
-                    <li>Tap <strong className="text-foreground">"Install app"</strong> or <strong className="text-foreground">"Add to Home Screen"</strong></li>
-                    <li>Tap <strong className="text-foreground">"Install"</strong> to confirm</li>
+                    <li>Tap <strong className="text-foreground">&quot;Install app&quot;</strong> or <strong className="text-foreground">&quot;Add to Home Screen&quot;</strong></li>
+                    <li>Tap <strong className="text-foreground">&quot;Install&quot;</strong> to confirm</li>
                     <li>The app icon will appear in your app drawer and home screen</li>
                   </ol>
                   <p className="text-xs text-muted-foreground mt-3">
@@ -392,12 +377,12 @@ function AboutContent() {
                   </div>
                   <ol className="space-y-2 text-sm text-muted-foreground list-decimal list-inside">
                     <li>Look for the <strong className="text-foreground">install icon</strong> in the address bar (⊕ or 🔽)</li>
-                    <li>Click the icon and select <strong className="text-foreground">"Install"</strong></li>
+                    <li>Click the icon and select <strong className="text-foreground">&quot;Install&quot;</strong></li>
                     <li>The app will open in its own window</li>
                     <li>Access it from your taskbar, dock, or applications folder</li>
                   </ol>
                   <p className="text-xs text-muted-foreground mt-3">
-                    Alternative: Click the three-dot menu → "Install Deen Companion" or "Create shortcut"
+                    Alternative: Click the three-dot menu → &quot;Install Deen Companion&quot; or &quot;Create shortcut&quot;
                   </p>
                 </div>
 
@@ -406,13 +391,13 @@ function AboutContent() {
                   <h3 className="font-semibold mb-2 text-sm">Troubleshooting</h3>
                   <div className="space-y-2 text-xs text-muted-foreground">
                     <p>
-                      <strong className="text-foreground">Don't see install option?</strong> Make sure you're using a supported browser (Safari on iOS, Chrome/Edge on Android/Desktop).
+                      <strong className="text-foreground">Don&apos;t see install option?</strong> Make sure you&apos;re using a supported browser (Safari on iOS, Chrome/Edge on Android/Desktop).
                     </p>
                     <p>
                       <strong className="text-foreground">Installation failed?</strong> Try refreshing the page and attempting again. Ensure you have stable internet connection.
                     </p>
                     <p>
-                      <strong className="text-foreground">Already installed but can't find it?</strong> Check your home screen, app drawer (Android), or applications folder (Desktop).
+                      <strong className="text-foreground">Already installed but can&apos;t find it?</strong> Check your home screen, app drawer (Android), or applications folder (Desktop).
                     </p>
                   </div>
                 </div>

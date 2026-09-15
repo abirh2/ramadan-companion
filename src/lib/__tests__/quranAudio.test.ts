@@ -117,7 +117,7 @@ describe('quranAudio utilities', () => {
     })
 
     it('returns undefined for invalid ID', () => {
-      const reciter = getReciterById('invalid.reciter' as any)
+      const reciter = getReciterById('invalid.reciter' as Parameters<typeof getReciterById>[0])
       expect(reciter).toBeUndefined()
     })
 
@@ -143,7 +143,7 @@ describe('quranAudio utilities', () => {
 
     it('constructs valid URLs for all reciters', () => {
       AVAILABLE_RECITERS.forEach(reciter => {
-        const url = getAyahAudioUrl(262, reciter.identifier as any)
+        const url = getAyahAudioUrl(262, reciter.identifier as Parameters<typeof getAyahAudioUrl>[1])
         expect(url).toMatch(/^https:\/\//)
         expect(url).toContain(reciter.identifier)
         expect(url).toMatch(/\.mp3$/)
@@ -151,4 +151,3 @@ describe('quranAudio utilities', () => {
     })
   })
 })
-

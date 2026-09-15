@@ -141,7 +141,7 @@ describe('usePrayerTracking', () => {
     beforeEach(() => {
       mockUseAuth.mockReturnValue({
         user: mockUser,
-        session: { access_token: 'mock-token' } as any,
+        session: { access_token: 'mock-token' } as ReturnType<typeof useAuth>['session'],
         profile: null,
         loading: false,
         signIn: jest.fn(),
@@ -153,7 +153,7 @@ describe('usePrayerTracking', () => {
       })
 
       // Mock Supabase client
-      mockCreateClient.mockReturnValue(mockSupabase as any)
+      mockCreateClient.mockReturnValue(mockSupabase as unknown as ReturnType<typeof supabaseClientModule.createClient>)
 
       // Mock utility functions
       jest.spyOn(prayerTrackingLib, 'getTodayDateString').mockReturnValue('2024-01-15')
@@ -219,7 +219,7 @@ describe('usePrayerTracking', () => {
         })),
         insert: jest.fn(() => Promise.resolve({ data: null, error: null })),
       }))
-      mockSupabase.from = mockFrom as any
+      mockSupabase.from = mockFrom as unknown as typeof mockSupabase.from
 
       await act(async () => {
         await result.current.togglePrayer('Fajr')
@@ -264,7 +264,7 @@ describe('usePrayerTracking', () => {
           })),
         })),
       }))
-      mockSupabase.from = mockFrom as any
+      mockSupabase.from = mockFrom as unknown as typeof mockSupabase.from
 
       const { result } = renderHook(() => usePrayerTracking())
 
@@ -341,4 +341,3 @@ describe('usePrayerTracking', () => {
     })
   })
 })
-

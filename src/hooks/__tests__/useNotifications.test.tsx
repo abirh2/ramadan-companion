@@ -154,9 +154,9 @@ describe('useNotifications', () => {
       }
 
       mockUseAuth.mockReturnValue({
-        user: { id: 'user-123' } as any,
-        session: {} as any,
-        profile: mockProfile as any,
+        user: { id: 'user-123' } as ReturnType<typeof authHook.useAuth>['user'],
+        session: {} as ReturnType<typeof authHook.useAuth>['session'],
+        profile: mockProfile as ReturnType<typeof authHook.useAuth>['profile'],
         loading: false,
         signIn: jest.fn(),
         signUp: jest.fn(),
@@ -351,9 +351,9 @@ describe('useNotifications', () => {
       }
 
       mockUseAuth.mockReturnValue({
-        user: { id: 'user-456' } as any,
-        session: {} as any,
-        profile: mockProfile as any,
+        user: { id: 'user-456' } as ReturnType<typeof authHook.useAuth>['user'],
+        session: {} as ReturnType<typeof authHook.useAuth>['session'],
+        profile: mockProfile as ReturnType<typeof authHook.useAuth>['profile'],
         loading: false,
         signIn: jest.fn(),
         signUp: jest.fn(),
@@ -376,4 +376,3 @@ describe('useNotifications', () => {
     })
   })
 })
-

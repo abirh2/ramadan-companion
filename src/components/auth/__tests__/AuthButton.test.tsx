@@ -54,8 +54,8 @@ describe('AuthButton', () => {
 
   it('shows UserMenu when user is authenticated', () => {
     mockUseAuth.mockReturnValue({
-      user: { id: '123', email: 'test@example.com' } as any,
-      session: {} as any,
+      user: { id: '123', email: 'test@example.com' } as ReturnType<typeof useAuth>['user'],
+      session: {} as ReturnType<typeof useAuth>['session'],
       profile: null,
       loading: false,
       signIn: jest.fn(),
@@ -71,4 +71,3 @@ describe('AuthButton', () => {
     expect(screen.getByText('UserMenu')).toBeInTheDocument();
   });
 });
-
