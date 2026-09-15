@@ -6,16 +6,25 @@ import { renderWithAuth } from '@/test-utils'
 global.fetch = jest.fn()
 
 describe('RamadanCard', () => {
+  let expectedRamadanDate: string
+
   beforeEach(() => {
     jest.clearAllMocks()
+
+    // Keep the mocked start in the future so the countdown test is stable
+    // after the 2025 Ramadan date has passed.
+    const start = new Date(Date.now() + 42 * 24 * 60 * 60 * 1000)
+    expectedRamadanDate = start.toLocaleDateString('en-US', {
+      month: 'long', day: 'numeric', year: 'numeric',
+    })
     
     // Mock Hijri API response
     ;(global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: async () => ({
-        currentHijri: { day: 28, month: 8, year: 1446, monthName: "Sha'ban" },
-        ramadanStart: '2025-03-01T00:00:00.000Z',
-        ramadanEnd: '2025-03-30T00:00:00.000Z',
+        currentHijri: { day: 28, month: 8, year: 1448, monthName: "Sha'ban" },
+        ramadanStart: start.toISOString(),
+        ramadanEnd: new Date(start.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         daysUntilRamadan: 42,
         isRamadan: false,
         currentRamadanDay: undefined,
@@ -30,7 +39,7 @@ describe('RamadanCard', () => {
     renderWithAuth(<RamadanCard />)
     
     await waitFor(() => {
-      expect(screen.getByText(/Ramadan 1446/i)).toBeInTheDocument()
+      expect(screen.getByText(/Ramadan 1448/i)).toBeInTheDocument()
     })
   })
 
@@ -51,7 +60,7 @@ describe('RamadanCard', () => {
       // The date format is "Expected: [Date] • Adjust in Settings"
       expect(screen.getByText(/Expected:/)).toBeInTheDocument()
       // Date may vary based on timezone, so just check for a date pattern
-      expect(screen.getByText(/February 28, 2025|March 1, 2025/)).toBeInTheDocument()
+      expect(screen.getByText(new RegExp(expectedRamadanDate))).toBeInTheDocument()
     })
   })
 
@@ -81,4 +90,3 @@ describe('RamadanCard', () => {
     })
   })
 })
-

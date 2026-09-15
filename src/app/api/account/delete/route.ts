@@ -19,6 +19,21 @@ export async function POST(request: NextRequest) {
     }
 
     const serviceClient = createServiceRoleClient()
+    // Feedback can contain names or other personal details in its free-text
+    // content. ON DELETE SET NULL would retain it after the account is gone.
+    const { error: feedbackError } = await serviceClient
+      .from('feedback')
+      .delete()
+      .eq('user_id', user.id)
+
+    if (feedbackError) {
+      console.error('[API] Account feedback delete error:', feedbackError)
+      return NextResponse.json(
+        { error: 'Failed to delete account data' },
+        { status: 500 }
+      )
+    }
+
     const { error: deleteError } = await serviceClient.auth.admin.deleteUser(user.id)
 
     if (deleteError) {

@@ -47,7 +47,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         details: error.details,
         hint: error.hint,
         code: error.code,
-        user_id: user?.id
       });
       return;
     }
@@ -65,7 +64,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { App } = await import('@capacitor/app');
 
       const handle = await App.addListener('appUrlOpen', async ({ url }: { url: string }) => {
-        if (!url.includes('login-callback')) return;
+        let urlObj: URL;
+        try {
+          urlObj = new URL(url);
+        } catch {
+          return;
+        }
+        const expectedScheme = Capacitor.getPlatform() === 'android'
+          ? 'com.deencompanion.lite:'
+          : 'com.deencompanion.app:';
+        if (urlObj.protocol !== expectedScheme || urlObj.hostname !== 'login-callback'
+          || (urlObj.pathname !== '' && urlObj.pathname !== '/')) return;
 
         // Close the in-app browser
         try {
@@ -74,7 +83,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch { /* browser may already be closed */ }
 
         // PKCE flow (Supabase v2 default): code is in the query string
-        const urlObj = new URL(url);
         const code = urlObj.searchParams.get('code');
 
         if (code) {
@@ -247,4 +255,3 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
-

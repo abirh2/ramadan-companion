@@ -5,6 +5,7 @@
   "webDir": "public",
   "server": {
     "url": "https://ramadan-companion.vercel.app",
+    "errorPath": "offline.html",
     "androidScheme": "https",
     "iosScheme": "capacitor",
     "cleartext": false

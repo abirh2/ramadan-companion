@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Offline · Deen Companion</title>
+  <style>
+    :root { color-scheme: light dark; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: #f9f5ec; color: #173b3b; }
+    main { max-width: 28rem; margin: auto; padding: calc(2rem + env(safe-area-inset-top)) 1.5rem calc(2rem + env(safe-area-inset-bottom)); }
+    img { width: 4rem; height: 4rem; border-radius: 1rem; }
+    h1 { font-size: 1.7rem; line-height: 1.2; margin: 1.25rem 0 .5rem; }
+    p { line-height: 1.5; }
+    .card { margin-top: 2rem; padding: 1.25rem; border: 1px solid #c8d5d0; border-radius: 1rem; background: #fffdf8; }
+    .count { font-size: 3rem; font-variant-numeric: tabular-nums; margin: 1rem 0; }
+    button { min-height: 3rem; border: 0; border-radius: .75rem; background: #0f3d3e; color: white; padding: .75rem 1.25rem; font: inherit; font-weight: 600; cursor: pointer; }
+    button:focus-visible { outline: 3px solid #bb8d2f; outline-offset: 3px; }
+    .secondary { background: transparent; color: #0f3d3e; border: 1px solid #0f3d3e; }
+    .actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #061116; color: #e8efea; }
+      .card { background: #112729; border-color: #3c5551; }
+      .secondary { color: #e8efea; border-color: #e8efea; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <img src="icon-192.png" alt="Deen Companion icon">
+    <h1>Deen Companion is offline</h1>
+    <p>The app could not reach its online services. You can keep a simple zikr count here and retry when your connection returns.</p>
+    <button id="retry" type="button">Retry connection</button>
+    <section class="card" aria-labelledby="zikr-heading">
+      <h2 id="zikr-heading">Offline zikr counter</h2>
+      <p>This count stays on this device.</p>
+      <p class="count" id="count" role="status" aria-live="polite">0</p>
+      <div class="actions">
+        <button id="increment" type="button">Count one zikr</button>
+        <button id="reset" class="secondary" type="button">Reset count</button>
+      </div>
+    </section>
+  </main>
+  <script>
+    (() => {
+      const key = 'deen_offline_zikr_count';
+      const countNode = document.getElementById('count');
+      let count = Number(localStorage.getItem(key)) || 0;
+      const render = () => { countNode.textContent = String(count); };
+      render();
+      document.getElementById('increment').addEventListener('click', () => {
+        count += 1;
+        localStorage.setItem(key, String(count));
+        render();
+      });
+      document.getElementById('reset').addEventListener('click', () => {
+        count = 0;
+        localStorage.removeItem(key);
+        render();
+      });
+      document.getElementById('retry').addEventListener('click', () => {
+        window.location.assign('https://ramadan-companion.vercel.app/');
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -46,7 +46,12 @@ export default function DeleteAccountPage() {
       }
 
       clearLocalUserData()
-      await signOut()
+      try {
+        await signOut()
+      } catch {
+        // The server has already deleted the account. A stale local session
+        // cannot turn a successful deletion into a retryable deletion error.
+      }
       setDialogOpen(false)
       router.push('/?accountDeleted=1')
     } catch (err) {
@@ -106,6 +111,7 @@ export default function DeleteAccountPage() {
               <li>Saved Quran ayahs and hadith favorites</li>
               <li>Quran reading bookmarks</li>
               <li>Prayer completion history</li>
+              <li>Feedback linked to your account</li>
               <li>Push notification subscriptions</li>
               <li>Device-local app preferences (cleared from this browser/device)</li>
             </ul>
@@ -115,21 +121,14 @@ export default function DeleteAccountPage() {
         <Card>
           <CardHeader>
             <CardTitle>Data retained</CardTitle>
-            <CardDescription>
-              Anonymized data kept for app improvement
-            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-              <li>
-                Feedback you submitted may be retained without your user ID attached
-                (anonymous after deletion)
-              </li>
-            </ul>
-            <p className="text-sm text-muted-foreground mt-4">
-              Cloud data is deleted immediately upon self-service deletion. Email-based
-              requests are processed within 30 days.
-            </p>
+          <CardContent className="text-sm text-muted-foreground space-y-2">
+            <p>Anonymous feedback that is not linked to your account may be retained.</p>
+            <p>Cloud account data is deleted upon successful self-service deletion. Email-based
+              requests are processed within 30 days.</p>
+            <p>If you used Sign in with Apple, you can also revoke Deen Companion&apos;s access
+              in your Apple Account settings after deletion. The app does not retain an Apple
+              authorization code or refresh token to revoke that access automatically.</p>
           </CardContent>
         </Card>
 

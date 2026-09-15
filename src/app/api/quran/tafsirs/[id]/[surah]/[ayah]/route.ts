@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { QuranComTafsirContentResponse } from '@/types/quran.types'
 import { rateLimit, PUBLIC_LIMIT } from '@/lib/rateLimit'
+import { sanitizeTafsirHtml } from '@/lib/sanitizeTafsirHtml'
 
 const QURAN_COM_API_BASE = 'https://api.quran.com/api/v4'
 
@@ -74,7 +75,10 @@ export async function GET(
       throw new Error('Invalid response from Quran.com API')
     }
 
-    return NextResponse.json(data)
+    return NextResponse.json({
+      ...data,
+      tafsir: { ...data.tafsir, text: sanitizeTafsirHtml(data.tafsir.text) },
+    })
   } catch (error) {
     console.error('Error in /api/quran/tafsirs/[id]/[surah]/[ayah]:', error)
     return NextResponse.json(
@@ -86,4 +90,3 @@ export async function GET(
     )
   }
 }
-

@@ -23,7 +23,7 @@ export default function PrivacyPage() {
         </Button>
         <h1 className="type-page-title text-text-primary">Privacy Policy</h1>
         <p className="type-body-secondary mt-2 text-text-secondary">
-          Last updated: July 4, 2026
+          Last updated: September 15, 2026
         </p>
       </header>
 
@@ -36,7 +36,7 @@ export default function PrivacyPage() {
             <p>Deen Companion is built with privacy in mind:</p>
             <ul className="list-disc pl-5 space-y-1">
               <li>No ads or third-party tracking scripts</li>
-              <li>Minimal data collection — most features work without an account</li>
+              <li>Most features work without an account</li>
               <li>Zakat calculator inputs are processed locally only and never stored</li>
               <li>Row-Level Security on all Supabase tables</li>
             </ul>
@@ -64,14 +64,14 @@ export default function PrivacyPage() {
                     <td className="py-2">Until cleared or account deleted</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="py-2 pr-4">Donations, favorites, bookmarks, prayer tracking</td>
+                    <td className="py-2 pr-4">Donation amounts and history; prayer completion; Quran and hadith favorites and bookmarks</td>
                     <td className="py-2 pr-4">Supabase (signed-in users only)</td>
                     <td className="py-2">Until account deleted</td>
                   </tr>
                   <tr className="border-b">
                     <td className="py-2 pr-4">Feedback</td>
                     <td className="py-2 pr-4">Supabase</td>
-                    <td className="py-2">Retained; user link removed on account deletion</td>
+                    <td className="py-2">Signed-in submissions deleted with account; anonymous submissions retained</td>
                   </tr>
                   <tr className="border-b">
                     <td className="py-2 pr-4">Zikr progress</td>
@@ -91,13 +91,35 @@ export default function PrivacyPage() {
 
         <Card>
           <CardHeader>
+            <CardTitle>Location and external services</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm text-muted-foreground">
+            <p>
+              Location access is optional. If you choose automatic location, your coordinates
+              are used for prayer times, Qibla, nearby mosques and halal food. You can instead
+              search for a city. Coordinates are saved on this device and may be saved to your
+              Supabase profile when signed in.
+            </p>
+            <p>
+              Coordinates or city searches are sent through our server to Nominatim/OpenStreetMap,
+              Overpass, Geoapify or AlAdhan as needed for the feature you request. Map tiles load
+              from OpenStreetMap. Quran text and audio, translations, tafsir and hadith are loaded
+              from AlQuran Cloud, Quran.com, Islamic Network and HadithAPI.com. These providers
+              may receive network information such as your IP address. We do not control their
+              independent retention practices.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
             <CardTitle>Analytics</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground space-y-2">
             <p>
-              We use Vercel Analytics and Speed Insights for aggregate, privacy-preserving
-              performance metrics. These are first-party tools with no ad tracking or
-              cross-site profiling.
+              We use Vercel Analytics for page visits and Speed Insights for performance
+              measurements. Vercel processes these events to help us improve the app.
+              We do not use them for advertising or cross-app tracking.
             </p>
           </CardContent>
         </Card>
@@ -111,7 +133,9 @@ export default function PrivacyPage() {
               Feedback submissions (problem reports and suggestions) are stored in Supabase.
               Submissions are anonymous by default. If you are signed in, your user ID may be
               attached for admin context only. Feedback includes page path, type, content,
-              timestamp, and browser/device info. Users cannot view submitted feedback.
+              timestamp, and browser/device info. Feedback linked to your account is deleted
+              with it. Anonymous submissions cannot be identified for account deletion.
+              Users cannot view submitted feedback.
             </p>
           </CardContent>
         </Card>

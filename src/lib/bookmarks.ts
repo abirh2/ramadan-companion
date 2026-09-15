@@ -84,8 +84,6 @@ export async function saveBookmark(
   // Save to Supabase only if user is authenticated
   if (userId) {
     try {
-      console.log('Attempting to save bookmark to Supabase:', { userId, surahNumber, ayahNumber })
-      
       const supabase = createClient()
       // Upsert: Insert or update if exists (based on user_id + surah_number unique constraint)
       const { data, error } = await supabase
@@ -257,4 +255,3 @@ export async function clearAllBookmarks(
   
   return { success: true }
 }
-

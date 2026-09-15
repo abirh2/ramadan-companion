@@ -6,6 +6,7 @@ import type { MapRef } from 'react-map-gl/maplibre'
 import type { HalalFoodData } from '@/types/places.types'
 import { LocateFixed, UtensilsCrossed } from 'lucide-react'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import { loadMapLibre } from '@/lib/mapLibre'
 
 interface FoodMapProps {
   foods: HalalFoodData[]
@@ -95,7 +96,7 @@ export function FoodMap({
           zoom: getZoomLevel(searchRadiusMiles),
         }}
         mapStyle={OSM_STYLE}
-        mapLib={import('maplibre-gl')}
+        mapLib={loadMapLibre()}
       >
         <NavigationControl position="top-right" showCompass={false} />
 

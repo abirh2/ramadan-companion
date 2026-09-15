@@ -326,7 +326,7 @@ CREATE POLICY "allow_all_insert"
 ON feedback
 FOR INSERT
 TO anon, authenticated
-WITH CHECK (true);
+WITH CHECK (user_id IS NULL OR auth.uid() = user_id);
 
 -- No SELECT policy - admin-only access via service role
 -- Users cannot read feedback (prevents spam/abuse)
@@ -414,7 +414,7 @@ BEGIN
     AND table_name = 'feedback' 
     AND column_name = 'reviewed_by'
   ) THEN
-    ALTER TABLE feedback ADD COLUMN reviewed_by UUID REFERENCES profiles(id);
+    ALTER TABLE feedback ADD COLUMN reviewed_by UUID REFERENCES profiles(id) ON DELETE SET NULL;
   END IF;
 END $$;
 
@@ -572,4 +572,3 @@ CREATE POLICY "Users can delete own subscriptions"
 
 -- Add comment for documentation
 COMMENT ON TABLE push_subscriptions IS 'Stores Web Push API subscription endpoints for prayer time notifications. Each user can have multiple subscriptions (different browsers/devices).';
-

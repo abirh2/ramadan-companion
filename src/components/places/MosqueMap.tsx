@@ -6,6 +6,7 @@ import type { MapRef } from 'react-map-gl/maplibre'
 import type { MosqueData } from '@/types/places.types'
 import { Building2, LocateFixed } from 'lucide-react'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import { loadMapLibre } from '@/lib/mapLibre'
 
 interface MosqueMapProps {
   mosques: MosqueData[]
@@ -95,7 +96,7 @@ export function MosqueMap({
           zoom: getZoomLevel(searchRadiusMiles),
         }}
         mapStyle={OSM_STYLE}
-        mapLib={import('maplibre-gl')}
+        mapLib={loadMapLibre()}
       >
         <NavigationControl position="top-right" showCompass={false} />
 

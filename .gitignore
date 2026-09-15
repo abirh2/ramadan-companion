@@ -44,6 +44,7 @@ next-env.d.ts
 # screenshot automation
 scripts/screenshot-config.json
 public/social-previews/
+/public/maplibre/
 
 # Capacitor native projects
 /ios/App/build

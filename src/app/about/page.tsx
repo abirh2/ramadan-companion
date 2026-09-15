@@ -219,7 +219,7 @@ function AboutContent() {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">•</span>
-                      <span><strong className="text-foreground">Prayer Notifications:</strong> Native and browser push notifications at exact prayer times with authentic hadith quotes</span>
+                      <span><strong className="text-foreground">Prayer Notifications:</strong> Native local reminders and optional browser notifications for prayer times</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">•</span>
@@ -294,7 +294,7 @@ function AboutContent() {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary">•</span>
-                      <span>No tracking, no ads, no third-party analytics</span>
+                      <span>No ads or cross-app tracking; Vercel Analytics and Speed Insights help us improve the app</span>
                     </li>
                   </ul>
                 </div>
@@ -303,7 +303,7 @@ function AboutContent() {
                   <h3 className="font-semibold mb-2">Roadmap (V1.3+)</h3>
                   <p className="text-sm text-muted-foreground">
                     Planned improvements include Islamic events countdown carousel, adhaan audio for prayer notifications,
-                    App Store and Google Play distribution, expanded notification sound options, 
+                    expanded notification sound options,
                     community features for sharing reflections, and continued performance optimizations.
                   </p>
                 </div>
@@ -315,9 +315,9 @@ function AboutContent() {
           <TabsContent value="install" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Install as App</CardTitle>
+                <CardTitle>Install the Website</CardTitle>
                 <CardDescription>
-                  Install Deen Companion on your device for a native app experience
+                  These browser instructions are for website visitors. The iOS app is already installed.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -327,7 +327,7 @@ function AboutContent() {
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">✓</span>
-                      <span><strong className="text-foreground">Works Offline:</strong> Access prayer times, Quran, and zikr even without internet</span>
+                      <span><strong className="text-foreground">Offline access:</strong> Cached content may remain available in browser installations. The iOS app provides an offline zikr counter when its server is unreachable.</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-1">✓</span>
@@ -424,10 +424,10 @@ function AboutContent() {
                     <h3 className="font-semibold">Native iOS & Android Apps</h3>
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">
-                    Deen Companion is also available as a native iOS and Android app with additional capabilities including home screen widgets, native push notifications, and deeper system integration.
+                    Deen Companion also has native iOS and Android apps with additional capabilities including home screen widgets, native prayer notifications, and deeper system integration.
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Contact the developer for access to the iOS TestFlight or Android beta. App Store and Google Play listings are planned for a future release.
+                    Contact the developer for access to the iOS TestFlight or Android beta while public store listings are pending.
                   </p>
                 </div>
 
@@ -436,7 +436,7 @@ function AboutContent() {
                   <h3 className="font-semibold mb-2">After Installation</h3>
                   <p className="text-sm text-muted-foreground">
                     Once installed, you can launch Deen Companion directly from your home screen or app drawer. 
-                    The app will remember your preferences, work offline, and provide a seamless experience across all your devices.
+                    The app will remember your preferences. Some features require an internet connection.
                     Enable notifications from the Prayer Times page to receive reminders at each prayer time.
                   </p>
                 </div>

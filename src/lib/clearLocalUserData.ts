@@ -26,6 +26,7 @@ const LOCAL_USER_DATA_KEYS = [
   'notification_fcm_token',
   'zikr_state',
   'zikr_feedback_enabled',
+  'deen_offline_zikr_count',
 ] as const
 
 /** Clear app-specific localStorage keys after account deletion. */
