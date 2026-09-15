@@ -38,7 +38,9 @@ const OSM_TILES: TileConfig = {
 }
 
 function cartoTiles(variant: 'light_all' | 'dark_all'): TileConfig {
-  const key = CARTO_API_KEY ? `?api_key=${CARTO_API_KEY}` : ''
+  // CARTO expects the key appended as a `key` query parameter (not `api_key`);
+  // requests without a valid `key` are stamped with an "API KEY REQUIRED" watermark.
+  const key = CARTO_API_KEY ? `?key=${CARTO_API_KEY}` : ''
   return {
     // Retina (@2x) tiles for crisp rendering on mobile/high-DPI screens.
     url: `https://{s}.basemaps.cartocdn.com/rastertiles/${variant}/{z}/{x}/{y}{r}.png${key}`,
