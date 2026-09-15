@@ -1,4 +1,3 @@
 {
-  "buildCommand": "next build"
+  "buildCommand": "npm run build"
 }
-
