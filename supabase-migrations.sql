@@ -572,3 +572,133 @@ CREATE POLICY "Users can delete own subscriptions"
 
 -- Add comment for documentation
 COMMENT ON TABLE push_subscriptions IS 'Stores Web Push API subscription endpoints for prayer time notifications. Each user can have multiple subscriptions (different browsers/devices).';
+
+-- ============================================
+-- 21. HARDEN ACCOUNT DELETION - FEEDBACK FK DELETE RULES
+-- ============================================
+--
+-- Context: Account deletion (POST /api/account/delete) removes a user's
+-- auth account and all app-owned data. Feedback free-text (`content`) can
+-- contain names or other personal details, so it must NOT survive deletion.
+--
+-- The application route already hard-deletes feedback rows by user_id via the
+-- service role BEFORE calling auth.admin.deleteUser(). This section adds a
+-- database-level safety net so that deleting a user by ANY path (Supabase
+-- dashboard, admin script, future code) also removes their linked feedback.
+--
+-- Two foreign keys are corrected:
+--   feedback.user_id     -> ON DELETE CASCADE  (the author's feedback is removed)
+--   feedback.reviewed_by -> ON DELETE SET NULL (an admin reviewer can be deleted
+--                                               without destroying other users'
+--                                               feedback; only the reviewer link
+--                                               is cleared)
+--
+-- Idempotent: each FK is only rewritten if its current delete rule differs
+-- from the target. NOTE: anonymous feedback (user_id IS NULL) is untouched.
+
+DO $$
+DECLARE
+  fk_name TEXT;
+  del_rule TEXT;
+BEGIN
+  -- feedback.user_id -> ON DELETE CASCADE
+  SELECT tc.constraint_name, rc.delete_rule
+    INTO fk_name, del_rule
+  FROM information_schema.table_constraints tc
+  JOIN information_schema.key_column_usage kcu
+    ON tc.constraint_name = kcu.constraint_name
+   AND tc.table_schema = kcu.table_schema
+  JOIN information_schema.referential_constraints rc
+    ON tc.constraint_name = rc.constraint_name
+   AND tc.table_schema = rc.constraint_schema
+  WHERE tc.constraint_type = 'FOREIGN KEY'
+    AND tc.table_schema = 'public'
+    AND tc.table_name = 'feedback'
+    AND kcu.column_name = 'user_id';
+
+  IF fk_name IS NULL THEN
+    RAISE NOTICE 'No FK on feedback.user_id found; skipping.';
+  ELSIF del_rule = 'CASCADE' THEN
+    RAISE NOTICE 'feedback.user_id FK already ON DELETE CASCADE; no change.';
+  ELSE
+    EXECUTE format('ALTER TABLE public.feedback DROP CONSTRAINT %I', fk_name);
+    ALTER TABLE public.feedback
+      ADD CONSTRAINT feedback_user_id_fkey
+      FOREIGN KEY (user_id) REFERENCES public.profiles(id) ON DELETE CASCADE;
+    RAISE NOTICE 'Rewrote feedback.user_id FK (%) to ON DELETE CASCADE.', fk_name;
+  END IF;
+
+  -- feedback.reviewed_by -> ON DELETE SET NULL
+  SELECT tc.constraint_name, rc.delete_rule
+    INTO fk_name, del_rule
+  FROM information_schema.table_constraints tc
+  JOIN information_schema.key_column_usage kcu
+    ON tc.constraint_name = kcu.constraint_name
+   AND tc.table_schema = kcu.table_schema
+  JOIN information_schema.referential_constraints rc
+    ON tc.constraint_name = rc.constraint_name
+   AND tc.table_schema = rc.constraint_schema
+  WHERE tc.constraint_type = 'FOREIGN KEY'
+    AND tc.table_schema = 'public'
+    AND tc.table_name = 'feedback'
+    AND kcu.column_name = 'reviewed_by';
+
+  IF fk_name IS NULL THEN
+    RAISE NOTICE 'No FK on feedback.reviewed_by found; skipping.';
+  ELSIF del_rule = 'SET NULL' THEN
+    RAISE NOTICE 'feedback.reviewed_by FK already ON DELETE SET NULL; no change.';
+  ELSE
+    EXECUTE format('ALTER TABLE public.feedback DROP CONSTRAINT %I', fk_name);
+    ALTER TABLE public.feedback
+      ADD CONSTRAINT feedback_reviewed_by_fkey
+      FOREIGN KEY (reviewed_by) REFERENCES public.profiles(id) ON DELETE SET NULL;
+    RAISE NOTICE 'Rewrote feedback.reviewed_by FK (%) to ON DELETE SET NULL.', fk_name;
+  END IF;
+END $$;F;
+END $$;
+
+-- ============================================
+-- 22. ADD MISSING distance_unit COLUMN TO PROFILES
+-- ============================================
+--
+-- The app writes profiles.distance_unit (src/lib/places.ts) but the column
+-- is absent in production, so those writes silently fail. It lives on the
+-- profiles table (ON DELETE CASCADE from auth.users), so it does not affect
+-- deletion coverage; this only closes a code/schema mismatch.
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+    AND table_name = 'profiles'
+    AND column_name = 'distance_unit'
+  ) THEN
+    ALTER TABLE profiles ADD COLUMN distance_unit TEXT DEFAULT 'mi'
+      CHECK (distance_unit IN ('mi', 'km'));
+  END IF;
+END $$;
+
+-- ============================================
+-- 23. VERIFICATION QUERIES (read-only)
+-- ============================================
+-- Run these after applying to confirm the delete rule and column:
+
+-- Confirm feedback FK delete rules (expect user_id=CASCADE, reviewed_by=SET NULL):
+--   SELECT kcu.column_name, rc.delete_rule
+--   FROM information_schema.referential_constraints rc
+--   JOIN information_schema.table_constraints tc
+--     ON rc.constraint_name = tc.constraint_name
+--    AND rc.constraint_schema = tc.table_schema
+--   JOIN information_schema.key_column_usage kcu
+--     ON tc.constraint_name = kcu.constraint_name
+--    AND tc.table_schema = kcu.table_schema
+--   WHERE tc.table_schema = 'public' AND tc.table_name = 'feedback'
+--     AND kcu.column_name IN ('user_id', 'reviewed_by');
+
+-- Confirm distance_unit exists:
+--   SELECT column_name FROM information_schema.columns
+--   WHERE table_name = 'profiles' AND column_name = 'distance_unit';
+
+-- Confirm no feedback rows remain for a given deleted user id:
+--   SELECT count(*) FROM feedback WHERE user_id = '<DELETED_USER_UUID>';
